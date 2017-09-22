@@ -1,0 +1,19 @@
+﻿<Properties StartupConfiguration="{998D7BC0-1D6D-4ED4-95DD-783B833E3805}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="TransportControl/List/LineHelper.cs">
+    <Files>
+      <File FileName="TransportControl/MapPage.xaml" Line="23" Column="39" />
+      <File FileName="TransportControl/MapPage.xaml.cs" Line="14" Column="1" />
+      <File FileName="TransportControl/LinePage.xaml" Line="24" Column="54" />
+      <File FileName="TransportControl/LinePage.xaml.cs" Line="31" Column="14" />
+      <File FileName="TransportControl/List/LineHelper.cs" Line="84" Column="14" />
+      <File FileName="TransportControl/Models/Line.cs" Line="8" Column="27" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.ItemProperties.TransportControl.iOS PreferredExecutionTarget="MonoDevelop.IPhone.IPhoneSimulatorTarget.2F6CD63A-72A9-4370-B3AF-95089D884110" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+</Properties>

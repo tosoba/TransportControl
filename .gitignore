@@ -1,0 +1,11 @@
+/packages/*
+/.vs/*
+/Droid/bin/*
+/Droid/obj/*
+/iOS/bin/*
+/iOS/obj/*
+/TransportControl/bin/*
+/TransportControl/obj/*
+/TransportControl/packages/
+/UWP/bin/*
+UWP/obj/*

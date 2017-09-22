@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="TransportControl.LinePage"
+    xmlns:design="clr-namespace:TransportControl;assembly=TransportControl"
+    Title="Lines">
+    <ContentPage.Content>
+        <StackLayout>
+            <SearchBar x:Name="LineSearchBar" 
+                       TextChanged="Handle_TextChanged"
+                       Placeholder="Enter line number:"/>
+            <ScrollView Orientation="Horizontal"
+                        HorizontalOptions="FillAndExpand">
+                <StackLayout Orientation="Horizontal">
+                    <Button Text="100"
+                            BackgroundColor="Transparent"
+                            x:Name="buttonLines_Clicked"
+                            Clicked="buttonLineNumbers_Clicked"/>
+                    <Button Text="200"
+                            BackgroundColor="Transparent"
+                            Clicked="buttonLineNumbers_Clicked"/>
+                    <Button Text="300"
+                            BackgroundColor="Transparent"
+                            Clicked="buttonLineNumbers_Clicked"/>
+                    <Button Text="400"
+                            BackgroundColor="Transparent"
+                            Clicked="buttonLineNumbers_Clicked"/>
+                    <Button Text="500"
+                            BackgroundColor="Transparent"
+                            Clicked="buttonLineNumbers_Clicked"/>
+                    <Button Text="600"
+                            BackgroundColor="Transparent"
+                            Clicked="buttonLineNumbers_Clicked"/>
+                    <Button Text="700"
+                            BackgroundColor="Transparent"
+                            Clicked="buttonLineNumbers_Clicked"/>
+                    <Button Text="E"
+                            BackgroundColor="Transparent"
+                            Clicked="buttonLineNumbers_Clicked"/>
+                </StackLayout>
+            </ScrollView>
+            <ListView ItemsSource="{Binding LinesGrouped}"
+                    x:Name="LinesListView"
+                    ItemSelected="Handle_ItemSelected"
+                    HasUnevenRows="true"
+                    GroupShortNameBinding = "{Binding Key}"
+                    IsGroupingEnabled = "true"
+                    GroupDisplayBinding = "{Binding Key}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Grid Padding="5" RowSpacing="0" ColumnSpacing="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Grid.Column="1"
+                                       Text="{Binding Symbol}"
+                                       VerticalOptions="Center"
+                                       FontSize="24"/>
+                                <Label Grid.Column="1"
+                                       Grid.Row="1"
+                                       VerticalOptions="Center"
+                                       Text="{Binding Dest1, StringFormat='From: {0:N}'}}"
+                                       FontSize="14"/>
+                                <Label Grid.Column="1"
+                                       Grid.Row="2"
+                                       VerticalOptions="Center"
+                                       Text="{Binding Dest2, StringFormat='To: {0:N}'}}"
+                                       FontSize="14"/>
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
