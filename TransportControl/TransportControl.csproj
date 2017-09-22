@@ -45,6 +45,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\MapViewModel.cs" />
     <Compile Include="Views\ChooseRadiusPage.xaml.cs">
       <DependentUpon>ChooseRadiusPage.xaml</DependentUpon>
     </Compile>

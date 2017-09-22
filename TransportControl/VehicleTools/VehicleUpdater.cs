@@ -49,6 +49,7 @@ namespace TransportControl
             {
                 if (map == null) map = value;
             }
+            get => map;
         }
 
         private VehicleUpdater()
