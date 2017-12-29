@@ -13,7 +13,7 @@ namespace TransportControl.iOS
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
             global::Xamarin.Forms.Forms.Init();
-            Xamarin.FormsGoogleMaps.Init(Keys.GOOGLE_MAPS_IOS_API_KEY); 
+            Xamarin.FormsGoogleMaps.Init("AIzaSyD74rhwpjwqhu2X6rzZLtNmtE - NKVBKzW4"); 
             LoadApplication(new App());
 
             return base.FinishedLaunching(app, options);

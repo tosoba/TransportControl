@@ -1,7 +1,5 @@
-﻿using System;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using Xamarin.Forms;
-using Xamarin.Forms.GoogleMaps;
 
 namespace TransportControl.ViewModels
 {
@@ -18,10 +16,10 @@ namespace TransportControl.ViewModels
             Navigation = navigation;
 
             var linePage = new LinePage();
-            linePage.OnVehiclesLoaded += OnVehiclesLoaded;
+            linePage.OnVehiclesLoaded += OnVehiclesLoadedListener.OnVehiclesLoaded;
 
             var chooseRadiusPage = new ChooseRadiusPage();
-            chooseRadiusPage.OnVehiclesLoaded += OnVehiclesLoaded;
+            chooseRadiusPage.OnVehiclesLoaded += OnVehiclesLoadedListener.OnVehiclesLoaded;
 
             ClearMap = new Command(() =>
             {
@@ -37,20 +35,6 @@ namespace TransportControl.ViewModels
             {
                 await Navigation.PushAsync(chooseRadiusPage);
             });
-        }
-
-        private async void OnVehiclesLoaded(object sender, VehiclesLoadedEventArgs e)
-        {
-            var updater = VehicleUpdater.Instance;
-            if (e.Vehicles.Count > 0)
-            {
-                updater.AddLines(e.Lines);
-                updater.AddVehicles(e.Vehicles);
-                updater.StartUpdates();
-
-                var bounds = VehicleHelper.GetBounds(e.Vehicles);
-                await updater.Map.AnimateCamera(CameraUpdateFactory.NewBounds(bounds, 50), TimeSpan.FromSeconds(1.5));
-            }
         }
     }
 }

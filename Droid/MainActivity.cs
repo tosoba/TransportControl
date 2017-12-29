@@ -12,11 +12,11 @@ namespace TransportControl.Droid
         {
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
-
+            
             base.OnCreate(bundle);
-
+            
             Xamarin.Forms.Forms.Init(this, bundle);
-            Xamarin.FormsGoogleMaps.Init(this, bundle); // initialize for Xamarin.Forms.GoogleMaps
+            Xamarin.FormsGoogleMaps.Init(this, bundle);
             UserDialogs.Init(this);
             LoadApplication(new App());
         }
