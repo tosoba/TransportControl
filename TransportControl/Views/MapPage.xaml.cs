@@ -13,6 +13,7 @@ namespace TransportControl
             VehicleUpdater.Instance.Map = map;
             BindingContext = new MapViewModel(Navigation);
 
+            map.InitialCameraUpdate = CameraUpdateFactory.NewPositionZoom(new Position(52.237049, 21.017532), 11d);
             map.CameraChanged += Map_CameraChanged;  
         }
 
