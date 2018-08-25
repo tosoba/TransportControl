@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Foundation;
+﻿using Foundation;
+using ImageCircle.Forms.Plugin.iOS;
 using UIKit;
 
 namespace TransportControl.iOS
@@ -13,8 +10,9 @@ namespace TransportControl.iOS
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
             global::Xamarin.Forms.Forms.Init();
-            Xamarin.FormsGoogleMaps.Init("AIzaSyD74rhwpjwqhu2X6rzZLtNmtE - NKVBKzW4"); 
+            Xamarin.FormsGoogleMaps.Init(Keys.GOOGLE_MAPS_IOS_API_KEY); 
             LoadApplication(new App());
+            ImageCircleRenderer.Init();
 
             return base.FinishedLaunching(app, options);
         }

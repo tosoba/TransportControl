@@ -7,6 +7,5 @@
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<application android:label="TransportControl" android:icon="@drawable/icon">
-		<meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyDXL3Q6C6x65rpZQUmqw9Snl6Yh-4P72a0" />
 	</application>
 </manifest>

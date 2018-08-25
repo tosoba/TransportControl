@@ -2,6 +2,7 @@
 using Android.App;
 using Android.Content.PM;
 using Android.OS;
+using ImageCircle.Forms.Plugin.Droid;
 
 namespace TransportControl.Droid
 {
@@ -19,6 +20,7 @@ namespace TransportControl.Droid
             Xamarin.FormsGoogleMaps.Init(this, bundle);
             UserDialogs.Init(this);
             LoadApplication(new App());
+            ImageCircleRenderer.Init();
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)

@@ -18,9 +18,9 @@ namespace TransportControl
 
         public JArray LoadLines()
         {
-            var assembly = typeof(App).GetTypeInfo().Assembly;
+            var assembly = IntrospectionExtensions.GetTypeInfo(typeof(Loader)).Assembly;
             Stream stream = assembly.GetManifestResourceStream("TransportControl.Resources.lines.json");
-            string text = String.Empty;
+            string text = string.Empty;
             using (var reader = new StreamReader(stream))
             {
                 text = reader.ReadToEnd();

@@ -7,15 +7,13 @@ using Plugin.CurrentActivity;
 
 namespace TransportControl.Droid
 {
-	//You can specify additional application information in this attribute
+    //You can specify additional application information in this attribute
     [Application]
     [MetaData("com.google.android.maps.v2.API_KEY", Value = Keys.GOOGLE_MAPS_ANDROID_API_KEY)]
     public class MainApplication : Application, Application.IActivityLifecycleCallbacks
     {
-        public static string AppName { get { return "Transport Control"; } }
-
         public MainApplication(IntPtr handle, JniHandleOwnership transer)
-          :base(handle, transer)
+          : base(handle, transer)
         {
         }
 
