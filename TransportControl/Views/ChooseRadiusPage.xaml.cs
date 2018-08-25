@@ -13,7 +13,7 @@ using TransportControl.List;
 namespace TransportControl
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ChooseRadiusPage : ContentPage, ILoadingPage
+    public partial class ChooseRadiusPage : ContentPage, IVehicleLoadingPage
     {
         public ChooseRadiusPage()
         {
@@ -30,10 +30,14 @@ namespace TransportControl
             await Permissions.Check();
 
             var geoLocator = new GeoLocator();
+
+            var progressDialog = UserDialogs.Instance.Progress(new ProgressDialogConfig());
+            progressDialog.Show();
+
             var userPosition = await geoLocator.GetUserLocationAsync();
             if (userPosition == null)
             {
-                Dialogs.ShowAlertDialog("Error retrieving location", "Failed to retrieve location after 15 secs.");
+                progressDialog.Hide();
                 return;
             }
 
@@ -48,14 +52,10 @@ namespace TransportControl
                 return;
             }
 
-            var progressDialog = UserDialogs.Instance.Progress(new ProgressDialogConfig());
-            progressDialog.Show();
-
             var loader = new Loader();
-            var vehicles = await loader.LoadAllVehiclesOfType(1);
-
-            //dummy location
-            userCoords = new Coordinates(52.23, 21);
+            var buses = await loader.LoadAllVehiclesOfType(1);
+            var trams = await loader.LoadAllVehiclesOfType(2);
+            var vehicles = buses.Concat(trams);
 
             var nearVehicles = vehicles.Where(v => userCoords.DistanceTo(Coordinates.FromPosition(new Position()
             {

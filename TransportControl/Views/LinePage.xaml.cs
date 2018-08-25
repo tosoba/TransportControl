@@ -10,7 +10,7 @@ using Xamarin.Forms;
 
 namespace TransportControl
 {
-    public partial class LinePage : ContentPage, ILoadingPage
+    public partial class LinePage : ContentPage, IVehicleLoadingPage
     {
         public LinePage()
         {
@@ -34,16 +34,30 @@ namespace TransportControl
                 return;
             }
 
-            var dialog = UserDialogs.Instance.Progress(new ProgressDialogConfig());
-            dialog.Show();
+            var progressDialog = UserDialogs.Instance.Progress(new ProgressDialogConfig());
+            progressDialog.Show();
 
             var loader = new Loader();
-            var vehicles = await loader.LoadVehicles(line.Symbol, 1);
-            if (vehicles != null)
+            List<Vehicle> vehicles;
+            if (char.IsLetter(line.Symbol.First()) || int.Parse(line.Symbol) >= 100)
+            {
+                vehicles = await loader.LoadVehicles(line.Symbol, 1);
+            }
+            else
+            {
+                vehicles = await loader.LoadVehicles(line.Symbol, 2);
+            }
+
+            if (vehicles != null && vehicles.Count > 0)
             {
                 OnVehiclesLoaded?.Invoke(this, new VehiclesLoadedEventArgs(vehicles, new List<Line>() { line }));
-                dialog.Hide();
+                progressDialog.Hide();
                 await Navigation.PopAsync();
+            }
+            else
+            {
+                progressDialog.Hide();
+                Dialogs.ShowAlertDialog("Error retrieving data.", "No vehicles found.");
             }
         }
 
@@ -56,7 +70,9 @@ namespace TransportControl
 
         private void ScrollToItemThat(string startsWith)
         {
-            var target = LineHelper.LinesGrouped.FirstOrDefault(group => group.Any(line => line.Symbol.StartsWith(startsWith)))?.FirstOrDefault();
+            var target = LineHelper.LinesGrouped
+                .FirstOrDefault(group => group.Any(line => line.Symbol.StartsWith(startsWith) && line.Symbol.Length > 2))
+                ?.FirstOrDefault();
             if (target != null)
             {
                 LinesListView.ScrollTo(target, ScrollToPosition.Start, false);
@@ -68,6 +84,11 @@ namespace TransportControl
             var label = (sender as Button).Text;
             switch (label)
             {
+                case "1":
+                    LinesListView.ScrollTo(LineHelper.LinesGrouped
+                        .FirstOrDefault(group => group.Any(line => line.Symbol.Length < 3))
+                        ?.FirstOrDefault(), ScrollToPosition.Start, false);
+                    break;
                 case "100":
                     ScrollToItemThat(startsWith: "1"); break;
                 case "200":

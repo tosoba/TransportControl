@@ -10,30 +10,7 @@ namespace TransportControl
         {
             InitializeComponent();
 
-            MainPage = new MasterDetailPage()
-            {
-                Master = new NavigationPage() { 
-                    Title = "Main Page",
-                    Icon = "menu.png"
-                },
-                Detail = new Xamarin.Forms.NavigationPage(new MapPage())
-            };
-
-        }
-
-        protected override void OnStart()
-        {
-            // Handle when your app starts
-        }
-
-        protected override void OnSleep()
-        {
-            // Handle when your app sleeps
-        }
-
-        protected override void OnResume()
-        {
-            // Handle when your app resumes
+            MainPage = new NavigationPage(new MapPage());
         }
     }
 }

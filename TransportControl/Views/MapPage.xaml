@@ -6,35 +6,48 @@
     x:Class="TransportControl.MapPage"
     Title="Transport Control">
     <ContentPage.Content>
-        <Grid Margin="0,0,0,0" Padding="0,0,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-             <StackLayout Grid.Row="0" Grid.Column="0">
-                <maps:Map x:Name="map"
-                    />
-            </StackLayout>
+        <StackLayout Orientation="Vertical" Spacing="0">
+            <maps:Map x:Name="map" VerticalOptions="FillAndExpand" Margin="0,0,0,0"/>
 
-             <StackLayout Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalOptions="Center" VerticalOptions="Start">
-                <Button Command="{Binding GoToLines}"
-                        HorizontalOptions="Center"
-                        BackgroundColor="White"
-                        TextColor="Black"
+            <Grid VerticalOptions="End" HorizontalOptions="FillAndExpand" Margin="0,0,0,0" ColumnSpacing="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Command="{Binding GoToLines}" 
+                        Grid.Column="0"
+                        BorderRadius="0"
+                        BorderWidth="2"
+                        BorderColor="White"
+                        HorizontalOptions="FillAndExpand"
+                        BackgroundColor="#2196F3"
+                        TextColor="White"
+                        Margin="0,0,0,0"
                         Text="All" />
-                <Button Command="{Binding ClearMap}"
-                        HorizontalOptions="Center"
-                        BackgroundColor="White"
-                        TextColor="Black"
+                <Button Command="{Binding ClearMap}" 
+                        Grid.Column="1"
+                        BorderRadius="0"
+                        BorderWidth="2"
+                        BorderColor="White"
+                        HorizontalOptions="FillAndExpand"
+                        BackgroundColor="#2196F3"
+                        TextColor="White"
+                        Margin="0,0,0,0"
                         Text="Clear" />
-                <Button Command="{Binding GoToRadius}"
-                        HorizontalOptions="Center"
-                        BackgroundColor="White"
-                        TextColor="Black"
+                <Button Command="{Binding GoToRadius}" 
+                        Grid.Column="2"
+                        BorderRadius="0"
+                        BorderWidth="2"
+                        BorderColor="White"
+                        HorizontalOptions="FillAndExpand"
+                        BackgroundColor="#2196F3"
+                        Margin="0,0,0,0"
+                        TextColor="White"
                         Text="Near me" />
-            </StackLayout>
-        </Grid>
+            </Grid>
+        </StackLayout>
+
     </ContentPage.Content>
 </ContentPage>

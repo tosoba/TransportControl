@@ -17,10 +17,13 @@ namespace TransportControl.Droid
             base.OnCreate(bundle);
             
             Xamarin.Forms.Forms.Init(this, bundle);
+
             Xamarin.FormsGoogleMaps.Init(this, bundle);
             UserDialogs.Init(this);
-            LoadApplication(new App());
             ImageCircleRenderer.Init();
+            Xamarin.Forms.DependencyService.Register<MessageAndroid>();
+
+            LoadApplication(new App());
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)

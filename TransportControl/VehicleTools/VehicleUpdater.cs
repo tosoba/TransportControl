@@ -67,7 +67,7 @@ namespace TransportControl
             trackedVehicle.Lon = loadedVehicle.Lon;
             trackedVehicle.Time = loadedVehicle.Time;
             trackedVehicle.Pin.MoveTo(
-                new Position(double.Parse(trackedVehicle.Lat), double.Parse(trackedVehicle.Lon)) 
+                new Position(double.Parse(trackedVehicle.Lat), double.Parse(trackedVehicle.Lon))
             );
             trackedVehicle.Pin.UpdateLabel($"Last update at: {trackedVehicle.Time}");
         }
@@ -78,7 +78,11 @@ namespace TransportControl
 
             if (!CrossConnectivity.Current.IsConnected)
             {
-                Dialogs.ShowAlertDialog("Error retrieving data.", "No internet connection.");
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    DependencyService.Get<IMessage>().ShortAlert("No internet connection.");
+                });
+
                 return;
             }
 
@@ -108,7 +112,9 @@ namespace TransportControl
                 Type = PinType.Place,
                 Label = $"Last update at: {vehicle.Time}",
                 Position = new Position(double.Parse(vehicle.Lat), double.Parse(vehicle.Lon)),
-                Icon = BitmapDescriptorFactory.FromView(new BindingPinView(vehicle.Number))
+                Icon = char.IsLetter(vehicle.Number.First()) || vehicle.NumberInt >= 100 ? 
+                    BitmapDescriptorFactory.FromView(new BindingPinView(vehicle.Number, "pin_red_a.png"))
+                    : BitmapDescriptorFactory.FromView(new BindingPinView(vehicle.Number, "pin_red_t.png"))
             };
 
             map?.Pins.Add(vehicle.Pin);
@@ -144,7 +150,7 @@ namespace TransportControl
             if (!IsRunning)
             {
                 var seconds = TimeSpan.FromSeconds(5);
-                Device.StartTimer(seconds, () => 
+                Device.StartTimer(seconds, () =>
                 {
                     IsRunning = true;
                     Task.Run(async () =>

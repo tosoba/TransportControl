@@ -10,14 +10,9 @@ namespace TransportControl.Models
         public string Time { get; set; }
         public string Lon { get; set; }
 
-        public double LatDbl
-        {
-            get => double.Parse(Lat);
-        }
-        public double LonDbl
-        {
-            get => double.Parse(Lon);
-        }
+        public int NumberInt => int.Parse(Number);
+        public double LatDbl => double.Parse(Lat);
+        public double LonDbl => double.Parse(Lon);
 
         public Pin Pin { get; set; }
     }

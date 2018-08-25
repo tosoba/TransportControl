@@ -8,7 +8,7 @@
              x:Class="TransportControl.BindingPinView">
     <AbsoluteLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
 
-        <Image Source="pin_red_a.png" 
+        <Image Source="{Binding Source}" 
             AbsoluteLayout.LayoutBounds="0, 0, 37, 48"
             AbsoluteLayout.LayoutFlags="None" />
 

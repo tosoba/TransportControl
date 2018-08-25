@@ -4,18 +4,27 @@ namespace TransportControl
 {
     public partial class BindingPinView : StackLayout
     {
-        private string _display;
 
-        public BindingPinView(string display)
+        public BindingPinView(string display, string source)
         {
             InitializeComponent();
-            _display = display;
+
+            Display = display;
+            Source = source;
+
             BindingContext = this;
         }
 
         public string Display
         {
-            get { return _display; }
+            private set;
+            get;
+        }
+
+        public string Source
+        {
+            private set;
+            get;
         }
     }
 }

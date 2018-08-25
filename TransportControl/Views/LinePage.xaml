@@ -13,30 +13,50 @@
             <ScrollView Orientation="Horizontal"
                         HorizontalOptions="FillAndExpand">
                 <StackLayout Orientation="Horizontal">
+                    <Button Text="1"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            FontSize="Medium"
+                            Clicked="buttonLineNumbers_Clicked"/>
                     <Button Text="100"
-                            BackgroundColor="Transparent"
-                            x:Name="buttonLines_Clicked"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            FontSize="Medium"
                             Clicked="buttonLineNumbers_Clicked"/>
                     <Button Text="200"
-                            BackgroundColor="Transparent"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            FontSize="Medium"
                             Clicked="buttonLineNumbers_Clicked"/>
                     <Button Text="300"
-                            BackgroundColor="Transparent"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            FontSize="Medium"
                             Clicked="buttonLineNumbers_Clicked"/>
                     <Button Text="400"
-                            BackgroundColor="Transparent"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            FontSize="Medium"
                             Clicked="buttonLineNumbers_Clicked"/>
                     <Button Text="500"
-                            BackgroundColor="Transparent"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            FontSize="Medium"
                             Clicked="buttonLineNumbers_Clicked"/>
                     <Button Text="600"
-                            BackgroundColor="Transparent"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            FontSize="Medium"
                             Clicked="buttonLineNumbers_Clicked"/>
                     <Button Text="700"
-                            BackgroundColor="Transparent"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            FontSize="Medium"
                             Clicked="buttonLineNumbers_Clicked"/>
                     <Button Text="E"
-                            BackgroundColor="Transparent"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            
                             Clicked="buttonLineNumbers_Clicked"/>
                 </StackLayout>
             </ScrollView>
@@ -45,9 +65,9 @@
                     ItemTapped="Handle_ItemTapped"
                     ItemSelected="Handle_ItemSelected"
                     HasUnevenRows="true"
-                    GroupShortNameBinding = "{Binding Key}"
-                    IsGroupingEnabled = "true"
-                    GroupDisplayBinding = "{Binding Key}">
+                    GroupShortNameBinding="{Binding Key}"
+                    IsGroupingEnabled="true"
+                    GroupDisplayBinding="{Binding Key}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>

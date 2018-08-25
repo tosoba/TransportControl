@@ -2,7 +2,7 @@
 
 namespace TransportControl
 {
-    public interface ILoadingPage
+    public interface IVehicleLoadingPage
     {
         event EventHandler<VehiclesLoadedEventArgs> OnVehiclesLoaded;
     }

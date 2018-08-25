@@ -14,7 +14,7 @@ namespace TransportControl
                 updater.AddVehicles(e.Vehicles);
                 updater.StartUpdates();
 
-                var bounds = VehicleHelper.GetBounds(e.Vehicles);
+                var bounds = e.Vehicles.GetBounds();
                 await updater.Map.AnimateCamera(CameraUpdateFactory.NewBounds(bounds, 50), TimeSpan.FromSeconds(1.5));
             }
         }
