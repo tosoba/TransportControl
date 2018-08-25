@@ -23,11 +23,14 @@ namespace TransportControl
 
         public event EventHandler<VehiclesLoadedEventArgs> OnVehiclesLoaded;
 
-        void Handle_ItemTapped(object sender, ItemTappedEventArgs e) => ((ListView)sender).SelectedItem = null;
-
         async void Handle_ItemSelected(object sender, SelectedItemChangedEventArgs e)
         {
+            if (e.SelectedItem == null) return;
+
             await Permissions.Check();
+
+            var distance = new Distance(e.SelectedItem as Distance);
+            var radius = distance.Value;
 
             var geoLocator = new GeoLocator();
 
@@ -37,14 +40,11 @@ namespace TransportControl
             var userPosition = await geoLocator.GetUserLocationAsync();
             if (userPosition == null)
             {
+                RadiusListView.SelectedItem = null;
+
                 progressDialog.Hide();
                 return;
             }
-
-            var userCoords = Coordinates.FromPosition(userPosition);
-
-            var distance = e.SelectedItem as Distance;
-            var radius = distance.Value;
 
             if (!CrossConnectivity.Current.IsConnected)
             {
@@ -52,6 +52,7 @@ namespace TransportControl
                 return;
             }
 
+            var userCoords = Coordinates.FromPosition(userPosition);
             var loader = new Loader();
             var buses = await loader.LoadAllVehiclesOfType(1);
             var trams = await loader.LoadAllVehiclesOfType(2);
@@ -61,9 +62,9 @@ namespace TransportControl
             {
                 Latitude = v.LatDbl,
                 Longitude = v.LonDbl
-            }), UnitOfLength.Meters) <= radius).ToList();
+            }), UnitOfLength.Meters) <= distance.Value).ToList();
 
-            if (nearVehicles != null)
+            if (nearVehicles != null && nearVehicles.Count > 0)
             {
                 var lineNumbers = nearVehicles.Select(v => v.Number);
                 List<Line> lines = new List<Line>();
@@ -75,7 +76,16 @@ namespace TransportControl
 
                 OnVehiclesLoaded?.Invoke(this, new VehiclesLoadedEventArgs(nearVehicles, lines));
                 progressDialog.Hide();
+
+                RadiusListView.SelectedItem = null;
+
                 await Navigation.PopAsync();
+            }
+            else
+            {
+                progressDialog.Hide();
+                RadiusListView.SelectedItem = null;
+                Dialogs.ShowAlertDialog("Error retrieving data.", "No vehicles found.");
             }
         }
     }

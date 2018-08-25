@@ -11,5 +11,11 @@
             if (Value < 1000) ValueLabel = $"{Value} m";
             else ValueLabel = $"{Value / 1000} km";
         }
+
+        public Distance(Distance other)
+        {
+            Value = other.Value;
+            ValueLabel = other.ValueLabel;
+        }
     }
 }

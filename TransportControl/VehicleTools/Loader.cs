@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -33,7 +34,8 @@ namespace TransportControl
             using (var httpClient = new HttpClient())
             {
                 var jsonStr = await httpClient.GetStringAsync(URL_COMMON + typeStr + LINE + number);
-                return ParseVehicles(jsonStr);
+                var response = JsonConvert.DeserializeObject<VehiclesResponse>(jsonStr);
+                return response.Result;
             }
         }
 
@@ -43,37 +45,8 @@ namespace TransportControl
             using (var httpClient = new HttpClient())
             {
                 var jsonStr = await httpClient.GetStringAsync(URL_COMMON + typeStr);
-                return ParseVehicles(jsonStr);
-            }
-        }
-
-        private List<Vehicle> ParseVehicles(string jsonStr)
-        {
-            var vehicles = new List<Vehicle>();
-            var json = JObject.Parse(jsonStr);
-            JToken tokenResult;
-            var success = json.TryGetValue("result", out tokenResult);
-            if (success)
-            {
-                var result = tokenResult as JArray;
-                if (result == null) return null;
-
-                foreach (var j in result)
-                {
-                    vehicles.Add(new Vehicle
-                    {
-                        Lat = j.Value<string>("Lat"),
-                        Lon = j.Value<string>("Lon"),
-                        Brigade = j.Value<string>("Brigade"),
-                        Number = j.Value<string>("Lines"),
-                        Time = j.Value<string>("Time")
-                    });
-                }
-                return vehicles;
-            }
-            else
-            {
-                return null;
+                var response = JsonConvert.DeserializeObject<VehiclesResponse>(jsonStr);
+                return response.Result;
             }
         }
     }

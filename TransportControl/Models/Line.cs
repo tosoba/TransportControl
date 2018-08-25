@@ -13,7 +13,6 @@ namespace TransportControl.Models
             get
             {
                 if (char.IsLetter(Symbol.First())) return Symbol.First().ToString();
-                else if (Symbol.First() == 'Z') return "Z";
                 else if (Symbol.Length > 2) return (int.Parse(Symbol) / 100 * 100).ToString();
                 else return "1";
             }

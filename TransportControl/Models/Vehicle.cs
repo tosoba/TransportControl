@@ -1,19 +1,35 @@
-﻿using Xamarin.Forms.GoogleMaps;
+﻿using Newtonsoft.Json;
+using Xamarin.Forms.GoogleMaps;
 
 namespace TransportControl.Models
 {
     public class Vehicle
     {
+        [JsonProperty("Lat")]
         public string Lat { get; set; }
+
+        [JsonProperty("Lines")]
         public string Number { get; set; }
+
+        [JsonProperty("Brigade")]
         public string Brigade { get; set; }
+
+        [JsonProperty("Time")]
         public string Time { get; set; }
+
+        [JsonProperty("Lon")]
         public string Lon { get; set; }
 
+        [JsonIgnore]
         public int NumberInt => int.Parse(Number);
+
+        [JsonIgnore]
         public double LatDbl => double.Parse(Lat);
+
+        [JsonIgnore]
         public double LonDbl => double.Parse(Lon);
 
+        [JsonIgnore]
         public Pin Pin { get; set; }
     }
 }
