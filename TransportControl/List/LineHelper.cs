@@ -41,14 +41,22 @@ namespace TransportControl.List
 
         public static Line FindBy(string symbol) => Lines.Where(l => l.Symbol == symbol).FirstOrDefault();
 
-        private static void GroupCollections(ObservableCollection<Line> ToBeGrouped)
+        private static void GroupCollections(ObservableCollection<Line> toBeGrouped)
         {
             LinesGrouped?.Clear();
-            var sorted = from line in ToBeGrouped
+
+            var sorted = from line in toBeGrouped
                          orderby line.Symbol
                          group line by line.SymbolSort into lineGroup
                          select new Grouping<string, Line>(lineGroup.Key, lineGroup);
-            LinesGrouped = new ObservableCollection<Grouping<string, Line>>(sorted);
+
+            var first = sorted.First()
+                .OrderBy(l => int.Parse(l.Symbol))
+                .GroupBy(l => l.SymbolSort)
+                .Select(g => new Grouping<string, Line>(g.Key, g));
+            var rest = sorted.Skip(1); 
+
+            LinesGrouped = new ObservableCollection<Grouping<string, Line>>(first.Concat(rest));
         }
 
         private static void AddLines(JArray jLines)
