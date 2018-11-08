@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Xamarin.Forms.GoogleMaps;
 
 namespace TransportControl
@@ -8,13 +9,14 @@ namespace TransportControl
         public static async void OnVehiclesLoaded(object sender, VehiclesLoadedEventArgs e)
         {
             var updater = VehicleUpdater.Instance;
-            if (e.Vehicles.Count > 0)
+            var filteredVehicles = e.Vehicles.Where(v => v.ContainsAllInfo).ToList();
+            if (filteredVehicles.Count > 0)
             {
                 updater.AddLines(e.Lines);
-                updater.AddVehicles(e.Vehicles);
+                updater.AddVehicles(filteredVehicles);
                 updater.StartUpdates();
 
-                var bounds = e.Vehicles.GetBounds();
+                var bounds = filteredVehicles.GetBounds();
                 await updater.Map.AnimateCamera(CameraUpdateFactory.NewBounds(bounds, 50), TimeSpan.FromSeconds(1.5));
             }
         }

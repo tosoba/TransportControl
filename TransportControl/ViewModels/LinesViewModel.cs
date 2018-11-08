@@ -2,7 +2,6 @@
 using System.Windows.Input;
 using TransportControl.List;
 using TransportControl.Models;
-using Xamarin.Forms;
 
 namespace TransportControl.ViewModels
 {

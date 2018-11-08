@@ -31,5 +31,8 @@ namespace TransportControl.Models
 
         [JsonIgnore]
         public Pin Pin { get; set; }
+
+        [JsonIgnore]
+        public bool ContainsAllInfo => Lat != null && Lon != null && Brigade != null && Number != null && Time != null;
     }
 }

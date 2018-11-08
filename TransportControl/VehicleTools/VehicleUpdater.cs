@@ -89,7 +89,7 @@ namespace TransportControl
             for (int i = 0; i < trackedLines.Count; i++)
             {
                 var loader = new Loader();
-                var loadedVehicles = await loader.LoadVehicles(trackedLines[i].Symbol, 1);
+                var loadedVehicles = (await loader.LoadVehicles(trackedLines[i].Symbol, 1)).Where(v => v.ContainsAllInfo).ToList();
                 if (loadedVehicles != null)
                 {
                     AddVehicles(loadedVehicles);

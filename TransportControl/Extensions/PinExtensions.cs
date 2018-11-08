@@ -5,20 +5,14 @@ namespace TransportControl.MapPin
 {
     public static class PinExtensions
     {
-        public static void MoveTo(this Pin self, Position finalPos)
+        public static void MoveTo(this Pin self, Position finalPos) => Device.BeginInvokeOnMainThread(() =>
         {
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                self.Position = finalPos;
-            });
-        }
+            self.Position = finalPos;
+        });
 
-        public static void UpdateLabel(this Pin self, string label)
+        public static void UpdateLabel(this Pin self, string label) => Device.BeginInvokeOnMainThread(() =>
         {
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                self.Label = label;
-            });
-        }
+            self.Label = label;
+        });
     }
 }
