@@ -3,6 +3,7 @@ using Android.App;
 using Android.Content.PM;
 using Android.OS;
 using ImageCircle.Forms.Plugin.Droid;
+using Xamarin.Forms;
 
 namespace TransportControl.Droid
 {
@@ -15,13 +16,13 @@ namespace TransportControl.Droid
             ToolbarResource = Resource.Layout.Toolbar;
             
             base.OnCreate(bundle);
-            
-            Xamarin.Forms.Forms.Init(this, bundle);
+
+            Forms.Init(this, bundle);
 
             Xamarin.FormsGoogleMaps.Init(this, bundle);
             UserDialogs.Init(this);
             ImageCircleRenderer.Init();
-            Xamarin.Forms.DependencyService.Register<MessageAndroid>();
+            DependencyService.Register<MessageAndroid>();
 
             LoadApplication(new App());
         }

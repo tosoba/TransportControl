@@ -67,7 +67,7 @@ namespace TransportControl
             trackedVehicle.Lon = loadedVehicle.Lon;
             trackedVehicle.Time = loadedVehicle.Time;
             trackedVehicle.Pin.MoveTo(
-                new Position(double.Parse(trackedVehicle.Lat), double.Parse(trackedVehicle.Lon))
+                new Position(trackedVehicle.LatDbl, trackedVehicle.LonDbl)
             );
             trackedVehicle.Pin.UpdateLabel($"Last update at: {trackedVehicle.Time}");
         }
@@ -111,7 +111,7 @@ namespace TransportControl
             {
                 Type = PinType.Place,
                 Label = $"Last update at: {vehicle.Time}",
-                Position = new Position(double.Parse(vehicle.Lat), double.Parse(vehicle.Lon)),
+                Position = new Position(vehicle.LatDbl, vehicle.LonDbl),
                 Icon = char.IsLetter(vehicle.Number.First()) || vehicle.NumberInt >= 100 ? 
                     BitmapDescriptorFactory.FromView(new BindingPinView(vehicle.Number, "pin_red_a.png"))
                     : BitmapDescriptorFactory.FromView(new BindingPinView(vehicle.Number, "pin_red_t.png"))

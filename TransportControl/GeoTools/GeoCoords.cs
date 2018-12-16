@@ -14,18 +14,15 @@ namespace TransportControl
             Longitude = longitude;
         }
 
-        public static Coordinates FromPosition(Position position)
-        {
-            return new Coordinates(position.Latitude, position.Longitude);
-        }
+        public static Coordinates FromPosition(Position position) => new Coordinates(position.Latitude, position.Longitude);
     }
 
     public static class CoordinatesDistanceExtensions
     {
-        public static double DistanceTo(this Coordinates baseCoordinates, Coordinates targetCoordinates)
-        {
-            return DistanceTo(baseCoordinates, targetCoordinates, UnitOfLength.Kilometers);
-        }
+        public static double DistanceTo(
+            this Coordinates baseCoordinates,
+            Coordinates targetCoordinates
+        ) => DistanceTo(baseCoordinates, targetCoordinates, UnitOfLength.Kilometers);
 
         public static double DistanceTo(this Coordinates baseCoordinates, Coordinates targetCoordinates, UnitOfLength unitOfLength)
         {
@@ -60,9 +57,7 @@ namespace TransportControl
             _fromMilesFactor = fromMilesFactor;
         }
 
-        public double ConvertFromMiles(double input)
-        {
-            return input * _fromMilesFactor;
-        }
+        public double ConvertFromMiles(double input) => input * _fromMilesFactor;
     }
+
 }

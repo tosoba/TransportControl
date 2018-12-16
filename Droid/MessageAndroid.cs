@@ -7,14 +7,8 @@ namespace TransportControl.Droid
 {
     class MessageAndroid : IMessage
     {
-        public void LongAlert(string message)
-        {
-            Toast.MakeText(Application.Context, message, ToastLength.Long).Show();
-        }
-
-        public void ShortAlert(string message)
-        {
-            Toast.MakeText(Application.Context, message, ToastLength.Short).Show();
-        }
+        public void LongAlert(string message) => Toast.MakeText(Application.Context, message, ToastLength.Long).Show();
+        
+        public void ShortAlert(string message) => Toast.MakeText(Application.Context, message, ToastLength.Short).Show();
     }
 }

@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\lines.json" />
+    <None Remove="Views\MapPage.xaml~RF2241beb.TMP" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\lines.json" />

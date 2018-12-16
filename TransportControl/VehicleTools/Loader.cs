@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -34,8 +35,15 @@ namespace TransportControl
             using (var httpClient = new HttpClient())
             {
                 var jsonStr = await httpClient.GetStringAsync(URL_COMMON + typeStr + LINE + number);
-                var response = JsonConvert.DeserializeObject<VehiclesResponse>(jsonStr);
-                return response.Result;
+                try
+                {
+                    var response = JsonConvert.DeserializeObject<VehiclesResponse>(jsonStr);
+                    return response.Result;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
             }
         }
 
@@ -45,8 +53,15 @@ namespace TransportControl
             using (var httpClient = new HttpClient())
             {
                 var jsonStr = await httpClient.GetStringAsync(URL_COMMON + typeStr);
-                var response = JsonConvert.DeserializeObject<VehiclesResponse>(jsonStr);
-                return response.Result;
+                try
+                {
+                    var response = JsonConvert.DeserializeObject<VehiclesResponse>(jsonStr);
+                    return response.Result;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
             }
         }
     }

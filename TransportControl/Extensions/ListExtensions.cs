@@ -17,10 +17,10 @@ namespace TransportControl
 
         public static Bounds GetBounds(this IList<Vehicle> self)
         {
-            var minLat = self.Select(v => double.Parse(v.Lat)).Min();
-            var minLon = self.Select(v => double.Parse(v.Lon)).Min();
-            var maxLat = self.Select(v => double.Parse(v.Lat)).Max();
-            var maxLon = self.Select(v => double.Parse(v.Lon)).Max();
+            var minLat = self.Select(v => v.LatDbl).Min();
+            var minLon = self.Select(v => v.LonDbl).Min();
+            var maxLat = self.Select(v => v.LatDbl).Max();
+            var maxLon = self.Select(v => v.LonDbl).Max();
 
             return new Bounds(
                 southWest: new Position(minLat, minLon),

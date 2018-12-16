@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Globalization;
 using Xamarin.Forms.GoogleMaps;
 
 namespace TransportControl.Models
@@ -24,10 +25,10 @@ namespace TransportControl.Models
         public int NumberInt => int.Parse(Number);
 
         [JsonIgnore]
-        public double LatDbl => double.Parse(Lat);
+        public double LatDbl => double.Parse(Lat, CultureInfo.GetCultureInfo("en-US"));
 
         [JsonIgnore]
-        public double LonDbl => double.Parse(Lon);
+        public double LonDbl => double.Parse(Lon, CultureInfo.GetCultureInfo("en-US"));
 
         [JsonIgnore]
         public Pin Pin { get; set; }
