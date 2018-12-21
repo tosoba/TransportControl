@@ -74,17 +74,7 @@ namespace TransportControl
 
         private async Task Update()
         {
-            if (trackedLines == null) return;
-
-            if (!CrossConnectivity.Current.IsConnected)
-            {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    DependencyService.Get<IMessage>().ShortAlert("No internet connection.");
-                });
-
-                return;
-            }
+            if (trackedLines == null || !CrossConnectivity.Current.IsConnected) return;
 
             for (int i = 0; i < trackedLines.Count; i++)
             {

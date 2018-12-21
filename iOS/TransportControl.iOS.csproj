@@ -223,7 +223,6 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
-    <Compile Include="MessageIOS.cs" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\bg.jpg" />

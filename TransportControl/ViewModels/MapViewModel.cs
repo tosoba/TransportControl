@@ -1,15 +1,32 @@
-﻿using System.Windows.Input;
+﻿using Plugin.Connectivity;
+using Plugin.Connectivity.Abstractions;
+using System.ComponentModel;
+using System.Windows.Input;
 using Xamarin.Forms;
 
 namespace TransportControl.ViewModels
 {
-    public class MapViewModel
+    public class MapViewModel : INotifyPropertyChanged
     {
         public INavigation Navigation { get; private set; }
 
         public ICommand ClearMap { get; }
         public ICommand GoToLines { get; }
         public ICommand GoToRadius { get; }
+
+        private bool isConnected = false;
+        public bool IsConnected
+        {
+            get { return isConnected; }
+            private set
+            {
+                if (isConnected != value)
+                {
+                    isConnected = value;
+                    OnPropertyChanged(nameof(IsConnected));
+                }
+            }
+        }
 
         public MapViewModel(INavigation navigation)
         {
@@ -35,6 +52,21 @@ namespace TransportControl.ViewModels
             {
                 await Navigation.PushAsync(chooseRadiusPage);
             });
+
+            IsConnected = CrossConnectivity.Current.IsConnected;
+            CrossConnectivity.Current.ConnectivityChanged += OnConnectivityChanged;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        private void OnConnectivityChanged(object sender, ConnectivityChangedEventArgs e)
+        {
+            IsConnected = e.IsConnected;
         }
     }
 }
