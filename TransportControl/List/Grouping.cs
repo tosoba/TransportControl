@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace TransportControl.List
@@ -12,7 +11,7 @@ namespace TransportControl.List
         {
             Key = key;
             foreach (var item in items)
-                this.Items.Add(item);
+                Items.Add(item);
         }
     }
 }

@@ -6,7 +6,7 @@ using Xamarin.Forms.GoogleMaps;
 namespace TransportControl
 {
     public static class ListExtensions
-    {
+    { 
         public static Bounds GetBounds(this IList<Vehicle> self)
         {
             var minLat = self.Select(v => v.LatDbl).Min();
