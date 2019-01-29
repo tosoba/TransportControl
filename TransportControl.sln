@@ -8,8 +8,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransportControl.iOS", "iOS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransportControl.Droid", "Droid\TransportControl.Droid.csproj", "{A931BE17-CE63-48CF-8EB0-C29E16AB658C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XFGoogleMapSample.UWP", "UWP\XFGoogleMapSample.UWP.csproj", "{186F0CA7-B878-4ABC-AC10-CA1FC42B50AD}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Android|Any CPU = Debug_Android|Any CPU

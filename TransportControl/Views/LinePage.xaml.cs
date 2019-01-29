@@ -34,8 +34,8 @@ namespace TransportControl
                 return;
             }
 
-            var progressDialog = UserDialogs.Instance.Progress(new ProgressDialogConfig());
-            progressDialog.Show();
+            //var progressDialog = UserDialogs.Instance.Progress();
+            //progressDialog.Show();
 
             var loader = new Loader();
             List<Vehicle> vehicles;
@@ -51,12 +51,12 @@ namespace TransportControl
             if (vehicles != null && vehicles.Count > 0)
             {
                 OnVehiclesLoaded?.Invoke(this, new VehiclesLoadedEventArgs(vehicles, new List<Line>() { line }));
-                progressDialog.Hide();
+                //progressDialog.Hide();
                 await Navigation.PopAsync();
             }
             else
             {
-                progressDialog.Hide();
+               // progressDialog.Hide();
                 Dialogs.ShowAlertDialog("Error retrieving data.", "No vehicles found.");
             }
         }
