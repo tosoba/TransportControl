@@ -10,7 +10,8 @@ namespace TransportControl
         {
             InitializeComponent();
 
-            MainPage = new NavigationPage(new MapPage());
+            var bootstrapper = new AppBootstrapper();
+            MainPage = bootstrapper.CreateMainPage();
         }
     }
 }

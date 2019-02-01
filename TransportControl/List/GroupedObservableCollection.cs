@@ -3,11 +3,11 @@ using System.Collections.ObjectModel;
 
 namespace TransportControl.List
 {
-    public class Grouping<K, T> : ObservableCollection<T>
+    public class GroupedObservableCollection<K, T> : ObservableCollection<T>
     {
         public K Key { get; private set; }
 
-        public Grouping(K key, IEnumerable<T> items)
+        public GroupedObservableCollection(K key, IEnumerable<T> items)
         {
             Key = key;
             foreach (var item in items)

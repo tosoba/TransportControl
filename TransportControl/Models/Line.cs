@@ -17,5 +17,14 @@ namespace TransportControl.Models
                 else return "1";
             }
         }
+
+        public int Type
+        {
+            get
+            {
+                if (char.IsLetter(Symbol.First()) || int.Parse(Symbol) >= 100) return 1;
+                else return 2;
+            }
+        }
     }
 }

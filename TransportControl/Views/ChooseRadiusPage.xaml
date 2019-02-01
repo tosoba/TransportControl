@@ -1,13 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+<ui:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="TransportControl.ChooseRadiusPage"
-             Title="Choose radius">
+             xmlns:ui="clr-namespace:TransportControl.Views"
+             Title="Choose radius"
+             xmlns:vm="clr-namespace:TransportControl.ViewModels"
+             x:TypeArguments="vm:RadiusViewModel">
     <ContentPage.Content>
         <StackLayout>
-            <ListView ItemsSource="{Binding Radiuses}"
-                      x:Name="RadiusListView"
-                      ItemSelected="Handle_ItemSelected"
+            <ListView ItemsSource="{Binding Distances}"
+                      x:Name="DistancesListView"
                       HasUnevenRows="true">
                 <ListView.ItemTemplate>
                     <DataTemplate>
@@ -33,4 +35,4 @@
             </ListView>
         </StackLayout>
     </ContentPage.Content>
-</ContentPage>
+</ui:BaseContentPage>

@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace TransportControl
 {
-    public class GeoLocator
+    public static class GeoLocator
     {
-        public async Task<Position> GetUserLocationAsync()
+        public static async Task<Position> GetUserLocationAsync()
         {
             try
             {

@@ -28,5 +28,17 @@ namespace TransportControl
                 Dialogs.ShowAlertDialog("Location", $"Exception thrown: {ex.Message}");
             }
         }
+
+        public static async Task<PermissionStatus> GetLocationPermissionStatus()
+        {
+            try
+            {
+                return await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Location);
+            }
+            catch (Exception)
+            {
+                return PermissionStatus.Unknown;
+            }
+        }
     }
 }

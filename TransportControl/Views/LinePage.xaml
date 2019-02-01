@@ -1,14 +1,16 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<ContentPage
+<ui:BaseContentPage
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="TransportControl.LinePage"
     xmlns:design="clr-namespace:TransportControl;assembly=TransportControl"
+    xmlns:ui="clr-namespace:TransportControl.Views"
+    xmlns:vm="clr-namespace:TransportControl.ViewModels"
+    x:TypeArguments="vm:LinesViewModel"
     Title="Lines">
     <ContentPage.Content>
         <StackLayout>
             <SearchBar x:Name="LineSearchBar" 
-                       TextChanged="Handle_TextChanged"
                        Placeholder="Enter line number:"/>
             <ScrollView Orientation="Horizontal"
                         HorizontalOptions="FillAndExpand">
@@ -17,53 +19,51 @@
                             BackgroundColor="#2196F3"
                             TextColor="White"
                             FontSize="Medium"
-                            Clicked="buttonLineNumbers_Clicked"/>
+                            Clicked="OnLineNumberBtnClicked"/>
                     <Button Text="100"
                             BackgroundColor="#2196F3"
                             TextColor="White"
                             FontSize="Medium"
-                            Clicked="buttonLineNumbers_Clicked"/>
+                            Clicked="OnLineNumberBtnClicked"/>
                     <Button Text="200"
                             BackgroundColor="#2196F3"
                             TextColor="White"
                             FontSize="Medium"
-                            Clicked="buttonLineNumbers_Clicked"/>
+                            Clicked="OnLineNumberBtnClicked"/>
                     <Button Text="300"
                             BackgroundColor="#2196F3"
                             TextColor="White"
                             FontSize="Medium"
-                            Clicked="buttonLineNumbers_Clicked"/>
+                            Clicked="OnLineNumberBtnClicked"/>
                     <Button Text="400"
                             BackgroundColor="#2196F3"
                             TextColor="White"
                             FontSize="Medium"
-                            Clicked="buttonLineNumbers_Clicked"/>
+                            Clicked="OnLineNumberBtnClicked"/>
                     <Button Text="500"
                             BackgroundColor="#2196F3"
                             TextColor="White"
                             FontSize="Medium"
-                            Clicked="buttonLineNumbers_Clicked"/>
+                            Clicked="OnLineNumberBtnClicked"/>
                     <Button Text="600"
                             BackgroundColor="#2196F3"
                             TextColor="White"
                             FontSize="Medium"
-                            Clicked="buttonLineNumbers_Clicked"/>
+                            Clicked="OnLineNumberBtnClicked"/>
                     <Button Text="700"
                             BackgroundColor="#2196F3"
                             TextColor="White"
                             FontSize="Medium"
-                            Clicked="buttonLineNumbers_Clicked"/>
+                            Clicked="OnLineNumberBtnClicked"/>
                     <Button Text="E"
                             BackgroundColor="#2196F3"
                             TextColor="White"
                             
-                            Clicked="buttonLineNumbers_Clicked"/>
+                            Clicked="OnLineNumberBtnClicked"/>
                 </StackLayout>
             </ScrollView>
             <ListView ItemsSource="{Binding LinesGrouped}"
                     x:Name="LinesListView"
-                    ItemTapped="Handle_ItemTapped"
-                    ItemSelected="Handle_ItemSelected"
                     HasUnevenRows="true"
                     GroupShortNameBinding="{Binding Key}"
                     IsGroupingEnabled="true"
@@ -88,12 +88,12 @@
                                 <Label Grid.Column="1"
                                        Grid.Row="1"
                                        VerticalOptions="Center"
-                                       Text="{Binding Dest1, StringFormat='From: {0:N}'}}"
+                                       Text="{Binding Dest1, StringFormat='From: {0:N}'}"
                                        FontSize="14"/>
                                 <Label Grid.Column="1"
                                        Grid.Row="2"
                                        VerticalOptions="Center"
-                                       Text="{Binding Dest2, StringFormat='To: {0:N}'}}"
+                                       Text="{Binding Dest2, StringFormat='To: {0:N}'}"
                                        FontSize="14"/>
                             </Grid>
                         </ViewCell>
@@ -102,4 +102,4 @@
             </ListView>
         </StackLayout>
     </ContentPage.Content>
-</ContentPage>
+</ui:BaseContentPage>
