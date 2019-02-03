@@ -13,9 +13,14 @@ namespace TransportControl
         private readonly Position warsawCenterPosition = new Position(52.237049, 21.017532);
         private const double initialZoom = 11d;
 
+        private bool handlersAttached = false;
+
         public MapPage()
         {
             InitializeComponent();
+
+            //TODO: for some reason setting toolbar title is not working both in xaml in code...
+            //Title = "Transport Control";
 
             map.InitialCameraUpdate = CameraUpdateFactory.NewPositionZoom(warsawCenterPosition, initialZoom);
             map.CameraIdled += OnMapCameraIdled;
@@ -26,9 +31,13 @@ namespace TransportControl
                 disposables(this.BindCommand(ViewModel, vm => vm.GoToRadius, view => view.ShowRadiusBtn));
                 disposables(this.BindCommand(ViewModel, vm => vm.ClearMap, view => view.ClearMapBtn));
 
-                ViewModel.OnBoundsCalculated += OnBoundsCalculated;
-                ViewModel.OnVehicleTrackingStarted += OnVehicleTrackingStarted;
-                ViewModel.OnVehiclesTrackingStopped += OnVehiclesTrackingStopped;
+                if (ViewModel != null && !handlersAttached)
+                {
+                    ViewModel.OnBoundsCalculated += OnBoundsCalculated;
+                    ViewModel.OnVehicleTrackingStarted += OnVehicleTrackingStarted;
+                    ViewModel.OnVehiclesTrackingStopped += OnVehiclesTrackingStopped;
+                    handlersAttached = true;
+                }
             });
         }
 
@@ -55,7 +64,7 @@ namespace TransportControl
         private async void OnBoundsCalculated(object sender, BoundsCalculatedEventArgs e)
         {
             await map.AnimateCamera(
-                cameraUpdate: CameraUpdateFactory.NewBounds(e.Bounds, 50), 
+                cameraUpdate: CameraUpdateFactory.NewBounds(e.Bounds, 50),
                 duration: TimeSpan.FromSeconds(1.5)
             );
         }

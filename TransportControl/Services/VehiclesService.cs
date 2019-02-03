@@ -35,12 +35,10 @@ namespace TransportControl.Services
             }).ToList());
         }
 
-        public IObservable<List<Line>> LoadLinesWithSymbols(IEnumerable<string> symbols)
-        {
-            return LoadLines().SelectMany(lines => lines.ToObservable())
+        public IObservable<List<Line>> LoadLinesWithSymbols(IEnumerable<string> symbols) => LoadLines()
+                .SelectMany(lines => lines.ToObservable())
                 .Where(line => symbols.Contains(line.Symbol))
                 .ToList()
                 .Select(lines => lines.ToList());
-        }
     }
 }

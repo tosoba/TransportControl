@@ -3,6 +3,8 @@ using Android.App;
 using Android.Content.PM;
 using Android.OS;
 using ImageCircle.Forms.Plugin.Droid;
+using Plugin.CurrentActivity;
+using Xamarin;
 using Xamarin.Forms;
 
 namespace TransportControl.Droid
@@ -14,14 +16,16 @@ namespace TransportControl.Droid
         {
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
-            
+
             base.OnCreate(bundle);
 
             Forms.Init(this, bundle);
 
-            Xamarin.FormsGoogleMaps.Init(this, bundle);
-            UserDialogs.Init(() => (Activity)Forms.Context);
+            FormsGoogleMaps.Init(this, bundle);
+            UserDialogs.Init(this);
             ImageCircleRenderer.Init();
+
+            CrossCurrentActivity.Current.Init(this, bundle);
 
             LoadApplication(new App());
         }

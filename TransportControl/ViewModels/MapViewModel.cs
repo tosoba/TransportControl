@@ -158,9 +158,7 @@ namespace TransportControl.ViewModels
                             {
                                 var trackedVehicle = Find(v);
                                 if (trackedVehicle != null)
-                                {
                                     UpdateVehicle(trackedVehicle, v);
-                                }
                             });
                         },
                         onError: error =>

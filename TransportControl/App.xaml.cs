@@ -9,7 +9,7 @@ namespace TransportControl
         public App()
         {
             InitializeComponent();
-
+            
             var bootstrapper = new AppBootstrapper();
             MainPage = bootstrapper.CreateMainPage();
         }

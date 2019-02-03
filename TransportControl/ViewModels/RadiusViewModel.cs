@@ -61,7 +61,7 @@ namespace TransportControl.ViewModels
 
             this.WhenActivated(disposables =>
             {
-                //TODO: try to make this work somehow with both checking permissions and internet connection
+                //TODO: progress dialogs when loading...
                 this.WhenAnyValue(vm => vm.SelectedDistance)
                     .Where(distance => distance != null)
                     .Do(_ =>
@@ -82,16 +82,25 @@ namespace TransportControl.ViewModels
                     )
                     .Do(async (tuple) =>
                     {
-                        if (await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Location))
+                        if (tuple.Item2 != PermissionStatus.Granted && await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Location))
                             Dialogs.ShowAlertDialog("Location", "Need permissions to access device location.");
                     })
-                    .SelectMany(tuple => CrossPermissions.Current.RequestPermissionsAsync(new[] { Permission.Location })
-                            .ToObservable()
-                            .Zip(
-                                second: Observable.Return(tuple.Item1),
-                                resultSelector: (results, distance) => new Tuple<Distance, PermissionStatus>(distance, results[Permission.Location])
-                            )
-                    )
+                    .SelectMany(tuple =>
+                    {
+                        if (tuple.Item2 != PermissionStatus.Granted)
+                        {
+                            return CrossPermissions.Current.RequestPermissionsAsync(new[] { Permission.Location })
+                                .ToObservable()
+                                .Zip(
+                                    second: Observable.Return(tuple.Item1),
+                                    resultSelector: (results, distance) => new Tuple<Distance, PermissionStatus>(distance, results[Permission.Location])
+                                );
+                        }
+                        else
+                        {
+                            return Observable.Return(tuple);
+                        }
+                    })
                     .Do(tuple =>
                     {
                         if (tuple.Item2 != PermissionStatus.Granted)
@@ -122,16 +131,16 @@ namespace TransportControl.ViewModels
                     .SubscribeOn(this.mainThreadScheduler)
                     .ObserveOn(this.taskPoolScheduler)
                     .SelectMany(tuple => CrossGeolocator.Current.GetLastKnownLocationAsync()
-                             .ToObservable()
-                             .SelectMany(lastKnownLocation =>
-                             {
-                                 if (lastKnownLocation == null) return CrossGeolocator.Current.GetPositionAsync(TimeSpan.FromSeconds(15), null, true).ToObservable();
-                                 else return Observable.Return(lastKnownLocation);
-                             })
-                             .Zip(
-                                 second: Observable.Return(tuple.Item1),
-                                 resultSelector: (location, distance) => new Tuple<Distance, Position>(distance, location)
-                             )
+                                .ToObservable()
+                                .SelectMany(lastKnownLocation =>
+                                {
+                                    if (lastKnownLocation == null) return CrossGeolocator.Current.GetPositionAsync(TimeSpan.FromSeconds(15), null, true).ToObservable();
+                                    else return Observable.Return(lastKnownLocation);
+                                })
+                                .Zip(
+                                    second: Observable.Return(tuple.Item1),
+                                    resultSelector: (location, distance) => new Tuple<Distance, Position>(distance, location)
+                                )
                     )
                     .Do(tuple =>
                     {
