@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using TransportControl.Events;
@@ -23,19 +24,21 @@ namespace TransportControl.ViewModels
         public ICommand GoToRadius { get; }
 
         private bool isConnected = false;
-
-        public event EventHandler<BoundsCalculatedEventArgs> OnBoundsCalculated;
-        public event EventHandler<VehicleTrackingStartedEventArgs> OnVehicleTrackingStarted;
-        public event EventHandler<VehiclesTrackingStoppedEventArgs> OnVehiclesTrackingStopped;
-
         public bool IsConnected
         {
             get { return isConnected; }
             private set { this.RaiseAndSetIfChanged(ref isConnected, value); }
         }
 
+
+        public event EventHandler<BoundsCalculatedEventArgs> OnBoundsCalculated;
+        public event EventHandler<VehicleTrackingStartedEventArgs> OnVehicleTrackingStarted;
+        public event EventHandler<VehiclesTrackingStoppedEventArgs> OnVehiclesTrackingStopped;
+
         private List<Vehicle> trackedVehicles = new List<Vehicle>();
         private List<Line> trackedLines = new List<Line>();
+
+        private IDisposable updatesDisposable;
 
         private bool isRunning = false;
         public bool IsRunning
@@ -53,7 +56,6 @@ namespace TransportControl.ViewModels
             }
         }
 
-        //TODO: maybe inject this?
         private IVehiclesService vehiclesSevice;
 
         private IScheduler mainThreadScheduler;
@@ -83,6 +85,17 @@ namespace TransportControl.ViewModels
 
             IsConnected = CrossConnectivity.Current.IsConnected;
             CrossConnectivity.Current.ConnectivityChanged += OnConnectivityChanged;
+
+            this.WhenActivated(disposables =>
+            {
+                this.WhenNavigatingFromObservable()
+                    .Subscribe(_ =>
+                    {
+                        IsRunning = false;
+                        updatesDisposable?.Dispose();
+                    })
+                    .DisposeWith(disposables);
+            });
         }
 
         private void OnVehiclesLoaded(object sender, VehiclesLoadedEventArgs e)
@@ -98,7 +111,7 @@ namespace TransportControl.ViewModels
                     OnVehicleTrackingStarted?.Invoke(this, new VehicleTrackingStartedEventArgs(v));
                 });
 
-                StartUpdatesIfNotRunning();
+                StartUpdatesIfNeeded();
 
                 var bounds = filteredVehicles.GetBounds();
                 OnBoundsCalculated?.Invoke(this, new BoundsCalculatedEventArgs(bounds));
@@ -116,7 +129,7 @@ namespace TransportControl.ViewModels
 
         private Vehicle Find(Vehicle vehicle) => trackedVehicles.Where(v => v.Number == vehicle.Number && v.Brigade == vehicle.Brigade)
             .FirstOrDefault();
-        
+
         private void UpdateVehicle(Vehicle trackedVehicle, Vehicle loadedVehicle)
         {
             trackedVehicle.Lat = loadedVehicle.Lat;
@@ -128,28 +141,31 @@ namespace TransportControl.ViewModels
             trackedVehicle.Pin.UpdateLabel($"Last update at: {trackedVehicle.Time}");
         }
 
-        private void StartUpdatesIfNotRunning()
+        private void StartUpdatesIfNeeded()
         {
             if (!IsRunning)
             {
-                //TODO: dipose this
-                Observable.Interval(TimeSpan.FromSeconds(5))
+                updatesDisposable = Observable.Interval(TimeSpan.FromSeconds(10))
                     .Where(_ => CrossConnectivity.Current.IsConnected)
                     .SelectMany(_ => trackedLines.ToObservable())
                     .SelectMany(line => vehiclesSevice.FetchVehicles(line.Type, line.Symbol))
                     .SubscribeOn(taskPoolScheduler)
                     .ObserveOn(mainThreadScheduler)
-                    .Subscribe(vehiclesOfLine => 
-                    {
-                        vehiclesOfLine.ForEach(v => 
+                    .Subscribe(
+                        onNext: vehiclesOfLine =>
                         {
-                            var trackedVehicle = Find(v);
-                            if (trackedVehicle != null)
+                            vehiclesOfLine.ForEach(v =>
                             {
-                                UpdateVehicle(trackedVehicle, v);
-                            }
+                                var trackedVehicle = Find(v);
+                                if (trackedVehicle != null)
+                                {
+                                    UpdateVehicle(trackedVehicle, v);
+                                }
+                            });
+                        },
+                        onError: error =>
+                        {
                         });
-                    });
 
                 IsRunning = true;
             }

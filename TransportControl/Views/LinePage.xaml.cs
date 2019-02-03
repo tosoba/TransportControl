@@ -16,13 +16,11 @@ namespace TransportControl
 
             this.WhenActivated(disposables =>
             {
-                //TODO: see if this can be bound like that later
-                //this.OneWayBind(ViewModel, vm => vm.LinesGrouped, x => x.LinesListView.ItemsSource).DisposeWith(disposables);
-
                 this.Bind(ViewModel, vm => vm.SelectedLine, view => view.LinesListView.SelectedItem)
                     .DisposeWith(disposables);
 
-                this.Bind(ViewModel, vm => vm.SearchInput, view => view.LineSearchBar.Text);
+                this.Bind(ViewModel, vm => vm.SearchInput, view => view.LineSearchBar.Text)
+                    .DisposeWith(disposables);
             });
         }
 

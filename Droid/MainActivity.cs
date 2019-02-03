@@ -20,7 +20,7 @@ namespace TransportControl.Droid
             Forms.Init(this, bundle);
 
             Xamarin.FormsGoogleMaps.Init(this, bundle);
-            UserDialogs.Init(this);
+            UserDialogs.Init(() => (Activity)Forms.Context);
             ImageCircleRenderer.Init();
 
             LoadApplication(new App());

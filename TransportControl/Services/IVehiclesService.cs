@@ -7,5 +7,7 @@ namespace TransportControl.Services
     public interface IVehiclesService
     {
         IObservable<List<Vehicle>> FetchVehicles(int type, string line = null);
+        IObservable<List<Line>> LoadLines();
+        IObservable<List<Line>> LoadLinesWithSymbols(IEnumerable<string> symbols);
     }
 }

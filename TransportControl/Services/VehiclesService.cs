@@ -1,10 +1,11 @@
-﻿using Refit;
+﻿using Newtonsoft.Json.Linq;
+using Refit;
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
+using System.IO;
+using System.Linq;
 using System.Reactive.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Reflection;
 using TransportControl.Api;
 using TransportControl.Models;
 
@@ -14,39 +15,32 @@ namespace TransportControl.Services
     {
         private const string apiBaseAddress = "https://api.um.warszawa.pl/api/action";
 
-        private IVehiclesApiClient client;
-
-        public VehiclesService()
-        {
-#if DEBUG
-            var debugHandler = new DebugDelegatingHandler(new HttpClientHandler());
-            var httpClient = new HttpClient(debugHandler)
-            {
-                BaseAddress = new Uri(apiBaseAddress)
-            };
-            client = RestService.For<IVehiclesApiClient>(httpClient);
-#else
-                client = RestService.For<IApiClient>(apiBaseAddress);
-#endif
-        }
+        private IVehiclesApiClient client = RestService.For<IVehiclesApiClient>(apiBaseAddress);
 
         public IObservable<List<Vehicle>> FetchVehicles(int type, string line = null)
         {
-            if (line == null)
-            {
-                return client.FetchAllVehiclesOfType(type).Select(response => response.Result);
-            }
-            else
-            {
-                return client.FetchAllVehiclesOfTypeAndLine(type, line).Select(response => response.Result);
-            }
+            if (line == null) return client.FetchAllVehiclesOfType(type).Select(response => response.Result);
+            else return client.FetchAllVehiclesOfTypeAndLine(type, line).Select(response => response.Result);
         }
-    }
 
-    internal class DebugDelegatingHandler : DelegatingHandler
-    {
-        public DebugDelegatingHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
+        public IObservable<List<Line>> LoadLines()
+        {
+            var assembly = IntrospectionExtensions.GetTypeInfo(typeof(App)).Assembly;
+            var stream = assembly.GetManifestResourceStream("TransportControl.Resources.lines.json");
+            return Observable.Return(JArray.Parse(new StreamReader(stream).ReadToEnd()).Select(jsonLine => new Line
+            {
+                Symbol = jsonLine.Value<string>("Symbol"),
+                Dest1 = jsonLine.Value<string>("Dest1"),
+                Dest2 = jsonLine.Value<string>("Dest2")
+            }).ToList());
+        }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) => base.SendAsync(request, cancellationToken);
+        public IObservable<List<Line>> LoadLinesWithSymbols(IEnumerable<string> symbols)
+        {
+            return LoadLines().SelectMany(lines => lines.ToObservable())
+                .Where(line => symbols.Contains(line.Symbol))
+                .ToList()
+                .Select(lines => lines.ToList());
+        }
     }
 }

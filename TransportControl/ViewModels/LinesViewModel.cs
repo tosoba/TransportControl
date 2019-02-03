@@ -12,13 +12,21 @@ using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using Splat;
 using Plugin.Connectivity;
+using Acr.UserDialogs;
+using Xamarin.Forms;
 
 namespace TransportControl.ViewModels
 {
     public class LinesViewModel : BaseViewModel, IVehiclesLoadedHandler
     {
         private List<Line> AllLines { get; set; }
-        public ObservableCollection<GroupedObservableCollection<string, Line>> LinesGrouped { get; set; }
+
+        private ObservableCollection<GroupedObservableCollection<string, Line>> linesGrouped;
+        public ObservableCollection<GroupedObservableCollection<string, Line>> LinesGrouped
+        {
+            get { return linesGrouped; }
+            set { this.RaiseAndSetIfChanged(ref linesGrouped, value); }
+        }
 
         private Line selectedLine;
         public Line SelectedLine
@@ -32,6 +40,13 @@ namespace TransportControl.ViewModels
         {
             get { return searchInput; }
             set { this.RaiseAndSetIfChanged(ref searchInput, value); }
+        }
+
+        private bool loadingVehiclesInProgress = false;
+        public bool LoadingVehiclesInProgress
+        {
+            get { return loadingVehiclesInProgress; }
+            set { this.RaiseAndSetIfChanged(ref loadingVehiclesInProgress, value); }
         }
 
         public int LineCount => AllLines.Count;
@@ -54,10 +69,6 @@ namespace TransportControl.ViewModels
             this.taskPoolScheduler = taskPoolScheduler ?? RxApp.TaskpoolScheduler;
             this.vehiclesSevice = vehiclesSevice ?? Locator.Current.GetService<IVehiclesService>();
 
-            //TODO: load lines off the main thread with a task or observable 
-            AllLines = LinesLoader.Load();
-            GroupLines(AllLines);
-
             this.WhenActivated(disposables =>
             {
                 this.WhenAnyValue(vm => vm.SelectedLine)
@@ -66,8 +77,17 @@ namespace TransportControl.ViewModels
                     {
                         if (!CrossConnectivity.Current.IsConnected)
                         {
-                            //TODO: show a dialog or smth
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                UserDialogs.Instance.Toast("Unable to load vehicles' data - no internet connection.");
+                                SelectedLine = null;
+                            });
                         }
+                    })
+                    .Where(_ => CrossConnectivity.Current.IsConnected)
+                    .Do(_ =>
+                    {
+                        LoadingVehiclesInProgress = true;
                     })
                     .SelectMany(line => this.vehiclesSevice.FetchVehicles(line.Type, line.Symbol)
                         .Select(vehicles => new VehiclesLoadedEventArgs(vehicles, new List<Line> { line }))
@@ -77,9 +97,10 @@ namespace TransportControl.ViewModels
                     .Subscribe(
                         onNext: args =>
                         {
+                            LoadingVehiclesInProgress = false;
                             if (args.Vehicles == null || !args.Vehicles.Any())
                             {
-                                //TODO: show a dialog or smth
+                                OnVehiclesDataLoadingFailure();
                             }
                             else
                             {
@@ -89,16 +110,40 @@ namespace TransportControl.ViewModels
                         },
                         onError: error =>
                         {
-                            //TODO: show a dialog or smth
+                            LoadingVehiclesInProgress = false;
+                            OnVehiclesDataLoadingFailure();
                         })
                     .DisposeWith(disposables);
 
                 this.WhenAnyValue(vm => vm.SearchInput)
-                    .Where(input => !string.IsNullOrEmpty(input))
+                    .Where(input => input != null)
                     .DistinctUntilChanged()
                     .Subscribe(input =>
                     {
                         FilterLines(input);
+                    })
+                    .DisposeWith(disposables);
+
+                this.vehiclesSevice.LoadLines()
+                    .SubscribeOn(this.taskPoolScheduler)
+                    .ObserveOn(this.mainThreadScheduler)
+                    .Subscribe(lines =>
+                    {
+                        AllLines = lines;
+                        GroupLines(AllLines);
+                    })
+                    .DisposeWith(disposables);
+
+                this.WhenAnyValue(vm => vm.LoadingVehiclesInProgress)
+                    .Skip(1)
+                    .DistinctUntilChanged()
+                    .SubscribeOn(this.mainThreadScheduler)
+                    .ObserveOn(this.mainThreadScheduler)
+                    .Subscribe(isLoading =>
+                    {
+                        //TODO: this is not working - maybe use another lib or smth...
+                        if (isLoading) UserDialogs.Instance.Loading("Loading vehicles' data in progress...").Show();
+                        else UserDialogs.Instance.HideLoading();
                     })
                     .DisposeWith(disposables);
             });
@@ -106,12 +151,9 @@ namespace TransportControl.ViewModels
 
         public Line FindBy(string symbol) => AllLines.Where(l => l.Symbol == symbol).FirstOrDefault();
 
-        //TODO: fix filtering with searchbar
         private void FilterLines(string filter)
         {
-            if (filter == null)
-                return;
-            else if (!filter.Any())
+            if (!filter.Trim().Any())
                 GroupLines(AllLines);
             else
             {
@@ -140,6 +182,11 @@ namespace TransportControl.ViewModels
 
                 LinesGrouped = new ObservableCollection<GroupedObservableCollection<string, Line>>(first.Concat(rest));
             }
+        }
+
+        private void OnVehiclesDataLoadingFailure()
+        {
+            UserDialogs.Instance.Toast("Unable to load vehicles' data.");
         }
     }
 }
