@@ -43,17 +43,17 @@ namespace TransportControl.ViewModels
                    .ObserveOn(this.mainThreadScheduler)
                    .Subscribe(isLoading =>
                    {
-                        //TODO: it actually works - delete and clone repo again 
-                        if (isLoading) UserDialogs.Instance.ShowLoading("Loading vehicles' data...");
+                       //TODO: it actually works - delete and clone repo again 
+                       if (isLoading) UserDialogs.Instance.ShowLoading("Loading vehicles' data...");
                        else UserDialogs.Instance.HideLoading();
                    })
                    .DisposeWith(disposables);
             });
         }
 
-        protected void OnVehiclesDataLoadingFailure()
+        protected void OnVehiclesDataLoadingFailure(string message = null)
         {
-            UserDialogs.Instance.Toast("Unable to load vehicles' data.");
+            UserDialogs.Instance.Toast(message ?? "Unable to load vehicles' data.");
         }
     }
 }

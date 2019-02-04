@@ -48,6 +48,8 @@ namespace TransportControl.ViewModels
 
         public event EventHandler<VehiclesLoadedEventArgs> OnVehiclesLoaded;
 
+        private PermissionStatus locationPermissionStatus = PermissionStatus.Unknown;
+
         public RadiusViewModel(
             IScheduler mainThreadScheduler = null,
             IScheduler taskPoolScheduler = null,
@@ -57,6 +59,15 @@ namespace TransportControl.ViewModels
         {
             this.WhenActivated(disposables =>
             {
+                SelectedDistance = null;
+
+                this.WhenAnyValue(vm => vm.SelectedDistance)
+                    .Subscribe(sd =>
+                    {
+
+                    })
+                    .DisposeWith(disposables);
+
                 this.WhenAnyValue(vm => vm.SelectedDistance)
                     .Where(distance => distance != null)
                     .Do(_ =>
@@ -124,7 +135,6 @@ namespace TransportControl.ViewModels
                     {
                         if (!CrossGeolocator.Current.IsGeolocationEnabled)
                         {
-                            //TODO: when this appears it looks like observable is disposed for some reason
                             Device.BeginInvokeOnMainThread(() =>
                             {
                                 SelectedDistance = null;
@@ -137,16 +147,16 @@ namespace TransportControl.ViewModels
                     .ObserveOn(this.taskPoolScheduler)
                     .Do(_ => { RetrievingLocationInProgress = true; })
                     .SelectMany(tuple => CrossGeolocator.Current.GetLastKnownLocationAsync()
-                                .ToObservable()
-                                .SelectMany(lastKnownLocation =>
-                                {
-                                    if (lastKnownLocation == null) return CrossGeolocator.Current.GetPositionAsync(TimeSpan.FromSeconds(15), null, true).ToObservable();
-                                    else return Observable.Return(lastKnownLocation);
-                                })
-                                .Zip(
-                                    second: Observable.Return(tuple.Item1),
-                                    resultSelector: (location, distance) => new Tuple<Distance, Position>(distance, location)
-                                )
+                        .ToObservable()
+                        .SelectMany(lastKnownLocation =>
+                        {
+                            if (lastKnownLocation == null) return CrossGeolocator.Current.GetPositionAsync(TimeSpan.FromSeconds(15), null, true).ToObservable();
+                            else return Observable.Return(lastKnownLocation);
+                        })
+                        .Zip(
+                            second: Observable.Return(tuple.Item1),
+                            resultSelector: (location, distance) => new Tuple<Distance, Position>(distance, location)
+                        )
                     )
                     .Do(tuple =>
                     {
@@ -160,24 +170,24 @@ namespace TransportControl.ViewModels
                     .Where(tuple => tuple.Item2 != null)
                     .Do(_ => { LoadingVehiclesInProgress = true; })
                     .SelectMany(tuple => this.vehiclesSevice.FetchVehicles(1)
+                        .Zip(
+                            second: this.vehiclesSevice.FetchVehicles(2),
+                            resultSelector: (buses, trams) => buses.Concat(trams)
+                        )
+                        .SelectMany(vehicles => vehicles.ToObservable())
+                        .Where(vehicle => Coordinates.FromPosition(tuple.Item2).DistanceTo(Coordinates.FromPosition(new Position()
+                        {
+                            Latitude = vehicle.LatDbl,
+                            Longitude = vehicle.LonDbl
+                        }), UnitOfLength.Meters) <= tuple.Item1.Value)
+                        .ToList()
+                        .Select(vehicles => vehicles.ToList())
+                        .SelectMany(vehicles => Observable.Return(vehicles)
                             .Zip(
-                                second: this.vehiclesSevice.FetchVehicles(2),
-                                resultSelector: (buses, trams) => buses.Concat(trams)
+                                second: this.vehiclesSevice.LoadLinesWithSymbols(vehicles.Select(v => v.Number)),
+                                resultSelector: (_, lines) => new VehiclesLoadedEventArgs(vehicles, lines)
                             )
-                            .SelectMany(vehicles => vehicles.ToObservable())
-                            .Where(vehicle => Coordinates.FromPosition(tuple.Item2).DistanceTo(Coordinates.FromPosition(new Position()
-                            {
-                                Latitude = vehicle.LatDbl,
-                                Longitude = vehicle.LonDbl
-                            }), UnitOfLength.Meters) <= tuple.Item1.Value)
-                            .ToList()
-                            .Select(vehicles => vehicles.ToList())
-                            .SelectMany(vehicles => Observable.Return(vehicles)
-                                .Zip(
-                                    second: this.vehiclesSevice.LoadLinesWithSymbols(vehicles.Select(v => v.Number)),
-                                    resultSelector: (_, lines) => new VehiclesLoadedEventArgs(vehicles, lines)
-                                )
-                            )
+                        )
                     )
                     .ObserveOn(this.mainThreadScheduler)
                     .Do(_ => { LoadingVehiclesInProgress = false; })
@@ -199,6 +209,10 @@ namespace TransportControl.ViewModels
                         {
                             SelectedDistance = null;
                             OnVehiclesDataLoadingFailure();
+                        },
+                        //TODO: for some reason it completes - and it's most likely not because of toast or permission check...
+                        onCompleted: () =>
+                        {
                         })
                     .DisposeWith(disposables);
 

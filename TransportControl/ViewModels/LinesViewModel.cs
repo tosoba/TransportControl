@@ -55,6 +55,8 @@ namespace TransportControl.ViewModels
         {
             this.WhenActivated(disposables =>
             {
+                SelectedLine = null;
+
                 this.WhenAnyValue(vm => vm.SelectedLine)
                     .Where(line => line != null)
                     .Do(_ =>
@@ -79,10 +81,9 @@ namespace TransportControl.ViewModels
                     .Subscribe(
                         onNext: args =>
                         {
-                            //TODO: loading does not work when retrying to load after connecting to internet...
                             if (args.Vehicles == null || !args.Vehicles.Any())
                             {
-                                OnVehiclesDataLoadingFailure();
+                                OnVehiclesDataLoadingFailure("API returned no results.");
                             }
                             else
                             {
@@ -92,7 +93,6 @@ namespace TransportControl.ViewModels
                         },
                         onError: error =>
                         {
-                            //TODO: loading does not work when retrying to load after connecting to internet...
                             OnVehiclesDataLoadingFailure();
                         })
                     .DisposeWith(disposables);
