@@ -10,14 +10,14 @@ using System.Reactive.Linq;
 using TransportControl.Services;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
-using Splat;
 using Plugin.Connectivity;
 using Acr.UserDialogs;
 using Xamarin.Forms;
+using MoreLinq;
 
 namespace TransportControl.ViewModels
 {
-    public class LinesViewModel : BaseViewModel, IVehiclesLoadedHandler
+    public class LinesViewModel : BaseVehicleLoadingViewModel, IVehiclesLoadedHandler
     {
         private List<Line> AllLines { get; set; }
 
@@ -42,33 +42,17 @@ namespace TransportControl.ViewModels
             set { this.RaiseAndSetIfChanged(ref searchInput, value); }
         }
 
-        private bool loadingVehiclesInProgress = false;
-        public bool LoadingVehiclesInProgress
-        {
-            get { return loadingVehiclesInProgress; }
-            set { this.RaiseAndSetIfChanged(ref loadingVehiclesInProgress, value); }
-        }
-
         public int LineCount => AllLines.Count;
 
         public event EventHandler<VehiclesLoadedEventArgs> OnVehiclesLoaded;
-
-        private IVehiclesService vehiclesSevice;
-
-        private IScheduler mainThreadScheduler;
-        private IScheduler taskPoolScheduler;
 
         public LinesViewModel(
             IScheduler mainThreadScheduler = null,
             IScheduler taskPoolScheduler = null,
             IVehiclesService vehiclesSevice = null,
             IScreen hostScreen = null
-        ) : base(hostScreen)
+        ) : base(mainThreadScheduler, taskPoolScheduler, vehiclesSevice, hostScreen)
         {
-            this.mainThreadScheduler = mainThreadScheduler ?? RxApp.MainThreadScheduler;
-            this.taskPoolScheduler = taskPoolScheduler ?? RxApp.TaskpoolScheduler;
-            this.vehiclesSevice = vehiclesSevice ?? Locator.Current.GetService<IVehiclesService>();
-
             this.WhenActivated(disposables =>
             {
                 this.WhenAnyValue(vm => vm.SelectedLine)
@@ -85,19 +69,17 @@ namespace TransportControl.ViewModels
                         }
                     })
                     .Where(_ => CrossConnectivity.Current.IsConnected)
-                    .Do(_ =>
-                    {
-                        LoadingVehiclesInProgress = true;
-                    })
+                    .Do(_ => { LoadingVehiclesInProgress = true; })
                     .SelectMany(line => this.vehiclesSevice.FetchVehicles(line.Type, line.Symbol)
                         .Select(vehicles => new VehiclesLoadedEventArgs(vehicles, new List<Line> { line }))
                     )
                     .SubscribeOn(this.taskPoolScheduler)
                     .ObserveOn(this.mainThreadScheduler)
+                    .Do(_ => { LoadingVehiclesInProgress = false; })
                     .Subscribe(
                         onNext: args =>
                         {
-                            LoadingVehiclesInProgress = false;
+                            //TODO: loading does not work when retrying to load after connecting to internet...
                             if (args.Vehicles == null || !args.Vehicles.Any())
                             {
                                 OnVehiclesDataLoadingFailure();
@@ -110,7 +92,7 @@ namespace TransportControl.ViewModels
                         },
                         onError: error =>
                         {
-                            LoadingVehiclesInProgress = false;
+                            //TODO: loading does not work when retrying to load after connecting to internet...
                             OnVehiclesDataLoadingFailure();
                         })
                     .DisposeWith(disposables);
@@ -133,19 +115,6 @@ namespace TransportControl.ViewModels
                         GroupLines(AllLines);
                     })
                     .DisposeWith(disposables);
-
-                this.WhenAnyValue(vm => vm.LoadingVehiclesInProgress)
-                    .Skip(1)
-                    .DistinctUntilChanged()
-                    .SubscribeOn(this.mainThreadScheduler)
-                    .ObserveOn(this.mainThreadScheduler)
-                    .Subscribe(isLoading =>
-                    {
-                        //TODO: this is not working - maybe use another lib or smth...
-                        if (isLoading) UserDialogs.Instance.Loading("Loading vehicles' data in progress...").Show();
-                        else UserDialogs.Instance.HideLoading();
-                    })
-                    .DisposeWith(disposables);
             });
         }
 
@@ -157,8 +126,7 @@ namespace TransportControl.ViewModels
                 GroupLines(AllLines);
             else
             {
-                var filteredLines = AllLines.Where(l => l.Symbol.ToLower().Contains(filter.ToLower()))
-                    .ToList();
+                var filteredLines = AllLines.Where(l => l.Symbol.ToLower().Contains(filter.ToLower())).ToList();
                 GroupLines(filteredLines);
             }
         }
@@ -166,27 +134,19 @@ namespace TransportControl.ViewModels
         private void GroupLines(List<Line> lines)
         {
             LinesGrouped?.Clear();
-
-            var sorted = lines.OrderBy(l => l.Symbol)
-                .GroupBy(l => l.SymbolSort)
-                .Select(lg => new GroupedObservableCollection<string, Line>(lg.Key, lg));
-
-            if (!sorted.Any()) LinesGrouped = new ObservableCollection<GroupedObservableCollection<string, Line>>();
+            var groups = lines.GroupBy(l => l.GroupSymbol)
+                 .Select(lg => new GroupedObservableCollection<string, Line>(lg.Key, lg));
+            if (!groups.Any())
+                LinesGrouped = new ObservableCollection<GroupedObservableCollection<string, Line>>();
             else
             {
-                var first = sorted.First()
-                    .OrderBy(l => int.Parse(l.Symbol))
-                    .GroupBy(l => l.SymbolSort)
-                    .Select(g => new GroupedObservableCollection<string, Line>(g.Key, g));
-                var rest = sorted.Skip(1);
-
-                LinesGrouped = new ObservableCollection<GroupedObservableCollection<string, Line>>(first.Concat(rest));
+                var dividedGroups = groups.Partition(lg => lg.Key.All(char.IsDigit)).ToTuple();
+                var numberOnlyLines = dividedGroups.Item1
+                    .Select(lg => new GroupedObservableCollection<string, Line>(lg.Key, lg.OrderBy(l => int.Parse(l.Symbol))));
+                var linesContainingLetters = dividedGroups.Item2
+                    .Select(lg => new GroupedObservableCollection<string, Line>(lg.Key, lg.OrderBy(l => l.Symbol)));
+                LinesGrouped = new ObservableCollection<GroupedObservableCollection<string, Line>>(numberOnlyLines.Concat(linesContainingLetters));
             }
-        }
-
-        private void OnVehiclesDataLoadingFailure()
-        {
-            UserDialogs.Instance.Toast("Unable to load vehicles' data.");
         }
     }
 }

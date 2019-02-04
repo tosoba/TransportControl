@@ -45,14 +45,14 @@ namespace TransportControl
         public static UnitOfLength NauticalMiles = new UnitOfLength(0.8684);
         public static UnitOfLength Miles = new UnitOfLength(1);
 
-        private readonly double _fromMilesFactor;
+        private readonly double fromMilesFactor;
 
         private UnitOfLength(double fromMilesFactor)
         {
-            _fromMilesFactor = fromMilesFactor;
+            this.fromMilesFactor = fromMilesFactor;
         }
 
-        public double ConvertFromMiles(double input) => input * _fromMilesFactor;
+        public double ConvertFromMiles(double input) => input * fromMilesFactor;
     }
 
 }

@@ -8,7 +8,7 @@ namespace TransportControl.Models
         public string Dest1 { get; set; }
         public string Dest2 { get; set; }
 
-        public string SymbolSort
+        public string GroupSymbol
         {
             get
             {

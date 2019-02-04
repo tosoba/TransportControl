@@ -7,8 +7,7 @@
     xmlns:ui="clr-namespace:TransportControl.Views"
     xmlns:converters="clr-namespace:TransportControl.Converters"
     xmlns:vm="clr-namespace:TransportControl.ViewModels"
-    x:TypeArguments="vm:MapViewModel"
-    Title="Transport Control">
+    x:TypeArguments="vm:MapViewModel">
     <ContentPage.Resources>
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
     </ContentPage.Resources>

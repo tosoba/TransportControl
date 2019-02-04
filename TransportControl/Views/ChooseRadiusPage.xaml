@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="TransportControl.ChooseRadiusPage"
              xmlns:ui="clr-namespace:TransportControl.Views"
-             Title="Choose radius"
              xmlns:vm="clr-namespace:TransportControl.ViewModels"
              x:TypeArguments="vm:RadiusViewModel">
     <ContentPage.Content>

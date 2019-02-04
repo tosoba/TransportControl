@@ -6,8 +6,7 @@
     xmlns:design="clr-namespace:TransportControl;assembly=TransportControl"
     xmlns:ui="clr-namespace:TransportControl.Views"
     xmlns:vm="clr-namespace:TransportControl.ViewModels"
-    x:TypeArguments="vm:LinesViewModel"
-    Title="Lines">
+    x:TypeArguments="vm:LinesViewModel">
     <ContentPage.Content>
         <StackLayout>
             <SearchBar x:Name="LineSearchBar" 
@@ -88,12 +87,12 @@
                                 <Label Grid.Column="1"
                                        Grid.Row="1"
                                        VerticalOptions="Center"
-                                       Text="{Binding Dest1, StringFormat='From: {0:N}'}"
+                                       Text="{Binding Dest1}"
                                        FontSize="14"/>
                                 <Label Grid.Column="1"
                                        Grid.Row="2"
                                        VerticalOptions="Center"
-                                       Text="{Binding Dest2, StringFormat='To: {0:N}'}"
+                                       Text="{Binding Dest2}"
                                        FontSize="14"/>
                             </Grid>
                         </ViewCell>

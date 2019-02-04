@@ -9,7 +9,6 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using TransportControl.Events;
-using TransportControl.MapPin;
 using TransportControl.Models;
 using TransportControl.Services;
 using Xamarin.Forms;

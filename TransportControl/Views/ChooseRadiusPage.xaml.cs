@@ -15,6 +15,8 @@ namespace TransportControl
 
             this.WhenActivated(disposables =>
             {
+                Title = "Search radius";
+
                 this.Bind(ViewModel, vm => vm.SelectedDistance, view => view.DistancesListView.SelectedItem)
                    .DisposeWith(disposables);
             });

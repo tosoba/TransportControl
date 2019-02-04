@@ -19,14 +19,13 @@ namespace TransportControl
         {
             InitializeComponent();
 
-            //TODO: for some reason setting toolbar title is not working both in xaml in code...
-            //Title = "Transport Control";
-
             map.InitialCameraUpdate = CameraUpdateFactory.NewPositionZoom(warsawCenterPosition, initialZoom);
             map.CameraIdled += OnMapCameraIdled;
 
             this.WhenActivated(disposables =>
             {
+                Title = "Transport Control";
+
                 disposables(this.BindCommand(ViewModel, vm => vm.GoToLines, view => view.ShowLinesBtn));
                 disposables(this.BindCommand(ViewModel, vm => vm.GoToRadius, view => view.ShowRadiusBtn));
                 disposables(this.BindCommand(ViewModel, vm => vm.ClearMap, view => view.ClearMapBtn));

@@ -5,7 +5,6 @@ using Plugin.Geolocator.Abstractions;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using ReactiveUI;
-using Splat;
 using System;
 using System.Linq;
 using System.Collections.ObjectModel;
@@ -20,7 +19,7 @@ using Xamarin.Forms;
 
 namespace TransportControl.ViewModels
 {
-    public class RadiusViewModel : BaseViewModel, IVehiclesLoadedHandler
+    public class RadiusViewModel : BaseVehicleLoadingViewModel, IVehiclesLoadedHandler
     {
         public ObservableCollection<Distance> Distances { get; set; } = new ObservableCollection<Distance>
         {
@@ -40,28 +39,24 @@ namespace TransportControl.ViewModels
             get { return selectedDistance; }
         }
 
+        private bool retrievingLocationInProgress = false;
+        protected bool RetrievingLocationInProgress
+        {
+            get { return retrievingLocationInProgress; }
+            set { this.RaiseAndSetIfChanged(ref retrievingLocationInProgress, value); }
+        }
+
         public event EventHandler<VehiclesLoadedEventArgs> OnVehiclesLoaded;
-
-        private IVehiclesService vehiclesSevice;
-
-        private IScheduler mainThreadScheduler;
-        private IScheduler taskPoolScheduler;
 
         public RadiusViewModel(
             IScheduler mainThreadScheduler = null,
             IScheduler taskPoolScheduler = null,
             IVehiclesService vehiclesSevice = null,
             IScreen hostScreen = null
-        ) : base(hostScreen)
+        ) : base(mainThreadScheduler, taskPoolScheduler, vehiclesSevice, hostScreen)
         {
-            //TODO: move this to an abstract base viewmodel class BaseVehicleLoadingViewModel
-            this.mainThreadScheduler = mainThreadScheduler ?? RxApp.MainThreadScheduler;
-            this.taskPoolScheduler = taskPoolScheduler ?? RxApp.TaskpoolScheduler;
-            this.vehiclesSevice = vehiclesSevice ?? Locator.Current.GetService<IVehiclesService>();
-
             this.WhenActivated(disposables =>
             {
-                //TODO: progress dialogs when loading...
                 this.WhenAnyValue(vm => vm.SelectedDistance)
                     .Where(distance => distance != null)
                     .Do(_ =>
@@ -83,7 +78,13 @@ namespace TransportControl.ViewModels
                     .Do(async (tuple) =>
                     {
                         if (tuple.Item2 != PermissionStatus.Granted && await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Location))
-                            Dialogs.ShowAlertDialog("Location", "Need permissions to access device location.");
+                        {
+                            UserDialogs.Instance.Alert(new AlertConfig()
+                            {
+                                Title = "Location",
+                                Message = "Need permissions to access device location."
+                            });
+                        }
                     })
                     .SelectMany(tuple =>
                     {
@@ -114,7 +115,7 @@ namespace TransportControl.ViewModels
                     {
                         if (!CrossGeolocator.IsSupported || !CrossGeolocator.Current.IsGeolocationAvailable)
                         {
-                            Dialogs.ShowAlertDialog("Error retrieving location.", "Device does not support geolocation.");
+                            UserDialogs.Instance.Toast("Error retrieving location - device does not support geolocation.");
                             SelectedDistance = null;
                         }
                     })
@@ -123,13 +124,18 @@ namespace TransportControl.ViewModels
                     {
                         if (!CrossGeolocator.Current.IsGeolocationEnabled)
                         {
-                            Dialogs.ShowAlertDialog("Error retrieving location.", "Location is disabled.");
-                            SelectedDistance = null;
+                            //TODO: when this appears it looks like observable is disposed for some reason
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                SelectedDistance = null;
+                                UserDialogs.Instance.Toast("Error retrieving location - location is disabled.");
+                            });
                         }
                     })
                     .Where(_ => CrossGeolocator.Current.IsGeolocationEnabled)
                     .SubscribeOn(this.mainThreadScheduler)
                     .ObserveOn(this.taskPoolScheduler)
+                    .Do(_ => { RetrievingLocationInProgress = true; })
                     .SelectMany(tuple => CrossGeolocator.Current.GetLastKnownLocationAsync()
                                 .ToObservable()
                                 .SelectMany(lastKnownLocation =>
@@ -144,6 +150,7 @@ namespace TransportControl.ViewModels
                     )
                     .Do(tuple =>
                     {
+                        RetrievingLocationInProgress = false;
                         if (tuple.Item2 == null)
                         {
                             UserDialogs.Instance.Toast("Unable to retrieve device location.");
@@ -151,6 +158,7 @@ namespace TransportControl.ViewModels
                         }
                     })
                     .Where(tuple => tuple.Item2 != null)
+                    .Do(_ => { LoadingVehiclesInProgress = true; })
                     .SelectMany(tuple => this.vehiclesSevice.FetchVehicles(1)
                             .Zip(
                                 second: this.vehiclesSevice.FetchVehicles(2),
@@ -172,12 +180,14 @@ namespace TransportControl.ViewModels
                             )
                     )
                     .ObserveOn(this.mainThreadScheduler)
+                    .Do(_ => { LoadingVehiclesInProgress = false; })
                     .Subscribe(
                         onNext: (args) =>
                         {
                             if (args.Vehicles == null || !args.Vehicles.Any())
                             {
-                                //TODO: OnVehiclesDataLoadingFailure();
+                                SelectedDistance = null;
+                                OnVehiclesDataLoadingFailure();
                             }
                             else
                             {
@@ -187,10 +197,22 @@ namespace TransportControl.ViewModels
                         },
                         onError: (error) =>
                         {
-                            //TODO:
-                            //LoadingVehiclesInProgress = false;
-                            //OnVehiclesDataLoadingFailure();
-                        });
+                            SelectedDistance = null;
+                            OnVehiclesDataLoadingFailure();
+                        })
+                    .DisposeWith(disposables);
+
+                this.WhenAnyValue(vm => vm.RetrievingLocationInProgress)
+                  .Skip(1)
+                  .DistinctUntilChanged()
+                  .SubscribeOn(this.mainThreadScheduler)
+                  .ObserveOn(this.mainThreadScheduler)
+                  .Subscribe(isLoading =>
+                  {
+                      if (isLoading) UserDialogs.Instance.ShowLoading("Retrieving device location...");
+                      else UserDialogs.Instance.HideLoading();
+                  })
+                  .DisposeWith(disposables);
             });
         }
     }

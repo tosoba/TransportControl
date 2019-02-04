@@ -1,7 +1,7 @@
 ﻿using Xamarin.Forms;
 using Xamarin.Forms.GoogleMaps;
 
-namespace TransportControl.MapPin
+namespace TransportControl
 {
     public static class PinExtensions
     {

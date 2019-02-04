@@ -16,6 +16,8 @@ namespace TransportControl
 
             this.WhenActivated(disposables =>
             {
+                Title = "Lines";
+
                 this.Bind(ViewModel, vm => vm.SelectedLine, view => view.LinesListView.SelectedItem)
                     .DisposeWith(disposables);
 
@@ -59,9 +61,7 @@ namespace TransportControl
                 .FirstOrDefault(group => group.Any(line => line.Symbol.StartsWith(text) && line.Symbol.Length > 2))
                 ?.FirstOrDefault();
             if (target != null)
-            {
                 LinesListView.ScrollTo(target, ScrollToPosition.Start, false);
-            }
         }
     }
 }
