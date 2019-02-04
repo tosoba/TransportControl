@@ -149,6 +149,7 @@ namespace TransportControl.ViewModels
                     .SelectMany(_ => trackedLines.ToObservable())
                     .SelectMany(line => vehiclesSevice.FetchVehicles(line.Type, line.Symbol))
                     .SubscribeOn(taskPoolScheduler)
+                    .OnErrorResumeNext(Observable.Return(new List<Vehicle>() { }))
                     .ObserveOn(mainThreadScheduler)
                     .Subscribe(
                         onNext: vehiclesOfLine =>
@@ -162,6 +163,7 @@ namespace TransportControl.ViewModels
                         },
                         onError: error =>
                         {
+                            
                         });
 
                 IsRunning = true;
