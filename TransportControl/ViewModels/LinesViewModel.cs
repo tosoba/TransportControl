@@ -83,7 +83,7 @@ namespace TransportControl.ViewModels
                         {
                             if (args.Vehicles == null || !args.Vehicles.Any())
                             {
-                                OnVehiclesDataLoadingFailure("API returned no results.");
+                                OnVehiclesDataLoadingFailure("No vehicles found within given radius.");
                             }
                             else
                             {

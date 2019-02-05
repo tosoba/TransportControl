@@ -43,7 +43,6 @@ namespace TransportControl.ViewModels
                    .ObserveOn(this.mainThreadScheduler)
                    .Subscribe(isLoading =>
                    {
-                       //TODO: it actually works - delete and clone repo again 
                        if (isLoading) UserDialogs.Instance.ShowLoading("Loading vehicles' data...");
                        else UserDialogs.Instance.HideLoading();
                    })

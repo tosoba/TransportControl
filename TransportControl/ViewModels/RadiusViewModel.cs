@@ -172,8 +172,8 @@ namespace TransportControl.ViewModels
                     RetrievingLocationInProgress = false;
                     if (tuple.Item2 == null)
                     {
-                        UserDialogs.Instance.Toast("Unable to retrieve device location.");
                         SelectedDistance = null;
+                        UserDialogs.Instance.Toast("Unable to retrieve device location."); 
                     }
                 })
                 .Where(tuple => tuple.Item2 != null)
@@ -206,7 +206,7 @@ namespace TransportControl.ViewModels
                         if (args.Vehicles == null || !args.Vehicles.Any())
                         {
                             SelectedDistance = null;
-                            OnVehiclesDataLoadingFailure();
+                            OnVehiclesDataLoadingFailure("No vehicles found within given radius.");
                         }
                         else
                         {
@@ -219,7 +219,6 @@ namespace TransportControl.ViewModels
                         SelectedDistance = null;
                         OnVehiclesDataLoadingFailure();
                     },
-                    //TODO: it's a workaround - maybe simplify this somehow...
                     onCompleted: () =>
                     {
                         SetupRadiusList(disposables);
