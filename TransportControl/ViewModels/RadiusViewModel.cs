@@ -151,23 +151,7 @@ namespace TransportControl.ViewModels
         {
             LoadingVehiclesInProgress = true;
 
-            //TODO: move this to vehiclesService
-            var args = await vehiclesSevice.FetchVehicles(1)
-                .Zip(
-                    second: vehiclesSevice.FetchVehicles(2),
-                    resultSelector: (buses, trams) => buses.Concat(trams)
-                )
-                .SelectMany(vehicles => vehicles.ToObservable())
-                .Where(vehicle => Coordinates.FromPosition(userLocation).DistanceTo(
-                    targetCoordinates: Coordinates.FromPosition(new Position()
-                    {
-                        Latitude = vehicle.LatDbl,
-                        Longitude = vehicle.LonDbl
-                    }),
-                    unitOfLength: UnitOfLength.Meters
-                ) <= distance.Value)
-                .ToList()
-                .Select(vehicles => vehicles.ToList())
+            var args = await vehiclesSevice.FetchNearbyVehicles(distance, userLocation)
                 .SelectMany(vehicles => Observable.Return(vehicles)
                     .Zip(
                         second: vehiclesSevice.LoadLinesWithSymbols(vehicles.Select(v => v.Number)),

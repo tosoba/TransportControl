@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using Plugin.Geolocator.Abstractions;
 using Refit;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,23 @@ namespace TransportControl.Services
         private const string apiBaseAddress = "https://api.um.warszawa.pl/api/action";
 
         private IVehiclesApiClient client = RestService.For<IVehiclesApiClient>(apiBaseAddress);
+
+        public IObservable<List<Vehicle>> FetchNearbyVehicles(Distance distance, Position userLocation) => FetchVehicles(1)
+                .Zip(
+                    second: FetchVehicles(2),
+                    resultSelector: (buses, trams) => buses.Concat(trams)
+                )
+                .SelectMany(vehicles => vehicles.ToObservable())
+                .Where(vehicle => Coordinates.FromPosition(userLocation).DistanceTo(
+                    targetCoordinates: Coordinates.FromPosition(new Position()
+                    {
+                        Latitude = vehicle.LatDbl,
+                        Longitude = vehicle.LonDbl
+                    }),
+                    unitOfLength: UnitOfLength.Meters
+                ) <= distance.Value)
+                .ToList()
+                .Select(vehicles => vehicles.ToList());
 
         public IObservable<List<Vehicle>> FetchVehicles(int type, string line = null)
         {
