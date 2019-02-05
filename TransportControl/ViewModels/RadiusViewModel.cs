@@ -11,7 +11,6 @@ using System.Collections.ObjectModel;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using TransportControl.Events;
 using TransportControl.Models;
 using TransportControl.Services;
@@ -64,8 +63,6 @@ namespace TransportControl.ViewModels
                 this.WhenAnyValue(vm => vm.RetrievingLocationInProgress)
                   .Skip(1)
                   .DistinctUntilChanged()
-                  .SubscribeOn(this.mainThreadScheduler)
-                  .ObserveOn(this.mainThreadScheduler)
                   .Subscribe(isLoading =>
                   {
                       if (isLoading) UserDialogs.Instance.ShowLoading("Retrieving device location...");
@@ -79,14 +76,15 @@ namespace TransportControl.ViewModels
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            SelectedDistance = null;
                             if (!CrossConnectivity.Current.IsConnected)
                             {
+                                SelectedDistance = null;
                                 UserDialogs.Instance.Toast("Unable to load vehicles' data - no internet connection.");
                             }
                         });
                     })
                     .Where(_ => CrossConnectivity.Current.IsConnected)
+                    .Do(_ => { Device.BeginInvokeOnMainThread(() => { SelectedDistance = null; }); })
                     .Subscribe(
                         onNext: async distance =>
                         {
@@ -114,7 +112,7 @@ namespace TransportControl.ViewModels
                                 UserDialogs.Instance.Toast("Unable to retrieve device location.");
                                 return;
                             }
-                            
+
                             await LoadNearbyVehicles(distance, userLocation);
                         })
                     .DisposeWith(disposables);
