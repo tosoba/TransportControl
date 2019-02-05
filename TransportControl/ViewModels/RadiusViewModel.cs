@@ -16,6 +16,8 @@ using TransportControl.Events;
 using TransportControl.Models;
 using TransportControl.Services;
 using Xamarin.Forms;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace TransportControl.ViewModels
 {
@@ -59,8 +61,6 @@ namespace TransportControl.ViewModels
             {
                 SelectedDistance = null;
 
-                SetupRadiusList(disposables);
-
                 this.WhenAnyValue(vm => vm.RetrievingLocationInProgress)
                   .Skip(1)
                   .DistinctUntilChanged()
@@ -72,158 +72,126 @@ namespace TransportControl.ViewModels
                       else UserDialogs.Instance.HideLoading();
                   })
                   .DisposeWith(disposables);
+
+                this.WhenAnyValue(vm => vm.SelectedDistance)
+                    .Where(distance => distance != null)
+                    .Do(_ =>
+                    {
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            SelectedDistance = null;
+                            if (!CrossConnectivity.Current.IsConnected)
+                            {
+                                UserDialogs.Instance.Toast("Unable to load vehicles' data - no internet connection.");
+                            }
+                        });
+                    })
+                    .Where(_ => CrossConnectivity.Current.IsConnected)
+                    .Subscribe(
+                        onNext: async distance =>
+                        {
+                            if (!await IsLocationPermissionGranted())
+                            {
+                                UserDialogs.Instance.Toast("Unable to load vehicles' data - no permission to access device location.");
+                                return;
+                            }
+
+                            if (!CrossGeolocator.IsSupported || !CrossGeolocator.Current.IsGeolocationAvailable)
+                            {
+                                UserDialogs.Instance.Toast("Error retrieving location - device does not support geolocation.");
+                                return;
+                            }
+
+                            if (!CrossGeolocator.Current.IsGeolocationEnabled)
+                            {
+                                UserDialogs.Instance.Toast("Error retrieving location - location is disabled.");
+                                return;
+                            }
+
+                            var userLocation = await GetLastUserLocation();
+                            if (userLocation == null)
+                            {
+                                UserDialogs.Instance.Toast("Unable to retrieve device location.");
+                                return;
+                            }
+                            
+                            await LoadNearbyVehicles(distance, userLocation);
+                        })
+                    .DisposeWith(disposables);
             });
         }
 
-        private void SetupRadiusList(CompositeDisposable disposables)
+        private async Task<bool> IsLocationPermissionGranted()
         {
-            this.WhenAnyValue(vm => vm.SelectedDistance)
-                .Where(distance => distance != null)
-                .Do(_ =>
-                {
-                    if (!CrossConnectivity.Current.IsConnected)
-                    {
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            UserDialogs.Instance.Toast("Unable to load vehicles' data - no internet connection.");
-                            SelectedDistance = null;
-                        });
-                    }
-                })
-                .Where(_ => CrossConnectivity.Current.IsConnected)
+            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Location);
+            if (status == PermissionStatus.Granted)
+            {
+                return true;
+            }
+            else
+            {
+                var result = await CrossPermissions.Current.RequestPermissionsAsync(new[] { Permission.Location });
+                return result[Permission.Location] == PermissionStatus.Granted;
+            }
+        }
+
+        private async Task<Position> GetLastUserLocation()
+        {
+            RetrievingLocationInProgress = true;
+
+            var lastKnownLocation = await CrossGeolocator.Current.GetLastKnownLocationAsync();
+            if (lastKnownLocation == null)
+                lastKnownLocation = await CrossGeolocator.Current.GetPositionAsync(TimeSpan.FromSeconds(15), null, true);
+
+            RetrievingLocationInProgress = false;
+            return lastKnownLocation;
+        }
+
+        private async Task LoadNearbyVehicles(Distance distance, Position userLocation)
+        {
+            LoadingVehiclesInProgress = true;
+
+            //TODO: move this to vehiclesService
+            var args = await vehiclesSevice.FetchVehicles(1)
                 .Zip(
-                    second: CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Location).ToObservable(),
-                    resultSelector: (distance, permissionStatus) => new Tuple<Distance, PermissionStatus>(distance, permissionStatus)
+                    second: vehiclesSevice.FetchVehicles(2),
+                    resultSelector: (buses, trams) => buses.Concat(trams)
                 )
-                .Do(async (tuple) =>
-                {
-                    if (tuple.Item2 != PermissionStatus.Granted && await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Location))
-                    {
-                        UserDialogs.Instance.Alert(new AlertConfig()
-                        {
-                            Title = "Location",
-                            Message = "Need permissions to access device location."
-                        });
-                    }
-                })
-                .SelectMany(tuple =>
-                {
-                    if (tuple.Item2 != PermissionStatus.Granted)
-                    {
-                        return CrossPermissions.Current.RequestPermissionsAsync(new[] { Permission.Location })
-                            .ToObservable()
-                            .Zip(
-                                second: Observable.Return(tuple.Item1),
-                                resultSelector: (results, distance) => new Tuple<Distance, PermissionStatus>(distance, results[Permission.Location])
-                            );
-                    }
-                    else
-                    {
-                        return Observable.Return(tuple);
-                    }
-                })
-                .Do(tuple =>
-                {
-                    if (tuple.Item2 != PermissionStatus.Granted)
-                    {
-                        UserDialogs.Instance.Toast("Unable to load vehicles' data - no permission to access device location.");
-                        SelectedDistance = null;
-                    }
-                })
-                .Where(tuple => tuple.Item2 == PermissionStatus.Granted)
-                .Do(_ =>
-                {
-                    if (!CrossGeolocator.IsSupported || !CrossGeolocator.Current.IsGeolocationAvailable)
-                    {
-                        UserDialogs.Instance.Toast("Error retrieving location - device does not support geolocation.");
-                        SelectedDistance = null;
-                    }
-                })
-                .Where(_ => CrossGeolocator.IsSupported && CrossGeolocator.Current.IsGeolocationAvailable)
-                .Do(_ =>
-                {
-                    if (!CrossGeolocator.Current.IsGeolocationEnabled)
-                    {
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            SelectedDistance = null;
-                            UserDialogs.Instance.Toast("Error retrieving location - location is disabled.");
-                        });
-                    }
-                })
-                .Where(_ => CrossGeolocator.Current.IsGeolocationEnabled)
-                .SubscribeOn(mainThreadScheduler)
-                .ObserveOn(taskPoolScheduler)
-                .Do(_ => { RetrievingLocationInProgress = true; })
-                .SelectMany(tuple => CrossGeolocator.Current.GetLastKnownLocationAsync()
-                    .ToObservable()
-                    .SelectMany(lastKnownLocation =>
-                    {
-                        if (lastKnownLocation == null) return CrossGeolocator.Current.GetPositionAsync(TimeSpan.FromSeconds(15), null, true).ToObservable();
-                        else return Observable.Return(lastKnownLocation);
-                    })
-                    .Zip(
-                        second: Observable.Return(tuple.Item1),
-                        resultSelector: (location, distance) => new Tuple<Distance, Position>(distance, location)
-                    )
-                )
-                .Do(tuple =>
-                {
-                    RetrievingLocationInProgress = false;
-                    if (tuple.Item2 == null)
-                    {
-                        SelectedDistance = null;
-                        UserDialogs.Instance.Toast("Unable to retrieve device location."); 
-                    }
-                })
-                .Where(tuple => tuple.Item2 != null)
-                .Do(_ => { LoadingVehiclesInProgress = true; })
-                .SelectMany(tuple => vehiclesSevice.FetchVehicles(1)
-                    .Zip(
-                        second: vehiclesSevice.FetchVehicles(2),
-                        resultSelector: (buses, trams) => buses.Concat(trams)
-                    )
-                    .SelectMany(vehicles => vehicles.ToObservable())
-                    .Where(vehicle => Coordinates.FromPosition(tuple.Item2).DistanceTo(Coordinates.FromPosition(new Position()
+                .SelectMany(vehicles => vehicles.ToObservable())
+                .Where(vehicle => Coordinates.FromPosition(userLocation).DistanceTo(
+                    targetCoordinates: Coordinates.FromPosition(new Position()
                     {
                         Latitude = vehicle.LatDbl,
                         Longitude = vehicle.LonDbl
-                    }), UnitOfLength.Meters) <= tuple.Item1.Value)
-                    .ToList()
-                    .Select(vehicles => vehicles.ToList())
-                    .SelectMany(vehicles => Observable.Return(vehicles)
-                        .Zip(
-                            second: vehiclesSevice.LoadLinesWithSymbols(vehicles.Select(v => v.Number)),
-                            resultSelector: (_, lines) => new VehiclesLoadedEventArgs(vehicles, lines)
-                        )
+                    }),
+                    unitOfLength: UnitOfLength.Meters
+                ) <= distance.Value)
+                .ToList()
+                .Select(vehicles => vehicles.ToList())
+                .SelectMany(vehicles => Observable.Return(vehicles)
+                    .Zip(
+                        second: vehiclesSevice.LoadLinesWithSymbols(vehicles.Select(v => v.Number)),
+                        resultSelector: (_, lines) => new VehiclesLoadedEventArgs(vehicles, lines)
                     )
                 )
-                .ObserveOn(mainThreadScheduler)
-                .Do(_ => { LoadingVehiclesInProgress = false; })
-                .Subscribe(
-                    onNext: (args) =>
-                    {
-                        if (args.Vehicles == null || !args.Vehicles.Any())
-                        {
-                            SelectedDistance = null;
-                            OnVehiclesDataLoadingFailure("No vehicles found within given radius.");
-                        }
-                        else
-                        {
-                            OnVehiclesLoaded?.Invoke(this, args);
-                            NavigateBack().Subscribe().DisposeWith(disposables);
-                        }
-                    },
-                    onError: (error) =>
-                    {
-                        SelectedDistance = null;
-                        OnVehiclesDataLoadingFailure();
-                    },
-                    onCompleted: () =>
-                    {
-                        SetupRadiusList(disposables);
-                    })
-                .DisposeWith(disposables);
+                .OnErrorResumeNext(Observable.Return(new VehiclesLoadedEventArgs(new List<Vehicle>() { }, new List<Line>() { }, true)))
+                .FirstAsync();
+
+            LoadingVehiclesInProgress = false;
+
+            if (args.ErrorOccurred)
+            {
+                OnVehiclesDataLoadingFailure();
+            }
+            else if (args.Vehicles == null || !args.Vehicles.Any())
+            {
+                OnVehiclesDataLoadingFailure("No vehicles found within given radius.");
+            }
+            else
+            {
+                OnVehiclesLoaded?.Invoke(this, args);
+                NavigateBack().Subscribe();
+            }
         }
     }
 }

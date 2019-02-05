@@ -13,11 +13,13 @@ namespace TransportControl.Events
     {
         public List<Vehicle> Vehicles { get; }
         public List<Line> Lines { get; }
+        public bool ErrorOccurred { get; }
 
-        public VehiclesLoadedEventArgs(List<Vehicle> vehicles, List<Line> lines)
+        public VehiclesLoadedEventArgs(List<Vehicle> vehicles, List<Line> lines, bool errorOccurred = false)
         {
             Vehicles = vehicles;
             Lines = lines;
+            ErrorOccurred = errorOccurred;
         }
     }
 }
