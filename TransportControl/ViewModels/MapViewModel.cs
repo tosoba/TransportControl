@@ -29,7 +29,6 @@ namespace TransportControl.ViewModels
             private set { this.RaiseAndSetIfChanged(ref isConnected, value); }
         }
 
-
         public event EventHandler<BoundsCalculatedEventArgs> OnBoundsCalculated;
         public event EventHandler<VehicleTrackingStartedEventArgs> OnVehicleTrackingStarted;
         public event EventHandler<VehiclesTrackingStoppedEventArgs> OnVehiclesTrackingStopped;
@@ -39,21 +38,7 @@ namespace TransportControl.ViewModels
 
         private IDisposable updatesDisposable;
 
-        private bool isRunning = false;
-        public bool IsRunning
-        {
-            get => isRunning;
-            set
-            {
-                isRunning = value;
-                if (isRunning == false)
-                {
-                    trackedVehicles.Clear();
-                    trackedLines.Clear();
-                    OnVehiclesTrackingStopped?.Invoke(this, new VehiclesTrackingStoppedEventArgs());
-                }
-            }
-        }
+        public bool IsRunning { get; set; } = false;
 
         private IVehiclesService vehiclesSevice;
 
@@ -66,7 +51,13 @@ namespace TransportControl.ViewModels
             this.taskPoolScheduler = taskPoolScheduler ?? RxApp.TaskpoolScheduler;
             vehiclesSevice = new VehiclesService();
 
-            ClearMap = new Command(() => { IsRunning = false; });
+            ClearMap = new Command(() =>
+            {
+                IsRunning = false;
+                trackedVehicles.Clear();
+                trackedLines.Clear();
+                OnVehiclesTrackingStopped?.Invoke(this, new VehiclesTrackingStoppedEventArgs());
+            });
 
             GoToLines = ReactiveCommand.CreateFromObservable(() =>
             {
@@ -144,7 +135,7 @@ namespace TransportControl.ViewModels
         {
             if (!IsRunning)
             {
-                updatesDisposable = Observable.Interval(TimeSpan.FromSeconds(10))
+                updatesDisposable = Observable.Interval(TimeSpan.FromSeconds(15))
                     .Where(_ => CrossConnectivity.Current.IsConnected)
                     .SelectMany(_ => trackedLines.ToObservable())
                     .SelectMany(line => vehiclesSevice.FetchVehicles(line.Type, line.Symbol))
@@ -161,13 +152,17 @@ namespace TransportControl.ViewModels
                                     UpdateVehicle(trackedVehicle, v);
                             });
                         },
-                        onError: error =>
-                        {
-                            
-                        });
+                        onError: error => { RestartUpdates(); },
+                        onCompleted: RestartUpdates);
 
                 IsRunning = true;
             }
+        }
+
+        private void RestartUpdates()
+        {
+            IsRunning = false;
+            StartUpdatesIfNeeded();
         }
     }
 }
