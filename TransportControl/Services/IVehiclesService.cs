@@ -1,6 +1,7 @@
 ﻿using Plugin.Geolocator.Abstractions;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TransportControl.Models;
 
 namespace TransportControl.Services
@@ -11,5 +12,6 @@ namespace TransportControl.Services
         IObservable<List<Vehicle>> FetchNearbyVehicles(Distance distance, Position userLocation);
         IObservable<List<Line>> LoadLines();
         IObservable<List<Line>> LoadLinesWithSymbols(IEnumerable<string> symbols);
+        Task<IEnumerable<Line>> GetFavouriteLines();
     }
 }

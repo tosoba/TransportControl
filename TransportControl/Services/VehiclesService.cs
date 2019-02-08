@@ -1,13 +1,16 @@
 ﻿using Newtonsoft.Json.Linq;
 using Plugin.Geolocator.Abstractions;
 using Refit;
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using TransportControl.Api;
+using TransportControl.Db;
 using TransportControl.Models;
 
 namespace TransportControl.Services
@@ -17,6 +20,13 @@ namespace TransportControl.Services
         private const string apiBaseAddress = "https://api.um.warszawa.pl/api/action";
 
         private IVehiclesApiClient client = RestService.For<IVehiclesApiClient>(apiBaseAddress);
+
+        private IAppDatabase db;
+
+        public VehiclesService(IAppDatabase db = null)
+        {
+            this.db = db ?? Locator.Current.GetService<IAppDatabase>();
+        }
 
         public IObservable<List<Vehicle>> FetchNearbyVehicles(Distance distance, Position userLocation) => FetchVehicles(1)
                 .Zip(
@@ -39,6 +49,12 @@ namespace TransportControl.Services
         {
             if (line == null) return client.FetchAllVehiclesOfType(type).Select(response => response.Result);
             else return client.FetchAllVehiclesOfTypeAndLine(type, line).Select(response => response.Result);
+        }
+
+        public async Task<IEnumerable<Line>> GetFavouriteLines()
+        {
+            await db.Create();
+            return await db.GetAll();
         }
 
         public IObservable<List<Line>> LoadLines()

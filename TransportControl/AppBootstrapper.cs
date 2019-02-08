@@ -2,6 +2,7 @@
 using ReactiveUI.XamForms;
 using Splat;
 using System;
+using TransportControl.Db;
 using TransportControl.Services;
 using TransportControl.ViewModels;
 using Xamarin.Forms;
@@ -24,6 +25,7 @@ namespace TransportControl
             Locator.CurrentMutable.Register(() => new FavouriteLinesPage(), typeof(IViewFor<FavouriteLinesViewModel>));
             Locator.CurrentMutable.Register(() => new LinesTabbedPage(), typeof(IViewFor<LinesTabbedViewModel>));
 
+            Locator.CurrentMutable.Register(() => new AppDatabase(), typeof(IAppDatabase));
             Locator.CurrentMutable.Register(() => new VehiclesService(), typeof(IVehiclesService));
 
             Router.NavigateAndReset

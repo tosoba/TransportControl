@@ -57,7 +57,6 @@
                     <Button Text="E"
                             BackgroundColor="#2196F3"
                             TextColor="White"
-                            
                             Clicked="OnLineNumberBtnClicked"/>
                 </StackLayout>
             </ScrollView>

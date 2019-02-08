@@ -5,7 +5,7 @@
              HeightRequest="48"
              AnchorX="0.5"
              AnchorY="1.0"
-             x:Class="TransportControl.BindingPinView">
+             x:Class="TransportControl.PinView">
     <AbsoluteLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
 
         <Image Source="{Binding Source}" 

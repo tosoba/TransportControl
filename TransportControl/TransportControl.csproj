@@ -44,6 +44,9 @@
     <Compile Update="Views\AllLinesPage.xaml.cs">
       <DependentUpon>AllLinesPage.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\PinView.xaml.cs">
+      <DependentUpon>PinView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

@@ -1,11 +1,18 @@
-﻿using System.Linq;
+﻿using SQLite;
+using System.Linq;
 
 namespace TransportControl.Models
 {
     public class Line
     {
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+
+        [Indexed]
         public string Symbol { get; set; }
+
         public string Dest1 { get; set; }
+
         public string Dest2 { get; set; }
 
         public string GroupSymbol
