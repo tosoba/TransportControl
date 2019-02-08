@@ -1,6 +1,6 @@
 ﻿using Xamarin.Forms;
 
-namespace TransportControl
+namespace TransportControl.Views
 {
     public partial class PinView : StackLayout
     {

@@ -3,7 +3,7 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:maps="clr-namespace:Xamarin.Forms.GoogleMaps;assembly=Xamarin.Forms.GoogleMaps"
-    x:Class="TransportControl.MapPage"
+    x:Class="TransportControl.Views.MapPage"
     xmlns:ui="clr-namespace:TransportControl.Views"
     xmlns:converters="clr-namespace:TransportControl.Converters"
     xmlns:vm="clr-namespace:TransportControl.ViewModels"

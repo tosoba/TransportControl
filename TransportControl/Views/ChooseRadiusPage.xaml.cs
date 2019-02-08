@@ -1,10 +1,9 @@
 ﻿using TransportControl.ViewModels;
 using Xamarin.Forms.Xaml;
-using TransportControl.Views;
 using ReactiveUI;
 using System.Reactive.Disposables;
 
-namespace TransportControl
+namespace TransportControl.Views
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class ChooseRadiusPage : BaseContentPage<ChooseRadiusViewModel>

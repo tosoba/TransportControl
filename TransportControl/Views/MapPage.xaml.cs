@@ -3,10 +3,9 @@ using System;
 using System.Linq;
 using TransportControl.Events;
 using TransportControl.ViewModels;
-using TransportControl.Views;
 using Xamarin.Forms.GoogleMaps;
 
-namespace TransportControl
+namespace TransportControl.Views
 {
     public partial class MapPage : BaseContentPage<MapViewModel>
     {

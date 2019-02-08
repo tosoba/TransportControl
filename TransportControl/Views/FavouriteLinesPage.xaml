@@ -1,15 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ui:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="TransportControl.FavouriteLinesPage"
+             x:Class="TransportControl.Views.FavouriteLinesPage"
              xmlns:ui="clr-namespace:TransportControl.Views"
              xmlns:vm="clr-namespace:TransportControl.ViewModels"
              x:TypeArguments="vm:FavouriteLinesViewModel">
-    <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
-    </ContentPage.Content>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <ui:LinesPageContent x:Name="LinesContent" />
+        <Label Text="No favourite lines added yet." VerticalOptions="Center" HorizontalOptions="Center" FontSize="24"
+               x:Name="NoLinesLabel"/>
+    </Grid>
+
 </ui:BaseContentPage>

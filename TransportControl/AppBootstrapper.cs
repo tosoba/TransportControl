@@ -5,6 +5,7 @@ using System;
 using TransportControl.Db;
 using TransportControl.Services;
 using TransportControl.ViewModels;
+using TransportControl.Views;
 using Xamarin.Forms;
 
 namespace TransportControl

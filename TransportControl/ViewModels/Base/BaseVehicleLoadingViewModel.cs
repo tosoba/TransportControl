@@ -24,7 +24,8 @@ namespace TransportControl.ViewModels
         protected IScheduler mainThreadScheduler;
         protected IScheduler taskPoolScheduler;
 
-        public BaseVehicleLoadingViewModel(IScheduler mainThreadScheduler = null,
+        public BaseVehicleLoadingViewModel(
+            IScheduler mainThreadScheduler = null,
             IScheduler taskPoolScheduler = null,
             IVehiclesService vehiclesSevice = null,
             IScreen hostScreen = null
