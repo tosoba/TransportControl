@@ -70,8 +70,8 @@ namespace TransportControl.ViewModels
 
             GoToLines = ReactiveCommand.CreateFromObservable(() =>
             {
-                var vm = new LinesViewModel();
-                vm.OnVehiclesLoaded += OnVehiclesLoaded;
+                var vm = new LinesTabbedViewModel();
+                vm.OnVehiclesLoaded = OnVehiclesLoaded;
                 return NavigateTo(vm);
             });
 

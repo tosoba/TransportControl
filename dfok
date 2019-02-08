@@ -1,0 +1,150 @@
+[33mcommit 89b95de5dbe353fec5cb179a48d2e2b83d01da6c[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/reactiveui[m[33m, [m[1;32mreactiveui[m[33m)[m
+Author: = <therealmerengue@gmail.com>
+Date:   Tue Feb 5 21:09:41 2019 +0100
+
+    Small fixes.
+
+[33mcommit 74ab6ae41a89c593b3a76bac14bb29de71a4c8bb[m
+Author: Tomasz Osoba <tomasz.osoba@comarch.pl>
+Date:   Tue Feb 5 14:41:30 2019 +0100
+
+    Moved fetching nearby vehicles to service.
+
+[33mcommit d6414d8cb93e786523cae3f668fad28855a06f4b[m
+Author: Tomasz Osoba <tomasz.osoba@comarch.pl>
+Date:   Tue Feb 5 14:29:25 2019 +0100
+
+    Converted radius choice Rx chain -> tasks.
+
+[33mcommit b201af7d9fb0b387ec3f4e7aec7ea4d191121979[m
+Author: Tomasz Osoba <tomasz.osoba@comarch.pl>
+Date:   Tue Feb 5 11:10:50 2019 +0100
+
+    Small fixes.
+
+[33mcommit cb2318b840c8c242b498b05a55d7f46ab6d842b8[m
+Author: = <therealmerengue@gmail.com>
+Date:   Mon Feb 4 21:35:40 2019 +0100
+
+    Workaround for SelectedItem in radius ListView.
+
+[33mcommit 0abb09d44824eaf1f0b4038990115d373465423a[m
+Author: Tomasz Osoba <tomasz.osoba@comarch.pl>
+Date:   Mon Feb 4 16:09:45 2019 +0100
+
+    Small fixes.
+
+[33mcommit f98986eb89312b98ee68b479250665fc64135178[m
+Author: Tomasz Osoba <tomasz.osoba@comarch.pl>
+Date:   Mon Feb 4 15:09:01 2019 +0100
+
+    Loading and search fixes + cleanup.
+
+[33mcommit bcca077d9d74a16a88cb513624b41a6ff1e2990a[m
+Author: = <therealmerengue@gmail.com>
+Date:   Sun Feb 3 21:29:23 2019 +0100
+
+    Loading nearby vehicles' data.
+
+[33mcommit 38507d520beee9e8faf4daacf5046c08a84db783[m
+Author: = <therealmerengue@gmail.com>
+Date:   Sun Feb 3 13:01:08 2019 +0100
+
+    Some fixes.
+
+[33mcommit dd1d10473228d696c431e23765e3650c0fd618ac[m
+Author: = <therealmerengue@gmail.com>
+Date:   Fri Feb 1 19:07:40 2019 +0100
+
+    Loading lines works.
+
+[33mcommit 588f9b9b7900ec334145137b5977c60d2fd6b0ed[m
+Author: = <therealmerengue@gmail.com>
+Date:   Tue Jan 29 22:17:16 2019 +0100
+
+    Version upgrades + cleanup.
+
+[33mcommit 6bb97627c350ed7c276a3c4b7f49300edfbbebeb[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: cb76c02 58ce160
+Author: Tomasz Osoba <tomasz.osoba@comarch.pl>
+Date:   Fri Dec 21 10:13:14 2018 +0100
+
+    Merge branch 'master' of https://github.com/tosoba/TransportControl
+
+[33mcommit cb76c021eefe73934aa4e10ed08bc31238b8713f[m
+Author: Tomasz Osoba <tomasz.osoba@comarch.pl>
+Date:   Fri Dec 21 10:11:42 2018 +0100
+
+    No connection label + cleanup.
+
+[33mcommit 58ce160cade03f1fb70d4ba4dddf0065d7ca724b[m
+Author: = <therealmerengue@gmail.com>
+Date:   Mon Dec 17 23:24:53 2018 +0100
+
+    Removing useless stuff.
+
+[33mcommit 2ff32376523487abee1796b9134f87d6b6e8aa0f[m
+Author: = <therealmerengue@gmail.com>
+Date:   Sun Dec 16 21:43:33 2018 +0100
+
+    Cleanup + crash fix.
+
+[33mcommit df4c12141cf215829d33126e84583d00733ab9a9[m
+Author: = <therealmerengue@gmail.com>
+Date:   Thu Nov 8 22:04:58 2018 +0100
+
+    Random fixes.
+
+[33mcommit 1cf75346847017fa1ae8ee12c8495bd8349f4c6b[m
+Author: therealmerengue@gmail.com <therealmerengue@gmail.com>
+Date:   Sat Aug 25 19:52:53 2018 +0200
+
+    More lines.
+
+[33mcommit f3e3d5f4cffadf8b2d832aa4f1f06df1c06ed7a3[m
+Author: therealmerengue@gmail.com <therealmerengue@gmail.com>
+Date:   Sat Aug 25 19:05:15 2018 +0200
+
+    JSON parsing changes + small fixes.
+
+[33mcommit c8cc5db20f2cd5b82252629fc67f67277bf20fd5[m
+Author: therealmerengue@gmail.com <therealmerengue@gmail.com>
+Date:   Sat Aug 25 18:01:34 2018 +0200
+
+    Ui changes, fixes with loading data.
+
+[33mcommit 517492fc17ecd33a519fe9a10242d3c82bd2e40a[m
+Author: therealmerengue@gmail.com <therealmerengue@gmail.com>
+Date:   Sat Aug 25 13:37:01 2018 +0200
+
+    Upgrade to .netstandard
+
+[33mcommit 68bdba8c1dcef3f9f997bca16ecbfacc9527c2e1[m
+Author: therealmerengue@gmail.com <therealmerengue@gmail.com>
+Date:   Fri Aug 24 20:37:39 2018 +0200
+
+    Changes in nugets.
+
+[33mcommit defce14a45ef02960ff8df416d70a3a8e55a39d7[m
+Author: therealmerengue@gmail.com <therealmerengue@gmail.com>
+Date:   Thu Aug 16 23:01:01 2018 +0200
+
+    Removed ignored files.
+
+[33mcommit b2be710c694f4f0b2a7c3dd2070d78318464c87c[m
+Author: therealmerengue@gmail.com <therealmerengue@gmail.com>
+Date:   Fri Dec 29 23:37:30 2017 +0100
+
+    Small fixes.
+
+[33mcommit ff3b156aa8e74c91f95a89b7b37691fb13346ce7[m
+Author: therealmerengue@gmail.com <therealmerengue@gmail.com>
+Date:   Fri Sep 22 20:50:17 2017 +0200
+
+    View model changes.
+
+[33mcommit 7f28aaff98b075d2140b454e928dae7802efd7cf[m
+Author: therealmerengue@gmail.com <therealmerengue@gmail.com>
+Date:   Fri Sep 22 16:48:58 2017 +0200
+
+    Initial commit
