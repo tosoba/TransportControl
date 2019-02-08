@@ -6,6 +6,6 @@
             xmlns:vm="clr-namespace:TransportControl.ViewModels"
             xmlns:ui="clr-namespace:TransportControl"
             x:TypeArguments="vm:LinesTabbedViewModel">
-    <ui:LinePage Title="All" x:Name="LinesPage"/>
+    <ui:AllLinesPage Title="All" x:Name="AllLinesPage"/>
     <ui:FavouriteLinesPage Title="Favourites" x:Name="FavouritesLinesPage"/>
 </rxui:ReactiveTabbedPage>

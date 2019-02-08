@@ -8,9 +8,9 @@ using Xamarin.Forms;
 
 namespace TransportControl
 {
-    public partial class LinePage : BaseContentPage<LinesViewModel>
+    public partial class AllLinesPage : BaseContentPage<AllLinesViewModel>
     {
-        public LinePage()
+        public AllLinesPage()
         {
             InitializeComponent();
 

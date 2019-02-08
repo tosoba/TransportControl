@@ -7,11 +7,11 @@ namespace TransportControl.ViewModels
     {
         public Action<object, VehiclesLoadedEventArgs> OnVehiclesLoaded { get; set; }
 
-        public LinesViewModel LinesViewModel
+        public AllLinesViewModel AllLinesViewModel
         {
             get
             {
-                var vm = new LinesViewModel();
+                var vm = new AllLinesViewModel();
                 vm.OnVehiclesLoaded += _OnVehiclesLoaded;
                 return vm;
             }
@@ -19,9 +19,6 @@ namespace TransportControl.ViewModels
 
         public FavouriteLinesViewModel FavouriteLinesViewModel => new FavouriteLinesViewModel();
 
-        private void _OnVehiclesLoaded(object sender, VehiclesLoadedEventArgs e)
-        {
-            OnVehiclesLoaded?.Invoke(sender, e);
-        }
+        private void _OnVehiclesLoaded(object sender, VehiclesLoadedEventArgs e) => OnVehiclesLoaded?.Invoke(sender, e);
     }
 }

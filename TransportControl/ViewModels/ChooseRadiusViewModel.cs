@@ -20,7 +20,7 @@ using System.Collections.Generic;
 
 namespace TransportControl.ViewModels
 {
-    public class RadiusViewModel : BaseVehicleLoadingViewModel, IVehiclesLoadedHandler
+    public class ChooseRadiusViewModel : BaseVehicleLoadingViewModel, IVehiclesLoadedHandler
     {
         public ObservableCollection<Distance> Distances { get; set; } = new ObservableCollection<Distance>
         {
@@ -49,7 +49,7 @@ namespace TransportControl.ViewModels
 
         public event EventHandler<VehiclesLoadedEventArgs> OnVehiclesLoaded;
 
-        public RadiusViewModel(
+        public ChooseRadiusViewModel(
             IScheduler mainThreadScheduler = null,
             IScheduler taskPoolScheduler = null,
             IVehiclesService vehiclesSevice = null,

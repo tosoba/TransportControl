@@ -7,7 +7,7 @@ using System.Reactive.Disposables;
 namespace TransportControl
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ChooseRadiusPage : BaseContentPage<RadiusViewModel>
+    public partial class ChooseRadiusPage : BaseContentPage<ChooseRadiusViewModel>
     {
         public ChooseRadiusPage()
         {

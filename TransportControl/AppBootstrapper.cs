@@ -19,8 +19,8 @@ namespace TransportControl
             Locator.CurrentMutable.RegisterConstant(this, typeof(IScreen));
 
             Locator.CurrentMutable.Register(() => new MapPage(), typeof(IViewFor<MapViewModel>));
-            Locator.CurrentMutable.Register(() => new LinePage(), typeof(IViewFor<LinesViewModel>));
-            Locator.CurrentMutable.Register(() => new ChooseRadiusPage(), typeof(IViewFor<RadiusViewModel>));
+            Locator.CurrentMutable.Register(() => new AllLinesPage(), typeof(IViewFor<AllLinesViewModel>));
+            Locator.CurrentMutable.Register(() => new ChooseRadiusPage(), typeof(IViewFor<ChooseRadiusViewModel>));
             Locator.CurrentMutable.Register(() => new FavouriteLinesPage(), typeof(IViewFor<FavouriteLinesViewModel>));
             Locator.CurrentMutable.Register(() => new LinesTabbedPage(), typeof(IViewFor<LinesTabbedViewModel>));
 

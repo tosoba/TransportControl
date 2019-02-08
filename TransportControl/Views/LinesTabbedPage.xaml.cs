@@ -15,9 +15,11 @@ namespace TransportControl
 
             this.WhenActivated(disposables =>
             {
+                Title = "Transport Control";
+
                 this.OneWayBind(ViewModel, vm => vm.FavouriteLinesViewModel, view => view.FavouritesLinesPage.ViewModel)
                     .DisposeWith(disposables);
-                this.OneWayBind(ViewModel, vm => vm.LinesViewModel, view => view.LinesPage.ViewModel)
+                this.OneWayBind(ViewModel, vm => vm.AllLinesViewModel, view => view.AllLinesPage.ViewModel)
                     .DisposeWith(disposables);
             });
         }

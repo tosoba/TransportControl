@@ -17,7 +17,7 @@ using MoreLinq;
 
 namespace TransportControl.ViewModels
 {
-    public class LinesViewModel : BaseVehicleLoadingViewModel, IVehiclesLoadedHandler
+    public class AllLinesViewModel : BaseVehicleLoadingViewModel, IVehiclesLoadedHandler
     {
         private List<Line> AllLines { get; set; }
 
@@ -46,7 +46,7 @@ namespace TransportControl.ViewModels
 
         public event EventHandler<VehiclesLoadedEventArgs> OnVehiclesLoaded;
 
-        public LinesViewModel(
+        public AllLinesViewModel(
             IScheduler mainThreadScheduler = null,
             IScheduler taskPoolScheduler = null,
             IVehiclesService vehiclesSevice = null,

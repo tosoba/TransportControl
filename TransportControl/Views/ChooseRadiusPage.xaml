@@ -4,7 +4,7 @@
              x:Class="TransportControl.ChooseRadiusPage"
              xmlns:ui="clr-namespace:TransportControl.Views"
              xmlns:vm="clr-namespace:TransportControl.ViewModels"
-             x:TypeArguments="vm:RadiusViewModel">
+             x:TypeArguments="vm:ChooseRadiusViewModel">
     <ContentPage.Content>
         <StackLayout>
             <ListView ItemsSource="{Binding Distances}"
