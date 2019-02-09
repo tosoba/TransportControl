@@ -6,8 +6,8 @@ namespace TransportControl.Db
 {
     public interface IAppDatabase
     {
-        Task Create();
-        Task Insert(Line line);
+        Task<bool> Insert(Line line);
         Task<IEnumerable<Line>> GetAll();
+        Task Delete(Line line);
     }
 }

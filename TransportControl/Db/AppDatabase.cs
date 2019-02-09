@@ -16,7 +16,7 @@ namespace TransportControl.Db
 
         public SQLiteAsyncConnection Connection => new SQLiteAsyncConnection(databasePath);
 
-        public async Task Create()
+        private async Task CreateIfNeeded()
         {
             if (!tableCreated)
             {
@@ -25,15 +25,30 @@ namespace TransportControl.Db
             }
         }
 
-        public async Task Insert(Line line)
+        public async Task<bool> Insert(Line line)
         {
+            await CreateIfNeeded();
             var query = Connection.Table<Line>().Where(l => l.Symbol == line.Symbol);
             var result = await query.ToListAsync();
 
             if (!result.Any())
+            {
                 await Connection.InsertAsync(line);
+                return true;
+            }
+            return false;
         }
 
-        public async Task<IEnumerable<Line>> GetAll() => await Connection.Table<Line>().ToListAsync();
+        public async Task<IEnumerable<Line>> GetAll()
+        {
+            await CreateIfNeeded();
+            return await Connection.Table<Line>().ToListAsync();
+        }
+
+        public async Task Delete(Line line)
+        {
+            await CreateIfNeeded();
+            await Connection.DeleteAsync(line);
+        }
     }
 }

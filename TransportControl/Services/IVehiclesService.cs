@@ -13,5 +13,7 @@ namespace TransportControl.Services
         IObservable<List<Line>> LoadLines();
         IObservable<List<Line>> LoadLinesWithSymbols(IEnumerable<string> symbols);
         Task<IEnumerable<Line>> GetFavouriteLines();
+        Task<bool> AddToFavourites(Line line);
+        Task RemoveFromFavourites(Line line);
     }
 }

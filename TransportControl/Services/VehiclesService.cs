@@ -28,6 +28,8 @@ namespace TransportControl.Services
             this.db = db ?? Locator.Current.GetService<IAppDatabase>();
         }
 
+        public async Task<bool> AddToFavourites(Line line) => await db.Insert(line);
+
         public IObservable<List<Vehicle>> FetchNearbyVehicles(Distance distance, Position userLocation) => FetchVehicles(1)
                 .Zip(
                     second: FetchVehicles(2),
@@ -51,11 +53,7 @@ namespace TransportControl.Services
             else return client.FetchAllVehiclesOfTypeAndLine(type, line).Select(response => response.Result);
         }
 
-        public async Task<IEnumerable<Line>> GetFavouriteLines()
-        {
-            await db.Create();
-            return await db.GetAll();
-        }
+        public async Task<IEnumerable<Line>> GetFavouriteLines() => await db.GetAll();
 
         public IObservable<List<Line>> LoadLines()
         {
@@ -74,5 +72,7 @@ namespace TransportControl.Services
                 .Where(line => symbols.Contains(line.Symbol))
                 .ToList()
                 .Select(lines => lines.ToList());
+
+        public async Task RemoveFromFavourites(Line line) => await db.Delete(line);
     }
 }

@@ -22,7 +22,7 @@ namespace TransportControl.ViewModels
         protected List<Line> AllLines { get; set; }
 
         private ObservableCollection<GroupedObservableCollection<string, Line>> linesGrouped;
-        public ObservableCollection<GroupedObservableCollection<string, Line>> LinesGrouped
+        public virtual ObservableCollection<GroupedObservableCollection<string, Line>> LinesGrouped
         {
             get { return linesGrouped; }
             set { this.RaiseAndSetIfChanged(ref linesGrouped, value); }
@@ -44,6 +44,15 @@ namespace TransportControl.ViewModels
 
         public event EventHandler<VehiclesLoadedEventArgs> OnVehiclesLoaded;
 
+        private string favouritesActionText;
+        public string FavouritesActionText
+        {
+            get => favouritesActionText;
+            protected set => this.RaiseAndSetIfChanged(ref favouritesActionText, value);
+        }
+
+        public Command<Line> FavouritesActionCommand { get; protected set; }
+
         public BaseLinesViewModel(
             IScheduler mainThreadScheduler = null,
             IScheduler taskPoolScheduler = null,
@@ -55,15 +64,7 @@ namespace TransportControl.ViewModels
             {
                 SelectedLine = null;
 
-                LoadLines()
-                    .SubscribeOn(this.taskPoolScheduler)
-                    .ObserveOn(this.mainThreadScheduler)
-                    .Subscribe(lines =>
-                    {
-                        AllLines = lines;
-                        GroupLines(AllLines);
-                    })
-                    .DisposeWith(disposables);
+                LoadLines(disposables);
 
                 this.WhenAnyValue(vm => vm.SearchInput)
                     .Where(input => input != null)
@@ -110,7 +111,20 @@ namespace TransportControl.ViewModels
             });
         }
 
-        protected abstract IObservable<List<Line>> LoadLines();
+        protected abstract IObservable<List<Line>> LinesObservable { get; }
+
+        protected void LoadLines(CompositeDisposable disposables)
+        {
+            LinesObservable
+                   .SubscribeOn(taskPoolScheduler)
+                   .ObserveOn(mainThreadScheduler)
+                   .Subscribe(lines =>
+                   {
+                       AllLines = lines;
+                       GroupLines(AllLines);
+                   })
+                   .DisposeWith(disposables);
+        }
 
         protected void FilterLines(string filter)
         {

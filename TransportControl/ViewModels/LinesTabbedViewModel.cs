@@ -17,7 +17,15 @@ namespace TransportControl.ViewModels
             }
         }
 
-        public FavouriteLinesViewModel FavouriteLinesViewModel => new FavouriteLinesViewModel();
+        public FavouriteLinesViewModel FavouriteLinesViewModel
+        {
+            get
+            {
+                var vm = new FavouriteLinesViewModel();
+                vm.OnVehiclesLoaded += _OnVehiclesLoaded;
+                return vm;
+            }
+        }
 
         private void _OnVehiclesLoaded(object sender, VehiclesLoadedEventArgs e) => OnVehiclesLoaded?.Invoke(sender, e);
     }

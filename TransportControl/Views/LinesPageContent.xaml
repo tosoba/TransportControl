@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="TransportControl.Views.LinesPageContent">
+             x:Class="TransportControl.Views.LinesPageContent"
+             x:Name="LinesContentView"
+             xmlns:effects="clr-namespace:TransportControl.Effects">
     <ContentView.Content>
         <StackLayout>
             <SearchBar x:Name="LineSearchBar" 
@@ -64,6 +66,9 @@
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
+                            <ViewCell.ContextActions>
+                                <MenuItem Command="{Binding Path=BindingContext.FavouritesActionCommand,Source={x:Reference LinesContentView}}" CommandParameter="{Binding .}" Text="{Binding Path=BindingContext.FavouritesActionText,Source={x:Reference LinesContentView}}"/>
+                            </ViewCell.ContextActions>
                             <Grid Padding="5" RowSpacing="0" ColumnSpacing="10">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>

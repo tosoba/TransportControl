@@ -25,9 +25,9 @@ namespace TransportControl.Views
             {
                 Title = "Transport Control";
 
-                disposables(this.BindCommand(ViewModel, vm => vm.GoToLines, view => view.ShowLinesBtn));
-                disposables(this.BindCommand(ViewModel, vm => vm.GoToRadius, view => view.ShowRadiusBtn));
-                disposables(this.BindCommand(ViewModel, vm => vm.ClearMap, view => view.ClearMapBtn));
+                this.BindCommand(ViewModel, vm => vm.GoToLines, view => view.ShowLinesBtn);
+                this.BindCommand(ViewModel, vm => vm.GoToRadius, view => view.ShowRadiusBtn);
+                this.BindCommand(ViewModel, vm => vm.ClearMap, view => view.ClearMapBtn);
 
                 if (ViewModel != null && !handlersAttached)
                 {

@@ -53,6 +53,7 @@ namespace TransportControl.ViewModels
 
         protected void OnVehiclesDataLoadingFailure(string message = null)
         {
+            LoadingVehiclesInProgress = false;
             UserDialogs.Instance.Toast(message ?? "Unable to load vehicles' data.");
         }
     }
