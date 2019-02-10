@@ -35,7 +35,7 @@ namespace TransportControl.ViewModels
             this.taskPoolScheduler = taskPoolScheduler ?? RxApp.TaskpoolScheduler;
             this.vehiclesSevice = vehiclesSevice ?? Locator.Current.GetService<IVehiclesService>();
 
-            this.WhenActivated(disposables =>
+            this.WhenActivated((CompositeDisposable disposables) =>
             {
                 this.WhenAnyValue(vm => vm.LoadingVehiclesInProgress)
                    .Skip(1)
@@ -46,8 +46,7 @@ namespace TransportControl.ViewModels
                    {
                        if (isLoading) UserDialogs.Instance.ShowLoading("Loading vehicles' data...");
                        else UserDialogs.Instance.HideLoading();
-                   })
-                   .DisposeWith(disposables);
+                   });
             });
         }
 
