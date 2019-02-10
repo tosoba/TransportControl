@@ -156,7 +156,7 @@ namespace TransportControl.ViewModels
                         resultSelector: (_, lines) => new VehiclesLoadedEventArgs(vehicles, lines)
                     )
                 )
-                .OnErrorResumeNext(Observable.Return(new VehiclesLoadedEventArgs(new List<Vehicle>() { }, new List<Line>() { }, true)))
+                .OnErrorResumeNext(Observable.Return(new VehiclesLoadedEventArgs(new List<Vehicle> { }, new List<Line> { }, true)))
                 .FirstAsync();
 
             LoadingVehiclesInProgress = false;

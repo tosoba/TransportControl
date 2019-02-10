@@ -35,6 +35,11 @@
     "Dest2": "Gocławek"
   },
   {
+    "Dest1": "Os. Górczewska",
+    "Symbol": "10",
+    "Dest2": "Wyścigi"
+  },
+  {
     "Dest1": "Metro Młociny",
     "Symbol": "11",
     "Dest2": "Pl.Narutowicza"

@@ -21,5 +21,7 @@ namespace TransportControl.Events
             Lines = lines;
             ErrorOccurred = errorOccurred;
         }
+
+        public static VehiclesLoadedEventArgs Error => new VehiclesLoadedEventArgs(new List<Vehicle>(), new List<Line>(), true);
     }
 }

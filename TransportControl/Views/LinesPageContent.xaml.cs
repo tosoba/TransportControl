@@ -18,6 +18,9 @@ namespace TransportControl.Views
         public LinesPageContent()
         {
             InitializeComponent();
+
+            if (Device.RuntimePlatform == Device.iOS)
+                LineNumbersScrollView.IsVisible = false;
         }
 
         private void OnLineNumberBtnClicked(object sender, EventArgs e)

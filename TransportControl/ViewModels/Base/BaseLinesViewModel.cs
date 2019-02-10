@@ -53,7 +53,7 @@ namespace TransportControl.ViewModels
 
         public Command<Line> FavouritesActionCommand { get; protected set; }
 
-        public BaseLinesViewModel(
+        protected BaseLinesViewModel(
             IScheduler mainThreadScheduler = null,
             IScheduler taskPoolScheduler = null,
             IVehiclesService vehiclesSevice = null,
@@ -69,45 +69,10 @@ namespace TransportControl.ViewModels
                 this.WhenAnyValue(vm => vm.SearchInput)
                     .Where(input => input != null)
                     .DistinctUntilChanged()
-                    .Subscribe(input => { FilterLines(input); })
+                    .Subscribe(FilterAndGroupLines)
                     .DisposeWith(disposables);
 
-                this.WhenAnyValue(vm => vm.SelectedLine)
-                    .Where(line => line != null)
-                    .Do(_ =>
-                    {
-                        if (!CrossConnectivity.Current.IsConnected)
-                        {
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                UserDialogs.Instance.Toast("Unable to load vehicles' data - no internet connection.");
-                                SelectedLine = null;
-                            });
-                        }
-                    })
-                    .Where(_ => CrossConnectivity.Current.IsConnected)
-                    .Do(_ => { LoadingVehiclesInProgress = true; })
-                    .SelectMany(line => this.vehiclesSevice.FetchVehicles(line.Type, line.Symbol)
-                        .Select(vehicles => new VehiclesLoadedEventArgs(vehicles, new List<Line> { line }))
-                    )
-                    .SubscribeOn(this.taskPoolScheduler)
-                    .ObserveOn(this.mainThreadScheduler)
-                    .Do(_ => { LoadingVehiclesInProgress = false; })
-                    .Subscribe(
-                        onNext: args =>
-                        {
-                            if (args.Vehicles == null || !args.Vehicles.Any())
-                            {
-                                OnVehiclesDataLoadingFailure("No vehicles found.");
-                            }
-                            else
-                            {
-                                OnVehiclesLoaded?.Invoke(this, args);
-                                NavigateBack().Subscribe().DisposeWith(disposables);
-                            }
-                        },
-                        onError: error => { OnVehiclesDataLoadingFailure(); }
-                    );
+                SetupLineSelected(disposables);
             });
         }
 
@@ -116,17 +81,17 @@ namespace TransportControl.ViewModels
         protected void LoadLines(CompositeDisposable disposables)
         {
             LinesObservable
-                   .SubscribeOn(taskPoolScheduler)
-                   .ObserveOn(mainThreadScheduler)
-                   .Subscribe(lines =>
-                   {
-                       AllLines = lines;
-                       GroupLines(AllLines);
-                   })
-                   .DisposeWith(disposables);
+               .SubscribeOn(taskPoolScheduler)
+               .ObserveOn(mainThreadScheduler)
+               .Subscribe(lines =>
+               {
+                   AllLines = lines;
+                   GroupLines(AllLines);
+               })
+               .DisposeWith(disposables);
         }
 
-        protected void FilterLines(string filter)
+        protected void FilterAndGroupLines(string filter)
         {
             if (!filter.Trim().Any())
                 GroupLines(AllLines);
@@ -153,6 +118,57 @@ namespace TransportControl.ViewModels
                     .Select(lg => new GroupedObservableCollection<string, Line>(lg.Key, lg.OrderBy(l => l.Symbol)));
                 LinesGrouped = new ObservableCollection<GroupedObservableCollection<string, Line>>(numberOnlyLines.Concat(linesContainingLetters));
             }
+        }
+
+        private void SetupLineSelected(CompositeDisposable disposables)
+        {
+            this.WhenAnyValue(vm => vm.SelectedLine)
+                .Where(line => line != null)
+                .Do(_ =>
+                {
+                    if (!CrossConnectivity.Current.IsConnected)
+                    {
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            UserDialogs.Instance.Toast("Unable to load vehicles' data - no internet connection.");
+                            SelectedLine = null;
+                        });
+                    }
+                })
+                .Where(_ => CrossConnectivity.Current.IsConnected)
+                .Do(_ => { LoadingVehiclesInProgress = true; })
+                .SelectMany(line => vehiclesSevice.FetchVehicles(line.Type, line.Symbol)
+                    .Select(vehicles => new VehiclesLoadedEventArgs(vehicles, new List<Line> { line }))
+                )
+                .OnErrorResumeNext(Observable.Return(VehiclesLoadedEventArgs.Error))
+                .SubscribeOn(taskPoolScheduler)
+                .ObserveOn(mainThreadScheduler)
+                .Do(_ => { LoadingVehiclesInProgress = false; })
+                .Subscribe(
+                    onNext: args =>
+                    {
+                        SelectedLine = null;
+                        if (args.ErrorOccurred)
+                        {
+                            OnVehiclesDataLoadingFailure();
+                        }
+                        else if (args.Vehicles == null || !args.Vehicles.Any())
+                        {
+                            OnVehiclesDataLoadingFailure("No vehicles found.");
+                        }
+                        else
+                        {
+                            OnVehiclesLoaded?.Invoke(this, args);
+                            NavigateBack().Subscribe().DisposeWith(disposables);
+                        }
+                    }, 
+                    onCompleted: () =>
+                    {
+                        SelectedLine = null;
+                        LoadingVehiclesInProgress = false;
+                        SetupLineSelected(disposables);
+                    })
+                .DisposeWith(disposables);
         }
     }
 }
