@@ -2,6 +2,7 @@
 using ReactiveUI.XamForms;
 using System.Reactive.Disposables;
 using TransportControl.ViewModels;
+using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace TransportControl.Views
@@ -12,6 +13,12 @@ namespace TransportControl.Views
         public LinesTabbedPage()
         {
             InitializeComponent();
+
+            if (Device.RuntimePlatform == Device.iOS)
+            {
+                AllLinesPage.Icon = "list.png";
+                FavouritesLinesPage.Icon = "heart.png";
+            }
 
             this.WhenActivated(disposables =>
             {

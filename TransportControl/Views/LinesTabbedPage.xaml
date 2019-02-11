@@ -7,6 +7,6 @@
             xmlns:ui="clr-namespace:TransportControl.Views"
             x:TypeArguments="vm:LinesTabbedViewModel"
             BackgroundColor="White">
-    <ui:AllLinesPage Title="All" x:Name="AllLinesPage" Icon="list.png"/>
-    <ui:FavouriteLinesPage Title="Favourites" x:Name="FavouritesLinesPage" Icon="heart.png"/>
+    <ui:AllLinesPage Title="All" x:Name="AllLinesPage" />
+    <ui:FavouriteLinesPage Title="Favourites" x:Name="FavouritesLinesPage"/>
 </rxui:ReactiveTabbedPage>
