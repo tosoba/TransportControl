@@ -9,6 +9,7 @@ namespace TransportControl.iOS
     {
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
+            Rg.Plugins.Popup.Popup.Init();
             Xamarin.Forms.Forms.Init();
             Xamarin.FormsGoogleMaps.Init(Keys.GOOGLE_MAPS_IOS_API_KEY);
             ImageCircleRenderer.Init();

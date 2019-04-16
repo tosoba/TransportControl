@@ -27,6 +27,7 @@
     <PackageReference Include="ReactiveUI.Events.XamForms" Version="9.9.1" />
     <PackageReference Include="ReactiveUI.XamForms" Version="9.9.1" />
     <PackageReference Include="Refit" Version="4.6.58" />
+    <PackageReference Include="Rg.Plugins.Popup" Version="1.1.5.188" />
     <PackageReference Include="Splat" Version="6.1.7" />
     <PackageReference Include="sqlite-net-pcl" Version="1.5.231" />
     <PackageReference Include="System.Reactive" Version="4.0.0" />

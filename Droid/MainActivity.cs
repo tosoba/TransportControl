@@ -4,6 +4,8 @@ using Android.Content.PM;
 using Android.OS;
 using ImageCircle.Forms.Plugin.Droid;
 using Plugin.CurrentActivity;
+using Plugin.Permissions;
+using Rg.Plugins.Popup;
 using Xamarin;
 using Xamarin.Forms;
 
@@ -19,6 +21,8 @@ namespace TransportControl.Droid
 
             base.OnCreate(bundle);
 
+            Popup.Init(this, bundle);
+
             Forms.Init(this, bundle);
 
             FormsGoogleMaps.Init(this, bundle);
@@ -33,7 +37,12 @@ namespace TransportControl.Droid
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-            Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
+        public override void OnBackPressed()
+        {
+            Popup.SendBackPressed(base.OnBackPressed);
         }
     }
 }
