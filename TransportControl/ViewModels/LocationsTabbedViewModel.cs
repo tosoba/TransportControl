@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ReactiveUI;
+using System;
+using System.Windows.Input;
 using TransportControl.Events;
 
 namespace TransportControl.ViewModels
@@ -27,6 +29,22 @@ namespace TransportControl.ViewModels
             }
         }
 
-        private void _OnVehiclesLoaded(object sender, VehiclesLoadedEventArgs e) => OnVehiclesLoaded?.Invoke(sender, e);
+        public ICommand GoToRadius { get; }
+
+        public LocationsTabbedViewModel()
+        {
+            GoToRadius = ReactiveCommand.CreateFromObservable(() =>
+            {
+                var vm = new ChooseRadiusViewModel();
+                vm.OnVehiclesLoaded += _OnVehiclesLoaded;
+                return NavigateTo(vm);
+            });
+        }
+
+        private void _OnVehiclesLoaded(object sender, VehiclesLoadedEventArgs e)
+        {
+            OnVehiclesLoaded?.Invoke(sender, e);
+            NavigateBack().Subscribe();
+        }
     }
 }

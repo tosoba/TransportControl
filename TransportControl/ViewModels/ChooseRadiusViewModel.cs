@@ -139,8 +139,16 @@ namespace TransportControl.ViewModels
 
             var lastKnownLocation = await CrossGeolocator.Current.GetLastKnownLocationAsync();
             if (lastKnownLocation == null)
-                lastKnownLocation = await CrossGeolocator.Current.GetPositionAsync(TimeSpan.FromSeconds(15), null, true);
-
+            {
+                try
+                {
+                    lastKnownLocation = await CrossGeolocator.Current.GetPositionAsync(TimeSpan.FromSeconds(15), null, true);
+                }
+                catch (TaskCanceledException e)
+                {
+                    return null;
+                }
+            }
             RetrievingLocationInProgress = false;
             return lastKnownLocation;
         }

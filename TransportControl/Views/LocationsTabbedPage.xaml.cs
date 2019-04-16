@@ -28,6 +28,8 @@ namespace TransportControl.Views
                     .DisposeWith(disposables);
                 this.OneWayBind(ViewModel, vm => vm.ChooseLocationViewModel, view => view.ChooseLocationPage.ViewModel)
                     .DisposeWith(disposables);
+
+                this.BindCommand(ViewModel, vm => vm.GoToRadius, view => view.NearbyMenuItem);
             });
         }
 	}

@@ -8,7 +8,7 @@
             x:TypeArguments="vm:LocationsTabbedViewModel"
             BackgroundColor="White">
     <TabbedPage.ToolbarItems>
-        <ToolbarItem Name="NearbyMenuItem" Order="Primary" Text="Nearby" Priority="0" />
+        <ToolbarItem x:Name="NearbyMenuItem" Order="Primary" Text="Nearby" Priority="0" />
     </TabbedPage.ToolbarItems>
     <ui:ChooseLocationPage Title="Location" x:Name="ChooseLocationPage" />
     <ui:FavouriteLocationsPage Title="Favourites" x:Name="FavouriteLocationsPage"/>
