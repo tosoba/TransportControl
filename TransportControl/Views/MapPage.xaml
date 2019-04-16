@@ -47,7 +47,7 @@
                         TextColor="White"
                         Margin="0,0,0,0"
                         Text="Clear" />
-                <Button x:Name="ShowRadiusBtn"
+                <Button x:Name="ShowLocationBtn"
                         Grid.Column="2"
                         BorderRadius="0"
                         BorderWidth="2"
@@ -56,7 +56,7 @@
                         BackgroundColor="#2196F3"
                         Margin="0,0,0,0"
                         TextColor="White"
-                        Text="Near me" />
+                        Text="Location" />
             </Grid>
         </StackLayout>
 

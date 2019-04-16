@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using TransportControl.Events;
@@ -20,7 +19,7 @@ namespace TransportControl.ViewModels
     {
         public ICommand ClearMap { get; }
         public ICommand GoToLines { get; }
-        public ICommand GoToRadius { get; }
+        public ICommand GoToLocation { get; }
 
         private bool isConnected = false;
         public bool IsConnected
@@ -66,10 +65,10 @@ namespace TransportControl.ViewModels
                 return NavigateTo(vm);
             });
 
-            GoToRadius = ReactiveCommand.CreateFromObservable(() =>
+            GoToLocation = ReactiveCommand.CreateFromObservable(() =>
             {
-                var vm = new ChooseRadiusViewModel();
-                vm.OnVehiclesLoaded += OnVehiclesLoaded;
+                var vm = new LocationsTabbedViewModel();
+                vm.OnVehiclesLoaded = OnVehiclesLoaded;
                 return NavigateTo(vm);
             });
 

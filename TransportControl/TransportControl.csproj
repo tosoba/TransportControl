@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\lines.json" />
+    <None Remove="Views\FavouriteLocationsPage.xaml~RF80d4e5.TMP" />
     <None Remove="Views\MapPage.xaml~RF2241beb.TMP" />
   </ItemGroup>
   <ItemGroup>
@@ -44,6 +45,12 @@
     <Compile Update="Views\AllLinesPage.xaml.cs">
       <DependentUpon>AllLinesPage.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\ChooseLocationPage.xaml.cs">
+      <DependentUpon>ChooseLocationPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\LocationsTabbedPage.xaml.cs">
+      <DependentUpon>LocationsTabbedPage.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\PinView.xaml.cs">
       <DependentUpon>PinView.xaml</DependentUpon>
     </Compile>
@@ -53,10 +60,19 @@
     <EmbeddedResource Update="Views\FavouriteLinesPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
+    <EmbeddedResource Update="Views\FavouriteLocationsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Views\LinesPageContent.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\LinesTabbedPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\ChooseLocationPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\LocationsTabbedPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>
