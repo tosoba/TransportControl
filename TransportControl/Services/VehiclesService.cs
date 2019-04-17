@@ -28,7 +28,7 @@ namespace TransportControl.Services
             this.db = db ?? Locator.Current.GetService<IAppDatabase>();
         }
 
-        public async Task<bool> AddToFavourites(Line line) => await db.Insert(line);
+        public async Task<bool> AddToFavourites(Line line) => await db.InsertLine(line);
 
         public IObservable<List<Vehicle>> FetchNearbyVehicles(Distance distance, Position userLocation) => FetchVehicles(1)
                 .Zip(
@@ -53,7 +53,7 @@ namespace TransportControl.Services
             else return client.FetchAllVehiclesOfTypeAndLine(type, line).Select(response => response.Result);
         }
 
-        public async Task<IEnumerable<Line>> GetFavouriteLines() => await db.GetAll();
+        public async Task<IEnumerable<Line>> GetFavouriteLines() => await db.GetAllLines();
 
         public IObservable<List<Line>> LoadLines()
         {
@@ -73,6 +73,6 @@ namespace TransportControl.Services
                 .ToList()
                 .Select(lines => lines.ToList());
 
-        public async Task RemoveFromFavourites(Line line) => await db.Delete(line);
+        public async Task RemoveFromFavourites(Line line) => await db.DeleteLine(line);
     }
 }

@@ -10,24 +10,27 @@ namespace TransportControl.Db
 {
     public class AppDatabase : IAppDatabase
     {
-        private readonly string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TransportControl.db");
+        private static readonly string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TransportControl.db");
 
-        private bool tableCreated = false;
+        private static readonly Lazy<SQLiteAsyncConnection> connection = new Lazy<SQLiteAsyncConnection>(() => new SQLiteAsyncConnection(databasePath));
 
-        public SQLiteAsyncConnection Connection => new SQLiteAsyncConnection(databasePath);
+        private static SQLiteAsyncConnection Connection => connection.Value;
 
-        private async Task CreateIfNeeded()
+        private static async Task CreateTables()
         {
-            if (!tableCreated)
-            {
-                await Connection.CreateTableAsync<Line>();
-                tableCreated = true;
-            }
+            await Connection.CreateTablesAsync(CreateFlags.None, typeof(Line), typeof(Location));
         }
 
-        public async Task<bool> Insert(Line line)
+        public AppDatabase()
         {
-            await CreateIfNeeded();
+            Task.Run(async () =>
+            {
+                await CreateTables();
+            });
+        }
+
+        public async Task<bool> InsertLine(Line line)
+        {
             var query = Connection.Table<Line>().Where(l => l.Symbol == line.Symbol);
             var result = await query.ToListAsync();
 
@@ -39,16 +42,14 @@ namespace TransportControl.Db
             return false;
         }
 
-        public async Task<IEnumerable<Line>> GetAll()
-        {
-            await CreateIfNeeded();
-            return await Connection.Table<Line>().ToListAsync();
-        }
+        public async Task<IEnumerable<Line>> GetAllLines() => await Connection.Table<Line>().ToListAsync();
 
-        public async Task Delete(Line line)
-        {
-            await CreateIfNeeded();
-            await Connection.DeleteAsync(line);
-        }
+        public async Task DeleteLine(Line line) => await Connection.DeleteAsync(line);
+
+        public async Task InsertLocation(Location location) => await Connection.InsertAsync(location);
+
+        public async Task<IEnumerable<Location>> GetAllLocations() => await Connection.Table<Location>().ToListAsync();
+
+        public async Task DeleteLocation(Location location) => await Connection.DeleteAsync(location);
     }
 }
