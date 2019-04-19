@@ -7,4 +7,29 @@
              x:TypeArguments="vm:FavouriteLocationsViewModel"
              BackgroundColor="Transparent">
 
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <ListView ItemsSource="{Binding Locations}"
+                  x:Name="LocationsListView"
+                  HasUnevenRows="true"
+                  SeparatorColor="#2196F3">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ui:SelectedBackgroundViewCell SelectedItemBackgroundColor="#2196F3">
+                        <Label Grid.Column="1"
+                               Margin="5"
+                               TextColor="White"
+                               Text="{Binding Name}"
+                               VerticalOptions="Center"
+                               FontSize="24"/>
+                    </ui:SelectedBackgroundViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <Label Text="No locations added yet." VerticalOptions="Center" HorizontalOptions="Center" FontSize="24"
+               x:Name="NoLocationsLabel" TextColor="LightGray"/>
+    </Grid>
+
 </ui:BaseContentPage>

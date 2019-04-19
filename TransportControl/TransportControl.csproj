@@ -7,6 +7,7 @@
     <None Remove="Resources\lines.json" />
     <None Remove="Resources\map.json" />
     <None Remove="Views\AllLinesPage.xaml~RF981663.TMP" />
+    <None Remove="Views\FavouriteLocationsPage.xaml.cs~RF1878aae.TMP" />
     <None Remove="Views\FavouriteLocationsPage.xaml~RF80d4e5.TMP" />
     <None Remove="Views\MapPage.xaml~RF2241beb.TMP" />
   </ItemGroup>
