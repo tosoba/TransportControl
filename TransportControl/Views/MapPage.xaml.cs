@@ -1,7 +1,9 @@
 ﻿using ReactiveUI;
 using System;
+using System.IO;
 using System.Linq;
 using TransportControl.Events;
+using TransportControl.Utils.Extensions;
 using TransportControl.ViewModels;
 using Xamarin.Forms.GoogleMaps;
 
@@ -18,8 +20,10 @@ namespace TransportControl.Views
         {
             InitializeComponent();
 
+            map.MapStyle = MapStyle.FromJson(new StreamReader("TransportControl.Resources.map.json".ResourceStream()).ReadToEnd());
             map.InitialCameraUpdate = CameraUpdateFactory.NewPositionZoom(warsawCenterPosition, initialZoom);
             map.CameraIdled += OnMapCameraIdled;
+            map.UiSettings.ZoomControlsEnabled = false;
 
             this.WhenActivated(disposables =>
             {

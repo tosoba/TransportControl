@@ -5,31 +5,23 @@
              xmlns:ui="clr-namespace:TransportControl.Views"
              xmlns:vm="clr-namespace:TransportControl.ViewModels"
              x:TypeArguments="vm:ChooseRadiusViewModel"
-             BackgroundColor="White">
+             BackgroundColor="#151515">
     <ContentPage.Content>
         <StackLayout>
             <ListView ItemsSource="{Binding Distances}"
                       x:Name="DistancesListView"
-                      HasUnevenRows="true">
+                      HasUnevenRows="true"
+                      SeparatorColor="#2196F3">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <ViewCell>
-                            <Grid Padding="5" RowSpacing="0" ColumnSpacing="10">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Label Grid.Column="1"
-                                       Text="{Binding ValueLabel}"
-                                       VerticalOptions="Center"
-                                       FontSize="24"/>
-                            </Grid>
-                        </ViewCell>
+                        <ui:SelectedBackgroundViewCell SelectedItemBackgroundColor="#2196F3">
+                            <Label Grid.Column="1"
+                                   Margin="5"
+                                   TextColor="White"
+                                   Text="{Binding ValueLabel}"
+                                   VerticalOptions="Center"
+                                   FontSize="24"/>
+                        </ui:SelectedBackgroundViewCell>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

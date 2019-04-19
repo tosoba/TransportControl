@@ -6,7 +6,7 @@
             xmlns:vm="clr-namespace:TransportControl.ViewModels"
             xmlns:ui="clr-namespace:TransportControl.Views"
             x:TypeArguments="vm:LocationsTabbedViewModel"
-            BackgroundColor="White">
+            BackgroundColor="#151515">
     <TabbedPage.ToolbarItems>
         <ToolbarItem x:Name="NearbyMenuItem" Order="Primary" Text="Nearby" Priority="0" />
     </TabbedPage.ToolbarItems>

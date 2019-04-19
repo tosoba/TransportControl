@@ -5,6 +5,6 @@
              xmlns:ui="clr-namespace:TransportControl.Views"
              xmlns:vm="clr-namespace:TransportControl.ViewModels"
              x:TypeArguments="vm:FavouriteLocationsViewModel"
-             BackgroundColor="White">
+             BackgroundColor="Transparent">
 
 </ui:BaseContentPage>

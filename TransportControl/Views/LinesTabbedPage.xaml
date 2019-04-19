@@ -6,7 +6,7 @@
             xmlns:vm="clr-namespace:TransportControl.ViewModels"
             xmlns:ui="clr-namespace:TransportControl.Views"
             x:TypeArguments="vm:LinesTabbedViewModel"
-            BackgroundColor="White">
+            BackgroundColor="#151515">
     <ui:AllLinesPage Title="All" x:Name="AllLinesPage" />
     <ui:FavouriteLinesPage Title="Favourites" x:Name="FavouritesLinesPage"/>
 </rxui:ReactiveTabbedPage>

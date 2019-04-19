@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using TransportControl.Api;
 using TransportControl.Db;
 using TransportControl.Models;
+using TransportControl.Utils.Extensions;
 
 namespace TransportControl.Services
 {
@@ -57,14 +58,13 @@ namespace TransportControl.Services
 
         public IObservable<List<Line>> LoadLines()
         {
-            var assembly = IntrospectionExtensions.GetTypeInfo(typeof(App)).Assembly;
-            var stream = assembly.GetManifestResourceStream("TransportControl.Resources.lines.json");
-            return Observable.Return(JArray.Parse(new StreamReader(stream).ReadToEnd()).Select(jsonLine => new Line
-            {
-                Symbol = jsonLine.Value<string>("Symbol"),
-                Dest1 = jsonLine.Value<string>("Dest1"),
-                Dest2 = jsonLine.Value<string>("Dest2")
-            }).ToList());
+            return Observable.Return(JArray.Parse(new StreamReader("TransportControl.Resources.lines.json".ResourceStream()).ReadToEnd())
+                .Select(jsonLine => new Line
+                {
+                    Symbol = jsonLine.Value<string>("Symbol"),
+                    Dest1 = jsonLine.Value<string>("Dest1"),
+                    Dest2 = jsonLine.Value<string>("Dest2")
+                }).ToList());
         }
 
         public IObservable<List<Line>> LoadLinesWithSymbols(IEnumerable<string> symbols) => LoadLines()

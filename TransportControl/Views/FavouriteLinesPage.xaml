@@ -5,14 +5,14 @@
              xmlns:ui="clr-namespace:TransportControl.Views"
              xmlns:vm="clr-namespace:TransportControl.ViewModels"
              x:TypeArguments="vm:FavouriteLinesViewModel"
-             BackgroundColor="White">
+             BackgroundColor="Transparent">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <ui:LinesPageContent x:Name="LinesContent" />
         <Label Text="No favourite lines added yet." VerticalOptions="Center" HorizontalOptions="Center" FontSize="24"
-               x:Name="NoLinesLabel"/>
+               x:Name="NoLinesLabel" TextColor="LightGray"/>
     </Grid>
 
 </ui:BaseContentPage>

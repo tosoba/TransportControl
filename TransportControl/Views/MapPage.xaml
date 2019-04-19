@@ -13,14 +13,21 @@
     </ContentPage.Resources>
     
     <ContentPage.Content>
-        <StackLayout Orientation="Vertical" Spacing="0">
-            <maps:Map x:Name="map" VerticalOptions="FillAndExpand" Margin="0,0,0,0"/>
+        <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Margin="0,0,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <maps:Map x:Name="map" VerticalOptions="FillAndExpand" Margin="0,0,0,0" Grid.Row="0" Grid.Column="0"/>
 
-            <Label VerticalOptions="Start" HorizontalOptions="CenterAndExpand" 
-                   Margin="10,10,10,10" Text="No internet connection." FontSize="Medium" 
+            <Label VerticalOptions="Start" HorizontalOptions="FillAndExpand" Grid.Row="0" Grid.Column="0"
+                   Margin="10,10,10,10" Text="No internet connection." FontSize="Medium" BackgroundColor="DarkGray" TextColor="White"
                    IsVisible="{Binding IsConnected, Converter={StaticResource InverseBooleanConverter}}"/>
 
-            <Grid VerticalOptions="End" HorizontalOptions="FillAndExpand" Margin="0,0,0,0" ColumnSpacing="0">
+            <Grid VerticalOptions="End" HorizontalOptions="FillAndExpand" Margin="5" ColumnSpacing="0" Grid.Row="0" Grid.Column="0" BackgroundColor="Transparent">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -30,35 +37,32 @@
                 <Button x:Name="ShowLinesBtn"
                         Grid.Column="0"
                         BorderRadius="0"
-                        BorderWidth="2"
-                        BorderColor="White"
+                        BorderWidth="0"
                         HorizontalOptions="FillAndExpand"
                         BackgroundColor="#2196F3"
                         TextColor="White"
-                        Margin="0,0,0,0"
+                        Margin="5"
                         Text="Lines" />
                 <Button x:Name="ClearMapBtn"
                         Grid.Column="1"
                         BorderRadius="0"
-                        BorderWidth="2"
-                        BorderColor="White"
+                        BorderWidth="0"
                         HorizontalOptions="FillAndExpand"
                         BackgroundColor="#2196F3"
                         TextColor="White"
-                        Margin="0,0,0,0"
+                        Margin="5"
                         Text="Clear" />
                 <Button x:Name="ShowLocationBtn"
                         Grid.Column="2"
                         BorderRadius="0"
-                        BorderWidth="2"
+                        BorderWidth="0"
                         BorderColor="White"
                         HorizontalOptions="FillAndExpand"
                         BackgroundColor="#2196F3"
-                        Margin="0,0,0,0"
+                        Margin="5"
                         TextColor="White"
                         Text="Location" />
             </Grid>
-        </StackLayout>
-
+        </Grid>
     </ContentPage.Content>
 </ui:BaseContentPage>
