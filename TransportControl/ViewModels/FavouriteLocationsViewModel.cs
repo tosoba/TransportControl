@@ -3,9 +3,11 @@ using Splat;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Windows.Input;
 using TransportControl.Db;
 using TransportControl.Events;
 using TransportControl.Models;
@@ -17,9 +19,9 @@ namespace TransportControl.ViewModels
         public event EventHandler<VehiclesLoadedEventArgs> OnVehiclesLoaded;
 
         private ObservableCollection<Location> locations;
-        public ObservableCollection<Location> Locations
+        public ObservableCollection<Location> Locations 
         {
-            get => locations;
+            get => locations; 
             set
             {
                 this.RaiseAndSetIfChanged(ref locations, value);
@@ -27,14 +29,27 @@ namespace TransportControl.ViewModels
             }
         }
 
-        public Location SelectedLocation { get; set; }
+        private Location selectedLocation;
+        public Location SelectedLocation
+        {
+            get { return selectedLocation; }
+            set { this.RaiseAndSetIfChanged(ref selectedLocation, value); }
+        }
+
+        public ICommand GoToChooseRadius => ReactiveCommand.CreateFromObservable<Location, Unit>(location =>
+        {
+            var vm = new ChooseRadiusViewModel(location);
+            vm.OnVehiclesLoaded += OnVehiclesLoaded;
+            NavigateTo(vm).Subscribe();
+            return Observable.Return(Unit.Default);
+        });
 
         public bool NoLocationsLabelVisible => Locations == null || !Locations.Any();
 
         private IAppDatabase db;
 
         public FavouriteLocationsViewModel(
-            IAppDatabase db = null,
+            IAppDatabase db = null, 
             IScheduler mainThreadScheduler = null,
             IScheduler taskPoolScheduler = null)
         {
@@ -42,17 +57,12 @@ namespace TransportControl.ViewModels
             this.mainThreadScheduler = mainThreadScheduler ?? RxApp.MainThreadScheduler;
             this.taskPoolScheduler = taskPoolScheduler ?? RxApp.TaskpoolScheduler;
 
-            this.db.InsertLocation(new Location()
-            {
-                Name = "WAW test",
-                Lat = 52.19,
-                Lon = 21
-            });
-
             this.WhenActivated((CompositeDisposable disposables) =>
             {
+                SelectedLocation = null;
+
                 Observable.FromAsync(this.db.GetAllLocations)
-                    .SubscribeOn(this.mainThreadScheduler)
+                    .SubscribeOn(this.taskPoolScheduler)
                     .ObserveOn(this.mainThreadScheduler)
                     .Subscribe(
                     onNext: (locations) =>
@@ -61,6 +71,16 @@ namespace TransportControl.ViewModels
                     },
                     onError: (err) =>
                     {
+                    })
+                    .DisposeWith(disposables);
+
+                this.WhenAnyValue(vm => vm.SelectedLocation)
+                    .SubscribeOn(this.mainThreadScheduler)
+                    .ObserveOn(this.mainThreadScheduler)
+                    .Where(location => location != null)
+                    .Subscribe(location =>
+                    {
+                        GoToChooseRadius.Execute(location);
                     })
                     .DisposeWith(disposables);
             });

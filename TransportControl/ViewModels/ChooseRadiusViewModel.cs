@@ -49,6 +49,41 @@ namespace TransportControl.ViewModels
 
         public event EventHandler<VehiclesLoadedEventArgs> OnVehiclesLoaded;
 
+        private IObservable<Distance> SelectedDistanceObservable => this.WhenAnyValue(vm => vm.SelectedDistance)
+            .Where(distance => distance != null)
+            .Do(_ =>
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    if (!CrossConnectivity.Current.IsConnected)
+                    {
+                        SelectedDistance = null;
+                        UserDialogs.Instance.Toast("Unable to load vehicles' data - no internet connection.");
+                    }
+                });
+            })
+            .Where(_ => CrossConnectivity.Current.IsConnected)
+            .Do(_ => { Device.BeginInvokeOnMainThread(() => { SelectedDistance = null; }); });
+
+        public ChooseRadiusViewModel(
+            Location location,
+            IScheduler mainThreadScheduler = null,
+            IScheduler taskPoolScheduler = null,
+            IVehiclesService vehiclesSevice = null,
+            IScreen hostScreen = null
+        ) : base(mainThreadScheduler, taskPoolScheduler, vehiclesSevice, hostScreen)
+        {
+            this.WhenActivated(disposables =>
+            {
+                SelectedDistance = null;
+                SelectedDistanceObservable.Subscribe(onNext: async distance =>
+                {
+                    await LoadNearbyVehicles(distance, location.Position);
+                })
+                .DisposeWith(disposables);
+            });
+        }
+
         public ChooseRadiusViewModel(
             IScheduler mainThreadScheduler = null,
             IScheduler taskPoolScheduler = null,
@@ -70,52 +105,36 @@ namespace TransportControl.ViewModels
                   })
                   .DisposeWith(disposables);
 
-                this.WhenAnyValue(vm => vm.SelectedDistance)
-                    .Where(distance => distance != null)
-                    .Do(_ =>
+                SelectedDistanceObservable.Subscribe(onNext: async distance =>
+                {
+                    if (!await IsLocationPermissionGranted())
                     {
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            if (!CrossConnectivity.Current.IsConnected)
-                            {
-                                SelectedDistance = null;
-                                UserDialogs.Instance.Toast("Unable to load vehicles' data - no internet connection.");
-                            }
-                        });
-                    })
-                    .Where(_ => CrossConnectivity.Current.IsConnected)
-                    .Do(_ => { Device.BeginInvokeOnMainThread(() => { SelectedDistance = null; }); })
-                    .Subscribe(
-                        onNext: async distance =>
-                        {
-                            if (!await IsLocationPermissionGranted())
-                            {
-                                UserDialogs.Instance.Toast("Unable to load vehicles' data - no permission to access device location.");
-                                return;
-                            }
+                        UserDialogs.Instance.Toast("Unable to load vehicles' data - no permission to access device location.");
+                        return;
+                    }
 
-                            if (!CrossGeolocator.IsSupported || !CrossGeolocator.Current.IsGeolocationAvailable)
-                            {
-                                UserDialogs.Instance.Toast("Error retrieving location - device does not support geolocation.");
-                                return;
-                            }
+                    if (!CrossGeolocator.IsSupported || !CrossGeolocator.Current.IsGeolocationAvailable)
+                    {
+                        UserDialogs.Instance.Toast("Error retrieving location - device does not support geolocation.");
+                        return;
+                    }
 
-                            if (!CrossGeolocator.Current.IsGeolocationEnabled)
-                            {
-                                UserDialogs.Instance.Toast("Error retrieving location - location is disabled.");
-                                return;
-                            }
+                    if (!CrossGeolocator.Current.IsGeolocationEnabled)
+                    {
+                        UserDialogs.Instance.Toast("Error retrieving location - location is disabled.");
+                        return;
+                    }
 
-                            var userLocation = await GetLastUserLocation();
-                            if (userLocation == null)
-                            {
-                                UserDialogs.Instance.Toast("Unable to retrieve device location.");
-                                return;
-                            }
+                    var userLocation = await GetLastUserLocation();
+                    if (userLocation == null)
+                    {
+                        UserDialogs.Instance.Toast("Unable to retrieve device location.");
+                        return;
+                    }
 
-                            await LoadNearbyVehicles(distance, userLocation);
-                        })
-                    .DisposeWith(disposables);
+                    await LoadNearbyVehicles(distance, userLocation);
+                })
+                .DisposeWith(disposables);
             });
         }
 

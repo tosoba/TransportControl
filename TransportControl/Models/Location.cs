@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿using Plugin.Geolocator.Abstractions;
+using SQLite;
 
 namespace TransportControl.Models
 {
@@ -13,5 +14,8 @@ namespace TransportControl.Models
         public double Lat { get; set; }
 
         public double Lon { get; set; }
+
+        [Ignore]
+        public Position Position => new Position(Lat, Lon);
     }
 }
