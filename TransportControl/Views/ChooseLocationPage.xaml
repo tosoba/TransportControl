@@ -25,6 +25,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <Button x:Name="ConfirmBtn"
@@ -36,7 +37,7 @@
                     TextColor="White"
                     Margin="5"
                     Text="Confirm" />
-            <Button x:Name="AddToFavouritesBtn"
+            <Button x:Name="ClearBtn"
                     Grid.Column="1"
                     BorderRadius="0"
                     BorderWidth="0"
@@ -44,7 +45,16 @@
                     BackgroundColor="#2196F3"
                     TextColor="White"
                     Margin="5"
-                    Text="Add to favourites" />
+                    Text="Clear" />
+            <Button x:Name="AddToFavouritesBtn"
+                    Grid.Column="2"
+                    BorderRadius="0"
+                    BorderWidth="0"
+                    HorizontalOptions="FillAndExpand"
+                    BackgroundColor="#2196F3"
+                    TextColor="White"
+                    Margin="5"
+                    Text="Save" />
         </Grid>
     </Grid>
 
