@@ -26,11 +26,22 @@ namespace TransportControl.Views
             {
                 this.BindCommand(ViewModel, vm => vm.AddToFavourites, view => view.AddToFavouritesBtn);
                 this.BindCommand(ViewModel, vm => vm.GoToRadius, view => view.ConfirmBtn);
+
+                if (ChosenLocationPin != null)
+                {
+                    ViewModel.ChosenLocation = new Models.Location()
+                    {
+                        Name = "Chosen location",
+                        Lat = ChosenLocationPin.Position.Latitude,
+                        Lon = ChosenLocationPin.Position.Longitude
+                    };
+                }
             });
         }
 
         private void OnClearBtnClicked(object sender, EventArgs e)
         {
+            HintLabel.IsVisible = true;
             ChooseLocationButtonsGrid.IsVisible = false;
             ViewModel.ChosenLocation = null;
             map.Pins.Clear();
@@ -53,6 +64,7 @@ namespace TransportControl.Views
                 Lon = e.Point.Longitude
             };
             map.Pins.Add(ChosenLocationPin);
+            HintLabel.IsVisible = false;
             ChooseLocationButtonsGrid.IsVisible = true;
         }
 
