@@ -53,7 +53,18 @@ namespace TransportControl.Db
             return await query.ToListAsync();
         }
 
-        public async Task InsertLocation(Location location) => await Connection.InsertAsync(location);
+        public async Task<bool> InsertLocation(Location location)
+        {
+            var query = Connection.Table<Location>().Where(l => l.Name == location.Name && l.Lat == location.Lat && l.Lon == location.Lon);
+            var result = await query.ToListAsync();
+
+            if (!result.Any())
+            {
+                await Connection.InsertAsync(location);
+                return true;
+            }
+            return false;
+        }
 
         public async Task<IEnumerable<Location>> GetAllLocations() => await Connection.Table<Location>().ToListAsync();
 

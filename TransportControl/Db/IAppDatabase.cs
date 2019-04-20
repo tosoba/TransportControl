@@ -11,7 +11,7 @@ namespace TransportControl.Db
         Task DeleteLine(Line line);
         Task<IEnumerable<Line>> FilterFavourites(IEnumerable<Line> lines);
 
-        Task InsertLocation(Location location);
+        Task<bool> InsertLocation(Location location);
         Task<IEnumerable<Location>> GetAllLocations();
         Task DeleteLocation(Location location);
     }

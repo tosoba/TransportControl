@@ -64,9 +64,10 @@ namespace TransportControl.ViewModels
                     return Observable.FromAsync(() => this.db.InsertLocation(ChosenLocation));
                 })
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Do(_ =>
+                .Do(wasAdded =>
                 {
-                    UserDialogs.Instance.Toast($"{ChosenLocation.Name} added to favourites.");
+                    if (wasAdded) UserDialogs.Instance.Toast($"{ChosenLocation.Name} added to favourites.");
+                    else UserDialogs.Instance.Toast($"{ChosenLocation.Name} already added to favourites.");
                 });
             });
         }
