@@ -7,24 +7,28 @@
              x:TypeArguments="vm:ChooseRadiusViewModel"
              BackgroundColor="#151515">
     <ContentPage.Content>
-        <StackLayout>
-            <ListView ItemsSource="{Binding Distances}"
-                      x:Name="DistancesListView"
-                      HasUnevenRows="true"
-                      SeparatorColor="#2196F3">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <ui:SelectedBackgroundViewCell SelectedItemBackgroundColor="#2196F3">
-                            <Label Grid.Column="1"
-                                   Margin="5"
-                                   TextColor="White"
-                                   Text="{Binding ValueLabel}"
-                                   VerticalOptions="Center"
-                                   FontSize="24"/>
-                        </ui:SelectedBackgroundViewCell>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </StackLayout>
+        <ListView ItemsSource="{Binding Distances}"
+                  x:Name="DistancesListView"
+                  HasUnevenRows="true"
+                  SeparatorColor="#2196F3">
+            <ListView.Header>
+                <StackLayout Orientation="Horizontal" x:Name="RadiusListViewHeader" Margin="10">
+                    <Switch x:Name="FavouritesOnlySwitch" VerticalOptions="Center" HorizontalOptions="Start"/>
+                    <Label Text="Favourite lines only" TextColor="White" Margin="10,0,0,0" FontSize="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
+                </StackLayout>
+            </ListView.Header>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ui:SelectedBackgroundViewCell SelectedItemBackgroundColor="#2196F3">
+                        <Label Grid.Column="1"
+                                Margin="5"
+                                TextColor="White"
+                                Text="{Binding ValueLabel}"
+                                VerticalOptions="Center"
+                                FontSize="24"/>
+                    </ui:SelectedBackgroundViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </ContentPage.Content>
 </ui:BaseContentPage>

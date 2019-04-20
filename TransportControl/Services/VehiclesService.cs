@@ -53,6 +53,8 @@ namespace TransportControl.Services
             else return client.FetchAllVehiclesOfTypeAndLine(type, line).Select(response => response.Result);
         }
 
+        public Task<IEnumerable<Line>> FilterFavourites(IEnumerable<Line> lines) => db.FilterFavourites(lines);
+
         public async Task<IEnumerable<Line>> GetFavouriteLines() => await db.GetAllLines();
 
         public IObservable<List<Line>> LoadLines()

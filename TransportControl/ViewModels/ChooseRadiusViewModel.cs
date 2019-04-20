@@ -47,6 +47,20 @@ namespace TransportControl.ViewModels
             set { this.RaiseAndSetIfChanged(ref retrievingLocationInProgress, value); }
         }
 
+        private bool favouritesOnly = false;
+        public bool FavouritesOnly
+        {
+            set { this.RaiseAndSetIfChanged(ref favouritesOnly, value); }
+            get => favouritesOnly;
+        }
+
+        private bool anyFavouritesAdded = false;
+        public bool AnyFavouritesAdded
+        {
+            set { this.RaiseAndSetIfChanged(ref anyFavouritesAdded, value); }
+            get => anyFavouritesAdded;
+        }
+
         public event EventHandler<VehiclesLoadedEventArgs> OnVehiclesLoaded;
 
         private IObservable<Distance> SelectedDistanceObservable => this.WhenAnyValue(vm => vm.SelectedDistance)
@@ -81,6 +95,8 @@ namespace TransportControl.ViewModels
                     await LoadNearbyVehicles(distance, location.Position);
                 })
                 .DisposeWith(disposables);
+
+                InitAnyFavouritesAdded(disposables);
             });
         }
 
@@ -104,6 +120,8 @@ namespace TransportControl.ViewModels
                       else UserDialogs.Instance.HideLoading();
                   })
                   .DisposeWith(disposables);
+
+                InitAnyFavouritesAdded(disposables);
 
                 SelectedDistanceObservable.Subscribe(onNext: async distance =>
                 {
@@ -136,6 +154,17 @@ namespace TransportControl.ViewModels
                 })
                 .DisposeWith(disposables);
             });
+        }
+
+        private void InitAnyFavouritesAdded(CompositeDisposable disposables)
+        {
+            Observable.FromAsync(async () => await vehiclesSevice.GetFavouriteLines())
+                    .Where(lines => lines != null)
+                    .Select(lines => lines.Any())
+                    .SubscribeOn(taskPoolScheduler)
+                    .ObserveOn(mainThreadScheduler)
+                    .Subscribe(anyAdded => AnyFavouritesAdded = anyAdded)
+                    .DisposeWith(disposables);
         }
 
         private async Task<bool> IsLocationPermissionGranted()
@@ -176,29 +205,40 @@ namespace TransportControl.ViewModels
         {
             LoadingVehiclesInProgress = true;
 
-            var args = await vehiclesSevice.FetchNearbyVehicles(distance, userLocation)
+            var loadedEventArgs = await vehiclesSevice.FetchNearbyVehicles(distance, userLocation)
                 .SelectMany(vehicles => Observable.Return(vehicles)
                     .Zip(
                         second: vehiclesSevice.LoadLinesWithSymbols(vehicles.Select(v => v.Number)),
                         resultSelector: (_, lines) => new VehiclesLoadedEventArgs(vehicles, lines)
                     )
                 )
+                .SelectMany(args =>
+                {
+                    if (AnyFavouritesAdded && FavouritesOnly)
+                        return Observable.FromAsync(() => vehiclesSevice.FilterFavourites(args.Lines))
+                             .Select(favLines =>
+                             {
+                                 var favLinesSymbols = favLines.Select(line => line.Symbol);
+                                 return new VehiclesLoadedEventArgs(args.Vehicles.Where(v => favLinesSymbols.Contains(v.Number)).ToList(), favLines.ToList());
+                             });
+                    else return Observable.Return(args);
+                })
                 .OnErrorResumeNext(Observable.Return(new VehiclesLoadedEventArgs(new List<Vehicle> { }, new List<Line> { }, true)))
                 .FirstAsync();
 
             LoadingVehiclesInProgress = false;
 
-            if (args.ErrorOccurred)
+            if (loadedEventArgs.ErrorOccurred)
             {
                 OnVehiclesDataLoadingFailure();
             }
-            else if (args.Vehicles == null || !args.Vehicles.Any())
+            else if (loadedEventArgs.Vehicles == null || !loadedEventArgs.Vehicles.Any())
             {
                 OnVehiclesDataLoadingFailure("No vehicles found within given radius.");
             }
             else
             {
-                OnVehiclesLoaded?.Invoke(this, args);
+                OnVehiclesLoaded?.Invoke(this, loadedEventArgs);
                 NavigateBack().Subscribe();
             }
         }

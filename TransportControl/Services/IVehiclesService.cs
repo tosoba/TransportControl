@@ -15,5 +15,6 @@ namespace TransportControl.Services
         Task<IEnumerable<Line>> GetFavouriteLines();
         Task<bool> AddToFavourites(Line line);
         Task RemoveFromFavourites(Line line);
+        Task<IEnumerable<Line>> FilterFavourites(IEnumerable<Line> lines);
     }
 }

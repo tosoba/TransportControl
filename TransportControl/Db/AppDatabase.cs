@@ -46,10 +46,17 @@ namespace TransportControl.Db
 
         public async Task DeleteLine(Line line) => await Connection.DeleteAsync(line);
 
+        public async Task<IEnumerable<Line>> FilterFavourites(IEnumerable<Line> lines)
+        {
+            var symbols = lines.Select(l => l.Symbol);
+            var query = Connection.Table<Line>().Where(l => symbols.Contains(l.Symbol));
+            return await query.ToListAsync();
+        }
+
         public async Task InsertLocation(Location location) => await Connection.InsertAsync(location);
 
         public async Task<IEnumerable<Location>> GetAllLocations() => await Connection.Table<Location>().ToListAsync();
 
-        public async Task DeleteLocation(Location location) => await Connection.DeleteAsync(location);
+        public async Task DeleteLocation(Location location) => await Connection.DeleteAsync(location); 
     }
 }

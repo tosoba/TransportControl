@@ -4,6 +4,7 @@
     <SkipValidatePackageReferences>true</SkipValidatePackageReferences>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Db\IAppDatabase.cs~RF15d6f1.TMP" />
     <None Remove="Resources\lines.json" />
     <None Remove="Resources\map.json" />
     <None Remove="Views\AllLinesPage.xaml~RF981663.TMP" />

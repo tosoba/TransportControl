@@ -18,6 +18,12 @@ namespace TransportControl.Views
 
                 this.Bind(ViewModel, vm => vm.SelectedDistance, view => view.DistancesListView.SelectedItem)
                    .DisposeWith(disposables);
+
+                this.Bind(ViewModel, vm => vm.FavouritesOnly, view => view.FavouritesOnlySwitch.IsToggled)
+                   .DisposeWith(disposables);
+
+                this.Bind(ViewModel, vm => vm.AnyFavouritesAdded, view => view.RadiusListViewHeader.IsVisible)
+                   .DisposeWith(disposables);
             });
         }
     }
