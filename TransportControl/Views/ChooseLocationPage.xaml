@@ -21,7 +21,8 @@
         <Label VerticalOptions="Start" HorizontalOptions="FillAndExpand" Grid.Row="0" Grid.Column="0" BackgroundColor="#2196F3" 
                Margin="0" Text="Long press the map at the chosen location." FontSize="Medium" TextColor="White"/>
 
-        <Grid VerticalOptions="End" HorizontalOptions="FillAndExpand" Margin="5" ColumnSpacing="0" Grid.Row="0" Grid.Column="0" BackgroundColor="Transparent">
+        <Grid VerticalOptions="End" HorizontalOptions="FillAndExpand" Margin="5" ColumnSpacing="0" Grid.Row="0" Grid.Column="0" BackgroundColor="Transparent" 
+              x:Name="ChooseLocationButtonsGrid" IsVisible="False">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>

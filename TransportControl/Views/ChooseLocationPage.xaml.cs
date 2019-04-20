@@ -1,4 +1,6 @@
-﻿using TransportControl.Utils.Extensions;
+﻿using ReactiveUI;
+using System;
+using TransportControl.Utils.Extensions;
 using TransportControl.ViewModels;
 using Xamarin.Forms.GoogleMaps;
 using Xamarin.Forms.Xaml;
@@ -19,10 +21,18 @@ namespace TransportControl.Views
             map.MapLongClicked += OnMapLongClicked;
 
             ClearBtn.Clicked += OnClearBtnClicked;
+
+            this.WhenActivated(disposables =>
+            {
+                this.BindCommand(ViewModel, vm => vm.AddToFavourites, view => view.AddToFavouritesBtn);
+                this.BindCommand(ViewModel, vm => vm.GoToRadius, view => view.ConfirmBtn);
+            });
         }
 
-        private void OnClearBtnClicked(object sender, System.EventArgs e)
+        private void OnClearBtnClicked(object sender, EventArgs e)
         {
+            ChooseLocationButtonsGrid.IsVisible = false;
+            ViewModel.ChosenLocation = null;
             map.Pins.Clear();
             ChosenLocationPin = null;
         }
@@ -36,7 +46,14 @@ namespace TransportControl.Views
                 Position = new Position(e.Point.Latitude, e.Point.Longitude),
                 Label = "Chosen location"
             };
+            ViewModel.ChosenLocation = new Models.Location()
+            {
+                Name = "Chosen location",
+                Lat = e.Point.Latitude,
+                Lon = e.Point.Longitude
+            };
             map.Pins.Add(ChosenLocationPin);
+            ChooseLocationButtonsGrid.IsVisible = true;
         }
 
         private void OnMapCameraIdled(object sender, CameraIdledEventArgs e)
