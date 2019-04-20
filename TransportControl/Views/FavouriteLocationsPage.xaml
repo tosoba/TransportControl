@@ -1,11 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ui:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="TransportControl.Views.FavouriteLocationsPage"
-             xmlns:ui="clr-namespace:TransportControl.Views"
-             xmlns:vm="clr-namespace:TransportControl.ViewModels"
-             x:TypeArguments="vm:FavouriteLocationsViewModel"
-             BackgroundColor="Transparent">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    x:Class="TransportControl.Views.FavouriteLocationsPage"
+                    xmlns:ui="clr-namespace:TransportControl.Views"
+                    xmlns:vm="clr-namespace:TransportControl.ViewModels"
+                    x:Name="FavouriteLocsPage"
+                    x:TypeArguments="vm:FavouriteLocationsViewModel"
+                    BackgroundColor="Transparent">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -18,6 +19,11 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ui:SelectedBackgroundViewCell SelectedItemBackgroundColor="#2196F3">
+                        <ViewCell.ContextActions>
+                            <MenuItem Command="{Binding Path=BindingContext.DeleteFavouriteActionCommand,Source={x:Reference FavouriteLocsPage}}" 
+                                      CommandParameter="{Binding .}" 
+                                      Text="{Binding Path=BindingContext.DeleteFavouriteActionText,Source={x:Reference FavouriteLocsPage}}"/>
+                        </ViewCell.ContextActions>
                         <Label Grid.Column="1"
                                Margin="5"
                                TextColor="White"

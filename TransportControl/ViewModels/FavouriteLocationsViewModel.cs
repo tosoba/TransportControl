@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using Acr.UserDialogs;
+using ReactiveUI;
 using Splat;
 using System;
 using System.Collections.ObjectModel;
@@ -11,6 +12,7 @@ using System.Windows.Input;
 using TransportControl.Db;
 using TransportControl.Events;
 using TransportControl.Models;
+using Xamarin.Forms;
 
 namespace TransportControl.ViewModels
 {
@@ -44,6 +46,10 @@ namespace TransportControl.ViewModels
             return Observable.Return(Unit.Default);
         });
 
+        public Command<Location> DeleteFavouriteActionCommand { get; protected set; }
+
+        public string DeleteFavouriteActionText => "Remove from favourites";
+
         public bool NoLocationsLabelVisible => Locations == null || !Locations.Any();
 
         private IAppDatabase db;
@@ -61,18 +67,14 @@ namespace TransportControl.ViewModels
             {
                 SelectedLocation = null;
 
-                Observable.FromAsync(this.db.GetAllLocations)
-                    .SubscribeOn(this.taskPoolScheduler)
-                    .ObserveOn(this.mainThreadScheduler)
-                    .Subscribe(
-                    onNext: (locations) =>
-                    {
-                        Locations = new ObservableCollection<Location>(locations);
-                    },
-                    onError: (err) =>
-                    {
-                    })
-                    .DisposeWith(disposables);
+                LoadLocations(disposables);
+
+                DeleteFavouriteActionCommand = new Command<Location>(async location =>
+                {
+                    await this.db.DeleteLocation(location);
+                    LoadLocations(disposables);
+                    UserDialogs.Instance.Toast($"{location.Name} removed from favourites.");
+                });
 
                 this.WhenAnyValue(vm => vm.SelectedLocation)
                     .SubscribeOn(this.mainThreadScheduler)
@@ -84,6 +86,22 @@ namespace TransportControl.ViewModels
                     })
                     .DisposeWith(disposables);
             });
+        }
+
+        private void LoadLocations(CompositeDisposable disposables)
+        {
+            Observable.FromAsync(db.GetAllLocations)
+                .SubscribeOn(taskPoolScheduler)
+                .ObserveOn(mainThreadScheduler)
+                .Subscribe(
+                onNext: (locations) =>
+                {
+                    Locations = new ObservableCollection<Location>(locations);
+                },
+                onError: (err) =>
+                {
+                })
+                .DisposeWith(disposables);
         }
     }
 }
