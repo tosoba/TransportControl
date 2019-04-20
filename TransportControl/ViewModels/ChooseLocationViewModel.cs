@@ -34,13 +34,40 @@ namespace TransportControl.ViewModels
 
             AddToFavourites = ReactiveCommand.CreateFromObservable(() =>
             {
-                return Observable.FromAsync(() => this.db.InsertLocation(ChosenLocation))
-                    .SubscribeOn(RxApp.TaskpoolScheduler)
-                    .ObserveOn(RxApp.MainThreadScheduler)
-                    .Do(_ =>
+                return Observable.FromAsync(async () => await UserDialogs.Instance.PromptAsync(new PromptConfig
+                {
+                    Placeholder = "Location name",
+                    InputType = InputType.Name,
+                    OkText = "Ok",
+                    Title = "Save location",
+                }))
+                .Do(promptResult =>
+                {
+                    if (string.IsNullOrWhiteSpace(promptResult.Text))
                     {
-                        UserDialogs.Instance.Toast($"{ChosenLocation.Name} added to favourites.");
-                    });
+                        UserDialogs.Instance.Toast("Invalid name.");
+                    }
+                    else if (!promptResult.Ok || ChosenLocation == null)
+                    {
+                        UserDialogs.Instance.Toast("Error occurred - try again.");
+                    }
+                })
+                .Where(promptResult =>
+                {
+                    return promptResult.Ok && !string.IsNullOrWhiteSpace(promptResult.Text) && ChosenLocation != null;
+                })
+                .SubscribeOn(RxApp.MainThreadScheduler)
+                .ObserveOn(RxApp.TaskpoolScheduler)
+                .SelectMany(promptResult =>
+                {
+                    ChosenLocation.Name = promptResult.Text;
+                    return Observable.FromAsync(() => this.db.InsertLocation(ChosenLocation));
+                })
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Do(_ =>
+                {
+                    UserDialogs.Instance.Toast($"{ChosenLocation.Name} added to favourites.");
+                });
             });
         }
     }
