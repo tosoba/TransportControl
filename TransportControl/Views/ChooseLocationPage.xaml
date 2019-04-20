@@ -4,7 +4,48 @@
              x:Class="TransportControl.Views.ChooseLocationPage"
              xmlns:ui="clr-namespace:TransportControl.Views"
              xmlns:vm="clr-namespace:TransportControl.ViewModels"
+             xmlns:maps="clr-namespace:Xamarin.Forms.GoogleMaps;assembly=Xamarin.Forms.GoogleMaps"
              x:TypeArguments="vm:ChooseLocationViewModel"
              BackgroundColor="Transparent">
+
+    <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Margin="0,0,0,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <maps:Map x:Name="map" VerticalOptions="FillAndExpand" Margin="0,0,0,0" Grid.Row="0" Grid.Column="0"/>
+
+        <Label VerticalOptions="Start" HorizontalOptions="FillAndExpand" Grid.Row="0" Grid.Column="0" BackgroundColor="#2196F3" 
+               Margin="0" Text="Long press the map at the chosen location." FontSize="Medium" TextColor="White"/>
+
+        <Grid VerticalOptions="End" HorizontalOptions="FillAndExpand" Margin="5" ColumnSpacing="0" Grid.Row="0" Grid.Column="0" BackgroundColor="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button x:Name="ConfirmBtn"
+                    Grid.Column="0"
+                    BorderRadius="0"
+                    BorderWidth="0"
+                    HorizontalOptions="FillAndExpand"
+                    BackgroundColor="#2196F3"
+                    TextColor="White"
+                    Margin="5"
+                    Text="Confirm" />
+            <Button x:Name="AddToFavouritesBtn"
+                    Grid.Column="1"
+                    BorderRadius="0"
+                    BorderWidth="0"
+                    HorizontalOptions="FillAndExpand"
+                    BackgroundColor="#2196F3"
+                    TextColor="White"
+                    Margin="5"
+                    Text="Add to favourites" />
+        </Grid>
+    </Grid>
 
 </ui:BaseContentPage>
