@@ -12,7 +12,7 @@
         </Grid.RowDefinitions>
         <ui:LinesPageContent x:Name="LinesContent" />
         <Label Text="No favourite lines added yet." VerticalOptions="Center" HorizontalOptions="Center" FontSize="24"
-               x:Name="NoLinesLabel" TextColor="LightGray"/>
+               x:Name="NoLinesLabel" TextColor="{DynamicResource SecondaryTextColor}"/>
     </Grid>
 
 </ui:BaseContentPage>

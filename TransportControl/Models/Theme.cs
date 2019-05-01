@@ -2,7 +2,7 @@
 
 namespace TransportControl.Models
 {
-    public class AppTheme : ObservableObject
+    public class Theme : ObservableObject
     {
         public ThemeManager.ThemeType ThemeId { get; set; }
         public string Title { get; set; }

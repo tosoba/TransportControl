@@ -9,12 +9,15 @@ using Rg.Plugins.Popup;
 using TransportControl.Utils;
 using Xamarin;
 using Xamarin.Forms;
+using Xamarin.Forms.Platform.Android;
 
 namespace TransportControl.Droid
 {
     [Activity(Label = "TransportControl.Droid", Icon = "@drawable/icon", Theme = "@style/lightAppTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-    public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
+    public class MainActivity : FormsAppCompatActivity
     {
+        public static MainActivity Instance = null;
+
         protected override void OnCreate(Bundle bundle)
         {
             TabLayoutResource = Resource.Layout.Tabbar;
@@ -35,6 +38,7 @@ namespace TransportControl.Droid
             CrossCurrentActivity.Current.Init(this, bundle);
 
             LoadApplication(new App());
+            Instance = this;
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)

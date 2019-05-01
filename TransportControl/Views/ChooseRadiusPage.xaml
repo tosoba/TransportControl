@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ui:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="TransportControl.Views.ChooseRadiusPage"
-             xmlns:ui="clr-namespace:TransportControl.Views"
-             xmlns:vm="clr-namespace:TransportControl.ViewModels"
-             x:TypeArguments="vm:ChooseRadiusViewModel"
-             BackgroundColor="#151515">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    x:Class="TransportControl.Views.ChooseRadiusPage"
+                    xmlns:ui="clr-namespace:TransportControl.Views"
+                    xmlns:vm="clr-namespace:TransportControl.ViewModels"
+                    x:TypeArguments="vm:ChooseRadiusViewModel"
+                    BackgroundColor="{DynamicResource PageBackgroundColor}">
     <ContentPage.Content>
         <ListView ItemsSource="{Binding Distances}"
                   x:Name="DistancesListView"
@@ -14,7 +14,8 @@
             <ListView.Header>
                 <StackLayout Orientation="Horizontal" x:Name="RadiusListViewHeader" Margin="10">
                     <Switch x:Name="FavouritesOnlySwitch" VerticalOptions="Center" HorizontalOptions="Start"/>
-                    <Label Text="Favourite lines only" TextColor="White" Margin="10,0,0,0" FontSize="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
+                    <Label Text="Favourite lines only" TextColor="{DynamicResource PrimaryTextColor}" 
+                           Margin="10,0,0,0" FontSize="20" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
                 </StackLayout>
             </ListView.Header>
             <ListView.ItemTemplate>
@@ -22,7 +23,7 @@
                     <ui:SelectedBackgroundViewCell SelectedItemBackgroundColor="#2196F3">
                         <Label Grid.Column="1"
                                 Margin="5"
-                                TextColor="White"
+                                TextColor="{DynamicResource PrimaryTextColor}"
                                 Text="{Binding ValueLabel}"
                                 VerticalOptions="Center"
                                 FontSize="24"/>

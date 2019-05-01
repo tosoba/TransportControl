@@ -1,4 +1,6 @@
-﻿using TransportControl.ViewModels;
+﻿using ReactiveUI;
+using System.Reactive.Disposables;
+using TransportControl.ViewModels;
 using Xamarin.Forms.Xaml;
 
 namespace TransportControl.Views
@@ -9,6 +11,14 @@ namespace TransportControl.Views
         public ThemesPage()
         {
             InitializeComponent();
+
+            this.WhenActivated(disposables =>
+            {
+                Content.BindingContext = ViewModel;
+
+                this.Bind(ViewModel, vm => vm.SelectedTheme, view => view.ThemesListView.SelectedItem)
+                    .DisposeWith(disposables);
+            });
         }
     }
 }

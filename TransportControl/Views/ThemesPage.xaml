@@ -4,12 +4,30 @@
                     x:Class="TransportControl.Views.ThemesPage"
                     xmlns:vm="clr-namespace:TransportControl.ViewModels"
                     xmlns:ui="clr-namespace:TransportControl.Views"
-                    x:TypeArguments="vm:ThemesViewModel">
+                    x:TypeArguments="vm:ThemesViewModel"
+                    BackgroundColor="{DynamicResource PageBackgroundColor}">
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
+        <ListView ItemsSource="{Binding Themes}" x:Name="ThemesListView"
+                  RowHeight="70" SeparatorColor="{StaticResource SeparatorLineColor}" BackgroundColor="Transparent">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Grid Margin="10" VerticalOptions="Center">
+                            <Label Style="{StaticResource TitleLabelStyle}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding Title}"/>
+                                        <Span Text="&#x0a;"/>
+                                        <Span Text="{Binding Description}" Style="{StaticResource SubLabelStyle}"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <BoxView IsVisible="{Binding IsSelected, Mode=TwoWay}" CornerRadius="10" HeightRequest="20" WidthRequest="20" 
+                                     VerticalOptions="Center" HorizontalOptions="End" BackgroundColor="{DynamicResource PrimaryColor}"/>
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </ContentPage.Content>
 </ui:BaseContentPage>

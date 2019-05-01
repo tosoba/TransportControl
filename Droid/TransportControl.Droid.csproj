@@ -266,6 +266,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dependencies\ThemeChangedListener.cs" />
     <Compile Include="Helpers\Settings.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Renderers\CustomIconSearchBarRenderer.cs" />
