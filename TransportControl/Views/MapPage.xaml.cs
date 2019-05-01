@@ -26,6 +26,7 @@ namespace TransportControl.Views
                 this.BindCommand(ViewModel, vm => vm.GoToLines, view => view.ShowLinesBtn);
                 this.BindCommand(ViewModel, vm => vm.GoToLocation, view => view.ShowLocationBtn);
                 this.BindCommand(ViewModel, vm => vm.ClearMap, view => view.ClearMapBtn);
+                this.BindCommand(ViewModel, vm => vm.GoToThemes, view => view.ThemesMenuItem);
 
                 if (ViewModel != null && !handlersAttached)
                 {

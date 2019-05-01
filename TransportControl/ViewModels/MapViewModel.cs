@@ -20,6 +20,7 @@ namespace TransportControl.ViewModels
         public ICommand ClearMap { get; }
         public ICommand GoToLines { get; }
         public ICommand GoToLocation { get; }
+        public ICommand GoToThemes { get; }
 
         private bool isConnected = false;
         public bool IsConnected
@@ -70,6 +71,11 @@ namespace TransportControl.ViewModels
                 var vm = new LocationsTabbedViewModel();
                 vm.OnVehiclesLoaded = OnVehiclesLoaded;
                 return NavigateTo(vm);
+            });
+
+            GoToThemes = ReactiveCommand.CreateFromObservable(() =>
+            {
+                return NavigateTo(new ThemesViewModel());
             });
 
             IsConnected = CrossConnectivity.Current.IsConnected;

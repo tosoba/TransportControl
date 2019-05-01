@@ -3,10 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="TransportControl.Themes.DarkTheme">
     <!--Blue-->
-    <Color x:Key="PrimaryColor">#120064</Color>
+    <Color x:Key="PrimaryColor">#2196F3</Color>
 
     <!--Dark Blue-->
-    <Color x:Key="PrimaryDarkColor">#090030</Color>
+    <Color x:Key="PrimaryDarkColor">#0a6ebd</Color>
 
     <!--White-->
     <Color x:Key="PrimaryTintColor">#FFFFFF</Color>
@@ -15,7 +15,7 @@
     <Color x:Key="PageBackgroundColor">#141414</Color>
 
     <!--Blue-->
-    <Color x:Key="NavigationBarColor">#120064</Color>
+    <Color x:Key="NavigationBarColor">#2196F3</Color>
 
     <!--White-->
     <Color x:Key="PrimaryTextColor">#ffffff</Color>
