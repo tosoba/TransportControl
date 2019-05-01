@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+  <style name="darkThemeToolbarStyle" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+    <item name="android:textColorPrimary">#FFFFFF</item>
+    <item name="actionMenuTextColor">#FFFFFF</item>
+    <item name="android:textColorSecondary">#FFFFFF</item>
+  </style>
+
+  <style name="lightThemeToolbarStyle" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+    <item name="android:textColorPrimary">#FFFFFF</item>
+    <item name="actionMenuTextColor">#FFFFFF</item>
+    <item name="android:textColorSecondary">#FFFFFF</item>
+  </style>
+
+  <style name="ToolbarTitleStyle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
+    <item name="android:textSize">20sp</item>
+  </style>
+</resources>

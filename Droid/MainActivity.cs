@@ -6,6 +6,7 @@ using ImageCircle.Forms.Plugin.Droid;
 using Plugin.CurrentActivity;
 using Plugin.Permissions;
 using Rg.Plugins.Popup;
+using TransportControl.Utils;
 using Xamarin;
 using Xamarin.Forms;
 
@@ -43,6 +44,27 @@ namespace TransportControl.Droid
         public override void OnBackPressed()
         {
             Popup.SendBackPressed(base.OnBackPressed);
+        }
+
+        private void InitTheme()
+        {
+            var theme = ThemeManager.CurrentTheme();
+            switch (theme)
+            {
+                case ThemeManager.ThemeType.Light:
+                    {
+                        SetTheme(Resource.Style.lightAppTheme);
+                        break;
+                    }
+                case ThemeManager.ThemeType.Dark:
+                    {
+                        SetTheme(Resource.Style.darkAppTheme);
+                        break;
+                    }
+                default:
+                    SetTheme(Resource.Style.lightAppTheme);
+                    break;
+            }
         }
     }
 }

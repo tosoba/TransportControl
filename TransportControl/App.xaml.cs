@@ -1,4 +1,5 @@
-﻿using Xamarin.Forms;
+﻿using TransportControl.Utils;
+using Xamarin.Forms;
 using Xamarin.Forms.GoogleMaps;
 using Xamarin.Forms.Xaml;
 
@@ -12,7 +13,7 @@ namespace TransportControl
         public App()
         {
             InitializeComponent();
-            
+            ThemeManager.LoadTheme();
             var bootstrapper = new AppBootstrapper();
             MainPage = bootstrapper.CreateMainPage();
         }

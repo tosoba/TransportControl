@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+
+  <style name="darkAppTheme" parent="MyTheme">
+    <item name="toolbarStyle">@style/darkThemeToolbarStyle</item>
+    <item name="toolbarPopupStyle">@style/darkToolbarPopupTheme</item>
+    <item name="colorPrimaryDark">#b70042</item>
+    <item name="android:windowLightStatusBar">false</item>
+  </style>
+
+  <style name="lightAppTheme" parent="MyTheme">
+    <item name="toolbarStyle">@style/lightThemeToolbarStyle</item>
+    <item name="toolbarPopupStyle">@style/lightToolbarPopupTheme</item>
+    <item name="colorPrimaryDark">#22a009</item>
+    <item name="android:windowLightStatusBar">false</item>
+  </style>
+
+</resources>
