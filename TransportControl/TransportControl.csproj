@@ -6,16 +6,18 @@
   <ItemGroup>
     <None Remove="Db\IAppDatabase.cs~RF15d6f1.TMP" />
     <None Remove="Db\IAppDatabase.cs~RFfb242c.TMP" />
+    <None Remove="Resources\dark_map.json" />
+    <None Remove="Resources\light_map.json" />
     <None Remove="Resources\lines.json" />
-    <None Remove="Resources\map.json" />
     <None Remove="Views\AllLinesPage.xaml~RF981663.TMP" />
     <None Remove="Views\FavouriteLocationsPage.xaml.cs~RF1878aae.TMP" />
     <None Remove="Views\FavouriteLocationsPage.xaml~RF80d4e5.TMP" />
     <None Remove="Views\MapPage.xaml~RF2241beb.TMP" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\light_map.json" />
     <EmbeddedResource Include="Resources\lines.json" />
-    <EmbeddedResource Include="Resources\map.json" />
+    <EmbeddedResource Include="Resources\dark_map.json" />
   </ItemGroup>
 
   <ItemGroup>

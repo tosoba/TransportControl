@@ -20,7 +20,7 @@ namespace TransportControl.Droid.Renderers
             base.OnElementChanged(e);
             int searchPlateId = Control.Context.Resources.GetIdentifier("android:id/search_mag_icon", null, null);
             ImageView searchButton = Control.FindViewById<ImageView>(searchPlateId);
-            searchButton.SetImageDrawable(ContextCompat.GetDrawable(Context, Resource.Drawable.abc_textfield_search_activated_mtrl_alpha));
+            searchButton.SetImageDrawable(ContextCompat.GetDrawable(Context, Resource.Drawable.search_icon));
         }
     }
 }

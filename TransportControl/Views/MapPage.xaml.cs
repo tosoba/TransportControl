@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using TransportControl.Events;
+using TransportControl.Utils;
 using TransportControl.Utils.Extensions;
 using TransportControl.ViewModels;
 using Xamarin.Forms.GoogleMaps;
@@ -16,7 +17,8 @@ namespace TransportControl.Views
         {
             InitializeComponent();
 
-            map.InitializeWithDefaults();
+            var mapStyle = ThemeManager.CurrentTheme() == ThemeManager.ThemeType.Light ? MapExtensions.Style.LIGHT : MapExtensions.Style.DARK;
+            map.InitializeWithDefaults(mapStyle);
             map.CameraIdled += OnMapCameraIdled;
 
             this.WhenActivated(disposables =>
