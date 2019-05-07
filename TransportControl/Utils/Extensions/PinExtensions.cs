@@ -12,23 +12,29 @@ namespace TransportControl
             self.Position = finalPos;
         });
 
-        public static void AnimateTo(this Pin self, Position finalPos, double durationMillis = 500)
+        public static void AnimateTo(this Pin self, Position endPosition)
         {
             var startPosition = new Position(self.Position.Latitude, self.Position.Longitude);
             var startTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            var durationMillis = GetAnimationDuration(startPosition, endPosition);
 
             Device.StartTimer(TimeSpan.FromMilliseconds(16), () =>
             {
                 var elapsed = DateTimeOffset.Now.ToUnixTimeMilliseconds() - startTime;
-                var multiplier = Interpolator.GetInterpolation(elapsed / (float)durationMillis);
-                double lng = multiplier * finalPos.Longitude + (1 - multiplier)
-                        * startPosition.Longitude;
-                double lat = multiplier * finalPos.Latitude + (1 - multiplier)
-                        * startPosition.Latitude;
-
+                var multiplier = Interpolator.GetInterpolation(elapsed / durationMillis);
+                var lng = multiplier * endPosition.Longitude + (1 - multiplier) * startPosition.Longitude;
+                var lat = multiplier * endPosition.Latitude + (1 - multiplier) * startPosition.Latitude;
                 self.Position = new Position(lat, lng);
                 return elapsed < durationMillis;
             });
+        }
+
+        private static float GetAnimationDuration(Position startPosition, Position endPosition)
+        {
+            var distance = Coordinates.FromMapPosition(startPosition).DistanceTo(Coordinates.FromMapPosition(endPosition), UnitOfLength.Meters);
+            if (distance < 200) return 500;
+            else if (distance < 500) return 1000;
+            else return 1500;
         }
 
         public static void UpdateLabel(this Pin self, string label) => Device.BeginInvokeOnMainThread(() =>

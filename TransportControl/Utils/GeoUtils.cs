@@ -15,10 +15,12 @@ namespace TransportControl
         }
 
         public static Coordinates FromPosition(Position position) => new Coordinates(position.Latitude, position.Longitude);
+
+        public static Coordinates FromMapPosition(Xamarin.Forms.GoogleMaps.Position position) => new Coordinates(position.Latitude, position.Longitude);
     }
 
     public static class CoordinatesDistanceExtensions
-    { 
+    {
         public static double DistanceTo(this Coordinates baseCoordinates, Coordinates targetCoordinates, UnitOfLength unitOfLength)
         {
             var baseRad = Math.PI * baseCoordinates.Latitude / 180;
