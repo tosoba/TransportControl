@@ -9,13 +9,14 @@
     <AbsoluteLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
 
         <Image Source="{Binding Source}" 
-            AbsoluteLayout.LayoutBounds="0, 0, 37, 48"
-            AbsoluteLayout.LayoutFlags="None" />
-        
-        <Label Text="{Binding Display}" TextColor="{DynamicResource PrimaryTextColor}" FontSize="10" HorizontalTextAlignment="Center" 
-                BackgroundColor="Transparent" WidthRequest="100" HeightRequest="40"
-                AbsoluteLayout.LayoutBounds="8, 10, 21, 16"
-                AbsoluteLayout.LayoutFlags="None" />
+               AbsoluteLayout.LayoutBounds="0, 0, 37, 48"
+               AbsoluteLayout.LayoutFlags="None" />
+
+        <Label Text="{Binding Display}" TextColor="DarkSlateGray" 
+               FontSize="10" HorizontalTextAlignment="Center" 
+               BackgroundColor="Transparent" WidthRequest="100" HeightRequest="40"
+               AbsoluteLayout.LayoutBounds="8, 10, 21, 16"
+               AbsoluteLayout.LayoutFlags="None" />
 
     </AbsoluteLayout>
 </StackLayout>

@@ -3,8 +3,6 @@ using TransportControl.Models;
 using System.Collections.Generic;
 using ReactiveUI;
 using System.Linq;
-using Xamarin.Forms;
-using TransportControl.Dependencies;
 
 namespace TransportControl.ViewModels
 {
@@ -43,11 +41,6 @@ namespace TransportControl.ViewModels
                 t.IsSelected = t.ThemeId == selectedTheme.ThemeId;
             }
             ThemeManager.ChangeTheme(selectedTheme.ThemeId);
-
-            if (Device.RuntimePlatform == Device.Android)
-            {
-                DependencyService.Get<IThemeChangedListener>().OnThemeChanged(selectedTheme.ThemeId);
-            }
         }
     }
 }

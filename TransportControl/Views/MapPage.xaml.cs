@@ -18,6 +18,7 @@ namespace TransportControl.Views
             InitializeComponent();
 
             var mapStyle = ThemeManager.CurrentTheme() == ThemeManager.ThemeType.Light ? MapExtensions.Style.LIGHT : MapExtensions.Style.DARK;
+            ThemeManager.OnThemeChanged += OnThemeChanged;
             map.InitializeWithDefaults(mapStyle);
             map.CameraIdled += OnMapCameraIdled;
 
@@ -38,6 +39,19 @@ namespace TransportControl.Views
                     handlersAttached = true;
                 }
             });
+        }
+
+        private void OnThemeChanged(object sender, ThemeChangedEventArgs e)
+        {
+            switch (e.ThemeType)
+            {
+                case ThemeManager.ThemeType.Light:
+                    map.LoadAndSetStyle(MapExtensions.Style.LIGHT);
+                    break;
+                case ThemeManager.ThemeType.Dark:
+                    map.LoadAndSetStyle(MapExtensions.Style.DARK);
+                    break;
+            }
         }
 
         private void OnVehiclesTrackingStopped(object sender, VehiclesTrackingStoppedEventArgs e)
