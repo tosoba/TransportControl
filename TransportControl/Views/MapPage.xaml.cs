@@ -41,6 +41,19 @@ namespace TransportControl.Views
             });
         }
 
+        protected override bool OnBackButtonPressed()
+        {
+            if (ViewModel.IsRunning)
+            {
+                ViewModel.ClearMap.Execute(new object());
+                return true;
+            }
+            else
+            {
+                return base.OnBackButtonPressed();
+            }
+        }
+
         private void OnThemeChanged(object sender, ThemeChangedEventArgs e)
         {
             switch (e.ThemeType)
