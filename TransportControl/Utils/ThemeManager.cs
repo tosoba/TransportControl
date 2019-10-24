@@ -46,15 +46,16 @@ namespace TransportControl.Utils
             }
         }
 
-        public static void LoadTheme()
+        public static void ToggleTheme()
         {
-            ThemeType currentTheme = CurrentTheme();
-            ChangeTheme(currentTheme);
+            ChangeTheme(CurrentTheme == ThemeType.Light ? ThemeType.Dark : ThemeType.Light);
         }
 
-        public static ThemeType CurrentTheme()
+        public static void LoadTheme()
         {
-            return (ThemeType)CrossSettings.Current.GetValueOrDefault("SelectedTheme", (int)ThemeType.Light);
+            ChangeTheme(CurrentTheme);
         }
+
+        public static ThemeType CurrentTheme => (ThemeType)CrossSettings.Current.GetValueOrDefault("SelectedTheme", (int)ThemeType.Light);
     }
 }

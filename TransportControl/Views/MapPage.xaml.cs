@@ -10,14 +10,14 @@ using Xamarin.Forms.GoogleMaps;
 namespace TransportControl.Views
 {
     public partial class MapPage : BaseContentPage<MapViewModel>
-    { 
+    {
         private bool handlersAttached = false;
 
         public MapPage()
         {
             InitializeComponent();
 
-            var mapStyle = ThemeManager.CurrentTheme() == ThemeManager.ThemeType.Light ? MapExtensions.Style.LIGHT : MapExtensions.Style.DARK;
+            var mapStyle = ThemeManager.CurrentTheme == ThemeManager.ThemeType.Light ? MapExtensions.Style.LIGHT : MapExtensions.Style.DARK;
             ThemeManager.OnThemeChanged += OnThemeChanged;
             map.InitializeWithDefaults(mapStyle);
             map.CameraIdled += OnMapCameraIdled;
@@ -29,7 +29,7 @@ namespace TransportControl.Views
                 this.BindCommand(ViewModel, vm => vm.GoToLines, view => view.ShowLinesBtn);
                 this.BindCommand(ViewModel, vm => vm.GoToLocation, view => view.ShowLocationBtn);
                 this.BindCommand(ViewModel, vm => vm.ClearMap, view => view.ClearMapBtn);
-                this.BindCommand(ViewModel, vm => vm.GoToThemes, view => view.ThemesMenuItem);
+                this.BindCommand(ViewModel, vm => vm.ToggleTheme, view => view.ThemesMenuItem);
 
                 if (ViewModel != null && !handlersAttached)
                 {
@@ -38,6 +38,8 @@ namespace TransportControl.Views
                     ViewModel.OnVehiclesTrackingStopped += OnVehiclesTrackingStopped;
                     handlersAttached = true;
                 }
+
+                ThemesMenuItem.Text = ThemeManager.CurrentTheme == ThemeManager.ThemeType.Light ? "Dark" : "Light";
             });
         }
 
@@ -47,9 +49,11 @@ namespace TransportControl.Views
             {
                 case ThemeManager.ThemeType.Light:
                     map.LoadAndSetStyle(MapExtensions.Style.LIGHT);
+                    ThemesMenuItem.Text = "Dark";
                     break;
                 case ThemeManager.ThemeType.Dark:
                     map.LoadAndSetStyle(MapExtensions.Style.DARK);
+                    ThemesMenuItem.Text = "Light";
                     break;
             }
         }

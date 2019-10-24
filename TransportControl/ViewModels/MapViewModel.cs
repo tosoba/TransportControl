@@ -10,6 +10,7 @@ using System.Windows.Input;
 using TransportControl.Events;
 using TransportControl.Models;
 using TransportControl.Services;
+using TransportControl.Utils;
 using Xamarin.Forms;
 using Xamarin.Forms.GoogleMaps;
 
@@ -20,12 +21,12 @@ namespace TransportControl.ViewModels
         public ICommand ClearMap { get; }
         public ICommand GoToLines { get; }
         public ICommand GoToLocation { get; }
-        public ICommand GoToThemes { get; }
+        public ICommand ToggleTheme { get; }
 
         private bool isConnected = false;
         public bool IsConnected
         {
-            get { return isConnected; }
+            get => isConnected;
             private set { this.RaiseAndSetIfChanged(ref isConnected, value); }
         }
 
@@ -73,10 +74,7 @@ namespace TransportControl.ViewModels
                 return NavigateTo(vm);
             });
 
-            GoToThemes = ReactiveCommand.CreateFromObservable(() =>
-            {
-                return NavigateTo(new ThemesViewModel());
-            });
+            ToggleTheme = ReactiveCommand.Create(ThemeManager.ToggleTheme);
 
             IsConnected = CrossConnectivity.Current.IsConnected;
             CrossConnectivity.Current.ConnectivityChanged += OnConnectivityChanged;

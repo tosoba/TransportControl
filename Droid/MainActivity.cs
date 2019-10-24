@@ -16,8 +16,6 @@ namespace TransportControl.Droid
     [Activity(Label = "TransportControl.Droid", Icon = "@drawable/icon", Theme = "@style/lightAppTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : FormsAppCompatActivity
     {
-        public static MainActivity Instance = null;
-
         protected override void OnCreate(Bundle bundle)
         {
             TabLayoutResource = Resource.Layout.Tabbar;
@@ -28,7 +26,6 @@ namespace TransportControl.Droid
             base.OnCreate(bundle);
 
             Popup.Init(this, bundle);
-
             Forms.Init(this, bundle);
 
             FormsGoogleMaps.Init(this, bundle);
@@ -38,7 +35,6 @@ namespace TransportControl.Droid
             CrossCurrentActivity.Current.Init(this, bundle);
 
             LoadApplication(new App());
-            Instance = this;
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
@@ -54,8 +50,7 @@ namespace TransportControl.Droid
 
         private void InitTheme()
         {
-            var theme = ThemeManager.CurrentTheme();
-            switch (theme)
+            switch (ThemeManager.CurrentTheme)
             {
                 case ThemeManager.ThemeType.Light:
                     {
@@ -74,4 +69,3 @@ namespace TransportControl.Droid
         }
     }
 }
-

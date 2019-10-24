@@ -17,7 +17,7 @@ namespace TransportControl.Views
         {
             InitializeComponent();
 
-            var mapStyle = ThemeManager.CurrentTheme() == ThemeManager.ThemeType.Light ? MapExtensions.Style.LIGHT : MapExtensions.Style.DARK;
+            var mapStyle = ThemeManager.CurrentTheme == ThemeManager.ThemeType.Light ? MapExtensions.Style.LIGHT : MapExtensions.Style.DARK;
             map.InitializeWithDefaults(mapStyle);
             map.CameraIdled += OnMapCameraIdled;
             map.MapLongClicked += OnMapLongClicked;
