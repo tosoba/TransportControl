@@ -80,6 +80,11 @@ namespace TransportControl.ViewModels
             CrossConnectivity.Current.ConnectivityChanged += OnConnectivityChanged;
         }
 
+        public Vehicle FindByPinTag(Guid tag)
+        {
+            return trackedVehicles.Where(v => (Guid)v.Pin.Tag == tag).FirstOrDefault();
+        }
+
         private void OnVehiclesLoaded(object sender, VehiclesLoadedEventArgs e)
         {
             var filteredVehicles = e.Vehicles.Where(v => v.ContainsAllInfo && !IsVehicleAdded(v))

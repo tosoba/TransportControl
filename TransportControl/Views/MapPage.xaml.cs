@@ -21,6 +21,7 @@ namespace TransportControl.Views
             ThemeManager.OnThemeChanged += OnThemeChanged;
             map.InitializeWithDefaults(mapStyle);
             map.CameraIdled += OnMapCameraIdled;
+            map.PinClicked += OnPinClicked;
 
             this.WhenActivated(disposables =>
             {
@@ -81,6 +82,7 @@ namespace TransportControl.Views
             var vehicle = e.Vehicle;
             vehicle.Pin = new Pin
             {
+                Tag = Guid.NewGuid(),
                 Type = PinType.Place,
                 Label = vehicle.Label,
                 Position = new Position(vehicle.LatDbl, vehicle.LonDbl),
@@ -102,6 +104,13 @@ namespace TransportControl.Views
         private void OnMapCameraIdled(object sender, CameraIdledEventArgs e)
         {
             map.InitialCameraUpdate = CameraUpdateFactory.NewCameraPosition(e.Position);
+        }
+
+        private void OnPinClicked(object sender, PinClickedEventArgs e)
+        {
+            var vehicle = ViewModel.FindByPinTag((Guid)e.Pin.Tag);
+            if (vehicle != null) e.Pin.Label = vehicle.Label;
+            e.Handled = false;
         }
     }
 }
