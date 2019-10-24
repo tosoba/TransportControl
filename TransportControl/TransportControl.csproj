@@ -9,6 +9,7 @@
     <None Remove="Resources\dark_map.json" />
     <None Remove="Resources\light_map.json" />
     <None Remove="Resources\lines.json" />
+    <None Remove="Utils\VehicleUpdateTimeConverter.cs~RF6d25e5.TMP" />
     <None Remove="Views\AllLinesPage.xaml~RF981663.TMP" />
     <None Remove="Views\FavouriteLocationsPage.xaml.cs~RF1878aae.TMP" />
     <None Remove="Views\FavouriteLocationsPage.xaml~RF80d4e5.TMP" />

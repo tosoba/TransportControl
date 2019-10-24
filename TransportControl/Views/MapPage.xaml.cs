@@ -82,7 +82,7 @@ namespace TransportControl.Views
             vehicle.Pin = new Pin
             {
                 Type = PinType.Place,
-                Label = $"Last update at: {vehicle.Time}",
+                Label = vehicle.Label,
                 Position = new Position(vehicle.LatDbl, vehicle.LonDbl),
                 Icon = char.IsLetter(vehicle.Number.First()) || vehicle.NumberInt >= 100 ?
                     BitmapDescriptorFactory.FromView(new PinView(vehicle.Number, "pin_a.png"))

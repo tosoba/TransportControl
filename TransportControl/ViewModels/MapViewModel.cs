@@ -120,7 +120,8 @@ namespace TransportControl.ViewModels
             trackedVehicle.Pin.AnimateTo(
                 new Position(trackedVehicle.LatDbl, trackedVehicle.LonDbl)
             );
-            trackedVehicle.Pin.UpdateLabel($"Last update at: {trackedVehicle.Time}");
+
+            trackedVehicle.Pin.UpdateLabel(trackedVehicle.Label);
         }
 
         private void StartUpdatesIfNeeded()

@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Globalization;
+using TransportControl.Utils;
 using Xamarin.Forms.GoogleMaps;
 
 namespace TransportControl.Models
@@ -16,7 +18,8 @@ namespace TransportControl.Models
         public string Brigade { get; set; }
 
         [JsonProperty("Time")]
-        public string Time { get; set; }
+        [JsonConverter(typeof(JsonDateTimeConverter), "yyyy-MM-dd HH:mm:ss")]
+        public DateTime Time { get; set; }
 
         [JsonProperty("Lon")]
         public string Lon { get; set; }
@@ -35,5 +38,46 @@ namespace TransportControl.Models
 
         [JsonIgnore]
         public bool ContainsAllInfo => Lat != null && Lon != null && Brigade != null && Number != null && Time != null;
+
+        [JsonIgnore]
+        public string Label
+        {
+            get
+            {
+                TimeSpan timeSpanSinceUpdate = DateTime.Now - Time;
+                string label = "Last updated: ";
+                if (timeSpanSinceUpdate.Days > 0)
+                {
+                    label += timeSpanSinceUpdate.Days;
+                    label += timeSpanSinceUpdate.Days > 1 ? " days ago" : " day ago";
+                }
+                else if (timeSpanSinceUpdate.Hours > 0)
+                {
+                    label += timeSpanSinceUpdate.Hours;
+                    label += timeSpanSinceUpdate.Hours > 1 ? " hours ago" : " hour ago";
+                }
+                else if (timeSpanSinceUpdate.Minutes > 0)
+                {
+                    label += timeSpanSinceUpdate.Minutes;
+                    label += timeSpanSinceUpdate.Minutes > 1 ? " minutes " : " minute ";
+                    if (timeSpanSinceUpdate.Seconds == 0) label += "ago";
+                    else
+                    {
+                        label += timeSpanSinceUpdate.Seconds;
+                        label += timeSpanSinceUpdate.Seconds > 1 ? " seconds ago" : " second ago";
+                    }
+                }
+                else if (timeSpanSinceUpdate.Seconds > 0)
+                {
+                    label += timeSpanSinceUpdate.Seconds;
+                    label += timeSpanSinceUpdate.Seconds > 1 ? " seconds ago" : " second ago";
+                }
+                else
+                {
+                    label += "just now";
+                }
+                return label;
+            }
+        }
     }
 }
