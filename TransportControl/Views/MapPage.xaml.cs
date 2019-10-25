@@ -1,6 +1,5 @@
 ﻿using ReactiveUI;
 using System;
-using System.Linq;
 using TransportControl.Events;
 using TransportControl.Utils;
 using TransportControl.Utils.Extensions;
@@ -86,9 +85,7 @@ namespace TransportControl.Views
                 Type = PinType.Place,
                 Label = vehicle.Label,
                 Position = new Position(vehicle.LatDbl, vehicle.LonDbl),
-                Icon = char.IsLetter(vehicle.Number.First()) || vehicle.NumberInt >= 100 ?
-                    BitmapDescriptorFactory.FromView(new PinView(vehicle.Number, "pin_a.png"))
-                    : BitmapDescriptorFactory.FromView(new PinView(vehicle.Number, "pin_t.png"))
+                Icon = BitmapDescriptorFactory.FromView(new PinView(vehicle.Number, "pin.png"))
             };
             map.Pins.Add(vehicle.Pin);
         }

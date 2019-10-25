@@ -1,21 +1,21 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <StackLayout xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
-             WidthRequest="37" 
-             HeightRequest="48"
+             WidthRequest="41" 
+             HeightRequest="33"
              AnchorX="0.5"
              AnchorY="1.0"
              x:Class="TransportControl.Views.PinView">
     <AbsoluteLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
 
         <Image Source="{Binding Source}" 
-               AbsoluteLayout.LayoutBounds="0, 0, 37, 48"
+               AbsoluteLayout.LayoutBounds="0, 0, 41, 33"
                AbsoluteLayout.LayoutFlags="None" />
 
-        <Label Text="{Binding Display}" TextColor="DeepSkyBlue" 
-               FontSize="10" HorizontalTextAlignment="Center" 
-               BackgroundColor="Transparent" WidthRequest="100" HeightRequest="40"
-               AbsoluteLayout.LayoutBounds="8, 10, 21, 16"
+        <Label Text="{Binding Display}" TextColor="White" 
+               FontSize="12" HorizontalTextAlignment="Center" 
+               BackgroundColor="Transparent"
+               AbsoluteLayout.LayoutBounds="0, 0, 41, 33"
                AbsoluteLayout.LayoutFlags="None" />
 
     </AbsoluteLayout>

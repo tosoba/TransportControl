@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Globalization;
+using System.Linq;
 using TransportControl.Utils;
 using Xamarin.Forms.GoogleMaps;
 
@@ -79,5 +80,8 @@ namespace TransportControl.Models
                 return label;
             }
         }
+
+        [JsonIgnore]
+        public bool IsBus => char.IsLetter(Number.First()) || NumberInt >= 100;
     }
 }
