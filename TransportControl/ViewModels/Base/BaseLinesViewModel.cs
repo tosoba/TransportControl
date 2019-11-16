@@ -81,12 +81,18 @@ namespace TransportControl.ViewModels
         protected void LoadLines(CompositeDisposable disposables)
         {
             LinesObservable
+               .Select(lines =>
+               {
+                   return new Tuple<List<Line>, ObservableCollection<GroupedObservableCollection<string, Line>>>(
+                       lines, GroupLines(lines)
+                   );
+               })
                .SubscribeOn(taskPoolScheduler)
                .ObserveOn(mainThreadScheduler)
-               .Subscribe(lines =>
+               .Subscribe(tuple =>
                {
-                   AllLines = lines;
-                   GroupLines(AllLines);
+                   AllLines = tuple.Item1;
+                   LinesGrouped = tuple.Item2;
                })
                .DisposeWith(disposables);
         }
@@ -102,13 +108,12 @@ namespace TransportControl.ViewModels
             }
         }
 
-        protected void GroupLines(List<Line> lines)
+        protected ObservableCollection<GroupedObservableCollection<string, Line>> GroupLines(List<Line> lines)
         {
-            LinesGrouped?.Clear();
             var groups = lines.GroupBy(l => l.GroupSymbol)
                  .Select(lg => new GroupedObservableCollection<string, Line>(lg.Key, lg));
             if (!groups.Any())
-                LinesGrouped = new ObservableCollection<GroupedObservableCollection<string, Line>>();
+                return new ObservableCollection<GroupedObservableCollection<string, Line>>();
             else
             {
                 var dividedGroups = groups.Partition(lg => lg.Key.All(char.IsDigit)).ToTuple();
@@ -116,7 +121,7 @@ namespace TransportControl.ViewModels
                     .Select(lg => new GroupedObservableCollection<string, Line>(lg.Key, lg.OrderBy(l => int.Parse(l.Symbol))));
                 var linesContainingLetters = dividedGroups.Item2
                     .Select(lg => new GroupedObservableCollection<string, Line>(lg.Key, lg.OrderBy(l => l.Symbol)));
-                LinesGrouped = new ObservableCollection<GroupedObservableCollection<string, Line>>(numberOnlyLines.Concat(linesContainingLetters));
+                return new ObservableCollection<GroupedObservableCollection<string, Line>>(numberOnlyLines.Concat(linesContainingLetters));
             }
         }
 
@@ -161,7 +166,7 @@ namespace TransportControl.ViewModels
                             OnVehiclesLoaded?.Invoke(this, args);
                             NavigateBack().Subscribe().DisposeWith(disposables);
                         }
-                    }, 
+                    },
                     onCompleted: () =>
                     {
                         SelectedLine = null;
