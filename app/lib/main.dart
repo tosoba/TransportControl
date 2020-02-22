@@ -3,9 +3,9 @@ import 'package:transport_control/pages/lines_page.dart';
 import 'package:transport_control/pages/locations_page.dart';
 import 'package:transport_control/pages/map_page.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(TransportControlApp());
 
-class MyApp extends StatelessWidget {
+class TransportControlApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
