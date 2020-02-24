@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quiver/iterables.dart';
 
 import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
@@ -61,29 +62,27 @@ class _HomePageState extends State<HomePage>
         top: true,
         child: Stack(
           fit: StackFit.expand,
-          children: _mainPages
-              .asMap()
-              .map((index, page) {
-                final Widget view = FadeTransition(
-                  opacity: _fadeAnimationControllers[index]
-                      .drive(CurveTween(curve: Curves.fastOutSlowIn)),
-                  child: KeyedSubtree(
-                    key: _pageKeys[index],
-                    child: page.widget,
-                  ),
-                );
-                if (index == _currentPageIndex) {
-                  _fadeAnimationControllers[index].forward();
-                  return MapEntry(index, view);
-                } else {
-                  _fadeAnimationControllers[index].reverse();
-                  return _fadeAnimationControllers[index].isAnimating
-                      ? MapEntry(index, IgnorePointer(child: view))
-                      : MapEntry(index, Offstage(child: view));
-                }
-              })
-              .values
-              .toList(),
+          children: enumerate(_mainPages).map((indexed) {
+            final page = indexed.value;
+            final index = indexed.index;
+            final Widget view = FadeTransition(
+              opacity: _fadeAnimationControllers[index]
+                  .drive(CurveTween(curve: Curves.fastOutSlowIn)),
+              child: KeyedSubtree(
+                key: _pageKeys[index],
+                child: page.widget,
+              ),
+            );
+            if (index == _currentPageIndex) {
+              _fadeAnimationControllers[index].forward();
+              return view;
+            } else {
+              _fadeAnimationControllers[index].reverse();
+              return _fadeAnimationControllers[index].isAnimating
+                  ? IgnorePointer(child: view)
+                  : Offstage(child: view);
+            }
+          }).toList(),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
