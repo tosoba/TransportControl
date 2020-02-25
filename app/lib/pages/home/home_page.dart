@@ -5,6 +5,13 @@ import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 
+class HomePage extends StatefulWidget {
+  HomePage({Key key}) : super(key: key);
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
 class _HomeSubPage {
   final Widget widget;
   final _HomeBottomNavMenuItem menuItem;
@@ -20,17 +27,10 @@ class _HomeBottomNavMenuItem {
   _HomeBottomNavMenuItem(this.title, this.icon, this.color);
 }
 
-class HomePage extends StatefulWidget {
-  HomePage({Key key}) : super(key: key);
-
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
 class _HomePageState extends State<HomePage>
     with TickerProviderStateMixin<HomePage> {
   int _currentPageIndex = 0;
-  final List<_HomeSubPage> _mainPages = [
+  final List<_HomeSubPage> _subPages = [
     _HomeSubPage(
         MapPage(), _HomeBottomNavMenuItem('Map', Icons.map, Colors.white)),
     _HomeSubPage(
@@ -40,19 +40,19 @@ class _HomePageState extends State<HomePage>
   ];
 
   List<AnimationController> _fadeAnimationControllers;
-  List<Key> _pageKeys;
+  List<Key> _subPageKeys;
 
   @override
   void initState() {
     super.initState();
 
     _fadeAnimationControllers = List<AnimationController>.generate(
-        _mainPages.length,
+        _subPages.length,
         (_) => AnimationController(
             vsync: this, duration: Duration(milliseconds: 200))).toList();
     _fadeAnimationControllers[_currentPageIndex].value = 1.0;
-    _pageKeys =
-        List<Key>.generate(_mainPages.length, (_) => GlobalKey()).toList();
+    _subPageKeys =
+        List<Key>.generate(_subPages.length, (_) => GlobalKey()).toList();
   }
 
   @override
@@ -62,38 +62,20 @@ class _HomePageState extends State<HomePage>
         top: true,
         child: Stack(
           fit: StackFit.expand,
-          children: enumerate(_mainPages).map((indexed) {
-            final page = indexed.value;
-            final index = indexed.index;
-            final Widget view = FadeTransition(
-              opacity: _fadeAnimationControllers[index]
-                  .drive(CurveTween(curve: Curves.fastOutSlowIn)),
-              child: KeyedSubtree(
-                key: _pageKeys[index],
-                child: page.widget,
-              ),
-            );
-            if (index == _currentPageIndex) {
-              _fadeAnimationControllers[index].forward();
-              return view;
-            } else {
-              _fadeAnimationControllers[index].reverse();
-              return _fadeAnimationControllers[index].isAnimating
-                  ? IgnorePointer(child: view)
-                  : Offstage(child: view);
-            }
-          }).toList(),
+          children: enumerate(_subPages)
+              .map((indexed) => _subPageWidget(indexed.value, indexed.index))
+              .toList(),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentPageIndex,
-        backgroundColor: _mainPages[_currentPageIndex].menuItem.color,
+        backgroundColor: _subPages[_currentPageIndex].menuItem.color,
         onTap: (int index) {
           setState(() {
             _currentPageIndex = index;
           });
         },
-        items: _mainPages
+        items: _subPages
             .map((page) => BottomNavigationBarItem(
                   icon: Icon(page.menuItem.icon),
                   title: Text(page.menuItem.title),
@@ -101,6 +83,26 @@ class _HomePageState extends State<HomePage>
             .toList(),
       ),
     );
+  }
+
+  Widget _subPageWidget(_HomeSubPage subPage, int index) {
+    final Widget view = FadeTransition(
+      opacity: _fadeAnimationControllers[index]
+          .drive(CurveTween(curve: Curves.fastOutSlowIn)),
+      child: KeyedSubtree(
+        key: _subPageKeys[index],
+        child: subPage.widget,
+      ),
+    );
+    if (index == _currentPageIndex) {
+      _fadeAnimationControllers[index].forward();
+      return view;
+    } else {
+      _fadeAnimationControllers[index].reverse();
+      return _fadeAnimationControllers[index].isAnimating
+          ? IgnorePointer(child: view)
+          : Offstage(child: view);
+    }
   }
 
   @override
