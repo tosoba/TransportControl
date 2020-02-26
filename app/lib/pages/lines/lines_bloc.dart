@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sealed_unions/factories/triplet_factory.dart';
 import 'package:sealed_unions/implementations/union_3_impl.dart';
@@ -16,9 +17,9 @@ class LineListItem {
 
 class LinesState {
   final Set<LineListItem> items;
-  final String filter = '';
+  final String filter;
 
-  LinesState(this.items);
+  LinesState({@required this.items, this.filter = ''});
 }
 
 class _LinesEvent
@@ -30,14 +31,19 @@ class _LinesEvent
   _LinesEvent._(Union3<_Created, _FilterUpdated, _ItemSelectionChanged> union)
       : super(union);
 
-  factory _LinesEvent.created() => _LinesEvent._(_factory.first(_Created()));
+  factory _LinesEvent.created(List<LineListItem> items) =>
+      _LinesEvent._(_factory.first(_Created(items)));
   factory _LinesEvent.filterUpdated(String filter) =>
       _LinesEvent._(_factory.second(_FilterUpdated(filter)));
   factory _LinesEvent.itemSelectionChanged(LineListItem item) =>
       _LinesEvent._(_factory.third(_ItemSelectionChanged(item)));
 }
 
-class _Created {}
+class _Created {
+  final List<LineListItem> items;
+
+  _Created(this.items);
+}
 
 class _FilterUpdated {
   final String filter;
@@ -57,14 +63,16 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState> {
 
   LinesBloc() {
     rootBundle.loadString('assets/lines.json').then((jsonString) {
-      (jsonDecode(jsonString) as List)
+      final lineItems = (jsonDecode(jsonString) as List)
           .map((lineJson) => LineListItem(Line.fromJson(lineJson)))
           .toList();
+      add(_LinesEvent.created(lineItems));
     });
   }
 
   @override
   Stream<LinesState> mapEventToState(_LinesEvent event) async* {
-    event.join((created) {}, (filterUpdate) {}, (selectionChange) {});
+    yield event.join((created) => LinesState(items: created.items.toSet()),
+        (filterUpdate) => state, (selectionChange) => state);
   }
 }
