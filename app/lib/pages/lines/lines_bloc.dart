@@ -20,6 +20,8 @@ class LinesState {
   final String filter;
 
   LinesState({@required this.items, this.filter = ''});
+
+  factory LinesState.empty() => LinesState(items: Set());
 }
 
 class _LinesEvent
@@ -59,7 +61,7 @@ class _ItemSelectionChanged {
 
 class LinesBloc extends Bloc<_LinesEvent, LinesState> {
   @override
-  LinesState get initialState => null;
+  LinesState get initialState => LinesState.empty();
 
   LinesBloc() {
     rootBundle.loadString('assets/lines.json').then((jsonString) {

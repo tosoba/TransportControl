@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiver/iterables.dart';
-
+import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
 import 'package:transport_control/pages/map/map_page.dart';
@@ -34,7 +35,11 @@ class _HomePageState extends State<HomePage>
     _HomeSubPage(
         MapPage(), _HomeBottomNavMenuItem('Map', Icons.map, Colors.white)),
     _HomeSubPage(
-        LinesPage(), _HomeBottomNavMenuItem('Lines', Icons.list, Colors.white)),
+        BlocProvider(
+          create: (BuildContext context) => LinesBloc(),
+          child: LinesPage(),
+        ),
+        _HomeBottomNavMenuItem('Lines', Icons.list, Colors.white)),
     _HomeSubPage(LocationsPage(),
         _HomeBottomNavMenuItem('Locations', Icons.my_location, Colors.white))
   ];
