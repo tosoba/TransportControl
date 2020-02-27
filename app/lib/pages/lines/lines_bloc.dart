@@ -7,6 +7,7 @@ import 'package:sealed_unions/implementations/union_3_impl.dart';
 import 'package:sealed_unions/union_3.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:search_app_bar/searcher.dart';
 
 class LineListItem {
   final Line line;
@@ -59,7 +60,8 @@ class _ItemSelectionChanged {
   _ItemSelectionChanged(this.item);
 }
 
-class LinesBloc extends Bloc<_LinesEvent, LinesState> {
+class LinesBloc extends Bloc<_LinesEvent, LinesState>
+    implements Searcher<LineListItem> {
   @override
   LinesState get initialState => LinesState.empty();
 
@@ -77,4 +79,11 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState> {
     yield event.join((created) => LinesState(items: created.items.toSet()),
         (filterUpdate) => state, (selectionChange) => state);
   }
+
+  @override
+  List<LineListItem> get data => state.items.toList();
+
+  @override
+  Function(List<LineListItem>) get onDataFiltered =>
+      (List<LineListItem> filtered) => add(_LinesEvent.created(filtered));
 }
