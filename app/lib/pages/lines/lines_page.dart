@@ -41,7 +41,7 @@ class _LinesPageState extends State<LinesPage> {
                       filter: (LineListItem item, String query) => item
                           .line.symbol
                           .toLowerCase()
-                          .contains(query.toLowerCase()),
+                          .contains(query.trim().toLowerCase()),
                     ),
                     pinned: false,
                     floating: true,
@@ -50,9 +50,9 @@ class _LinesPageState extends State<LinesPage> {
               ];
             },
             body: ListView.builder(
-                itemCount: state.items.length,
+                itemCount: state.filteredItems.length,
                 itemBuilder: (context, index) {
-                  return Text(state.items.elementAt(index).line.symbol);
+                  return Text(state.filteredItems.elementAt(index).line.symbol);
                 }));
       },
     );

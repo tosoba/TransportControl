@@ -9,7 +9,7 @@ import 'filter.dart';
 import 'search_widget.dart';
 
 class SearchAppBar<T> extends StatefulWidget implements PreferredSizeWidget {
-  final Searcher searcher;
+  final Searcher<T> searcher;
   final Filter<T> filter;
   final Widget title;
   final bool centerTitle;

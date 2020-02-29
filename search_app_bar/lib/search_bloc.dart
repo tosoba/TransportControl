@@ -6,7 +6,7 @@ import 'package:search_app_bar/searcher.dart';
 import 'filter.dart';
 
 class SearchBloc<T> extends BlocBase {
-  final Searcher searcher;
+  final Searcher<T> searcher;
   Filter<T> filter;
 
   final _isInSearchMode = BehaviorSubject<bool>();

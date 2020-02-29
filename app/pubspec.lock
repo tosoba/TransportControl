@@ -137,13 +137,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.6.4"
-  pedantic:
-    dependency: transitive
-    description:
-      name: pedantic
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.8.0+1"
   petitparser:
     dependency: transitive
     description:
@@ -182,7 +175,7 @@ packages:
   search_app_bar:
     dependency: "direct dev"
     description:
-      path: "..\\search_app_bar"
+      path: "../search_app_bar"
       relative: true
     source: path
     version: "1.0.2+2"
@@ -232,7 +225,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.11"
+    version: "0.2.14"
   typed_data:
     dependency: transitive
     description:
