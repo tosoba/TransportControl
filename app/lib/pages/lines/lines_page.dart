@@ -35,10 +35,10 @@ class _LinesPageState extends State<LinesPage> {
               return [
                 SliverAppBar(
                     titleSpacing: 0.0,
-                    title: SearchAppBar<LineListItem>(
+                    title: SearchAppBar<LineListItemState>(
                       title: Text('Lines'),
                       searcher: BlocProvider.of<LinesBloc>(context),
-                      filter: (LineListItem item, String query) => item
+                      filter: (LineListItemState item, String query) => item
                           .line.symbol
                           .toLowerCase()
                           .contains(query.trim().toLowerCase()),
@@ -49,12 +49,33 @@ class _LinesPageState extends State<LinesPage> {
                     forceElevated: innerBoxIsScrolled)
               ];
             },
-            body: ListView.builder(
+            body: ListView.separated(
+                separatorBuilder: (context, index) =>
+                    Divider(color: Colors.black),
                 itemCount: state.filteredItems.length,
                 itemBuilder: (context, index) {
-                  return Text(state.filteredItems.elementAt(index).line.symbol);
+                  return LineListItem(
+                      state: state.filteredItems.elementAt(index));
                 }));
       },
+    );
+  }
+}
+
+class LineListItem extends StatelessWidget {
+  final LineListItemState state;
+
+  const LineListItem({Key key, this.state}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(state.line.symbol),
+        Column(
+          children: [Text(state.line.dest1), Text(state.line.dest2)],
+        )
+      ],
     );
   }
 }

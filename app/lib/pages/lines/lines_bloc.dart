@@ -9,16 +9,16 @@ import 'package:transport_control/model/line.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:search_app_bar/searcher.dart';
 
-class LineListItem {
+class LineListItemState {
   final Line line;
   final bool selected = false;
 
-  LineListItem(this.line);
+  LineListItemState(this.line);
 }
 
 class LinesState {
-  final List<LineListItem> items;
-  final List<LineListItem> filteredItems;
+  final List<LineListItemState> items;
+  final List<LineListItemState> filteredItems;
 
   LinesState({@required this.items, @required this.filteredItems});
 
@@ -35,41 +35,41 @@ class _LinesEvent
   _LinesEvent._(Union3<_Created, _ItemsFiltered, _ItemSelectionChanged> union)
       : super(union);
 
-  factory _LinesEvent.created(List<LineListItem> items) =>
+  factory _LinesEvent.created(List<LineListItemState> items) =>
       _LinesEvent._(_factory.first(_Created(items)));
-  factory _LinesEvent.itemsFiltered(List<LineListItem> items) =>
+  factory _LinesEvent.itemsFiltered(List<LineListItemState> items) =>
       _LinesEvent._(_factory.second(_ItemsFiltered(items)));
-  factory _LinesEvent.itemSelectionChanged(LineListItem item) =>
+  factory _LinesEvent.itemSelectionChanged(LineListItemState item) =>
       _LinesEvent._(_factory.third(_ItemSelectionChanged(item)));
 }
 
 class _Created {
-  final List<LineListItem> items;
+  final List<LineListItemState> items;
 
   _Created(this.items);
 }
 
 class _ItemsFiltered {
-  final List<LineListItem> items;
+  final List<LineListItemState> items;
 
   _ItemsFiltered(this.items);
 }
 
 class _ItemSelectionChanged {
-  final LineListItem item;
+  final LineListItemState item;
 
   _ItemSelectionChanged(this.item);
 }
 
 class LinesBloc extends Bloc<_LinesEvent, LinesState>
-    implements Searcher<LineListItem> {
+    implements Searcher<LineListItemState> {
   @override
   LinesState get initialState => LinesState.empty();
 
   LinesBloc() {
     rootBundle.loadString('assets/lines.json').then((jsonString) {
       final lineItems = (jsonDecode(jsonString) as List)
-          .map((lineJson) => LineListItem(Line.fromJson(lineJson)))
+          .map((lineJson) => LineListItemState(Line.fromJson(lineJson)))
           .toList();
       add(_LinesEvent.created(lineItems));
     });
@@ -86,9 +86,10 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
   }
 
   @override
-  List<LineListItem> get data => state.items.toList();
+  List<LineListItemState> get data => state.items.toList();
 
   @override
-  Function(List<LineListItem>) get onDataFiltered =>
-      (List<LineListItem> filtered) => add(_LinesEvent.itemsFiltered(filtered));
+  Function(List<LineListItemState>) get onDataFiltered =>
+      (List<LineListItemState> filtered) =>
+          add(_LinesEvent.itemsFiltered(filtered));
 }
