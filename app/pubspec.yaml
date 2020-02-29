@@ -26,6 +26,7 @@ dependencies:
   flutter_bloc: ^3.2.0
   quiver: ^2.0.5
   sealed_unions: "^3.0.2+2"
+  animated_stream_list: ^1.1.0
 
 dev_dependencies:
   flutter_test:
