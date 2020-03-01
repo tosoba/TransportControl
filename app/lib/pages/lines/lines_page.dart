@@ -27,94 +27,75 @@ class _LinesPageState extends State<LinesPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return NestedScrollView(
-        controller: _scrollViewController,
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
-                titleSpacing: 0.0,
-                title: SearchAppBar<LineListItemState>(
-                  title: Text('Lines'),
-                  searcher: BlocProvider.of<LinesBloc>(context),
-                  filter: (LineListItemState item, String query) => item
-                      .line.symbol
-                      .toLowerCase()
-                      .contains(query.trim().toLowerCase()),
+  Widget build(BuildContext context) => NestedScrollView(
+      controller: _scrollViewController,
+      headerSliverBuilder: (context, innerBoxIsScrolled) {
+        return [_searchLinesAppBar(context, innerBoxIsScrolled)];
+      },
+      body: _linesList(BlocProvider.of<LinesBloc>(context)
+          .map((state) => state.filteredItems)));
+
+  Widget _searchLinesAppBar(BuildContext context, bool innerBoxIsScrolled) =>
+      SliverAppBar(
+          titleSpacing: 0.0,
+          title: SearchAppBar<LineListItemState>(
+            iconTheme: IconThemeData(color: Colors.white),
+            title: Text('Lines'),
+            searcher: BlocProvider.of<LinesBloc>(context),
+            filter: (LineListItemState item, String query) => item.line.symbol
+                .toLowerCase()
+                .contains(query.trim().toLowerCase()),
+          ),
+          pinned: false,
+          floating: true,
+          snap: true,
+          forceElevated: innerBoxIsScrolled);
+
+  Widget _linesList(Stream<List<LineListItemState>> lineStatesStream) =>
+      AnimatedStreamList<LineListItemState>(
+        streamList: lineStatesStream,
+        itemBuilder: (LineListItemState lineState, int index,
+                BuildContext context, Animation<double> animation) =>
+            _lineListItem(lineState, index, animation, false),
+        itemRemovedBuilder: (LineListItemState lineState, int index,
+                BuildContext context, Animation<double> animation) =>
+            _lineListItem(lineState, index, animation, true),
+        equals: (ls1, ls2) => ls1.line.symbol == ls2.line.symbol,
+      );
+
+  Widget _lineListItem(LineListItemState lineState, int index,
+      Animation<double> animation, bool removed) {
+    final card = Card(
+      child: ListTile(
+        title: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Text(
+                lineState.line.symbol,
+                style:
+                    const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  lineState.line.dest1,
+                  style: const TextStyle(fontSize: 14),
                 ),
-                pinned: false,
-                floating: true,
-                snap: true,
-                forceElevated: innerBoxIsScrolled)
-          ];
-        },
-        body: _lineStatesList(BlocProvider.of<LinesBloc>(context)
-            .map((state) => state.filteredItems)));
-  }
-
-  Widget _lineStatesList(Stream<List<LineListItemState>> lineStatesStream) {
-    return AnimatedStreamList<LineListItemState>(
-      streamList: lineStatesStream,
-      itemBuilder: (LineListItemState lineState, int index,
-              BuildContext context, Animation<double> animation) =>
-          _tile(lineState, index, animation),
-      itemRemovedBuilder: (LineListItemState lineState, int index,
-              BuildContext context, Animation<double> animation) =>
-          _removedTile(lineState, index, animation),
-      equals: (ls1, ls2) => ls1.line.symbol == ls2.line.symbol,
-    );
-  }
-
-  Widget _tile(
-      LineListItemState lineState, int index, Animation<double> animation) {
-    final textStyle = TextStyle();
-    final card = Card(
-      child: ListTile(
-        leading: Checkbox(
+                Text(
+                  lineState.line.dest2,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            )
+          ],
+        ),
+        trailing: Checkbox(
           value: lineState.selected,
-          onChanged: (newValue) => {},
+          onChanged: removed ? null : (newValue) => {},
         ),
-        title: Text(
-          lineState.line.symbol,
-          style: textStyle,
-        ),
-        subtitle: Text(
-          lineState.line.dest1 + ' : ' + lineState.line.dest2,
-          style: textStyle,
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete),
-          onPressed: () => {},
-        ),
-      ),
-    );
-    return index < 20
-        ? SizeTransition(
-            axis: Axis.vertical,
-            sizeFactor: animation,
-            child: card,
-          )
-        : card;
-  }
-
-  Widget _removedTile(
-      LineListItemState lineState, int index, Animation<double> animation) {
-    final textStyle = TextStyle();
-    final card = Card(
-      child: ListTile(
-        leading: Checkbox(
-          value: lineState.selected,
-          onChanged: null,
-        ),
-        title: Text(
-          lineState.line.symbol,
-          style: textStyle,
-        ),
-        subtitle: Text(
-          lineState.line.dest1 + ' : ' + lineState.line.dest2,
-          style: textStyle,
-        ),
-        trailing: const Icon(Icons.delete),
       ),
     );
     return index < 20
