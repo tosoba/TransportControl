@@ -1,65 +1,15 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sealed_unions/factories/triplet_factory.dart';
-import 'package:sealed_unions/implementations/union_3_impl.dart';
-import 'package:sealed_unions/union_3.dart';
-import 'package:transport_control/model/line.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sealed_unions/implementations/union_3_impl.dart';
+import 'package:sealed_unions/factories/triplet_factory.dart';
+import 'package:sealed_unions/union_3.dart';
 import 'package:search_app_bar/searcher.dart';
+import 'package:transport_control/model/line.dart';
 
-class LineListItemState {
-  final Line line;
-  final bool selected = false;
-
-  LineListItemState(this.line);
-}
-
-class LinesState {
-  final List<LineListItemState> items;
-  final List<LineListItemState> filteredItems;
-
-  LinesState({@required this.items, @required this.filteredItems});
-
-  factory LinesState.empty() =>
-      LinesState(items: List(), filteredItems: List());
-}
-
-class _LinesEvent
-    extends Union3Impl<_Created, _ItemsFiltered, _ItemSelectionChanged> {
-  static final Triplet<_Created, _ItemsFiltered, _ItemSelectionChanged>
-      _factory =
-      const Triplet<_Created, _ItemsFiltered, _ItemSelectionChanged>();
-
-  _LinesEvent._(Union3<_Created, _ItemsFiltered, _ItemSelectionChanged> union)
-      : super(union);
-
-  factory _LinesEvent.created(List<LineListItemState> items) =>
-      _LinesEvent._(_factory.first(_Created(items)));
-  factory _LinesEvent.itemsFiltered(List<LineListItemState> items) =>
-      _LinesEvent._(_factory.second(_ItemsFiltered(items)));
-  factory _LinesEvent.itemSelectionChanged(LineListItemState item) =>
-      _LinesEvent._(_factory.third(_ItemSelectionChanged(item)));
-}
-
-class _Created {
-  final List<LineListItemState> items;
-
-  _Created(this.items);
-}
-
-class _ItemsFiltered {
-  final List<LineListItemState> items;
-
-  _ItemsFiltered(this.items);
-}
-
-class _ItemSelectionChanged {
-  final LineListItemState item;
-
-  _ItemSelectionChanged(this.item);
-}
+part 'package:transport_control/pages/lines/lines_state.dart';
+part 'package:transport_control/pages/lines/lines_event.dart';
 
 class LinesBloc extends Bloc<_LinesEvent, LinesState>
     implements Searcher<LineListItemState> {
@@ -86,7 +36,7 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
   }
 
   @override
-  List<LineListItemState> get data => state.items.toList();
+  List<LineListItemState> get data => state.items;
 
   @override
   Function(List<LineListItemState>) get onDataFiltered =>
