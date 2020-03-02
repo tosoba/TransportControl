@@ -27,6 +27,7 @@ dependencies:
   quiver: ^2.0.5
   sealed_unions: "^3.0.2+2"
   animated_stream_list: ^1.1.0
+  google_maps_flutter: ^0.5.24+1
 
 dev_dependencies:
   flutter_test:
