@@ -2,6 +2,7 @@ import 'package:animated_stream_list/animated_stream_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:search_app_bar/search_app_bar.dart';
+import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 
 class LinesPage extends StatefulWidget {
@@ -32,17 +33,19 @@ class _LinesPageState extends State<LinesPage> {
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [_searchLinesAppBar(context, innerBoxIsScrolled)];
       },
-      body: _linesList(BlocProvider.of<LinesBloc>(context)
-          .map((state) => state.filteredItems)));
+      body: _linesList(
+          BlocProvider.of<LinesBloc>(context)
+              .map((state) => state.filteredItems.entries.toList()),
+          BlocProvider.of<LinesBloc>(context).itemSelectionChanged));
 
   Widget _searchLinesAppBar(BuildContext context, bool innerBoxIsScrolled) =>
       SliverAppBar(
           titleSpacing: 0.0,
-          title: SearchAppBar<LineListItemState>(
+          title: SearchAppBar<MapEntry<Line, bool>>(
             iconTheme: IconThemeData(color: Colors.white),
             title: Text('Lines'),
             searcher: BlocProvider.of<LinesBloc>(context),
-            filter: (LineListItemState item, String query) => item.line.symbol
+            filter: (MapEntry<Line, bool> item, String query) => item.key.symbol
                 .toLowerCase()
                 .contains(query.trim().toLowerCase()),
           ),
@@ -51,20 +54,25 @@ class _LinesPageState extends State<LinesPage> {
           snap: true,
           forceElevated: innerBoxIsScrolled);
 
-  Widget _linesList(Stream<List<LineListItemState>> lineStatesStream) =>
-      AnimatedStreamList<LineListItemState>(
+  Widget _linesList(Stream<List<MapEntry<Line, bool>>> lineStatesStream,
+          Function(Line, bool) selectionChanged) =>
+      AnimatedStreamList<MapEntry<Line, bool>>(
         streamList: lineStatesStream,
-        itemBuilder: (LineListItemState lineState, int index,
+        itemBuilder: (MapEntry<Line, bool> lineState, int index,
                 BuildContext context, Animation<double> animation) =>
-            _lineListItem(lineState, index, animation, false),
-        itemRemovedBuilder: (LineListItemState lineState, int index,
+            _lineListItem(lineState, index, animation, false, selectionChanged),
+        itemRemovedBuilder: (MapEntry<Line, bool> lineState, int index,
                 BuildContext context, Animation<double> animation) =>
-            _lineListItem(lineState, index, animation, true),
+            _lineListItem(lineState, index, animation, true, selectionChanged),
         equals: (ls1, ls2) => ls1.line.symbol == ls2.line.symbol,
       );
 
-  Widget _lineListItem(LineListItemState lineState, int index,
-      Animation<double> animation, bool removed) {
+  Widget _lineListItem(
+      MapEntry<Line, bool> lineState,
+      int index,
+      Animation<double> animation,
+      bool removed,
+      Function(Line, bool) selectionChanged) {
     final card = Card(
       child: ListTile(
         title: Row(
@@ -72,7 +80,7 @@ class _LinesPageState extends State<LinesPage> {
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: Text(
-                lineState.line.symbol,
+                lineState.key.symbol,
                 style:
                     const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
               ),
@@ -81,11 +89,11 @@ class _LinesPageState extends State<LinesPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  lineState.line.dest1,
+                  lineState.key.dest1,
                   style: const TextStyle(fontSize: 14),
                 ),
                 Text(
-                  lineState.line.dest2,
+                  lineState.key.dest2,
                   style: const TextStyle(fontSize: 14),
                 ),
               ],
@@ -93,8 +101,12 @@ class _LinesPageState extends State<LinesPage> {
           ],
         ),
         trailing: Checkbox(
-          value: lineState.selected,
-          onChanged: removed ? null : (newValue) => {},
+          value: lineState.value,
+          onChanged: removed
+              ? null
+              : (newValue) {
+                  selectionChanged(lineState.key, newValue);
+                },
         ),
       ),
     );

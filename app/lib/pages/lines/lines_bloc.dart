@@ -12,15 +12,14 @@ part 'package:transport_control/pages/lines/lines_state.dart';
 part 'package:transport_control/pages/lines/lines_event.dart';
 
 class LinesBloc extends Bloc<_LinesEvent, LinesState>
-    implements Searcher<LineListItemState> {
+    implements Searcher<MapEntry<Line, bool>> {
   @override
   LinesState get initialState => LinesState.empty();
 
   LinesBloc() {
     rootBundle.loadString('assets/lines.json').then((jsonString) {
-      final lineItems = (jsonDecode(jsonString) as List)
-          .map((lineJson) => LineListItemState(Line.fromJson(lineJson)))
-          .toList();
+      final lineItems = Map.fromIterable(jsonDecode(jsonString) as List,
+          key: (lineJson) => Line.fromJson(lineJson), value: (_) => false);
       add(_LinesEvent.created(lineItems));
     });
   }
@@ -32,14 +31,25 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
             LinesState(items: created.items, filteredItems: created.items),
         (filtered) =>
             LinesState(items: state.items, filteredItems: filtered.items),
-        (selectionChange) => state);
+        (selectionChange) {
+      final updatedItems = Map.of(state.items);
+      updatedItems[selectionChange.item] = selectionChange.selected;
+      final updatedFilteredItems = Map.of(state.filteredItems);
+      updatedFilteredItems[selectionChange.item] = selectionChange.selected;
+      return LinesState(
+          items: updatedItems, filteredItems: updatedFilteredItems);
+    });
   }
 
   @override
-  List<LineListItemState> get data => state.items;
+  List<MapEntry<Line, bool>> get data => state.items.entries.toList();
 
   @override
-  Function(List<LineListItemState>) get onDataFiltered =>
-      (List<LineListItemState> filtered) =>
-          add(_LinesEvent.itemsFiltered(filtered));
+  Function(List<MapEntry<Line, bool>>) get onDataFiltered =>
+      (List<MapEntry<Line, bool>> filtered) =>
+          add(_LinesEvent.itemsFiltered(Map.fromEntries(filtered)));
+
+  void itemSelectionChanged(Line item, bool selected) {
+    add(_LinesEvent.itemSelectionChanged(item, selected));
+  }
 }

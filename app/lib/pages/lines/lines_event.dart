@@ -9,28 +9,29 @@ class _LinesEvent
   _LinesEvent._(Union3<_Created, _ItemsFiltered, _ItemSelectionChanged> union)
       : super(union);
 
-  factory _LinesEvent.created(List<LineListItemState> items) =>
+  factory _LinesEvent.created(Map<Line, bool> items) =>
       _LinesEvent._(_factory.first(_Created(items)));
-  factory _LinesEvent.itemsFiltered(List<LineListItemState> items) =>
+  factory _LinesEvent.itemsFiltered(Map<Line, bool> items) =>
       _LinesEvent._(_factory.second(_ItemsFiltered(items)));
-  factory _LinesEvent.itemSelectionChanged(LineListItemState item) =>
-      _LinesEvent._(_factory.third(_ItemSelectionChanged(item)));
+  factory _LinesEvent.itemSelectionChanged(Line item, bool selected) =>
+      _LinesEvent._(_factory.third(_ItemSelectionChanged(item, selected)));
 }
 
 class _Created {
-  final List<LineListItemState> items;
+  final Map<Line, bool> items;
 
   _Created(this.items);
 }
 
 class _ItemsFiltered {
-  final List<LineListItemState> items;
+  final Map<Line, bool> items;
 
   _ItemsFiltered(this.items);
 }
 
 class _ItemSelectionChanged {
-  final LineListItemState item;
+  final Line item;
+  final bool selected;
 
-  _ItemSelectionChanged(this.item);
+  _ItemSelectionChanged(this.item, this.selected);
 }
