@@ -86,18 +86,15 @@ class _LinesPageState extends State<LinesPage> {
                     const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.key.dest1,
-                  style: const TextStyle(fontSize: 14),
-                ),
-                Text(
-                  item.key.dest2,
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  lineDestText(item.key.dest1),
+                  const Divider(color: Colors.grey),
+                  lineDestText(item.key.dest2),
+                ],
+              ),
             )
           ],
         ),
@@ -119,4 +116,11 @@ class _LinesPageState extends State<LinesPage> {
           )
         : card;
   }
+
+  Widget lineDestText(String text) => Text(
+        text,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(fontSize: 14),
+      );
 }
