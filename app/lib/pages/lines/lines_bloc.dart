@@ -27,17 +27,13 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
   @override
   Stream<LinesState> mapEventToState(_LinesEvent event) async* {
     yield event.join(
-        (created) =>
-            LinesState(items: created.items, filteredItems: created.items),
-        (filtered) =>
-            LinesState(items: state.items, filteredItems: filtered.items),
+        (created) => LinesState(items: created.items, filter: null),
+        (filterChange) =>
+            LinesState(items: state.items, filter: filterChange.filter),
         (selectionChange) {
       final updatedItems = Map.of(state.items);
       updatedItems[selectionChange.item] = selectionChange.selected;
-      final updatedFilteredItems = Map.of(state.filteredItems);
-      updatedFilteredItems[selectionChange.item] = selectionChange.selected;
-      return LinesState(
-          items: updatedItems, filteredItems: updatedFilteredItems);
+      return LinesState(items: updatedItems, filter: state.filter);
     });
   }
 
@@ -45,9 +41,17 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
   List<MapEntry<Line, bool>> get data => state.items.entries.toList();
 
   @override
-  Function(List<MapEntry<Line, bool>>) get onDataFiltered =>
-      (List<MapEntry<Line, bool>> filtered) =>
-          add(_LinesEvent.itemsFiltered(Map.fromEntries(filtered)));
+  Function(String) get filterChanged =>
+      (filter) => add(_LinesEvent.filterChanged(filter));
+
+  Stream<List<MapEntry<Line, bool>>> get filteredItemsStream =>
+      map((state) => state.filter == null
+          ? state.items.entries.toList()
+          : state.items.entries
+              .where((entry) => entry.key.symbol
+                  .toLowerCase()
+                  .contains(state.filter.trim().toLowerCase()))
+              .toList());
 
   void itemSelectionChanged(Line item, bool selected) {
     add(_LinesEvent.itemSelectionChanged(item, selected));

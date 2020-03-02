@@ -1,6 +1,6 @@
 import 'dart:core';
 
 abstract class Searcher<T> {
-  Function(List<T>) get onDataFiltered;
+  Function(String) get filterChanged;
   List<T> get data;
 }

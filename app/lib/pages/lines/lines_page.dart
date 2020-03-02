@@ -34,9 +34,9 @@ class _LinesPageState extends State<LinesPage> {
         return [_searchLinesAppBar(context, innerBoxIsScrolled)];
       },
       body: _linesList(
-          BlocProvider.of<LinesBloc>(context)
-              .map((state) => state.filteredItems.entries.toList()),
-          BlocProvider.of<LinesBloc>(context).itemSelectionChanged));
+          itemsStream: BlocProvider.of<LinesBloc>(context).filteredItemsStream,
+          selectionChanged:
+              BlocProvider.of<LinesBloc>(context).itemSelectionChanged));
 
   Widget _searchLinesAppBar(BuildContext context, bool innerBoxIsScrolled) =>
       SliverAppBar(
@@ -54,25 +54,26 @@ class _LinesPageState extends State<LinesPage> {
           snap: true,
           forceElevated: innerBoxIsScrolled);
 
-  Widget _linesList(Stream<List<MapEntry<Line, bool>>> lineStatesStream,
-          Function(Line, bool) selectionChanged) =>
+  Widget _linesList(
+          {Stream<List<MapEntry<Line, bool>>> itemsStream,
+          Function(Line, bool) selectionChanged}) =>
       AnimatedStreamList<MapEntry<Line, bool>>(
-        streamList: lineStatesStream,
+        streamList: itemsStream,
         itemBuilder: (MapEntry<Line, bool> lineState, int index,
                 BuildContext context, Animation<double> animation) =>
             _lineListItem(lineState, index, animation, false, selectionChanged),
-        itemRemovedBuilder: (MapEntry<Line, bool> lineState, int index,
+        itemRemovedBuilder: (MapEntry<Line, bool> item, int index,
                 BuildContext context, Animation<double> animation) =>
-            _lineListItem(lineState, index, animation, true, selectionChanged),
+            _lineListItem(item, index, animation, true, selectionChanged),
         equals: (ls1, ls2) => ls1.line.symbol == ls2.line.symbol,
       );
 
   Widget _lineListItem(
-      MapEntry<Line, bool> lineState,
+      MapEntry<Line, bool> item,
       int index,
       Animation<double> animation,
       bool removed,
-      Function(Line, bool) selectionChanged) {
+      Function(Line, bool) itemSelectionChanged) {
     final card = Card(
       child: ListTile(
         title: Row(
@@ -80,7 +81,7 @@ class _LinesPageState extends State<LinesPage> {
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: Text(
-                lineState.key.symbol,
+                item.key.symbol,
                 style:
                     const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
               ),
@@ -89,11 +90,11 @@ class _LinesPageState extends State<LinesPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  lineState.key.dest1,
+                  item.key.dest1,
                   style: const TextStyle(fontSize: 14),
                 ),
                 Text(
-                  lineState.key.dest2,
+                  item.key.dest2,
                   style: const TextStyle(fontSize: 14),
                 ),
               ],
@@ -101,11 +102,11 @@ class _LinesPageState extends State<LinesPage> {
           ],
         ),
         trailing: Checkbox(
-          value: lineState.value,
+          value: item.value,
           onChanged: removed
               ? null
               : (newValue) {
-                  selectionChanged(lineState.key, newValue);
+                  itemSelectionChanged(item.key, newValue);
                 },
         ),
       ),
