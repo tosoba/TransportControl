@@ -76,3 +76,4 @@
 .flutter-plugins-dependencies
 /android/app/src/main/res/values/keys.xml
 /ios/Runner/Key.swift
+/lib/api/vehicles_api_key.dart
