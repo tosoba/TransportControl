@@ -7,4 +7,7 @@ class LinesState {
   LinesState({@required this.items, @required this.filter});
 
   factory LinesState.empty() => LinesState(items: Map(), filter: null);
+
+  int get numberOfSelectedLines => items.values
+      .fold(0, (counter, selected) => selected ? counter + 1 : counter);
 }

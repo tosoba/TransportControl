@@ -33,10 +33,18 @@ class _LinesPageState extends State<LinesPage> {
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [_searchLinesAppBar(context, innerBoxIsScrolled)];
       },
-      body: _linesList(
-          itemsStream: BlocProvider.of<LinesBloc>(context).filteredItemsStream,
-          selectionChanged:
-              BlocProvider.of<LinesBloc>(context).itemSelectionChanged));
+      body: Column(
+        children: [
+          Expanded(
+            child: _linesList(
+                itemsStream:
+                    BlocProvider.of<LinesBloc>(context).filteredItemsStream,
+                selectionChanged:
+                    BlocProvider.of<LinesBloc>(context).itemSelectionChanged),
+          ),
+          _selectedLinesText,
+        ],
+      ));
 
   Widget _searchLinesAppBar(BuildContext context, bool innerBoxIsScrolled) =>
       SliverAppBar(
@@ -53,6 +61,25 @@ class _LinesPageState extends State<LinesPage> {
           floating: true,
           snap: true,
           forceElevated: innerBoxIsScrolled);
+
+  Widget get _selectedLinesText => BlocBuilder<LinesBloc, LinesState>(
+        builder: (context, state) {
+          final numberOfSelectedLines = state.numberOfSelectedLines;
+          return numberOfSelectedLines > 0
+              ? Container(
+                  width: double.infinity,
+                  color: Theme.of(context).primaryColor,
+                  child: Text(
+                    '$numberOfSelectedLines ${numberOfSelectedLines > 1 ? 'lines are' : 'line is'} selected.',
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                )
+              : Container();
+        },
+      );
 
   Widget _linesList(
           {Stream<List<MapEntry<Line, bool>>> itemsStream,
