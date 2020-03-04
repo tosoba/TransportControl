@@ -17,11 +17,11 @@ class _VehiclesApi implements VehiclesApi {
   String baseUrl;
 
   @override
-  fetchAllVehicles(type,
-      {line,
+  fetchVehicles(
+      {type,
+      line,
       resourceId = "f2e5503e-927d-4ad3-9500-4ab9e55deb59",
       apiKey = vehiclesApiKey}) async {
-    ArgumentError.checkNotNull(type, 'type');
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       'type': type,
