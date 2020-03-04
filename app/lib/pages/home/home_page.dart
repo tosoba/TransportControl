@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:quiver/iterables.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
+import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_page.dart';
+import 'package:transport_control/repo/vehicles_repo.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -33,7 +36,12 @@ class _HomePageState extends State<HomePage>
   int _currentPageIndex = 0;
   final List<_HomeSubPage> _subPages = [
     _HomeSubPage(
-        MapPage(), _HomeBottomNavMenuItem('Map', Icons.map, Colors.white)),
+        BlocProvider(
+          create: (BuildContext context) =>
+              MapBloc(GetIt.instance<VehiclesRepo>()),
+          child: MapPage(),
+        ),
+        _HomeBottomNavMenuItem('Map', Icons.map, Colors.white)),
     _HomeSubPage(
         BlocProvider(
           create: (BuildContext context) => LinesBloc(),
