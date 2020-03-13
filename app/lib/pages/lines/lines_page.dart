@@ -48,6 +48,8 @@ class _LinesPageState extends State<LinesPage> {
 
   Widget _searchLinesAppBar(BuildContext context, bool innerBoxIsScrolled) =>
       SliverAppBar(
+          leading: null,
+          automaticallyImplyLeading: false,
           titleSpacing: 0.0,
           title: SearchAppBar<MapEntry<Line, bool>>(
             iconTheme: IconThemeData(color: Colors.white),

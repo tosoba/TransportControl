@@ -6,13 +6,11 @@ class MapPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: GoogleMap(
-          mapType: MapType.normal,
-          initialCameraPosition: CameraPosition(
-            target: LatLng(52.237049, 21.017532),
-            zoom: 11,
-          )),
-    );
+    return GoogleMap(
+        mapType: MapType.normal,
+        initialCameraPosition: CameraPosition(
+          target: LatLng(52.237049, 21.017532),
+          zoom: 11,
+        ));
   }
 }
