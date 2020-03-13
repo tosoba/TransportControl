@@ -24,15 +24,16 @@ class HomePage extends StatelessWidget {
       );
 
   Widget get _appBar => PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(15),
+        preferredSize: Size.fromHeight(kToolbarHeight + 10),
+        child: Padding(
+          padding: EdgeInsets.only(left: 15, right: 15, top: 10),
           child: AppBar(
             leading: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(15.0),
+                  topLeft: const Radius.circular(15.0),
+                  bottomLeft: const Radius.circular(15.0),
                 ),
               ),
               child: IconButton(
@@ -46,7 +47,8 @@ class HomePage extends StatelessWidget {
             title: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(15.0),
+                  topRight: const Radius.circular(15.0),
+                  bottomRight: const Radius.circular(15.0),
                 ),
                 color: Colors.white,
               ),
@@ -58,7 +60,7 @@ class HomePage extends StatelessWidget {
               height: kToolbarHeight,
             ),
             backgroundColor: Colors.transparent,
-            elevation: 10,
+            elevation: 0.0,
           ),
         ),
       );
