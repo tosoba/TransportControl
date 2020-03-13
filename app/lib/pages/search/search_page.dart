@@ -32,13 +32,16 @@ class _SearchPageState extends State<SearchPage>
   int _currentPageIndex = 0;
   final List<_SearchSubPage> _subPages = [
     _SearchSubPage(
-        BlocProvider(
-          create: (BuildContext context) => LinesBloc(),
-          child: LinesPage(),
-        ),
-        _SearchBottomNavMenuItem('Lines', Icons.list, Colors.white)),
-    _SearchSubPage(LocationsPage(),
-        _SearchBottomNavMenuItem('Locations', Icons.my_location, Colors.white))
+      BlocProvider(
+        create: (BuildContext context) => LinesBloc(),
+        child: LinesPage(),
+      ),
+      _SearchBottomNavMenuItem('Lines', Icons.list, Colors.white),
+    ),
+    _SearchSubPage(
+      LocationsPage(),
+      _SearchBottomNavMenuItem('Locations', Icons.my_location, Colors.white),
+    )
   ];
 
   List<AnimationController> _fadeAnimationControllers;
@@ -49,43 +52,46 @@ class _SearchPageState extends State<SearchPage>
     super.initState();
 
     _fadeAnimationControllers = List<AnimationController>.generate(
-        _subPages.length,
-        (_) => AnimationController(
-            vsync: this, duration: Duration(milliseconds: 200))).toList();
+      _subPages.length,
+      (_) => AnimationController(
+        vsync: this,
+        duration: Duration(milliseconds: 200),
+      ),
+    ).toList();
     _fadeAnimationControllers[_currentPageIndex].value = 1.0;
-    _subPageKeys =
-        List<Key>.generate(_subPages.length, (_) => GlobalKey()).toList();
+    _subPageKeys = List<Key>.generate(
+      _subPages.length,
+      (_) => GlobalKey(),
+    ).toList();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        top: true,
-        child: Stack(
-          fit: StackFit.expand,
-          children: enumerate(_subPages)
-              .map((indexed) => _subPageWidget(indexed.value, indexed.index))
+  Widget build(BuildContext context) => Scaffold(
+        body: SafeArea(
+          top: true,
+          child: Stack(
+            fit: StackFit.expand,
+            children: enumerate(_subPages)
+                .map((indexed) => _subPageWidget(indexed.value, indexed.index))
+                .toList(),
+          ),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _currentPageIndex,
+          backgroundColor: _subPages[_currentPageIndex].menuItem.color,
+          onTap: (int index) {
+            setState(() {
+              _currentPageIndex = index;
+            });
+          },
+          items: _subPages
+              .map((page) => BottomNavigationBarItem(
+                    icon: Icon(page.menuItem.icon),
+                    title: Text(page.menuItem.title),
+                  ))
               .toList(),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentPageIndex,
-        backgroundColor: _subPages[_currentPageIndex].menuItem.color,
-        onTap: (int index) {
-          setState(() {
-            _currentPageIndex = index;
-          });
-        },
-        items: _subPages
-            .map((page) => BottomNavigationBarItem(
-                  icon: Icon(page.menuItem.icon),
-                  title: Text(page.menuItem.title),
-                ))
-            .toList(),
-      ),
-    );
-  }
+      );
 
   Widget _subPageWidget(_SearchSubPage subPage, int index) {
     final Widget view = FadeTransition(

@@ -9,6 +9,7 @@ import 'package:search_app_bar/searcher.dart';
 import 'package:transport_control/model/line.dart';
 
 part 'package:transport_control/pages/lines/lines_state.dart';
+
 part 'package:transport_control/pages/lines/lines_event.dart';
 
 class LinesBloc extends Bloc<_LinesEvent, LinesState>
@@ -18,8 +19,11 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
 
   LinesBloc() {
     rootBundle.loadString('assets/lines.json').then((jsonString) {
-      final lineItems = Map.fromIterable(jsonDecode(jsonString) as List,
-          key: (lineJson) => Line.fromJson(lineJson), value: (_) => false);
+      final lineItems = Map.fromIterable(
+        jsonDecode(jsonString) as List,
+        key: (lineJson) => Line.fromJson(lineJson),
+        value: (_) => false,
+      );
       add(_LinesEvent.created(lineItems));
     });
   }
@@ -27,14 +31,15 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
   @override
   Stream<LinesState> mapEventToState(_LinesEvent event) async* {
     yield event.join(
-        (created) => LinesState(items: created.items, filter: null),
-        (filterChange) =>
-            LinesState(items: state.items, filter: filterChange.filter),
-        (selectionChange) {
-      final updatedItems = Map.of(state.items);
-      updatedItems[selectionChange.item] = selectionChange.selected;
-      return LinesState(items: updatedItems, filter: state.filter);
-    });
+      (created) => LinesState(items: created.items, filter: null),
+      (filterChange) =>
+          LinesState(items: state.items, filter: filterChange.filter),
+      (selectionChange) {
+        final updatedItems = Map.of(state.items);
+        updatedItems[selectionChange.item] = selectionChange.selected;
+        return LinesState(items: updatedItems, filter: state.filter);
+      },
+    );
   }
 
   @override
@@ -53,7 +58,6 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
                   .contains(state.filter.trim().toLowerCase()))
               .toList());
 
-  void itemSelectionChanged(Line item, bool selected) {
-    add(_LinesEvent.itemSelectionChanged(item, selected));
-  }
+  void itemSelectionChanged(Line item, bool selected) =>
+      add(_LinesEvent.itemSelectionChanged(item, selected));
 }

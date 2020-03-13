@@ -8,9 +8,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-      ),
+      value: SystemUiOverlayStyle(statusBarColor: Colors.transparent),
       child: Scaffold(
         key: _scaffoldKey,
         extendBodyBehindAppBar: true,
