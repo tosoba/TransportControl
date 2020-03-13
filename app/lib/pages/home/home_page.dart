@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/search/search_page.dart';
 
@@ -24,40 +23,59 @@ class HomePage extends StatelessWidget {
       );
 
   Widget get _appBar => PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight + 10),
+        preferredSize: Size.fromHeight(kToolbarHeight + 10.0),
         child: Padding(
-          padding: EdgeInsets.only(left: 15, right: 15, top: 10),
+          padding: EdgeInsets.only(left: 15.0, right: 15.0, top: 10.0),
           child: AppBar(
-            leading: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(15.0),
-                  bottomLeft: const Radius.circular(15.0),
+            leading: Padding(
+              padding: EdgeInsets.only(left: 2.0, top: 2.0, bottom: 2.0),
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(15.0),
+                      bottomLeft: const Radius.circular(15.0),
+                    ),
+                    boxShadow: [
+                      const BoxShadow(
+                        color: Colors.grey,
+                        blurRadius: 2.0,
+                        offset: const Offset(-2.0, 0.0),
+                      )
+                    ]),
+                child: IconButton(
+                  icon: Icon(Icons.menu, color: Colors.black),
+                  onPressed: () {
+                    _scaffoldKey.currentState.openDrawer();
+                  },
                 ),
-              ),
-              child: IconButton(
-                icon: Icon(Icons.menu, color: Colors.black),
-                onPressed: () {
-                  _scaffoldKey.currentState.openDrawer();
-                },
               ),
             ),
             titleSpacing: 0.0,
-            title: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topRight: const Radius.circular(15.0),
-                  bottomRight: const Radius.circular(15.0),
+            title: Padding(
+              padding: EdgeInsets.only(right: 2.0, top: 2.0, bottom: 2.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topRight: const Radius.circular(15.0),
+                    bottomRight: const Radius.circular(15.0),
+                  ),
+                  boxShadow: [
+                    const BoxShadow(
+                      offset: const Offset(2.0, 0.0),
+                      color: Colors.grey,
+                      blurRadius: 2.0,
+                    )
+                  ],
+                  color: Colors.white,
                 ),
-                color: Colors.white,
+                child: Text(
+                  'TransportControl',
+                  style: TextStyle(color: Colors.black),
+                ),
+                width: double.infinity,
+                height: kToolbarHeight - 4.0,
               ),
-              child: Text(
-                'TransportControl',
-                style: TextStyle(color: Colors.black),
-              ),
-              width: double.infinity,
-              height: kToolbarHeight,
             ),
             backgroundColor: Colors.transparent,
             elevation: 0.0,
