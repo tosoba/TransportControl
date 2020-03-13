@@ -7,34 +7,10 @@ class HomePage extends StatelessWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
-  Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(statusBarColor: Colors.transparent),
-      child: Scaffold(
+  Widget build(BuildContext context) => Scaffold(
         key: _scaffoldKey,
         extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          leading: Container(
-            color: Colors.white,
-            child: IconButton(
-              icon: Icon(Icons.menu, color: Colors.black),
-              onPressed: () {
-                _scaffoldKey.currentState.openDrawer();
-              },
-            ),
-          ),
-          titleSpacing: 0.0,
-          title: Container(
-            child: Text(
-              'TransportControl',
-              style: TextStyle(color: Colors.black),
-            ),
-            width: double.infinity,
-            height: kToolbarHeight,
-            color: Colors.white,
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0.0,
-        ),
+        appBar: _appBar,
         body: Container(child: MapPage()),
         floatingActionButton: FloatingActionButton(
             child: Icon(Icons.list),
@@ -45,7 +21,47 @@ class HomePage extends StatelessWidget {
               );
             }),
         drawer: _navigationDrawer(context),
-      ));
+      );
+
+  Widget get _appBar => PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(15),
+          child: AppBar(
+            leading: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15.0),
+                ),
+              ),
+              child: IconButton(
+                icon: Icon(Icons.menu, color: Colors.black),
+                onPressed: () {
+                  _scaffoldKey.currentState.openDrawer();
+                },
+              ),
+            ),
+            titleSpacing: 0.0,
+            title: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(15.0),
+                ),
+                color: Colors.white,
+              ),
+              child: Text(
+                'TransportControl',
+                style: TextStyle(color: Colors.black),
+              ),
+              width: double.infinity,
+              height: kToolbarHeight,
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 10,
+          ),
+        ),
+      );
 
   Widget _navigationDrawer(BuildContext context) => Drawer(
         child: ListView(
