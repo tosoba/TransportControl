@@ -9,7 +9,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         key: _scaffoldKey,
         extendBodyBehindAppBar: true,
-        appBar: _appBar,
+        appBar: _appBar(context),
         body: Container(child: MapPage()),
         floatingActionButton: FloatingActionButton(
             child: Icon(Icons.list),
@@ -22,50 +22,39 @@ class HomePage extends StatelessWidget {
         drawer: _navigationDrawer(context),
       );
 
-  Widget get _appBar => PreferredSize(
+  Widget _appBar(BuildContext context) => PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight + 10.0),
         child: Padding(
-          padding: EdgeInsets.only(left: 15.0, right: 15.0, top: 10.0),
-          child: AppBar(
-            leading: Padding(
-              padding: EdgeInsets.only(left: 2.0, top: 2.0, bottom: 2.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(20.0),
-                    bottomLeft: const Radius.circular(20.0),
-                  ),
-                  color: Colors.white,
-                ),
-                child: IconButton(
+          padding: EdgeInsets.only(
+              left: 15.0,
+              right: 15.0,
+              top: MediaQuery.of(context).padding.top + 10.0),
+          child: Container(
+            child: Row(
+              children: [
+                IconButton(
                   icon: Icon(Icons.menu, color: Colors.black),
                   onPressed: () {
                     _scaffoldKey.currentState.openDrawer();
                   },
-                ),
-              ),
+                )
+              ],
             ),
-            titleSpacing: 0.0,
-            title: Padding(
-              padding: EdgeInsets.only(right: 2.0, top: 2.0, bottom: 2.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topRight: const Radius.circular(20.0),
-                    bottomRight: const Radius.circular(20.0),
-                  ),
-                  color: Colors.white,
-                ),
-                child: Text(
-                  'TransportControl',
-                  style: TextStyle(color: Colors.black),
-                ),
-                width: double.infinity,
-                height: kToolbarHeight - 4.0,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                bottomRight: const Radius.circular(15.0),
+                topRight: const Radius.circular(15.0),
+                topLeft: const Radius.circular(15.0),
+                bottomLeft: const Radius.circular(15.0),
               ),
+              boxShadow: [
+                const BoxShadow(
+                    color: Colors.grey, blurRadius: 4.0, spreadRadius: 1.0)
+              ],
+              color: Colors.white,
             ),
-            backgroundColor: Colors.transparent,
-            elevation: 0.0,
+            width: double.infinity,
+            height: kToolbarHeight,
           ),
         ),
       );
