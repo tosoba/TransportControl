@@ -31,18 +31,12 @@ class HomePage extends StatelessWidget {
               padding: EdgeInsets.only(left: 2.0, top: 2.0, bottom: 2.0),
               child: Container(
                 decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(15.0),
-                      bottomLeft: const Radius.circular(15.0),
-                    ),
-                    boxShadow: [
-                      const BoxShadow(
-                        color: Colors.grey,
-                        blurRadius: 2.0,
-                        offset: const Offset(-2.0, 0.0),
-                      )
-                    ]),
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(20.0),
+                    bottomLeft: const Radius.circular(20.0),
+                  ),
+                  color: Colors.white,
+                ),
                 child: IconButton(
                   icon: Icon(Icons.menu, color: Colors.black),
                   onPressed: () {
@@ -57,16 +51,9 @@ class HomePage extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(
-                    topRight: const Radius.circular(15.0),
-                    bottomRight: const Radius.circular(15.0),
+                    topRight: const Radius.circular(20.0),
+                    bottomRight: const Radius.circular(20.0),
                   ),
-                  boxShadow: [
-                    const BoxShadow(
-                      offset: const Offset(2.0, 0.0),
-                      color: Colors.grey,
-                      blurRadius: 2.0,
-                    )
-                  ],
                   color: Colors.white,
                 ),
                 child: Text(
