@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:quiver/iterables.dart';
 import 'package:transport_control/pages/map/map_page.dart';
+import 'package:transport_control/pages/places/places_page.dart';
 import 'package:transport_control/pages/search/search_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -7,20 +9,41 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with TickerProviderStateMixin<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   TextEditingController _searchQueryController;
 
+  int _currentPageIndex = 0;
+  List<AnimationController> _slideAnimationControllers;
+  List<Key> _subPageKeys;
+  final List<Widget> _subPages = [MapPage(), PlacesPage()];
+
   @override
   void initState() {
     super.initState();
+
     _searchQueryController = TextEditingController();
+
+    _slideAnimationControllers = List<AnimationController>.generate(
+      _subPages.length,
+      (_) => AnimationController(
+        vsync: this,
+        duration: Duration(milliseconds: 200),
+      ),
+    ).toList();
+    _slideAnimationControllers[_currentPageIndex].value = 1.0;
+    _subPageKeys = List<Key>.generate(
+      _subPages.length,
+      (_) => GlobalKey(),
+    ).toList();
   }
 
   @override
   void dispose() {
     _searchQueryController.dispose();
+    for (final controller in _slideAnimationControllers) controller.dispose();
     super.dispose();
   }
 
@@ -29,7 +52,12 @@ class _HomePageState extends State<HomePage> {
         key: _scaffoldKey,
         extendBodyBehindAppBar: true,
         appBar: _appBar(context),
-        body: Container(child: MapPage()),
+        body: Stack(
+          fit: StackFit.expand,
+          children: enumerate(_subPages)
+              .map((indexed) => _subPageWidget(indexed.value, indexed.index))
+              .toList(),
+        ),
         floatingActionButton: FloatingActionButton(
             child: Icon(Icons.list),
             onPressed: () {
@@ -41,6 +69,28 @@ class _HomePageState extends State<HomePage> {
         drawer: _navigationDrawer(context),
       );
 
+  Widget _subPageWidget(Widget subPage, int index) {
+    if (index == 0) return subPage;
+    
+    final Widget view = SlideTransition(
+      position: Tween<Offset>(begin: Offset.zero, end: Offset(0.0, 1.0))
+          .animate(_slideAnimationControllers[index]),
+      child: KeyedSubtree(
+        key: _subPageKeys[index],
+        child: subPage,
+      ),
+    );
+    if (index == _currentPageIndex) {
+      _slideAnimationControllers[index].forward();
+      return view;
+    } else {
+      _slideAnimationControllers[index].reverse();
+      return _slideAnimationControllers[index].isAnimating
+          ? IgnorePointer(child: view)
+          : Offstage(child: view);
+    }
+  }
+
   Widget get _drawerButton => IconButton(
         icon: Icon(Icons.menu, color: Colors.black),
         onPressed: () {
@@ -50,7 +100,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget get _placesSearchField => TextField(
         controller: _searchQueryController,
-        autofocus: true,
+        autofocus: false,
         decoration: InputDecoration(
           hintText: "Transport nearby...",
           border: InputBorder.none,
