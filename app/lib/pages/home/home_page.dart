@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quiver/iterables.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/places/places_page.dart';
 import 'package:transport_control/pages/search/search_page.dart';
@@ -14,10 +13,10 @@ class _HomePageState extends State<HomePage>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   TextEditingController _searchQueryController;
+  final FocusNode _searchFieldFocusNode = FocusNode();
 
   int _currentPageIndex = 0;
-  List<AnimationController> _slideAnimationControllers;
-  List<Key> _subPageKeys;
+  PageController _pageController;
   final List<Widget> _subPages = [MapPage(), PlacesPage()];
 
   @override
@@ -25,90 +24,68 @@ class _HomePageState extends State<HomePage>
     super.initState();
 
     _searchQueryController = TextEditingController();
+    _searchFieldFocusNode.addListener(() {
+      if (_searchFieldFocusNode.hasFocus && _currentPageIndex != 1)
+        _changeSubPage(index: 1);
+    });
 
-    _slideAnimationControllers = List<AnimationController>.generate(
-      _subPages.length,
-      (_) => AnimationController(
-        vsync: this,
-        duration: Duration(milliseconds: 200),
-      ),
-    ).toList();
-    _slideAnimationControllers[_currentPageIndex].value = 1.0;
-    _subPageKeys = List<Key>.generate(
-      _subPages.length,
-      (_) => GlobalKey(),
-    ).toList();
+    _pageController = PageController();
   }
 
   @override
   void dispose() {
     _searchQueryController.dispose();
-    for (final controller in _slideAnimationControllers) controller.dispose();
+    _searchFieldFocusNode.dispose();
+
+    _pageController.dispose();
+
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        key: _scaffoldKey,
-        extendBodyBehindAppBar: true,
-        appBar: _appBar(context),
-        body: Stack(
-          fit: StackFit.expand,
-          children: enumerate(_subPages)
-              .map((indexed) => _subPageWidget(indexed.value, indexed.index))
-              .toList(),
+  Widget build(BuildContext context) => WillPopScope(
+        onWillPop: () {
+          if (_currentPageIndex == 1) {
+            _showMapPage();
+            return Future.value(false);
+          } else {
+            return Future.value(true);
+          }
+        },
+        child: Scaffold(
+          key: _scaffoldKey,
+          extendBodyBehindAppBar: true,
+          appBar: _appBar(context),
+          body: _subPagesView,
+          floatingActionButton: _floatingActionButton(context),
+          drawer: _navigationDrawer(context),
         ),
-        floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.list),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => SearchPage()),
-              );
-            }),
-        drawer: _navigationDrawer(context),
       );
 
-  Widget _subPageWidget(Widget subPage, int index) {
-    if (index == 0) return subPage;
-    
-    final Widget view = SlideTransition(
-      position: Tween<Offset>(begin: Offset.zero, end: Offset(0.0, 1.0))
-          .animate(_slideAnimationControllers[index]),
-      child: KeyedSubtree(
-        key: _subPageKeys[index],
-        child: subPage,
-      ),
+  _changeSubPage({int index}) {
+    setState(() {
+      _currentPageIndex = index;
+    });
+    _pageController.animateToPage(
+      index,
+      duration: Duration(milliseconds: 250),
+      curve: Curves.easeOut,
     );
-    if (index == _currentPageIndex) {
-      _slideAnimationControllers[index].forward();
-      return view;
-    } else {
-      _slideAnimationControllers[index].reverse();
-      return _slideAnimationControllers[index].isAnimating
-          ? IgnorePointer(child: view)
-          : Offstage(child: view);
-    }
   }
 
-  Widget get _drawerButton => IconButton(
-        icon: Icon(Icons.menu, color: Colors.black),
-        onPressed: () {
-          _scaffoldKey.currentState.openDrawer();
-        },
-      );
+  _showMapPage() {
+    _searchFieldFocusNode.unfocus();
+    _changeSubPage(index: 0);
+  }
 
-  Widget get _placesSearchField => TextField(
-        controller: _searchQueryController,
-        autofocus: false,
-        decoration: InputDecoration(
-          hintText: "Transport nearby...",
-          border: InputBorder.none,
-          labelStyle: TextStyle(color: Colors.black12),
-          hintStyle: TextStyle(color: Colors.grey),
-        ),
-        style: TextStyle(color: Colors.white, fontSize: 16.0),
-        onChanged: (query) {},
+  Widget get _subPagesView => PageView(
+        scrollDirection: Axis.vertical,
+        physics: NeverScrollableScrollPhysics(),
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() => _currentPageIndex = index);
+        },
+        children: _subPages,
       );
 
   Widget _appBar(BuildContext context) => PreferredSize(
@@ -144,6 +121,43 @@ class _HomePageState extends State<HomePage>
           ),
         ),
       );
+
+  Widget get _drawerButton => IconButton(
+        icon: Icon(
+          _currentPageIndex == 1 ? Icons.arrow_back : Icons.menu,
+          color: Colors.black,
+        ),
+        onPressed: () {
+          if (_currentPageIndex == 1) {
+            _showMapPage();
+          } else {
+            _scaffoldKey.currentState.openDrawer();
+          }
+        },
+      );
+
+  Widget get _placesSearchField => TextField(
+        focusNode: _searchFieldFocusNode,
+        controller: _searchQueryController,
+        autofocus: false,
+        decoration: InputDecoration(
+          hintText: "Transport nearby...",
+          border: InputBorder.none,
+          labelStyle: TextStyle(color: Colors.black12),
+          hintStyle: TextStyle(color: Colors.grey),
+        ),
+        style: TextStyle(color: Colors.white, fontSize: 16.0),
+        onChanged: (query) {},
+      );
+
+  Widget _floatingActionButton(BuildContext context) => FloatingActionButton(
+      child: Icon(Icons.list),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => SearchPage()),
+        );
+      });
 
   Widget _navigationDrawer(BuildContext context) => Drawer(
         child: ListView(
