@@ -2,8 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/search/search_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  TextEditingController _searchQueryController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchQueryController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchQueryController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -22,23 +41,37 @@ class HomePage extends StatelessWidget {
         drawer: _navigationDrawer(context),
       );
 
+  Widget get _drawerButton => IconButton(
+        icon: Icon(Icons.menu, color: Colors.black),
+        onPressed: () {
+          _scaffoldKey.currentState.openDrawer();
+        },
+      );
+
+  Widget get _placesSearchField => TextField(
+        controller: _searchQueryController,
+        autofocus: true,
+        decoration: InputDecoration(
+          hintText: "Transport nearby...",
+          border: InputBorder.none,
+          labelStyle: TextStyle(color: Colors.black12),
+          hintStyle: TextStyle(color: Colors.grey),
+        ),
+        style: TextStyle(color: Colors.white, fontSize: 16.0),
+        onChanged: (query) {},
+      );
+
   Widget _appBar(BuildContext context) => PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight + 10.0),
         child: Padding(
           padding: EdgeInsets.only(
-              left: 15.0,
-              right: 15.0,
-              top: MediaQuery.of(context).padding.top + 10.0),
+            left: 15.0,
+            right: 15.0,
+            top: MediaQuery.of(context).padding.top + 10.0,
+          ),
           child: Container(
             child: Row(
-              children: [
-                IconButton(
-                  icon: Icon(Icons.menu, color: Colors.black),
-                  onPressed: () {
-                    _scaffoldKey.currentState.openDrawer();
-                  },
-                )
-              ],
+              children: [_drawerButton, Flexible(child: _placesSearchField)],
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.only(
@@ -49,7 +82,10 @@ class HomePage extends StatelessWidget {
               ),
               boxShadow: [
                 const BoxShadow(
-                    color: Colors.grey, blurRadius: 4.0, spreadRadius: 1.0)
+                  color: Colors.grey,
+                  blurRadius: 4.0,
+                  spreadRadius: 1.0,
+                )
               ],
               color: Colors.white,
             ),
