@@ -29,23 +29,25 @@ class _LinesPageState extends State<LinesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return NestedScrollView(
-        controller: _scrollViewController,
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [_searchLinesAppBar(context, innerBoxIsScrolled)];
-        },
-        body: Column(
-          children: [
-            Expanded(
-              child: _linesList(
-                  itemsStream:
-                      BlocProvider.of<LinesBloc>(context).filteredItemsStream,
-                  selectionChanged:
-                      BlocProvider.of<LinesBloc>(context).itemSelectionChanged),
-            ),
-            _selectedLinesText,
-          ],
-        ));
+    return Scaffold(
+      body: NestedScrollView(
+          controller: _scrollViewController,
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [_searchLinesAppBar(context, innerBoxIsScrolled)];
+          },
+          body: Column(
+            children: [
+              Expanded(
+                child: _linesList(
+                    itemsStream:
+                        BlocProvider.of<LinesBloc>(context).filteredItemsStream,
+                    selectionChanged: BlocProvider.of<LinesBloc>(context)
+                        .itemSelectionChanged),
+              ),
+              _selectedLinesText,
+            ],
+          )),
+    );
   }
 
   Widget _searchLinesAppBar(BuildContext context, bool innerBoxIsScrolled) {

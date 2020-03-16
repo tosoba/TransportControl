@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:transport_control/pages/lines/lines_bloc.dart';
+import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/places/places_page.dart';
-import 'package:transport_control/pages/search/search_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -160,7 +162,12 @@ class _HomePageState extends State<HomePage>
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => SearchPage()),
+            MaterialPageRoute(
+              builder: (_) => BlocProvider(
+                create: (BuildContext context) => LinesBloc(),
+                child: LinesPage(),
+              ),
+            ),
           );
         });
   }
