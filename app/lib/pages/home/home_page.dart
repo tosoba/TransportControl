@@ -158,18 +158,24 @@ class _HomePageState extends State<HomePage>
 
   Widget _floatingActionButton(BuildContext context) {
     return FloatingActionButton(
-        child: Icon(Icons.grid_on),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => BlocProvider(
-                create: (BuildContext context) => LinesBloc(),
-                child: LinesPage(),
-              ),
-            ),
-          );
-        });
+      child: Icon(Icons.grid_on),
+      onPressed: () => _showLinesPage(context),
+    );
+  }
+
+  _showLinesPage(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: BlocProvider.of<LinesBloc>(context),
+          child: LinesPage(),
+        ),
+      ),
+    );
+    if (result != null && result) {
+      BlocProvider.of<LinesBloc>(context).selectionReset();
+    }
   }
 
   Widget _navigationDrawer(BuildContext context) {

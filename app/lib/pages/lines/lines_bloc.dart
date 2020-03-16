@@ -2,14 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sealed_unions/implementations/union_3_impl.dart';
-import 'package:sealed_unions/factories/triplet_factory.dart';
-import 'package:sealed_unions/union_3.dart';
+import 'package:sealed_unions/factories/quartet_factory.dart';
+import 'package:sealed_unions/implementations/union_4_impl.dart';
+import 'package:sealed_unions/sealed_unions.dart';
 import 'package:search_app_bar/searcher.dart';
 import 'package:transport_control/model/line.dart';
 
 part 'package:transport_control/pages/lines/lines_state.dart';
-
 part 'package:transport_control/pages/lines/lines_event.dart';
 
 class LinesBloc extends Bloc<_LinesEvent, LinesState>
@@ -39,6 +38,11 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
         updatedItems[selectionChange.item] = selectionChange.selected;
         return LinesState(items: updatedItems, filter: state.filter);
       },
+      (_) {
+        final updatedItems = Map.of(state.items);
+        updatedItems.forEach((key, value) => updatedItems[key] = false);
+        return LinesState(items: updatedItems, filter: state.filter);
+      },
     );
   }
 
@@ -58,6 +62,8 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
                   .contains(state.filter.trim().toLowerCase()))
               .toList());
 
-  void itemSelectionChanged(Line item, bool selected) =>
+  itemSelectionChanged(Line item, bool selected) =>
       add(_LinesEvent.itemSelectionChanged(item, selected));
+
+  selectionReset() => add(_LinesEvent.selectionReset());
 }

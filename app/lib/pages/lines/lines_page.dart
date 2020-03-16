@@ -39,10 +39,11 @@ class _LinesPageState extends State<LinesPage> {
             children: [
               Expanded(
                 child: _linesList(
-                    itemsStream:
-                        BlocProvider.of<LinesBloc>(context).filteredItemsStream,
-                    selectionChanged: BlocProvider.of<LinesBloc>(context)
-                        .itemSelectionChanged),
+                  itemsStream:
+                      BlocProvider.of<LinesBloc>(context).filteredItemsStream,
+                  selectionChanged:
+                      BlocProvider.of<LinesBloc>(context).itemSelectionChanged,
+                ),
               ),
               _selectedLinesText,
             ],
@@ -73,17 +74,27 @@ class _LinesPageState extends State<LinesPage> {
         builder: (context, state) {
           final numberOfSelectedLines = state.numberOfSelectedLines;
           return numberOfSelectedLines > 0
-              ? Container(
-                  width: double.infinity,
-                  color: Theme.of(context).primaryColor,
-                  child: Text(
-                    '$numberOfSelectedLines ${numberOfSelectedLines > 1 ? 'lines are' : 'line is'} selected.',
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white, fontSize: 18),
+              ? Row(children: [
+                  Expanded(
+                    child: Container(
+                      color: Theme.of(context).primaryColor,
+                      child: Text(
+                        '$numberOfSelectedLines ${numberOfSelectedLines > 1 ? 'lines are' : 'line is'} selected.',
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    ),
                   ),
-                )
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context, true);
+                    },
+                    child: Text('Search'),
+                  )
+                ])
               : Container();
         },
       );

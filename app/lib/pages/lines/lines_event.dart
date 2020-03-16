@@ -1,12 +1,15 @@
 part of 'package:transport_control/pages/lines/lines_bloc.dart';
 
-class _LinesEvent
-    extends Union3Impl<_Created, _FilterChanged, _ItemSelectionChanged> {
-  static final Triplet<_Created, _FilterChanged, _ItemSelectionChanged>
-      _factory =
-      const Triplet<_Created, _FilterChanged, _ItemSelectionChanged>();
+class _LinesEvent extends Union4Impl<_Created, _FilterChanged,
+    _ItemSelectionChanged, _SelectionReset> {
+  static final Quartet<_Created, _FilterChanged, _ItemSelectionChanged,
+          _SelectionReset> _factory =
+      const Quartet<_Created, _FilterChanged, _ItemSelectionChanged,
+          _SelectionReset>();
 
-  _LinesEvent._(Union3<_Created, _FilterChanged, _ItemSelectionChanged> union)
+  _LinesEvent._(
+      Union4<_Created, _FilterChanged, _ItemSelectionChanged, _SelectionReset>
+          union)
       : super(union);
 
   factory _LinesEvent.created(Map<Line, bool> items) =>
@@ -15,6 +18,8 @@ class _LinesEvent
       _LinesEvent._(_factory.second(_FilterChanged(filter)));
   factory _LinesEvent.itemSelectionChanged(Line item, bool selected) =>
       _LinesEvent._(_factory.third(_ItemSelectionChanged(item, selected)));
+  factory _LinesEvent.selectionReset() =>
+      _LinesEvent._(_factory.fourth(_SelectionReset()));
 }
 
 class _Created {
@@ -35,3 +40,5 @@ class _ItemSelectionChanged {
 
   _ItemSelectionChanged(this.item, this.selected);
 }
+
+class _SelectionReset {}
