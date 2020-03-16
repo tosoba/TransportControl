@@ -96,20 +96,27 @@ class _LinesPageState extends State<LinesPage> {
           BuildContext context,
           AsyncSnapshot<List<MapEntry<Line, bool>>> snapshot,
         ) {
+          final columnsCount =
+              MediaQuery.of(context).orientation == Orientation.portrait
+                  ? 4
+                  : 8;
           return AnimationLimiter(
               child: GridView.count(
-            crossAxisCount: 3,
+            crossAxisCount: columnsCount,
             children: List.generate(
               snapshot.data.length,
               (int index) {
                 return AnimationConfiguration.staggeredGrid(
                   position: index,
                   duration: const Duration(milliseconds: 250),
-                  columnCount: 3,
+                  columnCount: columnsCount,
                   child: ScaleAnimation(
                     child: FadeInAnimation(
                       child: _lineListItem(
-                          snapshot.data[index], index, selectionChanged),
+                        snapshot.data[index],
+                        index,
+                        selectionChanged,
+                      ),
                     ),
                   ),
                 );
@@ -124,28 +131,17 @@ class _LinesPageState extends State<LinesPage> {
     int index,
     Function(Line, bool) itemSelectionChanged,
   ) {
-    return Card(
-      child: Row(children: [
-        Text(
+    final inkWell = InkWell(
+      onTap: () {
+        itemSelectionChanged(item.key, !item.value);
+      },
+      child: Center(
+        child: Text(
           item.key.symbol,
           style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
         ),
-        Checkbox(
-          value: item.value,
-          onChanged: (newValue) {
-            itemSelectionChanged(item.key, newValue);
-          },
-        ),
-      ]),
+      ),
     );
-  }
-
-  Widget lineDestText(String text) {
-    return Text(
-      text,
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-      style: const TextStyle(fontSize: 14),
-    );
+    return item.value ? Container(child: inkWell) : Card(child: inkWell);
   }
 }
