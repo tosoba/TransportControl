@@ -43,24 +43,26 @@ class _HomePageState extends State<HomePage>
   }
 
   @override
-  Widget build(BuildContext context) => WillPopScope(
-        onWillPop: () {
-          if (_currentPageIndex == 1) {
-            _showMapPage();
-            return Future.value(false);
-          } else {
-            return Future.value(true);
-          }
-        },
-        child: Scaffold(
-          key: _scaffoldKey,
-          extendBodyBehindAppBar: true,
-          appBar: _appBar(context),
-          body: _subPagesView,
-          floatingActionButton: _floatingActionButton(context),
-          drawer: _navigationDrawer(context),
-        ),
-      );
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () {
+        if (_currentPageIndex == 1) {
+          _showMapPage();
+          return Future.value(false);
+        } else {
+          return Future.value(true);
+        }
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        extendBodyBehindAppBar: true,
+        appBar: _appBar(context),
+        body: _subPagesView,
+        floatingActionButton: _floatingActionButton(context),
+        drawer: _navigationDrawer(context),
+      ),
+    );
+  }
 
   _changeSubPage({int index}) {
     setState(() {
@@ -88,39 +90,41 @@ class _HomePageState extends State<HomePage>
         children: _subPages,
       );
 
-  Widget _appBar(BuildContext context) => PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight + 10.0),
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: 15.0,
-            right: 15.0,
-            top: MediaQuery.of(context).padding.top + 10.0,
-          ),
-          child: Container(
-            child: Row(
-              children: [_drawerButton, Flexible(child: _placesSearchField)],
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                bottomRight: const Radius.circular(15.0),
-                topRight: const Radius.circular(15.0),
-                topLeft: const Radius.circular(15.0),
-                bottomLeft: const Radius.circular(15.0),
-              ),
-              boxShadow: [
-                const BoxShadow(
-                  color: Colors.grey,
-                  blurRadius: 4.0,
-                  spreadRadius: 1.0,
-                )
-              ],
-              color: Colors.white,
-            ),
-            width: double.infinity,
-            height: kToolbarHeight,
-          ),
+  Widget _appBar(BuildContext context) {
+    return PreferredSize(
+      preferredSize: Size.fromHeight(kToolbarHeight + 10.0),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 15.0,
+          right: 15.0,
+          top: MediaQuery.of(context).padding.top + 10.0,
         ),
-      );
+        child: Container(
+          child: Row(
+            children: [_drawerButton, Flexible(child: _placesSearchField)],
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(
+              bottomRight: const Radius.circular(15.0),
+              topRight: const Radius.circular(15.0),
+              topLeft: const Radius.circular(15.0),
+              bottomLeft: const Radius.circular(15.0),
+            ),
+            boxShadow: [
+              const BoxShadow(
+                color: Colors.grey,
+                blurRadius: 4.0,
+                spreadRadius: 1.0,
+              )
+            ],
+            color: Colors.white,
+          ),
+          width: double.infinity,
+          height: kToolbarHeight,
+        ),
+      ),
+    );
+  }
 
   Widget get _drawerButton => IconButton(
         icon: Icon(
@@ -150,36 +154,40 @@ class _HomePageState extends State<HomePage>
         onChanged: (query) {},
       );
 
-  Widget _floatingActionButton(BuildContext context) => FloatingActionButton(
-      child: Icon(Icons.list),
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => SearchPage()),
-        );
-      });
+  Widget _floatingActionButton(BuildContext context) {
+    return FloatingActionButton(
+        child: Icon(Icons.grid_on),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => SearchPage()),
+          );
+        });
+  }
 
-  Widget _navigationDrawer(BuildContext context) => Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              child: Text('Drawer Header'),
-              decoration: BoxDecoration(color: Colors.blue),
-            ),
-            ListTile(
-              title: Text('Item 1'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: Text('Item 2'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      );
+  Widget _navigationDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            child: Text('Drawer Header'),
+            decoration: BoxDecoration(color: Colors.blue),
+          ),
+          ListTile(
+            title: Text('Item 1'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: Text('Item 2'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
 }
