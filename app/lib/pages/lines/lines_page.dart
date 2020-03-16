@@ -96,6 +96,8 @@ class _LinesPageState extends State<LinesPage> {
           BuildContext context,
           AsyncSnapshot<List<MapEntry<Line, bool>>> snapshot,
         ) {
+          if (snapshot.data == null) return Container();
+
           final columnsCount =
               MediaQuery.of(context).orientation == Orientation.portrait
                   ? 4
