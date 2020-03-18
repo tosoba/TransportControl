@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -12,6 +13,7 @@ part 'package:transport_control/pages/lines/lines_event.dart';
 class LinesBloc extends Bloc<_LinesEvent, LinesState>
     implements Searcher<MapEntry<Line, LineState>> {
   final Stream<Set<Line>> _trackedLines;
+  StreamSubscription<Set<Line>> _trackedLinesSubscription;
 
   LinesBloc(this._trackedLines) {
     rootBundle.loadString('assets/lines.json').then((jsonString) {
@@ -22,6 +24,14 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
       );
       add(_LinesEvent.created(lineItems));
     });
+
+    _trackedLinesSubscription = _trackedLines.listen(_trackedLinesChanged);
+  }
+
+  @override
+  Future<void> close() async {
+    await _trackedLinesSubscription.cancel();
+    return super.close();
   }
 
   @override
@@ -53,7 +63,7 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
         updatedItems.forEach((key, value) {
           if (value == LineState.TRACKED) updatedItems[key] = LineState.IDLE;
         });
-        trackedLinesChange.trackedLines
+        trackedLinesChange.lines
             .forEach((line) => updatedItems[line] = LineState.TRACKED);
         return LinesState(items: updatedItems, filter: state.filter);
       },
@@ -80,4 +90,7 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
       add(_LinesEvent.itemSelectionChanged(item));
 
   selectionReset() => add(_LinesEvent.selectionReset());
+
+  _trackedLinesChanged(Iterable<Line> lines) =>
+      add(_LinesEvent.trackedLinesChanged(lines));
 }

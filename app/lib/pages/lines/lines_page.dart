@@ -158,8 +158,16 @@ class _LinesPageState extends State<LinesPage> {
         ),
       ),
     );
-    return item.value == LineState.SELECTED
-        ? Container(child: inkWell)
-        : Card(child: inkWell);
+
+    switch (item.value) {
+      case LineState.IDLE:
+        return Card(child: inkWell);
+      case LineState.SELECTED:
+        return Container(child: inkWell);
+      case LineState.TRACKED:
+        return Container(child: inkWell, color: Colors.lightBlue);
+      default:
+        throw ArgumentError();
+    }
   }
 }

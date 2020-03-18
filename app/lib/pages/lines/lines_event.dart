@@ -21,8 +21,8 @@ class _LinesEvent extends Union5Impl<_Created, _FilterChanged,
       _LinesEvent._(_factory.third(_ItemSelectionChanged(item)));
   factory _LinesEvent.selectionReset() =>
       _LinesEvent._(_factory.fourth(_SelectionReset()));
-  factory _LinesEvent.trackedLinesChanged(Set<Line> trackedLines) =>
-      _LinesEvent._(_factory.fifth(_TrackedLinesChanged(trackedLines)));
+  factory _LinesEvent.trackedLinesChanged(Iterable<Line> lines) =>
+      _LinesEvent._(_factory.fifth(_TrackedLinesChanged(lines)));
 }
 
 class _Created {
@@ -46,7 +46,7 @@ class _ItemSelectionChanged {
 class _SelectionReset {}
 
 class _TrackedLinesChanged {
-  final Set<Line> trackedLines;
+  final Iterable<Line> lines;
 
-  _TrackedLinesChanged(this.trackedLines);
+  _TrackedLinesChanged(this.lines);
 }
