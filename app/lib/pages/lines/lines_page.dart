@@ -56,11 +56,12 @@ class _LinesPageState extends State<LinesPage> {
         leading: null,
         automaticallyImplyLeading: false,
         titleSpacing: 0.0,
-        title: SearchAppBar<MapEntry<Line, bool>>(
+        title: SearchAppBar<MapEntry<Line, LineState>>(
           iconTheme: IconThemeData(color: Colors.white),
           title: Text('Lines'),
           searcher: BlocProvider.of<LinesBloc>(context),
-          filter: (MapEntry<Line, bool> item, String query) => item.key.symbol
+          filter: (MapEntry<Line, LineState> item, String query) => item
+              .key.symbol
               .toLowerCase()
               .contains(query.trim().toLowerCase()),
         ),
@@ -100,14 +101,14 @@ class _LinesPageState extends State<LinesPage> {
       );
 
   Widget _linesList({
-    Stream<List<MapEntry<Line, bool>>> itemsStream,
-    Function(Line, bool) selectionChanged,
+    Stream<List<MapEntry<Line, LineState>>> itemsStream,
+    Function(Line) selectionChanged,
   }) {
     return StreamBuilder(
         stream: itemsStream,
         builder: (
           BuildContext context,
-          AsyncSnapshot<List<MapEntry<Line, bool>>> snapshot,
+          AsyncSnapshot<List<MapEntry<Line, LineState>>> snapshot,
         ) {
           if (snapshot.data == null) return Container();
 
@@ -142,13 +143,13 @@ class _LinesPageState extends State<LinesPage> {
   }
 
   Widget _lineListItem(
-    MapEntry<Line, bool> item,
+    MapEntry<Line, LineState> item,
     int index,
-    Function(Line, bool) itemSelectionChanged,
+    Function(Line) itemSelectionChanged,
   ) {
     final inkWell = InkWell(
       onTap: () {
-        itemSelectionChanged(item.key, !item.value);
+        itemSelectionChanged(item.key);
       },
       child: Center(
         child: Text(
@@ -157,6 +158,8 @@ class _LinesPageState extends State<LinesPage> {
         ),
       ),
     );
-    return item.value ? Container(child: inkWell) : Card(child: inkWell);
+    return item.value == LineState.SELECTED
+        ? Container(child: inkWell)
+        : Card(child: inkWell);
   }
 }

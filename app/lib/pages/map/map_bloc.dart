@@ -25,4 +25,6 @@ class MapBloc extends Bloc<_MapEvent, MapState> {
       (loadInAreaEvent) => state,
     );
   }
+
+  Stream<Set<Line>> get trackedLines => map((state) => state.trackedLines);
 }
