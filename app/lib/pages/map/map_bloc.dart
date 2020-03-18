@@ -21,10 +21,16 @@ class MapBloc extends Bloc<_MapEvent, MapState> {
   Stream<MapState> mapEventToState(_MapEvent event) async* {
     yield event.join(
       (_) => MapState.empty(),
-      (loadLinesEvent) => state,
+      (linesAdded) {
+        return MapState(
+            state.trackedVehicles, state.trackedLines.union(linesAdded.lines));
+      },
       (loadInAreaEvent) => state,
     );
   }
 
   Stream<Set<Line>> get trackedLines => map((state) => state.trackedLines);
+
+  trackedLinesAdded(Set<Line> lines) =>
+      add(_MapEvent.trackedLinesAdded(lines));
 }

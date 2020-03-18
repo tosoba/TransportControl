@@ -44,8 +44,9 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
       (filterChange) =>
           LinesState(items: state.items, filter: filterChange.filter),
       (selectionChange) {
+        final oldLineState = state.items[selectionChange.item];
+        if (oldLineState == LineState.TRACKED) return state;
         final updatedItems = Map.of(state.items);
-        final oldLineState = updatedItems[selectionChange.item];
         updatedItems[selectionChange.item] = oldLineState == LineState.IDLE
             ? LineState.SELECTED
             : LineState.IDLE;
@@ -85,6 +86,11 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
                   .toLowerCase()
                   .contains(state.filter.trim().toLowerCase()))
               .toList());
+
+  Set<Line> get selectedLines => state.items.entries
+      .where((entry) => entry.value == LineState.SELECTED)
+      .map((entry) => entry.key)
+      .toSet();
 
   itemSelectionChanged(Line item) =>
       add(_LinesEvent.itemSelectionChanged(item));

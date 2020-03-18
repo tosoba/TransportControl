@@ -1,18 +1,17 @@
 part of 'package:transport_control/pages/map/map_bloc.dart';
 
 class _MapEvent
-    extends Union3Impl<_ClearMap, _LoadVehiclesOfLines, _LoadVehiclesInArea> {
-  static final Triplet<_ClearMap, _LoadVehiclesOfLines, _LoadVehiclesInArea>
+    extends Union3Impl<_ClearMap, _TrackedLinesAdded, _LoadVehiclesInArea> {
+  static final Triplet<_ClearMap, _TrackedLinesAdded, _LoadVehiclesInArea>
       _factory =
-      const Triplet<_ClearMap, _LoadVehiclesOfLines, _LoadVehiclesInArea>();
+      const Triplet<_ClearMap, _TrackedLinesAdded, _LoadVehiclesInArea>();
 
-  _MapEvent._(
-      Union3<_ClearMap, _LoadVehiclesOfLines, _LoadVehiclesInArea> union)
+  _MapEvent._(Union3<_ClearMap, _TrackedLinesAdded, _LoadVehiclesInArea> union)
       : super(union);
 
   factory _MapEvent.clearMap() => _MapEvent._(_factory.first(_ClearMap()));
-  factory _MapEvent.loadVehiclesOfLines(List<Line> lines) =>
-      _MapEvent._(_factory.second(_LoadVehiclesOfLines(lines)));
+  factory _MapEvent.trackedLinesAdded(Set<Line> lines) =>
+      _MapEvent._(_factory.second(_TrackedLinesAdded(lines)));
   factory _MapEvent.loadVehiclesInArea(
           {double southWestLat,
           double southWestLon,
@@ -24,10 +23,10 @@ class _MapEvent
 
 class _ClearMap {}
 
-class _LoadVehiclesOfLines {
-  final List<Line> lines;
+class _TrackedLinesAdded {
+  final Set<Line> lines;
 
-  _LoadVehiclesOfLines(this.lines);
+  _TrackedLinesAdded(this.lines);
 }
 
 class _LoadVehiclesInArea {

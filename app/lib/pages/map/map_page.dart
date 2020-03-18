@@ -12,11 +12,12 @@ class _MapPageState extends State<MapPage>
   Widget build(BuildContext context) {
     super.build(context);
     return GoogleMap(
-        mapType: MapType.normal,
-        initialCameraPosition: CameraPosition(
-          target: LatLng(52.237049, 21.017532),
-          zoom: 11,
-        ));
+      mapType: MapType.normal,
+      initialCameraPosition: CameraPosition(
+        target: LatLng(52.237049, 21.017532),
+        zoom: 11,
+      ),
+    );
   }
 
   @override

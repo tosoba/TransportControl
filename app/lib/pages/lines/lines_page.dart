@@ -53,22 +53,21 @@ class _LinesPageState extends State<LinesPage> {
 
   Widget _searchLinesAppBar(BuildContext context, bool innerBoxIsScrolled) {
     return SliverAppBar(
-        leading: null,
-        automaticallyImplyLeading: false,
-        titleSpacing: 0.0,
-        title: SearchAppBar<MapEntry<Line, LineState>>(
-          iconTheme: IconThemeData(color: Colors.white),
-          title: Text('Lines'),
-          searcher: BlocProvider.of<LinesBloc>(context),
-          filter: (MapEntry<Line, LineState> item, String query) => item
-              .key.symbol
-              .toLowerCase()
-              .contains(query.trim().toLowerCase()),
-        ),
-        pinned: false,
-        floating: true,
-        snap: true,
-        forceElevated: innerBoxIsScrolled);
+      leading: null,
+      automaticallyImplyLeading: false,
+      titleSpacing: 0.0,
+      title: SearchAppBar<MapEntry<Line, LineState>>(
+        iconTheme: IconThemeData(color: Colors.white),
+        title: Text('Lines'),
+        searcher: BlocProvider.of<LinesBloc>(context),
+        filter: (MapEntry<Line, LineState> item, String query) =>
+            item.key.symbol.toLowerCase().contains(query.trim().toLowerCase()),
+      ),
+      pinned: false,
+      floating: true,
+      snap: true,
+      forceElevated: innerBoxIsScrolled,
+    );
   }
 
   Widget get _selectedLinesText => BlocBuilder<LinesBloc, LinesState>(
