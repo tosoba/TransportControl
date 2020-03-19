@@ -33,6 +33,7 @@ dependencies:
   get_it: ^4.0.0
   rxdart: ^0.23.1
   flutter_staggered_animations: ^0.1.2
+  super_enum_generator: ^0.5.0
 
 dev_dependencies:
   flutter_test:

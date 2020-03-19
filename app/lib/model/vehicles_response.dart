@@ -5,6 +5,7 @@ part 'vehicles_response.g.dart';
 
 @JsonSerializable()
 class VehiclesResponse {
+  @JsonKey(name: 'result')
   final List<Vehicle> vehicles;
 
   VehiclesResponse({this.vehicles});

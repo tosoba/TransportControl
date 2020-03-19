@@ -22,14 +22,11 @@ class MapBloc extends Bloc<_MapEvent, MapState> {
     yield event.join(
       (_) => MapState.empty(),
       (linesAddedEvent) {
-        _vehiclesRepo
-            .loadVehiclesOfLines(
-              linesAddedEvent.lines.map((line) => line.symbol).toList(),
-            )
-            .then(
-              (result) => result.join(
-                (success) => _vehiclesAdded(success.data.toSet()),
-                (error) => log(error?.toString() ?? 'Unknown error'),
+        _vehiclesRepo.loadVehiclesOfLines(linesAddedEvent.lines).then(
+              (result) => result.when(
+                success: (success) => _vehiclesAdded(success.data.toSet()),
+                failure: (failure) =>
+                    log(failure.error?.toString() ?? 'Unknown error'),
               ),
             );
         return MapState(

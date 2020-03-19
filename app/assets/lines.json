@@ -2,1151 +2,1381 @@
   {
     "Dest1": "Annopol",
     "Symbol": "1",
-    "Dest2": "Żerań Wschodni"
+    "Dest2": "Żerań Wschodni",
+    "Type": 2
   },
   {
     "Dest1": "Metro Młociny",
     "Symbol": "2",
-    "Dest2": "Nowodwory / Tarchomin Kościelny"
+    "Dest2": "Nowodwory / Tarchomin Kościelny",
+    "Type": 2
   },
   {
     "Dest1": "Annopol",
     "Symbol": "3",
-    "Dest2": "Gocławek"
+    "Dest2": "Gocławek",
+    "Type": 2
   },
   {
     "Dest1": "Wyścigi",
     "Symbol": "4",
-    "Dest2": "Żerań Wschodni"
+    "Dest2": "Żerań Wschodni",
+    "Type": 2
   },
   {
     "Dest1": "Gocławek",
     "Symbol": "6",
-    "Dest2": "Metro Młociny"
+    "Dest2": "Metro Młociny",
+    "Type": 2
   },
   {
     "Dest1": "Kawęczyńska-Bazylika",
     "Symbol": "7",
-    "Dest2": "P+R Al.Krakowska"
+    "Dest2": "P+R Al.Krakowska",
+    "Type": 2
   },
   {
     "Dest1": "P+R Al.Krakowska",
     "Symbol": "9",
-    "Dest2": "Gocławek"
+    "Dest2": "Gocławek",
+    "Type": 2
   },
   {
     "Dest1": "Os. Górczewska",
     "Symbol": "10",
-    "Dest2": "Wyścigi"
+    "Dest2": "Wyścigi",
+    "Type": 2
   },
   {
     "Dest1": "Metro Młociny",
     "Symbol": "11",
-    "Dest2": "Pl.Narutowicza"
+    "Dest2": "Pl.Narutowicza",
+    "Type": 2
   },
   {
     "Dest1": "Kawęczyńska-Bazylika",
     "Symbol": "13",
-    "Dest2": "Cm.Wolski"
+    "Dest2": "Cm.Wolski",
+    "Type": 2
   },
   {
     "Dest1": "Marymont-Potok",
     "Symbol": "15",
-    "Dest2": "P+R Al.Krakowska"
+    "Dest2": "P+R Al.Krakowska",
+    "Type": 2
   },
   {
     "Dest1": "Tarchomin Kościelny",
     "Symbol": "17",
-    "Dest2": "Woronicza"
+    "Dest2": "Woronicza",
+    "Type": 2
   },
   {
     "Dest1": "Boernerowo",
     "Symbol": "20",
-    "Dest2": "Żerań FSO"
+    "Dest2": "Żerań FSO",
+    "Type": 2
   },
   {
     "Dest1": "Piaski",
     "Symbol": "22",
-    "Dest2": "Wiatraczna"
+    "Dest2": "Wiatraczna",
+    "Type": 2
   },
   {
     "Dest1": "Nowe Bemowo",
     "Symbol": "23",
-    "Dest2": "Czynszowa"
+    "Dest2": "Czynszowa",
+    "Type": 2
   },
   {
     "Dest1": "Gocławek",
     "Symbol": "24",
-    "Dest2": "Nowe Bemowo"
+    "Dest2": "Nowe Bemowo",
+    "Type": 2
   },
   {
     "Dest1": "Annopol",
     "Symbol": "25",
-    "Dest2": "Banacha"
+    "Dest2": "Banacha",
+    "Type": 2
   },
   {
     "Dest1": "Os.Górczewska",
     "Symbol": "26",
-    "Dest2": "Wiatraczna"
+    "Dest2": "Wiatraczna",
+    "Type": 2
   },
   {
     "Dest1": "Metro Marymont",
     "Symbol": "27",
-    "Dest2": "Cm.Wolski"
+    "Dest2": "Cm.Wolski",
+    "Type": 2
   },
   {
     "Dest1": "Os.Górczewska",
     "Symbol": "28",
-    "Dest2": "Dw.Wschodni (Kijowska)"
+    "Dest2": "Dw.Wschodni (Kijowska)",
+    "Type": 2
   },
   {
     "Dest1": "Domaniewska",
     "Symbol": "31",
-    "Dest2": "Metro Wierzbno"
+    "Dest2": "Metro Wierzbno",
+    "Type": 2
   },
   {
     "Dest1": "Kielecka",
     "Symbol": "33",
-    "Dest2": "Metro Młociny"
+    "Dest2": "Metro Młociny",
+    "Type": 2
   },
   {
     "Dest1": "Nowe Bemowo",
     "Symbol": "35",
-    "Dest2": "Banacha"
+    "Dest2": "Banacha",
+    "Type": 2
   },
   {
     "Dest1": "Żerań FSO",
     "Symbol": "70",
-    "Dest2": "Os.Górczewska"
+    "Dest2": "Os.Górczewska",
+    "Type": 2
   },
   {
     "Dest1": "Młynów",
     "Symbol": "102",
-    "Dest2": "PKP Olszynka Grochowska"
+    "Dest2": "PKP Olszynka Grochowska",
+    "Type": 1
   },
   {
     "Dest1": "Metro Młociny",
     "Symbol": "103",
-    "Dest2": "Dworzec Zachodni (Tunelowa)"
+    "Dest2": "Dworzec Zachodni (Tunelowa)",
+    "Type": 1
   },
   {
     "Dest1": "Żerań FSO",
     "Symbol": "104",
-    "Dest2": "Brzeziny"
+    "Dest2": "Brzeziny",
+    "Type": 1
   },
   {
     "Dest1": "Osiedle Górczewska",
     "Symbol": "105",
-    "Dest2": "Browarna"
+    "Dest2": "Browarna",
+    "Type": 1
   },
   {
     "Dest1": "EsperanDest2",
     "Symbol": "107",
-    "Dest2": "Kierbedzia"
+    "Dest2": "Kierbedzia",
+    "Type": 1
   },
   {
     "Dest1": "Plac Trzech Krzyży",
     "Symbol": "108",
-    "Dest2": "Metro Wilanowska"
+    "Dest2": "Metro Wilanowska",
+    "Type": 1
   },
   {
     "Dest1": "Osiedle Górczewska",
     "Symbol": "109",
-    "Dest2": "Dworzec Centralny"
+    "Dest2": "Dworzec Centralny",
+    "Type": 1
   },
   {
     "Dest1": "Cmentarz Północny-Brama Zachodnia",
     "Symbol": "110",
-    "Dest2": "Metro Marymont"
+    "Dest2": "Metro Marymont",
+    "Type": 1
   },
   {
     "Dest1": "EsperanDest2",
     "Symbol": "111",
-    "Dest2": "Gocław"
+    "Dest2": "Gocław",
+    "Type": 1
   },
   {
     "Dest1": "Karolin",
     "Symbol": "112",
-    "Dest2": "CH Marki"
+    "Dest2": "CH Marki",
+    "Type": 1
   },
   {
     "Dest1": "Młociny-UKSW",
     "Symbol": "114",
-    "Dest2": "Bródno-Podgrodzie"
+    "Dest2": "Bródno-Podgrodzie",
+    "Type": 1
   },
   {
     "Dest1": "PKP Mokry Ług",
     "Symbol": "115",
-    "Dest2": "Aleksandrów"
+    "Dest2": "Aleksandrów",
+    "Type": 1
   },
   {
     "Dest1": "Chomiczówka",
     "Symbol": "116",
-    "Dest2": "Wilanów"
+    "Dest2": "Wilanów",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Centralny",
     "Symbol": "117",
-    "Dest2": "Gocław"
+    "Dest2": "Gocław",
+    "Type": 1
   },
   {
     "Dest1": "Metro Politechnika",
     "Symbol": "118",
-    "Dest2": "Bródno-Podgrodzie"
+    "Dest2": "Bródno-Podgrodzie",
+    "Type": 1
   },
   {
     "Dest1": "Rakowiecka-Sanktuarium",
     "Symbol": "119",
-    "Dest2": "Wiśniowa Góra"
+    "Dest2": "Wiśniowa Góra",
+    "Type": 1
   },
   {
     "Dest1": "Olesin",
     "Symbol": "120",
-    "Dest2": "Dworzec Wschodni (Kijowska)"
+    "Dest2": "Dworzec Wschodni (Kijowska)",
+    "Type": 1
   },
   {
     "Dest1": "Nowe Bemowo",
     "Symbol": "121",
-    "Dest2": "Gwiaździsta"
+    "Dest2": "Gwiaździsta",
+    "Type": 1
   },
   {
     "Dest1": "Osiedle Górczewska",
     "Symbol": "122",
-    "Dest2": "Gwiaździsta"
+    "Dest2": "Gwiaździsta",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Wschodni (Kijowska)",
     "Symbol": "123",
-    "Dest2": "Dworzec Wschodni (Lubelska)"
+    "Dest2": "Dworzec Wschodni (Lubelska)",
+    "Type": 1
   },
   {
     "Dest1": "P+R Aleja Krakowska",
     "Symbol": "124",
-    "Dest2": "Paluch"
+    "Dest2": "Paluch",
+    "Type": 1
   },
   {
     "Dest1": "Metro Stadion Narodowy",
     "Symbol": "125",
-    "Dest2": "Międzylesie"
+    "Dest2": "Międzylesie",
+    "Type": 1
   },
   {
     "Dest1": "Nowodwory",
     "Symbol": "126",
-    "Dest2": "CH Targówek"
+    "Dest2": "CH Targówek",
+    "Type": 1
   },
   {
     "Dest1": "Nowe Włochy",
     "Symbol": "127",
-    "Dest2": "Mariensztat"
+    "Dest2": "Mariensztat",
+    "Type": 1
   },
   {
     "Dest1": "Szczęśliwice",
     "Symbol": "128",
-    "Dest2": "Plac Piłsudskiego"
+    "Dest2": "Plac Piłsudskiego",
+    "Type": 1
   },
   {
     "Dest1": "ReduDest2wa",
     "Symbol": "129",
-    "Dest2": "PKP Ursus"
+    "Dest2": "PKP Ursus",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Centralny",
     "Symbol": "131",
-    "Dest2": "Sadyba"
+    "Dest2": "Sadyba",
+    "Type": 1
   },
   {
     "Dest1": "Metro Marymont",
     "Symbol": "132",
-    "Dest2": "Grodzisk"
+    "Dest2": "Grodzisk",
+    "Type": 1
   },
   {
     "Dest1": "Choszczówka",
     "Symbol": "133",
-    "Dest2": "Tarchomin"
+    "Dest2": "Tarchomin",
+    "Type": 1
   },
   {
     "Dest1": "Żerań FSO",
     "Symbol": "134",
-    "Dest2": "Olesin"
+    "Dest2": "Olesin",
+    "Type": 1
   },
   {
     "Dest1": "Plac Hallera",
     "Symbol": "135",
-    "Dest2": "PKP Olszynka Grochowska"
+    "Dest2": "PKP Olszynka Grochowska",
+    "Type": 1
   },
   {
     "Dest1": "Młynów",
     "Symbol": "136",
-    "Dest2": "NaDest2lin Północny"
+    "Dest2": "NaDest2lin Północny",
+    "Type": 1
   },
   {
     "Dest1": "Bokserska",
     "Symbol": "138",
-    "Dest2": "Zajezdnia Utrata"
+    "Dest2": "Zajezdnia Utrata",
+    "Type": 1
   },
   {
     "Dest1": "Metro Wilanowska",
     "Symbol": "139",
-    "Dest2": "Ogród Botaniczny"
+    "Dest2": "Ogród Botaniczny",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Wschodni (Kijowska)",
     "Symbol": "140",
-    "Dest2": "Czarna Struga"
+    "Dest2": "Czarna Struga",
+    "Type": 1
   },
   {
     "Dest1": "P+R Aleja Krakowska",
     "Symbol": "141",
-    "Dest2": "WiDest2lin"
+    "Dest2": "WiDest2lin",
+    "Type": 1
   },
   {
     "Dest1": "Wiatraczna",
     "Symbol": "142",
-    "Dest2": "Aleksandrów"
+    "Dest2": "Aleksandrów",
+    "Type": 1
   },
   {
     "Dest1": "GUS",
     "Symbol": "143",
-    "Dest2": "Rembertów-Kolonia"
+    "Dest2": "Rembertów-Kolonia",
+    "Type": 1
   },
   {
     "Dest1": "Żerań FSO",
     "Symbol": "145",
-    "Dest2": "Wiatraczna"
+    "Dest2": "Wiatraczna",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Wschodni (Kijowska)",
     "Symbol": "146",
-    "Dest2": "Falenica"
+    "Dest2": "Falenica",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Wschodni (Kijowska)",
     "Symbol": "147",
-    "Dest2": "Dest2rfowa"
+    "Dest2": "Dest2rfowa",
+    "Type": 1
   },
   {
     "Dest1": "Lotnisko Chopina",
     "Symbol": "148",
-    "Dest2": "Wiatraczna"
+    "Dest2": "Wiatraczna",
+    "Type": 1
   },
   {
     "Dest1": "Groty",
     "Symbol": "149",
-    "Dest2": "Osiedle Górczewska"
+    "Dest2": "Osiedle Górczewska",
+    "Type": 1
   },
   {
     "Dest1": "Nowowiejska",
     "Symbol": "151",
-    "Dest2": "Rechniewskiego"
+    "Dest2": "Rechniewskiego",
+    "Type": 1
   },
   {
     "Dest1": "Białołęka Dworska",
     "Symbol": "152",
-    "Dest2": "Tarchomin"
+    "Dest2": "Tarchomin",
+    "Type": 1
   },
   {
     "Dest1": "Pastuszków",
     "Symbol": "153",
-    "Dest2": "Rembertów-Kolonia"
+    "Dest2": "Rembertów-Kolonia",
+    "Type": 1
   },
   {
     "Dest1": "Stare Bemowo",
     "Symbol": "154",
-    "Dest2": "P+R Aleja Krakowska"
+    "Dest2": "P+R Aleja Krakowska",
+    "Type": 1
   },
   {
     "Dest1": "Znana",
     "Symbol": "155",
-    "Dest2": "Rondo Daszyńskiego"
+    "Dest2": "Rondo Daszyńskiego",
+    "Type": 1
   },
   {
     "Dest1": "Metro Młociny",
     "Symbol": "156",
-    "Dest2": "Dworzec Wschodni (Kijowska)"
+    "Dest2": "Dworzec Wschodni (Kijowska)",
+    "Type": 1
   },
   {
     "Dest1": "Szczęśliwice",
     "Symbol": "157",
-    "Dest2": "Gwiaździsta"
+    "Dest2": "Gwiaździsta",
+    "Type": 1
   },
   {
     "Dest1": "CH Reduta",
     "Symbol": "158",
-    "Dest2": "WiDest2lin"
+    "Dest2": "WiDest2lin",
+    "Type": 1
   },
   {
     "Dest1": "CH Blue City",
     "Symbol": "159",
-    "Dest2": "EC Siekierki"
+    "Dest2": "EC Siekierki",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Centralny",
     "Symbol": "160",
-    "Dest2": "Witebska"
+    "Dest2": "Witebska",
+    "Type": 1
   },
   {
     "Dest1": "Olecka",
     "Symbol": "161",
-    "Dest2": "Zbójna Góra"
+    "Dest2": "Zbójna Góra",
+    "Type": 1
   },
   {
     "Dest1": "EC Siekierki",
     "Symbol": "162",
-    "Dest2": "Targówek"
+    "Dest2": "Targówek",
+    "Type": 1
   },
   {
     "Dest1": "Sadyba",
     "Symbol": "163",
-    "Dest2": "Wilanów"
+    "Dest2": "Wilanów",
+    "Type": 1
   },
   {
     "Dest1": "EC Siekierki",
     "Symbol": "164",
-    "Dest2": "Kępa Zawadowska"
+    "Dest2": "Kępa Zawadowska",
+    "Type": 1
   },
   {
     "Dest1": "Metro Wilanowska",
     "Symbol": "165",
-    "Dest2": "Wyczółki"
+    "Dest2": "Wyczółki",
+    "Type": 1
   },
   {
     "Dest1": "Osiedle Kabaty",
     "Symbol": "166",
-    "Dest2": "Plac Hallera"
+    "Dest2": "Plac Hallera",
+    "Type": 1
   },
   {
     "Dest1": "Znana",
     "Symbol": "167",
-    "Dest2": "Siekierki-Sanktuarium"
+    "Dest2": "Siekierki-Sanktuarium",
+    "Type": 1
   },
   {
     "Dest1": "Spartańska",
     "Symbol": "168",
-    "Dest2": "WiDest2lin"
+    "Dest2": "WiDest2lin",
+    "Type": 1
   },
   {
     "Dest1": "Bródno-Podgrodzie",
     "Symbol": "169",
-    "Dest2": "Dworzec Wschodni (Kijowska)"
+    "Dest2": "Dworzec Wschodni (Kijowska)",
+    "Type": 1
   },
   {
     "Dest1": "Elsnerów",
     "Symbol": "170",
-    "Dest2": "Rondo Starzyńskiego"
+    "Dest2": "Rondo Starzyńskiego",
+    "Type": 1
   },
   {
     "Dest1": "Nowe Bemowo",
     "Symbol": "171",
-    "Dest2": "Dest2rwar"
+    "Dest2": "Dest2rwar",
+    "Type": 1
   },
   {
     "Dest1": "CH Blue City",
     "Symbol": "172",
-    "Dest2": "Sadyba"
+    "Dest2": "Sadyba",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Wschodni (Lubelska)",
     "Symbol": "173",
-    "Dest2": "Stara Miłosna"
+    "Dest2": "Stara Miłosna",
+    "Type": 1
   },
   {
     "Dest1": "Rondo ONZ",
     "Symbol": "174",
-    "Dest2": "Bokserska"
+    "Dest2": "Bokserska",
+    "Type": 1
   },
   {
     "Dest1": "Plac Piłsudskiego",
     "Symbol": "175",
-    "Dest2": "Lotnisko Chopina"
+    "Dest2": "Lotnisko Chopina",
+    "Type": 1
   },
   {
     "Dest1": "Choszczówka",
     "Symbol": "176",
-    "Dest2": "Plac Hallera"
+    "Dest2": "Plac Hallera",
+    "Type": 1
   },
   {
     "Dest1": "Ursus-Ratusz",
     "Symbol": "177",
-    "Dest2": "P+R Aleja Krakowska"
+    "Dest2": "P+R Aleja Krakowska",
+    "Type": 1
   },
   {
     "Dest1": "PKP Ursus",
     "Symbol": "178",
-    "Dest2": "KonwikDest2rska"
+    "Dest2": "KonwikDest2rska",
+    "Type": 1
   },
   {
     "Dest1": "Ursynów Północny",
     "Symbol": "179",
-    "Dest2": "Osiedle Kabaty"
+    "Dest2": "Osiedle Kabaty",
+    "Type": 1
   },
   {
     "Dest1": "Chomiczówka",
     "Symbol": "180",
-    "Dest2": "Wilanów"
+    "Dest2": "Wilanów",
+    "Type": 1
   },
   {
     "Dest1": "Cmentarz Północny-Brama Główna",
     "Symbol": "181",
-    "Dest2": "Plac Wilsona"
+    "Dest2": "Plac Wilsona",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Zachodni",
     "Symbol": "182",
-    "Dest2": "WiDest2lin"
+    "Dest2": "WiDest2lin",
+    "Type": 1
   },
   {
     "Dest1": "Wiatraczna",
     "Symbol": "183",
-    "Dest2": "Zielona"
+    "Dest2": "Zielona",
+    "Type": 1
   },
   {
     "Dest1": "Metro Młociny",
     "Symbol": "184",
-    "Dest2": "Szczęśliwice"
+    "Dest2": "Szczęśliwice",
+    "Type": 1
   },
   {
     "Dest1": "Gwiaździsta",
     "Symbol": "185",
-    "Dest2": "Ursynów Zachodni"
+    "Dest2": "Ursynów Zachodni",
+    "Type": 1
   },
   {
     "Dest1": "Szczęśliwice",
     "Symbol": "186",
-    "Dest2": "Nowodwory"
+    "Dest2": "Nowodwory",
+    "Type": 1
   },
   {
     "Dest1": "Ursus-Niedźwiadek",
     "Symbol": "187",
-    "Dest2": "Stegny"
+    "Dest2": "Stegny",
+    "Type": 1
   },
   {
     "Dest1": "Lotnisko Chopina",
     "Symbol": "188",
-    "Dest2": "Gocławek Wschodni"
+    "Dest2": "Gocławek Wschodni",
+    "Type": 1
   },
   {
     "Dest1": "Osiedle Górczewska",
     "Symbol": "189",
-    "Dest2": "Sadyba"
+    "Dest2": "Sadyba",
+    "Type": 1
   },
   {
     "Dest1": "Osiedle Górczewska",
     "Symbol": "190",
-    "Dest2": "CH Marki"
+    "Dest2": "CH Marki",
+    "Type": 1
   },
   {
     "Dest1": "Regulska",
     "Symbol": "191",
-    "Dest2": "Plac NaruDest2wicza"
+    "Dest2": "Plac NaruDest2wicza",
+    "Type": 1
   },
   {
     "Dest1": "Metro Wilanowska",
     "Symbol": "192",
-    "Dest2": "Osiedle Kabaty"
+    "Dest2": "Osiedle Kabaty",
+    "Type": 1
   },
   {
     "Dest1": "Bokserska",
     "Symbol": "193",
-    "Dest2": "Ursynów Północny"
+    "Dest2": "Ursynów Północny",
+    "Type": 1
   },
   {
     "Dest1": "PKP Gołąbki",
     "Symbol": "194",
-    "Dest2": "Cmentarz Wolski"
+    "Dest2": "Cmentarz Wolski",
+    "Type": 1
   },
   {
     "Dest1": "Rakowiecka-Sanktuarium",
     "Symbol": "195",
-    "Dest2": "NaDest2lin Północny"
+    "Dest2": "NaDest2lin Północny",
+    "Type": 1
   },
   {
     "Dest1": "Rembertów-Kolonia",
     "Symbol": "196",
-    "Dest2": "Rembertów-Kolonia"
+    "Dest2": "Rembertów-Kolonia",
+    "Type": 1
   },
   {
     "Dest1": "Gwiaździsta",
     "Symbol": "197",
-    "Dest2": "Ursus-Niedźwiadek"
+    "Dest2": "Ursus-Niedźwiadek",
+    "Type": 1
   },
   {
     "Dest1": "PKP Wesoła",
     "Symbol": "198",
-    "Dest2": "Stara Miłosna"
+    "Dest2": "Stara Miłosna",
+    "Type": 1
   },
   {
     "Dest1": "Pratulińska",
     "Symbol": "199",
-    "Dest2": "Rembertów-AON"
+    "Dest2": "Rembertów-AON",
+    "Type": 1
   },
   {
     "Dest1": "Nowe Bemowo",
     "Symbol": "201",
-    "Dest2": "Koło"
+    "Dest2": "Koło",
+    "Type": 1
   },
   {
     "Dest1": "Metro Stadion Narodowy",
     "Symbol": "202",
-    "Dest2": "Gocławek Wschodni"
+    "Dest2": "Gocławek Wschodni",
+    "Type": 1
   },
   {
     "Dest1": "Metro Młociny",
     "Symbol": "203",
-    "Dest2": "Fort Wawrzyszew"
+    "Dest2": "Fort Wawrzyszew",
+    "Type": 1
   },
   {
     "Dest1": "Osiedle Derby",
     "Symbol": "204",
-    "Dest2": "PKP Praga"
+    "Dest2": "PKP Praga",
+    "Type": 1
   },
   {
     "Dest1": "Gwiaździsta",
     "Symbol": "205",
-    "Dest2": "Powązki-Cmentarz Wojskowy"
+    "Dest2": "Powązki-Cmentarz Wojskowy",
+    "Type": 1
   },
   {
     "Dest1": "Nowe Włochy",
     "Symbol": "206",
-    "Dest2": "Odolany"
+    "Dest2": "Odolany",
+    "Type": 1
   },
   {
     "Dest1": "Regulska",
     "Symbol": "207",
-    "Dest2": "Skorosze"
+    "Dest2": "Skorosze",
+    "Type": 1
   },
   {
     "Dest1": "Bitwy Warszawskiej 1920",
     "Symbol": "208",
-    "Dest2": "Bitwy Warszawskiej 1920"
+    "Dest2": "Bitwy Warszawskiej 1920",
+    "Type": 1
   },
   {
     "Dest1": "PKP Jeziorki",
     "Symbol": "209",
-    "Dest2": "Ursynów Północny"
+    "Dest2": "Ursynów Północny",
+    "Type": 1
   },
   {
     "Dest1": "Buków",
     "Symbol": "211",
-    "Dest2": "Żerań FSO"
+    "Dest2": "Żerań FSO",
+    "Type": 1
   },
   {
     "Dest1": "Plac Hallera",
     "Symbol": "212",
-    "Dest2": "Pratulińska"
+    "Dest2": "Pratulińska",
+    "Type": 1
   },
   {
     "Dest1": "Błota",
     "Symbol": "213",
-    "Dest2": "Gocław"
+    "Dest2": "Gocław",
+    "Type": 1
   },
   {
     "Dest1": "Tarchomin",
     "Symbol": "214",
-    "Dest2": "Grodzisk"
+    "Dest2": "Grodzisk",
+    "Type": 1
   },
   {
     "Dest1": "Metro Wilanowska",
     "Symbol": "217",
-    "Dest2": "Sarmacka"
+    "Dest2": "Sarmacka",
+    "Type": 1
   },
   {
     "Dest1": "Królikarnia",
     "Symbol": "218",
-    "Dest2": "Metro Wilanowska"
+    "Dest2": "Metro Wilanowska",
+    "Type": 1
   },
   {
     "Dest1": "Gocław",
     "Symbol": "219",
-    "Dest2": "PKP Radość"
+    "Dest2": "PKP Radość",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Gdański (Rydigera)",
     "Symbol": "221",
-    "Dest2": "Plac Niemena"
+    "Dest2": "Plac Niemena",
+    "Type": 1
   },
   {
     "Dest1": "Bielańska",
     "Symbol": "222",
-    "Dest2": "Spartańska"
+    "Dest2": "Spartańska",
+    "Type": 1
   },
   {
     "Dest1": "Gocław",
     "Symbol": "225",
-    "Dest2": "PKP Mokry Ług"
+    "Dest2": "PKP Mokry Ług",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Centralny",
     "Symbol": "227",
-    "Dest2": "Bródno-Podgrodzie"
+    "Dest2": "Bródno-Podgrodzie",
+    "Type": 1
   },
   {
     "Dest1": "Żerań FSO",
     "Symbol": "240",
-    "Dest2": "Marki Pustelnik"
+    "Dest2": "Marki Pustelnik",
+    "Type": 1
   },
   {
     "Dest1": "PKP Olszynka Grochowska",
     "Symbol": "245",
-    "Dest2": "Osiedle Dudziarska"
+    "Dest2": "Osiedle Dudziarska",
+    "Type": 1
   },
   {
     "Dest1": "Suwalska",
     "Symbol": "256",
-    "Dest2": "Pratulińska"
+    "Dest2": "Pratulińska",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Wileński",
     "Symbol": "262",
-    "Dest2": "Pratulińska"
+    "Dest2": "Pratulińska",
+    "Type": 1
   },
   {
     "Dest1": "Cmentarz Północny-Brama Główna",
     "Symbol": "303",
-    "Dest2": "Plac Wilsona"
+    "Dest2": "Plac Wilsona",
+    "Type": 1
   },
   {
     "Dest1": "Jesiennych Liści",
     "Symbol": "304",
-    "Dest2": "Zaułek-Szkoła"
+    "Dest2": "Zaułek-Szkoła",
+    "Type": 1
   },
   {
     "Dest1": "Strusia",
     "Symbol": "305",
-    "Dest2": "Międzylesie"
+    "Dest2": "Międzylesie",
+    "Type": 1
   },
   {
     "Dest1": "Ursus-Ratusz",
     "Symbol": "306",
-    "Dest2": "Osmańska-DHL"
+    "Dest2": "Osmańska-DHL",
+    "Type": 1
   },
   {
     "Dest1": "Praga Południe-Ratusz",
     "Symbol": "311",
-    "Dest2": "Gocław"
+    "Dest2": "Gocław",
+    "Type": 1
   },
   {
     "Dest1": "Nowodwory",
     "Symbol": "314",
-    "Dest2": "Stare Świdry"
+    "Dest2": "Stare Świdry",
+    "Type": 1
   },
   {
     "Dest1": "P+R Aleja Krakowska",
     "Symbol": "317",
-    "Dest2": "Wilanów"
+    "Dest2": "Wilanów",
+    "Type": 1
   },
   {
     "Dest1": "Metro Centrum Nauki Kopernik",
     "Symbol": "318",
-    "Dest2": "Dest2rwar"
+    "Dest2": "Dest2rwar",
+    "Type": 1
   },
   {
     "Dest1": "Fort Radiowo",
     "Symbol": "320",
-    "Dest2": "Groty"
+    "Dest2": "Groty",
+    "Type": 1
   },
   {
     "Dest1": "Oś Królewska",
     "Symbol": "323",
-    "Dest2": "Powsinek"
+    "Dest2": "Powsinek",
+    "Type": 1
   },
   {
     "Dest1": "Metro Marymont",
     "Symbol": "326",
-    "Dest2": "Olesin"
+    "Dest2": "Olesin",
+    "Type": 1
   },
   {
     "Dest1": "Lotnisko Chopina",
     "Symbol": "331",
-    "Dest2": "Metro Wilanowska"
+    "Dest2": "Metro Wilanowska",
+    "Type": 1
   },
   {
     "Dest1": "Zaułek-Szkoła",
     "Symbol": "332",
-    "Dest2": "Juranda ze Spychowa-Szkoła"
+    "Dest2": "Juranda ze Spychowa-Szkoła",
+    "Type": 1
   },
   {
     "Dest1": "Olesin",
     "Symbol": "334",
-    "Dest2": "Juranda ze Spychowa-Szkoła"
+    "Dest2": "Juranda ze Spychowa-Szkoła",
+    "Type": 1
   },
   {
     "Dest1": "Plac Hallera",
     "Symbol": "338",
-    "Dest2": "Zajezdnia Utrata"
+    "Dest2": "Zajezdnia Utrata",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Wschodni (Kijowska)",
     "Symbol": "340",
-    "Dest2": "Marki Pustelnik"
+    "Dest2": "Marki Pustelnik",
+    "Type": 1
   },
   {
     "Dest1": "Bródno-Podgrodzie",
     "Symbol": "345",
-    "Dest2": "Ząbki Maczka"
+    "Dest2": "Ząbki Maczka",
+    "Type": 1
   },
   {
     "Dest1": "Bokserska",
     "Symbol": "365",
-    "Dest2": "Metro Wilanowska"
+    "Dest2": "Metro Wilanowska",
+    "Type": 1
   },
   {
     "Dest1": "Sarmacka",
     "Symbol": "379",
-    "Dest2": "Wilanów"
+    "Dest2": "Wilanów",
+    "Type": 1
   },
   {
     "Dest1": "Metro Stare Bielany",
     "Symbol": "397",
-    "Dest2": "Koło"
+    "Dest2": "Koło",
+    "Type": 1
   },
   {
     "Dest1": "Ursus-Niedźwiadek",
     "Symbol": "401",
-    "Dest2": "Ursynów Południowy"
+    "Dest2": "Ursynów Południowy",
+    "Type": 1
   },
   {
     "Dest1": "Wynalazek",
     "Symbol": "402",
-    "Dest2": "Marysin"
+    "Dest2": "Marysin",
+    "Type": 1
   },
   {
     "Dest1": "Cmentarz Północny-Brama Zachodnia",
     "Symbol": "409",
-    "Dest2": "Bródno-Podgrodzie"
+    "Dest2": "Bródno-Podgrodzie",
+    "Type": 1
   },
   {
     "Dest1": "Metro Politechnika",
     "Symbol": "411",
-    "Dest2": "Stara Miłosna"
+    "Dest2": "Stara Miłosna",
+    "Type": 1
   },
   {
     "Dest1": "Świętego Wincentego",
     "Symbol": "412",
-    "Dest2": "Dworzec Wileński"
+    "Dest2": "Dworzec Wileński",
+    "Type": 1
   },
   {
     "Dest1": "Szczęśliwice",
     "Symbol": "414",
-    "Dest2": "Bródno-Podgrodzie"
+    "Dest2": "Bródno-Podgrodzie",
+    "Type": 1
   },
   {
     "Dest1": "Rondo Radosława",
     "Symbol": "500",
-    "Dest2": "Bródno-Podgrodzie"
+    "Dest2": "Bródno-Podgrodzie",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Centralny",
     "Symbol": "501",
-    "Dest2": "Stegny"
+    "Dest2": "Stegny",
+    "Type": 1
   },
   {
     "Dest1": "Metro Politechnika",
     "Symbol": "502",
-    "Dest2": "Stara Miłosna"
+    "Dest2": "Stara Miłosna",
+    "Type": 1
   },
   {
     "Dest1": "KonwikDest2ska",
     "Symbol": "503",
-    "Dest2": "NaDest2lin Północny"
+    "Dest2": "NaDest2lin Północny",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Centralny",
     "Symbol": "504",
-    "Dest2": "Osiedle Kabaty"
+    "Dest2": "Osiedle Kabaty",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Centralny",
     "Symbol": "507",
-    "Dest2": "Gocław"
+    "Dest2": "Gocław",
+    "Type": 1
   },
   {
     "Dest1": "Nowodwory",
     "Symbol": "509",
-    "Dest2": "Gocław"
+    "Dest2": "Gocław",
+    "Type": 1
   },
   {
     "Dest1": "Metro Młociny",
     "Symbol": "511",
-    "Dest2": "Dąbrówka Wiślana"
+    "Dest2": "Dąbrówka Wiślana",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Wileński",
     "Symbol": "512",
-    "Dest2": "Gilarska"
+    "Dest2": "Gilarska",
+    "Type": 1
   },
   {
     "Dest1": "Metro Politechnika",
     "Symbol": "514",
-    "Dest2": "Wola Grzybowska"
+    "Dest2": "Wola Grzybowska",
+    "Type": 1
   },
   {
     "Dest1": "Nowodwory",
     "Symbol": "516",
-    "Dest2": "Żerań FSO"
+    "Dest2": "Żerań FSO",
+    "Type": 1
   },
   {
     "Dest1": "Ursus-Niedźwiadek",
     "Symbol": "517",
-    "Dest2": "Witebska"
+    "Dest2": "Witebska",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Centralny",
     "Symbol": "518",
-    "Dest2": "Nowodwory"
+    "Dest2": "Nowodwory",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Centralny",
     "Symbol": "519",
-    "Dest2": "Wilanów"
+    "Dest2": "Wilanów",
+    "Type": 1
   },
   {
     "Dest1": "Płocka-Szpital",
     "Symbol": "520",
-    "Dest2": "Marysin"
+    "Dest2": "Marysin",
+    "Type": 1
   },
   {
     "Dest1": "Szczęśliwice",
     "Symbol": "521",
-    "Dest2": "Falenica"
+    "Dest2": "Falenica",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Centralny",
     "Symbol": "522",
-    "Dest2": "Branickiego"
+    "Dest2": "Branickiego",
+    "Type": 1
   },
   {
     "Dest1": "Stare Bemowo",
     "Symbol": "523",
-    "Dest2": "PKP Olszynka Grochowska"
+    "Dest2": "PKP Olszynka Grochowska",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Centralny",
     "Symbol": "525",
-    "Dest2": "Międzylesie"
+    "Dest2": "Międzylesie",
+    "Type": 1
   },
   {
     "Dest1": "EsperanDest2",
     "Symbol": "527",
-    "Dest2": "Osiedle Derby"
+    "Dest2": "Osiedle Derby",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Centralny",
     "Symbol": "700",
-    "Dest2": "Pańska"
+    "Dest2": "Pańska",
+    "Type": 1
   },
   {
     "Dest1": "Wiatraczna",
     "Symbol": "702",
-    "Dest2": "Smolna"
+    "Dest2": "Smolna",
+    "Type": 1
   },
   {
     "Dest1": "Kosów",
     "Symbol": "703",
-    "Dest2": "P+R Al.Krakowska"
+    "Dest2": "P+R Al.Krakowska",
+    "Type": 1
   },
   {
     "Dest1": "PKP Halinów",
     "Symbol": "704",
-    "Dest2": "Wiatraczna"
+    "Dest2": "Wiatraczna",
+    "Type": 1
   },
   {
     "Dest1": "Rynia",
     "Symbol": "705",
-    "Dest2": "Metro Marymont"
+    "Dest2": "Metro Marymont",
+    "Type": 1
   },
   {
     "Dest1": "Pl.Szwedzki",
     "Symbol": "706",
-    "Dest2": "P+R Al.Krakowska"
+    "Dest2": "P+R Al.Krakowska",
+    "Type": 1
   },
   {
     "Dest1": "Nadarzyńska",
     "Symbol": "707",
-    "Dest2": "P+R Al.Krakowska"
+    "Dest2": "P+R Al.Krakowska",
+    "Type": 1
   },
   {
     "Dest1": "Metro Młociny",
     "Symbol": "708",
-    "Dest2": "Skibińskiego"
+    "Dest2": "Skibińskiego",
+    "Type": 1
   },
   {
     "Dest1": "PKP Piaseczno",
     "Symbol": "709",
-    "Dest2": "Metro Wilanowska"
+    "Dest2": "Metro Wilanowska",
+    "Type": 1
   },
   {
     "Dest1": "Szkolna",
     "Symbol": "710",
-    "Dest2": "Metro Wilanowska"
+    "Dest2": "Metro Wilanowska",
+    "Type": 1
   },
   {
     "Dest1": "P+R Al.Krakowska",
     "Symbol": "711",
-    "Dest2": "Warszawska"
+    "Dest2": "Warszawska",
+    "Type": 1
   },
   {
     "Dest1": "Rynek",
     "Symbol": "712",
-    "Dest2": "Metro Młociny"
+    "Dest2": "Metro Młociny",
+    "Type": 1
   },
   {
     "Dest1": "Cm.Wolski",
     "Symbol": "713",
-    "Dest2": "Agricoop"
+    "Dest2": "Agricoop",
+    "Type": 1
   },
   {
     "Dest1": "Os.Górczewska",
     "Symbol": "714",
-    "Dest2": "Lipków-Muzeum"
+    "Dest2": "Lipków-Muzeum",
+    "Type": 1
   },
   {
     "Dest1": "P+R Al.Krakowska",
     "Symbol": "715",
-    "Dest2": "Metro Wilanowska"
+    "Dest2": "Metro Wilanowska",
+    "Type": 1
   },
   {
     "Dest1": "Cm.Wolski",
     "Symbol": "716",
-    "Dest2": "Ogińskiego"
+    "Dest2": "Ogińskiego",
+    "Type": 1
   },
   {
     "Dest1": "Ogińskiego",
     "Symbol": "717",
-    "Dest2": "Dw.Zachodni"
+    "Dest2": "Dw.Zachodni",
+    "Type": 1
   },
   {
     "Dest1": "Os.Górczewska",
     "Symbol": "719",
-    "Dest2": "Leszno"
+    "Dest2": "Leszno",
+    "Type": 1
   },
   {
     "Dest1": "Leszno",
     "Symbol": "720",
-    "Dest2": "Rzakta"
+    "Dest2": "Rzakta",
+    "Type": 1
   },
   {
     "Dest1": "Kosów",
     "Symbol": "721",
-    "Dest2": "P+R Al.Krakowska"
+    "Dest2": "P+R Al.Krakowska",
+    "Type": 1
   },
   {
     "Dest1": "Radiówek",
     "Symbol": "722",
-    "Dest2": "Wiatraczna"
+    "Dest2": "Wiatraczna",
+    "Type": 1
   },
   {
     "Dest1": "PKP Legionowo przystanek",
     "Symbol": "723",
-    "Dest2": "Żerań FSO"
+    "Dest2": "Żerań FSO",
+    "Type": 1
   },
   {
     "Dest1": "Gerbera",
     "Symbol": "724",
-    "Dest2": "Metro Wilanowska"
+    "Dest2": "Metro Wilanowska",
+    "Type": 1
   },
   {
     "Dest1": "Kępa Okrzewska-Cmentarz",
     "Symbol": "725",
-    "Dest2": "Wilanów"
+    "Dest2": "Wilanów",
+    "Type": 1
   },
   {
     "Dest1": "Głosków-Szkoła",
     "Symbol": "727",
-    "Dest2": "Metro Wilanowska"
+    "Dest2": "Metro Wilanowska",
+    "Type": 1
   },
   {
     "Dest1": "Złotokłos",
     "Symbol": "728",
-    "Dest2": "P+R Al.Krakowska"
+    "Dest2": "P+R Al.Krakowska",
+    "Type": 1
   },
   {
     "Dest1": "Mariew",
     "Symbol": "729",
-    "Dest2": "Os.Górczewska"
+    "Dest2": "Os.Górczewska",
+    "Type": 1
   },
   {
     "Dest1": "Brzeziny",
     "Symbol": "730",
-    "Dest2": "Wiatraczna"
+    "Dest2": "Wiatraczna",
+    "Type": 1
   },
   {
     "Dest1": "Żerań FSO",
     "Symbol": "731",
-    "Dest2": "Os.Młodych"
+    "Dest2": "Os.Młodych",
+    "Type": 1
   },
   {
     "Dest1": "P+R Al.Krakowska",
     "Symbol": "733",
-    "Dest2": "Młochów"
+    "Dest2": "Młochów",
+    "Type": 1
   },
   {
     "Dest1": "Żerań FSO",
     "Symbol": "734",
-    "Dest2": "Nowe Załubice"
+    "Dest2": "Nowe Załubice",
+    "Type": 1
   },
   {
     "Dest1": "Metro Marymont",
     "Symbol": "735",
-    "Dest2": "Zegrze Płd."
+    "Dest2": "Zegrze Płd.",
+    "Type": 1
   },
   {
     "Dest1": "Żerań FSO",
     "Symbol": "736",
-    "Dest2": "Mickiewicza"
+    "Dest2": "Mickiewicza",
+    "Type": 1
   },
   {
     "Dest1": "Ursynów Płd.",
     "Symbol": "737",
-    "Dest2": "Cm.Południowy-Brama Płd."
+    "Dest2": "Cm.Południowy-Brama Płd.",
+    "Type": 1
   },
   {
     "Dest1": "Dw.Wschodni (Kijowska)",
     "Symbol": "738",
-    "Dest2": "Os.Victoria"
+    "Dest2": "Os.Victoria",
+    "Type": 1
   },
   {
     "Dest1": "Julianowska-Cmentarz",
     "Symbol": "739",
-    "Dest2": "Metro Wilanowska"
+    "Dest2": "Metro Wilanowska",
+    "Type": 1
   },
   {
     "Dest1": "Nowodwory",
     "Symbol": "741",
-    "Dest2": "Chotomów"
+    "Dest2": "Chotomów",
+    "Type": 1
   },
   {
     "Dest1": "Wilanów",
     "Symbol": "742",
-    "Dest2": "Rynek"
+    "Dest2": "Rynek",
+    "Type": 1
   },
   {
     "Dest1": "Cm.Wolski",
     "Symbol": "743",
-    "Dest2": "Wolica K.Płochocina"
+    "Dest2": "Wolica K.Płochocina",
+    "Type": 1
   },
   {
     "Dest1": "Metro Młociny",
     "Symbol": "750",
-    "Dest2": "Dębina"
+    "Dest2": "Dębina",
+    "Type": 1
   },
   {
     "Dest1": "Metro Stadion Narodowy",
     "Symbol": "E–1",
-    "Dest2": "Gocław"
+    "Dest2": "Gocław",
+    "Type": 1
   },
   {
     "Dest1": "Płocka-Szpital",
     "Symbol": "E–2",
-    "Dest2": "Wilanów"
+    "Dest2": "Wilanów",
+    "Type": 1
   },
   {
     "Dest1": "Dworzec Wileński",
     "Symbol": "E–7",
-    "Dest2": "Osiedle Derby"
+    "Dest2": "Osiedle Derby",
+    "Type": 1
   },
   {
     "Dest1": "Metro Marymont",
     "Symbol": "E–9",
-    "Dest2": "Osiedle Derby"
+    "Dest2": "Osiedle Derby",
+    "Type": 1
   }
 ]

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/result.dart';
 import 'package:transport_control/model/vehicle.dart';
 
@@ -12,7 +13,7 @@ abstract class VehiclesRepo {
   });
 
   Future<Result<List<Vehicle>>> loadVehiclesOfLines(
-    Iterable<String> lines, {
+    Iterable<Line> lines, {
     int type,
   });
 }

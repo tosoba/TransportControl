@@ -8,7 +8,7 @@ part of 'vehicles_response.dart';
 
 VehiclesResponse _$VehiclesResponseFromJson(Map<String, dynamic> json) {
   return VehiclesResponse(
-    vehicles: (json['vehicles'] as List)
+    vehicles: (json['result'] as List)
         ?.map((e) =>
             e == null ? null : Vehicle.fromJson(e as Map<String, dynamic>))
         ?.toList(),
@@ -17,5 +17,5 @@ VehiclesResponse _$VehiclesResponseFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$VehiclesResponseToJson(VehiclesResponse instance) =>
     <String, dynamic>{
-      'vehicles': instance.vehicles,
+      'result': instance.vehicles,
     };
