@@ -1,7 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sealed_unions/implementations/union_3_impl.dart';
-import 'package:sealed_unions/factories/triplet_factory.dart';
-import 'package:sealed_unions/union_3.dart';
+import 'package:sealed_unions/sealed_unions.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
@@ -21,16 +21,33 @@ class MapBloc extends Bloc<_MapEvent, MapState> {
   Stream<MapState> mapEventToState(_MapEvent event) async* {
     yield event.join(
       (_) => MapState.empty(),
-      (linesAdded) {
+      (linesAddedEvent) {
+        _vehiclesRepo
+            .loadVehiclesOfLines(
+              linesAddedEvent.lines.map((line) => line.symbol).toList(),
+            )
+            .then(
+              (result) => result.join(
+                (success) => _vehiclesAdded(success.data.toSet()),
+                (error) => log(error?.toString() ?? 'Unknown error'),
+              ),
+            );
         return MapState(
-            state.trackedVehicles, state.trackedLines.union(linesAdded.lines));
+          state.trackedVehicles,
+          state.trackedLines.union(linesAddedEvent.lines),
+        );
       },
-      (loadInAreaEvent) => state,
+      (vehiclesAddedEvent) => MapState(
+        state.trackedVehicles.union(vehiclesAddedEvent.vehicles),
+        state.trackedLines,
+      ),
     );
   }
 
   Stream<Set<Line>> get trackedLines => map((state) => state.trackedLines);
 
-  trackedLinesAdded(Set<Line> lines) =>
-      add(_MapEvent.trackedLinesAdded(lines));
+  trackedLinesAdded(Set<Line> lines) => add(_MapEvent.trackedLinesAdded(lines));
+
+  _vehiclesAdded(Set<Vehicle> vehicles) =>
+      add(_MapEvent.vehiclesAdded(vehicles));
 }
