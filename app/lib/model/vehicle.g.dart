@@ -13,7 +13,7 @@ Vehicle _$VehicleFromJson(Map<String, dynamic> json) {
     symbol: json['Lines'] as String,
     brigade: json['Brigade'] as String,
     time: json['Time'] as String,
-    vehicleNumber: json['VehicleNumber'] as String,
+    number: json['VehicleNumber'] as String,
   );
 }
 
@@ -23,5 +23,5 @@ Map<String, dynamic> _$VehicleToJson(Vehicle instance) => <String, dynamic>{
       'Lines': instance.symbol,
       'Brigade': instance.brigade,
       'Time': instance.time,
-      'VehicleNumber': instance.vehicleNumber,
+      'VehicleNumber': instance.number,
     };

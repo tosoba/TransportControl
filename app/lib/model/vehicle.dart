@@ -15,7 +15,7 @@ class Vehicle {
   @JsonKey(name: 'Time')
   final String time;
   @JsonKey(name: 'VehicleNumber')
-  final String vehicleNumber;
+  final String number;
 
   Vehicle({
     this.lat,
@@ -23,7 +23,7 @@ class Vehicle {
     this.symbol,
     this.brigade,
     this.time,
-    this.vehicleNumber,
+    this.number,
   });
 
   factory Vehicle.fromJson(Map<String, dynamic> json) =>
