@@ -1,5 +1,9 @@
+import 'package:json_annotation/json_annotation.dart';
 import 'package:quiver/core.dart';
 
+part 'line.g.dart';
+
+@JsonSerializable()
 class Line {
   final String symbol;
   final String dest1;
@@ -8,14 +12,8 @@ class Line {
 
   Line(this.symbol, this.dest1, this.dest2, this.type);
 
-  factory Line.fromJson(Map<String, dynamic> json) {
-    return Line(
-      json['Symbol'] as String,
-      json['Dest1'] as String,
-      json['Dest2'] as String,
-      json['Type'] as int,
-    );
-  }
+  factory Line.fromJson(Map<String, dynamic> json) => _$LineFromJson(json);
+  Map<String, dynamic> toJson() => _$LineToJson(this);
 
   bool operator ==(o) {
     return o is Line &&
