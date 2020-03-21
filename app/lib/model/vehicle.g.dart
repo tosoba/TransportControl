@@ -8,18 +8,20 @@ part of 'vehicle.dart';
 
 Vehicle _$VehicleFromJson(Map<String, dynamic> json) {
   return Vehicle(
-    lat: json['lat'] as String,
-    lon: json['lon'] as String,
-    symbol: json['symbol'] as String,
-    brigade: json['brigade'] as String,
-    time: json['time'] as String,
+    lat: (json['Lat'] as num)?.toDouble(),
+    lon: (json['Lon'] as num)?.toDouble(),
+    symbol: json['Lines'] as String,
+    brigade: json['Brigade'] as String,
+    time: json['Time'] as String,
+    vehicleNumber: json['VehicleNumber'] as String,
   );
 }
 
 Map<String, dynamic> _$VehicleToJson(Vehicle instance) => <String, dynamic>{
-      'lat': instance.lat,
-      'lon': instance.lon,
-      'symbol': instance.symbol,
-      'brigade': instance.brigade,
-      'time': instance.time,
+      'Lat': instance.lat,
+      'Lon': instance.lon,
+      'Lines': instance.symbol,
+      'Brigade': instance.brigade,
+      'Time': instance.time,
+      'VehicleNumber': instance.vehicleNumber,
     };
