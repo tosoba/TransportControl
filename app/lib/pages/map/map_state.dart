@@ -10,3 +10,17 @@ class MapState {
       : trackedVehicles = {},
         trackedLines = {};
 }
+
+class AnimatedVehicle {
+  final Vehicle vehicle;
+  final double nextLat;
+  final double nextLon;
+  final int animationStartTime;
+
+  AnimatedVehicle(
+    this.vehicle,
+    this.nextLat,
+    this.nextLon,
+    this.animationStartTime,
+  );
+}

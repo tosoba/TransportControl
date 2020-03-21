@@ -6,6 +6,7 @@ import 'package:transport_control/di/injection.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/result.dart';
 import 'package:transport_control/model/vehicle.dart';
+import 'package:transport_control/model/vehicles_response.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
 import 'package:transport_control/res/strings.dart';
 import 'package:transport_control/util/vehicle_ext.dart';
@@ -20,10 +21,7 @@ class VehiclesRepoImpl extends VehiclesRepo {
   static final Duration _timeoutDuration = Duration(seconds: 3);
 
   @override
-  Future<Result<List<Vehicle>>> loadVehiclesOfLines(
-    Iterable<Line> lines, {
-    int type,
-  }) {
+  Future<Result<List<Vehicle>>> loadVehiclesOfLines(Iterable<Line> lines) {
     if (lines == null || lines.isEmpty) {
       return Future.value(
         Result.failure(error: ArgumentError(ErrorMessages.NO_LINES)),
@@ -38,17 +36,12 @@ class VehiclesRepoImpl extends VehiclesRepo {
           .then((response) => Result.success(data: response.vehicles))
           .catchError((error) => Result<List<Vehicle>>.failure(error: error));
     } else {
-      return _api
-          .fetchVehicles(type: type)
-          .timeout(_timeoutDuration)
+      return _loadVehiclesOfTypesUsing<Line>(lines, (line) => line.type)
           .then(
-            (response) => Result.success(
-              data: response.vehicles
-                  .where(
-                    (vehicle) =>
-                        vehicle.isValid && lines.contains(vehicle.symbol),
-                  )
-                  .toList(),
+            (responses) => Result.success(
+              data: responses.filterVehicles(
+                (vehicle) => vehicle.isValid && lines.contains(vehicle.symbol),
+              ),
             ),
           )
           .catchError((error) => Result<List<Vehicle>>.failure(error: error));
@@ -56,7 +49,23 @@ class VehiclesRepoImpl extends VehiclesRepo {
   }
 
   @override
-  Future<Result<Iterable<Vehicle>>> loadVehiclesInArea({
+  Future<Result<List<Vehicle>>> loadVehicles(Iterable<Vehicle> vehicles) {
+    final vehicleNumbers = vehicles.map((vehicle) => vehicle.number).toSet();
+    return _loadVehiclesOfTypesUsing<Vehicle>(
+            vehicles, (vehicle) => vehicle.type)
+        .then(
+          (responses) => Result.success(
+            data: responses.filterVehicles(
+              (vehicle) =>
+                  vehicle.isValid && vehicleNumbers.contains(vehicle.number),
+            ),
+          ),
+        )
+        .catchError((error) => Result<List<Vehicle>>.failure(error: error));
+  }
+
+  @override
+  Future<Result<List<Vehicle>>> loadVehiclesInArea({
     double southWestLat,
     double southWestLon,
     double northEastLat,
@@ -64,5 +73,29 @@ class VehiclesRepoImpl extends VehiclesRepo {
     int type,
   }) {
     throw UnimplementedError();
+  }
+
+  Future<List<VehiclesResponse>> _loadVehiclesOfTypesUsing<T>(
+    Iterable<T> list,
+    int Function(T) typeGetter,
+  ) {
+    return Future.wait(
+      list.map(typeGetter).toSet().map(
+          (type) => _api.fetchVehicles(type: type).timeout(_timeoutDuration)),
+      eagerError: true,
+    );
+  }
+}
+
+extension _VehicleResponsesExt on List<VehiclesResponse> {
+  List<Vehicle> filterVehicles(
+    bool Function(Vehicle) filter,
+  ) {
+    return map(
+      (response) => response.vehicles.where(filter).toList(),
+    ).fold<List<Vehicle>>(
+      [],
+      (previousValue, element) => previousValue + element,
+    );
   }
 }

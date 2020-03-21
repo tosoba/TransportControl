@@ -26,6 +26,9 @@ class _MapPageState extends State<MapPage>
                 (vehicle) => Marker(
                   markerId: MarkerId(vehicle.number),
                   position: LatLng(vehicle.lat, vehicle.lon),
+                  infoWindow: InfoWindow(
+                    title: 'Last updated at: ${vehicle.time}',
+                  ),
                 ),
               )
               .toSet(),

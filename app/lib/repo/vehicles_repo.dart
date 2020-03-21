@@ -4,7 +4,7 @@ import 'package:transport_control/model/result.dart';
 import 'package:transport_control/model/vehicle.dart';
 
 abstract class VehiclesRepo {
-  Future<Result<Iterable<Vehicle>>> loadVehiclesInArea({
+  Future<Result<List<Vehicle>>> loadVehiclesInArea({
     @required double southWestLat,
     @required double southWestLon,
     @required double northEastLat,
@@ -12,8 +12,7 @@ abstract class VehiclesRepo {
     int type,
   });
 
-  Future<Result<List<Vehicle>>> loadVehiclesOfLines(
-    Iterable<Line> lines, {
-    int type,
-  });
+  Future<Result<List<Vehicle>>> loadVehiclesOfLines(Iterable<Line> lines);
+
+  Future<Result<List<Vehicle>>> loadVehicles(Iterable<Vehicle> vehicles);
 }
