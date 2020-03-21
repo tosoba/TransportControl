@@ -11,16 +11,40 @@ class MapState {
         trackedLines = {};
 }
 
-class AnimatedVehicle {
-  final Vehicle vehicle;
-  final double nextLat;
-  final double nextLon;
+class LatLngAnimation {
+  final double startLat;
+  final double startLon;
+  final double destLat;
+  final double destLon;
   final int animationStartTime;
+  final bool isAnimating;
 
-  AnimatedVehicle(
-    this.vehicle,
-    this.nextLat,
-    this.nextLon,
+  int _durationMillis;
+
+  LatLngAnimation(
+    this.startLat,
+    this.startLon,
+    this.destLat,
+    this.destLon,
     this.animationStartTime,
-  );
+    this.isAnimating,
+  ) {
+    final distance = startDestDistance;
+    if (distance < 200)
+      _durationMillis = 500;
+    else if (distance < 500)
+      _durationMillis = 1000;
+    else
+      _durationMillis = 1500;
+  }
+
+  int get elapsed => throw UnimplementedError();
+
+  double get startDestDistance {
+    throw UnimplementedError();
+  }
+
+  double get interpolation {
+    throw UnimplementedError();
+  }
 }
