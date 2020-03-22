@@ -7,7 +7,7 @@ extension VehicleExt on Vehicle {
       lon != null &&
       symbol != null &&
       brigade != null &&
-      time != null;
+      lastUpdate != null;
 
   int get type {
     if (symbol == null)

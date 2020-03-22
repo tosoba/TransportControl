@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:quiver/core.dart';
 
 part 'vehicle.g.dart';
 
@@ -13,7 +14,7 @@ class Vehicle {
   @JsonKey(name: 'Brigade')
   final String brigade;
   @JsonKey(name: 'Time')
-  final String time;
+  final String lastUpdate;
   @JsonKey(name: 'VehicleNumber')
   final String number;
 
@@ -22,9 +23,13 @@ class Vehicle {
     this.lon,
     this.symbol,
     this.brigade,
-    this.time,
+    this.lastUpdate,
     this.number,
   });
+
+  int get hashCode {
+    return hash2(number.hashCode, brigade.hashCode);
+  }
 
   factory Vehicle.fromJson(Map<String, dynamic> json) =>
       _$VehicleFromJson(json);
