@@ -1,24 +1,26 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sealed_unions/sealed_unions.dart';
+import 'package:super_enum/super_enum.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/result.dart';
 import 'package:transport_control/model/vehicle.dart';
+import 'package:transport_control/pages/map/map_event.dart';
+import 'package:transport_control/pages/map/map_state.dart';
 import 'package:transport_control/pages/map/vehicle_animation_stage.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
 
-part 'package:transport_control/pages/map/map_state.dart';
-part 'package:transport_control/pages/map/map_event.dart';
-
-class MapBloc extends Bloc<_MapEvent, MapState> {
+class MapBloc extends Bloc<MapEvent, MapState> {
   final VehiclesRepo _vehiclesRepo;
 
-  final Duration _updateInterval = const Duration(seconds: 15);
+  final Duration _vehiclesUpdateInterval = const Duration(seconds: 15);
   StreamSubscription<Result<List<Vehicle>>> _vehicleUpdatesSubscription;
 
+  final Duration _vehiclesAnimationInterval = const Duration(milliseconds: 16);
+  StreamSubscription<dynamic> _vehiclesAnimationSubscription;
+
   MapBloc(this._vehiclesRepo) {
-    _vehicleUpdatesSubscription = Stream.periodic(_updateInterval)
+    _vehicleUpdatesSubscription = Stream.periodic(_vehiclesUpdateInterval)
         .where((_) => state.trackedVehiclesMap.isNotEmpty)
         .asyncExpand(
           (_) => Stream.fromFuture(
@@ -29,16 +31,23 @@ class MapBloc extends Bloc<_MapEvent, MapState> {
           ),
         )
         .listen(_handleVehiclesResult);
+
+    _vehiclesAnimationSubscription = Stream.periodic(_vehiclesAnimationInterval)
+        .where(
+          (_) => state.trackedVehiclesMap.values
+              .any((animated) => animated.stage.isAnimating),
+        )
+        .listen((_) => add(MapEvent.vehiclesAnimated()));
   }
 
   @override
   MapState get initialState => MapState.empty();
 
   @override
-  Stream<MapState> mapEventToState(_MapEvent event) async* {
-    yield event.join(
-      (_) => MapState.empty(),
-      (linesAddedEvent) {
+  Stream<MapState> mapEventToState(MapEvent event) async* {
+    yield event.when(
+      clearMap: (_) => MapState.empty(),
+      trackedLinesAdded: (linesAddedEvent) {
         _vehiclesRepo
             .loadVehiclesOfLines(linesAddedEvent.lines)
             .then(_handleVehiclesResult);
@@ -47,7 +56,7 @@ class MapBloc extends Bloc<_MapEvent, MapState> {
           state.trackedLines.union(linesAddedEvent.lines),
         );
       },
-      (vehiclesAddedEvent) {
+      vehiclesAdded: (vehiclesAddedEvent) {
         final updatedVehiclesMap = Map.of(state.trackedVehiclesMap);
         vehiclesAddedEvent.vehicles.forEach((vehicle) {
           final current = updatedVehiclesMap[vehicle.number];
@@ -61,26 +70,38 @@ class MapBloc extends Bloc<_MapEvent, MapState> {
         });
         return MapState(updatedVehiclesMap, state.trackedLines);
       },
+      vehiclesAnimated: (_) {
+        final updatedVehiclesMap = state.trackedVehiclesMap.map(
+          (number, animated) {
+            if (!animated.stage.isAnimating)
+              return MapEntry(number, animated);
+            else
+              return MapEntry(number, AnimatedVehicle.nextStage(animated));
+          },
+        );
+        return MapState(updatedVehiclesMap, state.trackedLines);
+      },
     );
   }
 
   _handleVehiclesResult(Result<List<Vehicle>> result) {
     result.when(
-      success: (success) => _vehiclesAdded(success.data.toSet()),
+      success: (success) => add(MapEvent.vehiclesAdded(vehicles: success.data)),
       failure: (failure) => failure.logError(),
     );
   }
 
   @override
   Future<void> close() async {
-    await _vehicleUpdatesSubscription.cancel();
+    await Future.wait([
+      _vehicleUpdatesSubscription.cancel(),
+      _vehiclesAnimationSubscription.cancel()
+    ]);
     return super.close();
   }
 
   Stream<Set<Line>> get trackedLines => map((state) => state.trackedLines);
 
-  trackedLinesAdded(Set<Line> lines) => add(_MapEvent.trackedLinesAdded(lines));
-
-  _vehiclesAdded(Set<Vehicle> vehicles) =>
-      add(_MapEvent.vehiclesAdded(vehicles));
+  trackedLinesAdded(Set<Line> lines) =>
+      add(MapEvent.trackedLinesAdded(lines: lines));
 }

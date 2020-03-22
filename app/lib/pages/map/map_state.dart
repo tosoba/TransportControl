@@ -1,4 +1,5 @@
-part of 'package:transport_control/pages/map/map_bloc.dart';
+import 'package:transport_control/model/line.dart';
+import 'package:transport_control/pages/map/vehicle_animation_stage.dart';
 
 class MapState {
   final Map<String, AnimatedVehicle> trackedVehiclesMap;
