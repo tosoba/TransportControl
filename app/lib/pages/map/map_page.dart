@@ -21,16 +21,23 @@ class _MapPageState extends State<MapPage>
             target: LatLng(52.237049, 21.017532),
             zoom: 11,
           ),
-          markers: state.trackedVehicles
+          markers: state.trackedVehiclesMap
               .map(
-                (vehicle) => Marker(
-                  markerId: MarkerId(vehicle.number),
-                  position: LatLng(vehicle.lat, vehicle.lon),
-                  infoWindow: InfoWindow(
-                    title: 'Last updated at: ${vehicle.lastUpdate}',
+                (number, animated) => MapEntry(
+                  number,
+                  Marker(
+                    markerId: MarkerId(number),
+                    position: LatLng(
+                      animated.stage.current.latitude,
+                      animated.stage.current.longitude,
+                    ),
+                    infoWindow: InfoWindow(
+                      title: 'Last updated at: ${animated.vehicle.lastUpdate}',
+                    ),
                   ),
                 ),
               )
+              .values
               .toSet(),
         );
       },

@@ -3,11 +3,32 @@ import 'dart:math';
 import 'package:latlong/latlong.dart';
 import 'package:transport_control/model/vehicle.dart';
 
-class VehicleAnimationStage {
+class AnimatedVehicle {
+  final Vehicle vehicle;
+  final _VehicleAnimationStage stage;
+
+  AnimatedVehicle.fromNewlyLoadedVehicle(Vehicle newlyLoadedVehicle)
+      : vehicle = newlyLoadedVehicle,
+        stage = _VehicleAnimationStage.forNewlyLoadedVehicle(newlyLoadedVehicle);
+
+  AnimatedVehicle.fromUpdatedVehicle(
+    Vehicle updatedVehicle,
+    AnimatedVehicle previous,
+  )   : vehicle = updatedVehicle,
+        stage = _VehicleAnimationStage.forUpdatedVehicle(
+          updatedVehicle,
+          previous.stage,
+        );
+
+  AnimatedVehicle.nextStage(AnimatedVehicle previous)
+      : vehicle = previous.vehicle,
+        stage = _VehicleAnimationStage.nextStage(previous.stage);
+}
+
+class _VehicleAnimationStage {
   final LatLng start;
   LatLng _current;
   final LatLng dest;
-  final String lastUpdate;
   final int animationStartTime;
   bool _isAnimating;
   int _durationMillis;
@@ -17,22 +38,20 @@ class VehicleAnimationStage {
   bool get isAnimating => _isAnimating;
   LatLng get current => _current;
 
-  VehicleAnimationStage.forNewlyLoadedVehicle(Vehicle newlyLoadedVehicle)
+  _VehicleAnimationStage.forNewlyLoadedVehicle(Vehicle newlyLoadedVehicle)
       : start = null,
         _current = LatLng(newlyLoadedVehicle.lat, newlyLoadedVehicle.lon),
         dest = null,
-        lastUpdate = newlyLoadedVehicle.lastUpdate,
         animationStartTime = null,
         _isAnimating = false,
         _durationMillis = null;
 
-  VehicleAnimationStage.forUpdatedVehiclePosition(
+  _VehicleAnimationStage.forUpdatedVehicle(
     Vehicle updatedVehicle,
-    VehicleAnimationStage previousStage,
+    _VehicleAnimationStage previousStage,
   )   : start = previousStage._current,
         _current = previousStage._current,
         dest = LatLng(updatedVehicle.lat, updatedVehicle.lon),
-        lastUpdate = updatedVehicle.lastUpdate,
         animationStartTime = DateTime.now().millisecondsSinceEpoch,
         _isAnimating = true {
     initDurationMillis();
@@ -48,10 +67,9 @@ class VehicleAnimationStage {
       _durationMillis = 1500;
   }
 
-  VehicleAnimationStage.nextStage(VehicleAnimationStage previousStage)
+  _VehicleAnimationStage.nextStage(_VehicleAnimationStage previousStage)
       : start = previousStage.start,
         dest = previousStage.dest,
-        lastUpdate = previousStage.lastUpdate,
         animationStartTime = previousStage.animationStartTime,
         _durationMillis = previousStage._durationMillis {
     final elapsedMillis = previousStage.elapsed;

@@ -5,6 +5,7 @@ import 'package:sealed_unions/sealed_unions.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/result.dart';
 import 'package:transport_control/model/vehicle.dart';
+import 'package:transport_control/pages/map/vehicle_animation_stage.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
 
 part 'package:transport_control/pages/map/map_state.dart';
@@ -18,10 +19,13 @@ class MapBloc extends Bloc<_MapEvent, MapState> {
 
   MapBloc(this._vehiclesRepo) {
     _vehicleUpdatesSubscription = Stream.periodic(_updateInterval)
-        .where((_) => state.trackedVehicles.isNotEmpty)
+        .where((_) => state.trackedVehiclesMap.isNotEmpty)
         .asyncExpand(
           (_) => Stream.fromFuture(
-            _vehiclesRepo.loadVehicles(state.trackedVehicles),
+            _vehiclesRepo.loadVehicles(
+              state.trackedVehiclesMap.values
+                  .map((animated) => animated.vehicle),
+            ),
           ),
         )
         .listen(_handleVehiclesResult);
@@ -39,14 +43,24 @@ class MapBloc extends Bloc<_MapEvent, MapState> {
             .loadVehiclesOfLines(linesAddedEvent.lines)
             .then(_handleVehiclesResult);
         return MapState(
-          state.trackedVehicles,
+          state.trackedVehiclesMap,
           state.trackedLines.union(linesAddedEvent.lines),
         );
       },
-      (vehiclesAddedEvent) => MapState(
-        vehiclesAddedEvent.vehicles,
-        state.trackedLines,
-      ),
+      (vehiclesAddedEvent) {
+        final updatedVehiclesMap = Map.of(state.trackedVehiclesMap);
+        vehiclesAddedEvent.vehicles.forEach((vehicle) {
+          final current = updatedVehiclesMap[vehicle.number];
+          if (current != null) {
+            updatedVehiclesMap[vehicle.number] =
+                AnimatedVehicle.fromUpdatedVehicle(vehicle, current);
+          } else {
+            updatedVehiclesMap[vehicle.number] =
+                AnimatedVehicle.fromNewlyLoadedVehicle(vehicle);
+          }
+        });
+        return MapState(updatedVehiclesMap, state.trackedLines);
+      },
     );
   }
 
