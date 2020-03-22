@@ -36,11 +36,13 @@ class VehiclesRepoImpl extends VehiclesRepo {
           .then((response) => Result.success(data: response.vehicles))
           .catchError((error) => Result<List<Vehicle>>.failure(error: error));
     } else {
+      final lineSymbols = lines.map((line) => line.symbol).toSet();
       return _loadVehiclesOfTypesUsing<Line>(lines, (line) => line.type)
           .then(
             (responses) => Result.success(
               data: responses.filterVehicles(
-                (vehicle) => vehicle.isValid && lines.contains(vehicle.symbol),
+                (vehicle) =>
+                    vehicle.isValid && lineSymbols.contains(vehicle.symbol),
               ),
             ),
           )

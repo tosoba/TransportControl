@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,6 +13,8 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage>
     with AutomaticKeepAliveClientMixin<MapPage> {
+  Completer<GoogleMapController> _mapController = Completer();
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -22,6 +26,11 @@ class _MapPageState extends State<MapPage>
             target: LatLng(52.237049, 21.017532),
             zoom: 11,
           ),
+          onMapCreated: _mapController.complete,
+          onCameraIdle: () {
+            // _mapController.future
+            //     .then((controller) => controller.getVisibleRegion());
+          },
           markers: state.trackedVehiclesMap
               .map(
                 (number, animated) => MapEntry(
