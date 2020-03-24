@@ -59,25 +59,33 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       vehiclesAdded: (vehiclesAddedEvent) {
         final updatedVehiclesMap = Map.of(state.trackedVehiclesMap);
         vehiclesAddedEvent.vehicles.forEach((vehicle) {
-          final current = updatedVehiclesMap[vehicle.number];
-          if (current != null) {
-            updatedVehiclesMap[vehicle.number] =
-                AnimatedVehicle.fromUpdatedVehicle(vehicle, current);
+          final animatedVehicle = updatedVehiclesMap[vehicle.number];
+          if (animatedVehicle != null) {
+            updatedVehiclesMap[vehicle.number] = AnimatedVehicle.fromUpdated(
+              vehicle,
+              previous: animatedVehicle.stage,
+              currentBounds: state.bounds,
+              currentZoom: state.zoom,
+            );
           } else {
             updatedVehiclesMap[vehicle.number] =
-                AnimatedVehicle.fromNewlyLoadedVehicle(vehicle);
+                AnimatedVehicle.fromNewlyLoaded(vehicle);
           }
         });
         return state.copyWith(trackedVehiclesMap: updatedVehiclesMap);
       },
       vehiclesAnimated: (_) {
         final updatedVehiclesMap = state.trackedVehiclesMap.map(
-          (number, animated) {
-            if (!animated.stage.isAnimating)
-              return MapEntry(number, animated);
-            else
-              return MapEntry(number, AnimatedVehicle.nextStage(animated));
-          },
+          (number, animated) => animated.stage.isAnimating
+              ? MapEntry(
+                  number,
+                  AnimatedVehicle.nextStageOf(
+                    animated,
+                    currentBounds: state.bounds,
+                    currentZoom: state.zoom,
+                  ),
+                )
+              : MapEntry(number, animated),
         );
         return state.copyWith(trackedVehiclesMap: updatedVehiclesMap);
       },
