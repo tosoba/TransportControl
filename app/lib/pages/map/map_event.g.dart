@@ -20,6 +20,9 @@ abstract class MapEvent extends Equatable {
 
   factory MapEvent.vehiclesAnimated() = VehiclesAnimated;
 
+  factory MapEvent.cameraMoved(
+      {@required LatLngBounds bounds, @required double zoom}) = CameraMoved;
+
   final _MapEvent _type;
 
 //ignore: missing_return
@@ -27,12 +30,14 @@ abstract class MapEvent extends Equatable {
       {@required R Function(ClearMap) clearMap,
       @required R Function(TrackedLinesAdded) trackedLinesAdded,
       @required R Function(VehiclesAdded) vehiclesAdded,
-      @required R Function(VehiclesAnimated) vehiclesAnimated}) {
+      @required R Function(VehiclesAnimated) vehiclesAnimated,
+      @required R Function(CameraMoved) cameraMoved}) {
     assert(() {
       if (clearMap == null ||
           trackedLinesAdded == null ||
           vehiclesAdded == null ||
-          vehiclesAnimated == null) {
+          vehiclesAnimated == null ||
+          cameraMoved == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -46,6 +51,8 @@ abstract class MapEvent extends Equatable {
         return vehiclesAdded(this as VehiclesAdded);
       case _MapEvent.VehiclesAnimated:
         return vehiclesAnimated(this as VehiclesAnimated);
+      case _MapEvent.CameraMoved:
+        return cameraMoved(this as CameraMoved);
     }
   }
 
@@ -54,12 +61,14 @@ abstract class MapEvent extends Equatable {
       {@required FutureOr<R> Function(ClearMap) clearMap,
       @required FutureOr<R> Function(TrackedLinesAdded) trackedLinesAdded,
       @required FutureOr<R> Function(VehiclesAdded) vehiclesAdded,
-      @required FutureOr<R> Function(VehiclesAnimated) vehiclesAnimated}) {
+      @required FutureOr<R> Function(VehiclesAnimated) vehiclesAnimated,
+      @required FutureOr<R> Function(CameraMoved) cameraMoved}) {
     assert(() {
       if (clearMap == null ||
           trackedLinesAdded == null ||
           vehiclesAdded == null ||
-          vehiclesAnimated == null) {
+          vehiclesAnimated == null ||
+          cameraMoved == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -73,6 +82,8 @@ abstract class MapEvent extends Equatable {
         return vehiclesAdded(this as VehiclesAdded);
       case _MapEvent.VehiclesAnimated:
         return vehiclesAnimated(this as VehiclesAnimated);
+      case _MapEvent.CameraMoved:
+        return cameraMoved(this as CameraMoved);
     }
   }
 
@@ -81,6 +92,7 @@ abstract class MapEvent extends Equatable {
       R Function(TrackedLinesAdded) trackedLinesAdded,
       R Function(VehiclesAdded) vehiclesAdded,
       R Function(VehiclesAnimated) vehiclesAnimated,
+      R Function(CameraMoved) cameraMoved,
       @required R Function(MapEvent) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -101,6 +113,9 @@ abstract class MapEvent extends Equatable {
       case _MapEvent.VehiclesAnimated:
         if (vehiclesAnimated == null) break;
         return vehiclesAnimated(this as VehiclesAnimated);
+      case _MapEvent.CameraMoved:
+        if (cameraMoved == null) break;
+        return cameraMoved(this as CameraMoved);
     }
     return orElse(this);
   }
@@ -110,6 +125,7 @@ abstract class MapEvent extends Equatable {
       FutureOr<R> Function(TrackedLinesAdded) trackedLinesAdded,
       FutureOr<R> Function(VehiclesAdded) vehiclesAdded,
       FutureOr<R> Function(VehiclesAnimated) vehiclesAnimated,
+      FutureOr<R> Function(CameraMoved) cameraMoved,
       @required FutureOr<R> Function(MapEvent) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -130,6 +146,9 @@ abstract class MapEvent extends Equatable {
       case _MapEvent.VehiclesAnimated:
         if (vehiclesAnimated == null) break;
         return vehiclesAnimated(this as VehiclesAnimated);
+      case _MapEvent.CameraMoved:
+        if (cameraMoved == null) break;
+        return cameraMoved(this as CameraMoved);
     }
     return orElse(this);
   }
@@ -139,12 +158,14 @@ abstract class MapEvent extends Equatable {
       {FutureOr<void> Function(ClearMap) clearMap,
       FutureOr<void> Function(TrackedLinesAdded) trackedLinesAdded,
       FutureOr<void> Function(VehiclesAdded) vehiclesAdded,
-      FutureOr<void> Function(VehiclesAnimated) vehiclesAnimated}) {
+      FutureOr<void> Function(VehiclesAnimated) vehiclesAnimated,
+      FutureOr<void> Function(CameraMoved) cameraMoved}) {
     assert(() {
       if (clearMap == null &&
           trackedLinesAdded == null &&
           vehiclesAdded == null &&
-          vehiclesAnimated == null) {
+          vehiclesAnimated == null &&
+          cameraMoved == null) {
         throw 'provide at least one branch';
       }
       return true;
@@ -162,6 +183,9 @@ abstract class MapEvent extends Equatable {
       case _MapEvent.VehiclesAnimated:
         if (vehiclesAnimated == null) break;
         return vehiclesAnimated(this as VehiclesAnimated);
+      case _MapEvent.CameraMoved:
+        if (cameraMoved == null) break;
+        return cameraMoved(this as CameraMoved);
     }
   }
 
@@ -217,4 +241,19 @@ class VehiclesAnimated extends MapEvent {
   }
 
   static VehiclesAnimated _instance;
+}
+
+@immutable
+class CameraMoved extends MapEvent {
+  const CameraMoved({@required this.bounds, @required this.zoom})
+      : super(_MapEvent.CameraMoved);
+
+  final LatLngBounds bounds;
+
+  final double zoom;
+
+  @override
+  String toString() => 'CameraMoved(bounds:${this.bounds},zoom:${this.zoom})';
+  @override
+  List get props => [bounds, zoom];
 }

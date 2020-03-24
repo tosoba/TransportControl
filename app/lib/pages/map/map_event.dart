@@ -1,3 +1,4 @@
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:super_enum/super_enum.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/vehicle.dart';
@@ -16,5 +17,11 @@ enum _MapEvent {
   VehiclesAdded,
 
   @object
-  VehiclesAnimated
+  VehiclesAnimated,
+
+  @Data(fields: [
+    DataField<LatLngBounds>('bounds'),
+    DataField<double>('zoom'),
+  ])
+  CameraMoved
 }
