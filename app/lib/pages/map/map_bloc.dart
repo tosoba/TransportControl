@@ -1,12 +1,16 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:super_enum/super_enum.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/result.dart';
 import 'package:transport_control/model/vehicle.dart';
+import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_event.dart';
+import 'package:transport_control/pages/map/map_helper.dart';
+import 'package:transport_control/pages/map/map_marker.dart';
 import 'package:transport_control/pages/map/map_state.dart';
 import 'package:transport_control/pages/map/animated_vehicle.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
@@ -113,6 +117,41 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   Stream<Set<Line>> get trackedLines => map((state) => state.trackedLines);
+
+  Stream<Set<Marker>> get markers {
+    return asyncExpand(
+      (state) => Stream.fromFuture(
+        MapHelper.initClusterManager(
+                state.trackedVehiclesMap
+                    .map(
+                      (number, animated) => MapEntry(
+                        number,
+                        MapMarker(
+                          id: number,
+                          position: LatLng(
+                            animated.stage.current.latitude,
+                            animated.stage.current.longitude,
+                          ),
+                        ),
+                      ),
+                    )
+                    .values
+                    .toList(),
+                MapConstants.minClusterZoom,
+                MapConstants.maxClusterZoom)
+            .then(
+              (manager) => MapHelper.getClusterMarkers(
+                manager,
+                state.zoom,
+                Colors.blue,
+                Colors.white,
+                80,
+              ),
+            )
+            .then((markers) => markers.toSet()),
+      ),
+    );
+  }
 
   trackedLinesAdded(Set<Line> lines) =>
       add(MapEvent.trackedLinesAdded(lines: lines));

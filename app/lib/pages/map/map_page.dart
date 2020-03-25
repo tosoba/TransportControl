@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
-import 'package:transport_control/pages/map/map_state.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -22,8 +21,9 @@ class _MapPageState extends State<MapPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return BlocBuilder<MapBloc, MapState>(
-      builder: (context, state) {
+    return StreamBuilder<Set<Marker>>(
+      stream: context.bloc<MapBloc>().markers,
+      builder: (context, snapshot) {
         return GoogleMap(
           mapType: MapType.normal,
           initialCameraPosition: CameraPosition(
@@ -33,24 +33,7 @@ class _MapPageState extends State<MapPage>
           onMapCreated: _mapController.complete,
           onCameraIdle: () => _mapController.future
               .then((controller) => _cameraMoved(context, controller)),
-          markers: state.trackedVehiclesMap
-              .map(
-                (number, animated) => MapEntry(
-                  number,
-                  Marker(
-                    markerId: MarkerId(number),
-                    position: LatLng(
-                      animated.stage.current.latitude,
-                      animated.stage.current.longitude,
-                    ),
-                    infoWindow: InfoWindow(
-                      title: 'Last updated at: ${animated.vehicle.lastUpdate}',
-                    ),
-                  ),
-                ),
-              )
-              .values
-              .toSet(),
+          markers: snapshot.data,
         );
       },
     );
