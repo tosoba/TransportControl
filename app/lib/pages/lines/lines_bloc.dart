@@ -1,16 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sealed_unions/sealed_unions.dart';
 import 'package:search_app_bar/searcher.dart';
 import 'package:transport_control/model/line.dart';
+import 'package:transport_control/pages/lines/lines_event.dart';
+import 'package:transport_control/pages/lines/lines_state.dart';
 
-part 'package:transport_control/pages/lines/lines_state.dart';
-part 'package:transport_control/pages/lines/lines_event.dart';
-
-class LinesBloc extends Bloc<_LinesEvent, LinesState>
+class LinesBloc extends Bloc<LinesEvent, LinesState>
     implements Searcher<MapEntry<Line, LineState>> {
   final Stream<Set<Line>> _trackedLines;
   StreamSubscription<Set<Line>> _trackedLinesSubscription;
@@ -22,7 +19,7 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
         key: (lineJson) => Line.fromJson(lineJson),
         value: (_) => LineState.IDLE,
       );
-      add(_LinesEvent.created(lineItems));
+      add(LinesEvent.created(items: lineItems));
     });
 
     _trackedLinesSubscription = _trackedLines.listen(_trackedLinesChanged);
@@ -38,12 +35,12 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
   LinesState get initialState => LinesState.empty();
 
   @override
-  Stream<LinesState> mapEventToState(_LinesEvent event) async* {
-    yield event.join(
-      (created) => LinesState(items: created.items, filter: null),
-      (filterChange) =>
+  Stream<LinesState> mapEventToState(LinesEvent event) async* {
+    yield event.when(
+      created: (created) => LinesState(items: created.items, filter: null),
+      filterChanged: (filterChange) =>
           LinesState(items: state.items, filter: filterChange.filter),
-      (selectionChange) {
+      itemSelectionChanged: (selectionChange) {
         final oldLineState = state.items[selectionChange.item];
         if (oldLineState == LineState.TRACKED) return state;
         final updatedItems = Map.of(state.items);
@@ -52,14 +49,14 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
             : LineState.IDLE;
         return LinesState(items: updatedItems, filter: state.filter);
       },
-      (_) {
+      selectionReset: (_) {
         final updatedItems = Map.of(state.items);
         updatedItems.forEach((key, value) {
           if (value == LineState.SELECTED) updatedItems[key] = LineState.IDLE;
         });
         return LinesState(items: updatedItems, filter: state.filter);
       },
-      (trackedLinesChange) {
+      trackedLinesChanged: (trackedLinesChange) {
         final updatedItems = Map.of(state.items);
         updatedItems.forEach((key, value) {
           if (value == LineState.TRACKED) updatedItems[key] = LineState.IDLE;
@@ -76,7 +73,7 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
 
   @override
   Function(String) get filterChanged =>
-      (filter) => add(_LinesEvent.filterChanged(filter));
+      (filter) => add(LinesEvent.filterChanged(filter: filter));
 
   Stream<List<MapEntry<Line, LineState>>> get filteredItemsStream =>
       map((state) => state.filter == null
@@ -93,10 +90,10 @@ class LinesBloc extends Bloc<_LinesEvent, LinesState>
       .toSet();
 
   itemSelectionChanged(Line item) =>
-      add(_LinesEvent.itemSelectionChanged(item));
+      add(LinesEvent.itemSelectionChanged(item: item));
 
-  selectionReset() => add(_LinesEvent.selectionReset());
+  selectionReset() => add(LinesEvent.selectionReset());
 
   _trackedLinesChanged(Iterable<Line> lines) =>
-      add(_LinesEvent.trackedLinesChanged(lines));
+      add(LinesEvent.trackedLinesChanged(lines: lines));
 }

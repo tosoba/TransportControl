@@ -4,6 +4,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:search_app_bar/search_app_bar.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
+import 'package:transport_control/pages/lines/lines_state.dart';
 
 class LinesPage extends StatefulWidget {
   const LinesPage({Key key}) : super(key: key);

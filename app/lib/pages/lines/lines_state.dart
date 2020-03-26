@@ -1,4 +1,5 @@
-part of 'package:transport_control/pages/lines/lines_bloc.dart';
+import 'package:flutter/material.dart';
+import 'package:transport_control/model/line.dart';
 
 class LinesState {
   final Map<Line, LineState> items;

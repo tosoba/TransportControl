@@ -1,52 +1,23 @@
-part of 'package:transport_control/pages/lines/lines_bloc.dart';
+import 'package:super_enum/super_enum.dart';
+import 'package:transport_control/model/line.dart';
+import 'package:transport_control/pages/lines/lines_state.dart';
 
-class _LinesEvent extends Union5Impl<_Created, _FilterChanged,
-    _ItemSelectionChanged, _SelectionReset, _TrackedLinesChanged> {
-  static final Quintet<_Created, _FilterChanged, _ItemSelectionChanged,
-          _SelectionReset, _TrackedLinesChanged> _factory =
-      const Quintet<_Created, _FilterChanged, _ItemSelectionChanged,
-          _SelectionReset, _TrackedLinesChanged>();
+part "lines_event.g.dart";
 
-  _LinesEvent._(
-      Union5<_Created, _FilterChanged, _ItemSelectionChanged, _SelectionReset,
-              _TrackedLinesChanged>
-          union)
-      : super(union);
+@superEnum
+enum _LinesEvent {
+  @Data(fields: [DataField<Map<Line, LineState>>('items')])
+  Created,
 
-  factory _LinesEvent.created(Map<Line, LineState> items) =>
-      _LinesEvent._(_factory.first(_Created(items)));
-  factory _LinesEvent.filterChanged(String filter) =>
-      _LinesEvent._(_factory.second(_FilterChanged(filter)));
-  factory _LinesEvent.itemSelectionChanged(Line item) =>
-      _LinesEvent._(_factory.third(_ItemSelectionChanged(item)));
-  factory _LinesEvent.selectionReset() =>
-      _LinesEvent._(_factory.fourth(_SelectionReset()));
-  factory _LinesEvent.trackedLinesChanged(Iterable<Line> lines) =>
-      _LinesEvent._(_factory.fifth(_TrackedLinesChanged(lines)));
-}
+  @Data(fields: [DataField<String>('filter')])
+  FilterChanged,
 
-class _Created {
-  final Map<Line, LineState> items;
+  @Data(fields: [DataField<Line>('item')])
+  ItemSelectionChanged,
 
-  _Created(this.items);
-}
+  @object
+  SelectionReset,
 
-class _FilterChanged {
-  final String filter;
-
-  _FilterChanged(this.filter);
-}
-
-class _ItemSelectionChanged {
-  final Line item;
-
-  _ItemSelectionChanged(this.item);
-}
-
-class _SelectionReset {}
-
-class _TrackedLinesChanged {
-  final Iterable<Line> lines;
-
-  _TrackedLinesChanged(this.lines);
+  @Data(fields: [DataField<Iterable<Line>>('lines')])
+  TrackedLinesChanged,
 }
