@@ -9,11 +9,11 @@ import 'package:transport_control/model/result.dart';
 import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_event.dart';
-import 'package:transport_control/pages/map/map_helper.dart';
 import 'package:transport_control/pages/map/map_marker.dart';
 import 'package:transport_control/pages/map/map_state.dart';
 import 'package:transport_control/pages/map/animated_vehicle.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
+import 'package:transport_control/util/fluster_ext.dart';
 
 class MapBloc extends Bloc<MapEvent, MapState> {
   final VehiclesRepo _vehiclesRepo;
@@ -121,7 +121,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   Stream<Set<Marker>> get markers {
     return asyncExpand(
       (state) => Stream.fromFuture(
-        MapHelper.initClusterManager(
+        flusterFromMarkers(
                 state.trackedVehiclesMap
                     .map(
                       (number, animated) => MapEntry(
@@ -137,15 +137,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
                     )
                     .values
                     .toList(),
-                MapConstants.minClusterZoom,
-                MapConstants.maxClusterZoom)
+                minZoom: MapConstants.minClusterZoom,
+                maxZoom: MapConstants.maxClusterZoom)
             .then(
-              (manager) => MapHelper.getClusterMarkers(
-                manager,
-                state.zoom,
-                Colors.blue,
-                Colors.white,
-                80,
+              (fluster) => fluster.getClusterMarkers(
+                currentZoom: state.zoom,
+                clusterColor: Colors.blue,
+                clusterTextColor: Colors.white,
+                clusterWidth: 80,
               ),
             )
             .then((markers) => markers.toSet()),
