@@ -121,33 +121,37 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   Stream<Set<Marker>> get markers {
     return asyncExpand(
       (state) => Stream.fromFuture(
-        flusterFromMarkers(
-                state.trackedVehiclesMap
-                    .map(
-                      (number, animated) => MapEntry(
-                        number,
-                        MapMarker(
-                          id: number,
-                          position: LatLng(
-                            animated.stage.current.latitude,
-                            animated.stage.current.longitude,
+        state.trackedVehiclesMap.isEmpty
+            ? null
+            : flusterFromMarkers(
+                    state.trackedVehiclesMap
+                        .map(
+                          (number, animated) => MapEntry(
+                            number,
+                            MapMarker(
+                              id: '${number}_${animated.vehicle.symbol}',
+                              position: LatLng(
+                                animated.stage.current.latitude,
+                                animated.stage.current.longitude,
+                              ),
+                            ),
                           ),
+                        )
+                        .values
+                        .toList(),
+                    minZoom: MapConstants.minClusterZoom,
+                    maxZoom: MapConstants.maxClusterZoom)
+                .then(
+                  (fluster) => fluster == null
+                      ? Future.value(<Marker>[])
+                      : fluster.getClusterMarkers(
+                          currentZoom: state.zoom,
+                          clusterColor: Colors.blue,
+                          clusterTextColor: Colors.white,
+                          clusterWidth: 80,
                         ),
-                      ),
-                    )
-                    .values
-                    .toList(),
-                minZoom: MapConstants.minClusterZoom,
-                maxZoom: MapConstants.maxClusterZoom)
-            .then(
-              (fluster) => fluster.getClusterMarkers(
-                currentZoom: state.zoom,
-                clusterColor: Colors.blue,
-                clusterTextColor: Colors.white,
-                clusterWidth: 80,
-              ),
-            )
-            .then((markers) => markers.toSet()),
+                )
+                .then((markers) => markers.toSet()),
       ),
     );
   }

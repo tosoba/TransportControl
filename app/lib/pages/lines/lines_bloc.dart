@@ -13,7 +13,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState>
   StreamSubscription<Set<Line>> _trackedLinesSubscription;
 
   LinesBloc(this._trackedLines) {
-    rootBundle.loadString('assets/lines.json').then((jsonString) {
+    rootBundle.loadString('assets/json/lines.json').then((jsonString) {
       final lineItems = Map.fromIterable(
         jsonDecode(jsonString) as List,
         key: (lineJson) => Line.fromJson(lineJson),

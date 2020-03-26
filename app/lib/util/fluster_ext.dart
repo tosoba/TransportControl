@@ -1,13 +1,13 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
+import 'dart:ui' as UI;
 
 import 'package:fluster/fluster.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/pages/map/map_marker.dart';
+import 'package:transport_control/util/vehicle_ext.dart';
 
 extension FlusterMapMarkerExt on Fluster<MapMarker> {
   Future<List<Marker>> getClusterMarkers({
@@ -15,11 +15,18 @@ extension FlusterMapMarkerExt on Fluster<MapMarker> {
     @required Color clusterColor,
     @required Color clusterTextColor,
     @required int clusterWidth,
-  }) {
+  }) async {
     assert(currentZoom != null);
     assert(clusterColor != null);
     assert(clusterTextColor != null);
     assert(clusterWidth != null);
+
+    List<UI.Image> markerImages = await Future.wait([
+      _loadUiImageFromAsset('assets/img/marker_bus.png'),
+      _loadUiImageFromAsset('assets/img/marker_tram.png')
+    ]);
+    final busMarkerImage = markerImages[0];
+    final tramMarkerImage = markerImages[1];
 
     return Future.wait(
       clusters(
@@ -33,6 +40,19 @@ extension FlusterMapMarkerExt on Fluster<MapMarker> {
               clusterColor,
               clusterTextColor,
               clusterWidth,
+            );
+          } else {
+            final symbol = mapMarker.id.substring(
+              mapMarker.id.indexOf('_') + 1,
+            );
+            final image = vehicleTypeFromSymbol(symbol) == VehicleType.TRAM
+                ? tramMarkerImage
+                : busMarkerImage;
+            mapMarker.icon = await _getMarker(
+              symbol: symbol,
+              width: 110,
+              height: 145,
+              imageAsset: image,
             );
           }
           return mapMarker.toMarker();
@@ -73,38 +93,63 @@ Future<Fluster<MapMarker>> flusterFromMarkers(
 
 final List<double> _bbox = [-180, -85, 180, 85];
 
-/// If there is a cached file and it's not old returns the cached marker image file
-/// else it will download the image and save it on the temp dir and return that file.
-///
-/// This mechanism is possible using the [DefaultCacheManager] package and is useful
-/// to improve load times on the next map loads, the first time will always take more
-/// time to download the file and set the marker image.
-///
-/// You can resize the marker image by providing a [targetWidth].
-Future<BitmapDescriptor> getMarkerImageFromUrl(
-  String url, {
-  int targetWidth,
-}) async {
-  assert(url != null);
-
-  final File markerImageFile = await DefaultCacheManager().getSingleFile(url);
-
-  Uint8List markerImageBytes = await markerImageFile.readAsBytes();
-
-  if (targetWidth != null) {
-    markerImageBytes = await _resizeImageBytes(
-      markerImageBytes,
-      targetWidth,
-    );
-  }
-
-  return BitmapDescriptor.fromBytes(markerImageBytes);
+Future<UI.Image> _loadUiImageFromAsset(String path) async {
+  final ByteData data = await rootBundle.load(path);
+  final Completer<UI.Image> completer = Completer();
+  UI.decodeImageFromList(Uint8List.view(data.buffer), (UI.Image img) {
+    return completer.complete(img);
+  });
+  return completer.future;
 }
 
-/// Draw a [clusterColor] circle with the [clusterSize] text inside that is [width] wide.
-///
-/// Then it will convert the canvas to an image and generate the [BitmapDescriptor]
-/// to be used on the cluster marker icons.
+Future<BitmapDescriptor> _getMarker({
+  @required String symbol,
+  @required int width,
+  @required int height,
+  @required UI.Image imageAsset,
+}) async {
+  assert(symbol != null);
+  assert(width != null);
+  assert(height != null);
+  assert(imageAsset != null);
+
+  final UI.PictureRecorder pictureRecorder = UI.PictureRecorder();
+  final Canvas canvas = Canvas(pictureRecorder);
+  final Paint paint = Paint();
+  final TextPainter textPainter = TextPainter(
+    textDirection: TextDirection.ltr,
+  );
+
+  canvas.drawImage(
+    imageAsset,
+    Offset.zero,
+    paint,
+  );
+
+  textPainter.text = TextSpan(
+    text: symbol,
+    style: TextStyle(
+      fontSize: 45,
+      fontWeight: FontWeight.bold,
+      color: Colors.black,
+    ),
+  );
+
+  textPainter.layout();
+  textPainter.paint(
+    canvas,
+    Offset(
+      60 - textPainter.width / 2,
+      60 - textPainter.height / 2,
+    ),
+  );
+
+  final image = await pictureRecorder.endRecording().toImage(width, height);
+  final data = await image.toByteData(format: UI.ImageByteFormat.png);
+
+  return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
+}
+
 Future<BitmapDescriptor> _getClusterMarker(
   int clusterSize,
   Color clusterColor,
@@ -115,7 +160,7 @@ Future<BitmapDescriptor> _getClusterMarker(
   assert(clusterColor != null);
   assert(width != null);
 
-  final PictureRecorder pictureRecorder = PictureRecorder();
+  final UI.PictureRecorder pictureRecorder = UI.PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
   final Paint paint = Paint()..color = clusterColor;
   final TextPainter textPainter = TextPainter(
@@ -149,31 +194,7 @@ Future<BitmapDescriptor> _getClusterMarker(
         radius.toInt() * 2,
         radius.toInt() * 2,
       );
-  final data = await image.toByteData(format: ImageByteFormat.png);
+  final data = await image.toByteData(format: UI.ImageByteFormat.png);
 
   return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
-}
-
-/// Resizes the given [imageBytes] with the [targetWidth].
-///
-/// We don't want the marker image to be too big so we might need to resize the image.
-Future<Uint8List> _resizeImageBytes(
-  Uint8List imageBytes,
-  int targetWidth,
-) async {
-  assert(imageBytes != null);
-  assert(targetWidth != null);
-
-  final Codec imageCodec = await instantiateImageCodec(
-    imageBytes,
-    targetWidth: targetWidth,
-  );
-
-  final FrameInfo frameInfo = await imageCodec.getNextFrame();
-
-  final ByteData byteData = await frameInfo.image.toByteData(
-    format: ImageByteFormat.png,
-  );
-
-  return byteData.buffer.asUint8List();
 }
