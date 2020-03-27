@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/pages/map/map_marker.dart';
-import 'package:transport_control/util/vehicle_ext.dart';
 
 extension FlusterMapMarkerExt on Fluster<MapMarker> {
   Future<List<Marker>> getClusterMarkers({
@@ -21,12 +20,7 @@ extension FlusterMapMarkerExt on Fluster<MapMarker> {
     assert(clusterTextColor != null);
     assert(clusterWidth != null);
 
-    List<UI.Image> markerImages = await Future.wait([
-      _loadUiImageFromAsset('assets/img/marker_bus.png'),
-      _loadUiImageFromAsset('assets/img/marker_tram.png')
-    ]);
-    final busMarkerImage = markerImages[0];
-    final tramMarkerImage = markerImages[1];
+    final markerImage = await _loadUiImageFromAsset('assets/img/marker.png');
 
     return Future.wait(
       clusters(
@@ -45,14 +39,11 @@ extension FlusterMapMarkerExt on Fluster<MapMarker> {
             final symbol = mapMarker.id.substring(
               mapMarker.id.indexOf('_') + 1,
             );
-            final image = vehicleTypeFromSymbol(symbol) == VehicleType.TRAM
-                ? tramMarkerImage
-                : busMarkerImage;
             mapMarker.icon = await _getMarker(
               symbol: symbol,
-              width: 110,
-              height: 145,
-              imageAsset: image,
+              width: 60,
+              height: 80,
+              imageAsset: markerImage,
             );
           }
           return mapMarker.toMarker();
@@ -129,9 +120,9 @@ Future<BitmapDescriptor> _getMarker({
   textPainter.text = TextSpan(
     text: symbol,
     style: TextStyle(
-      fontSize: 45,
+      fontSize: 40,
       fontWeight: FontWeight.bold,
-      color: Colors.black,
+      color: Colors.white,
     ),
   );
 
@@ -139,8 +130,8 @@ Future<BitmapDescriptor> _getMarker({
   textPainter.paint(
     canvas,
     Offset(
-      60 - textPainter.width / 2,
-      60 - textPainter.height / 2,
+      30 - textPainter.width / 2,
+      30 - textPainter.height / 2,
     ),
   );
 

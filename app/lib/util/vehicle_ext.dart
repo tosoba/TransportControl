@@ -9,19 +9,17 @@ extension VehicleExt on Vehicle {
       brigade != null &&
       lastUpdate != null;
 
-  int get type => vehicleTypeFromSymbol(symbol);
-}
-
-int vehicleTypeFromSymbol(String symbol) {
-  if (symbol == null)
-    return null;
-  else {
-    int parsedSymbol = int.tryParse(symbol);
-    if (symbol.firstCharIsLetter ||
-        (parsedSymbol != null && parsedSymbol >= 100))
-      return VehicleType.BUS;
-    else
-      return VehicleType.TRAM;
+  int get type {
+    if (symbol == null)
+      return null;
+    else {
+      int parsedSymbol = int.tryParse(symbol);
+      if (symbol.firstCharIsLetter ||
+          (parsedSymbol != null && parsedSymbol >= 100))
+        return VehicleType.BUS;
+      else
+        return VehicleType.TRAM;
+    }
   }
 }
 
