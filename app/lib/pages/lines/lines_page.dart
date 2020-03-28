@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:search_app_bar/search_app_bar.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
+import 'package:transport_control/widgets/search_app_bar.dart';
 
 class LinesPage extends StatefulWidget {
   const LinesPage({Key key}) : super(key: key);
@@ -30,75 +30,72 @@ class _LinesPageState extends State<LinesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = SearchAppBar(
+      hint: "Search lines...",
+      leading: _backButton,
+      onChanged: (query) {
+        context.bloc<LinesBloc>().filterChanged(query);
+      },
+    );
     return Scaffold(
-      body: NestedScrollView(
-          controller: _scrollViewController,
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [_searchLinesAppBar(context, innerBoxIsScrolled)];
-          },
-          body: Column(
-            children: [
-              Expanded(
-                child: _linesList(
-                  itemsStream:
-                      context.bloc<LinesBloc>().filteredItemsStream,
-                  selectionChanged:
-                      context.bloc<LinesBloc>().itemSelectionChanged,
-                ),
-              ),
-              _selectedLinesText,
-            ],
-          )),
-    );
-  }
-
-  Widget _searchLinesAppBar(BuildContext context, bool innerBoxIsScrolled) {
-    return SliverAppBar(
-      leading: null,
-      automaticallyImplyLeading: false,
-      titleSpacing: 0.0,
-      title: SearchAppBar<MapEntry<Line, LineState>>(
-        iconTheme: IconThemeData(color: Colors.white),
-        title: Text('Lines'),
-        searcher: context.bloc<LinesBloc>(),
-        filter: (MapEntry<Line, LineState> item, String query) =>
-            item.key.symbol.toLowerCase().contains(query.trim().toLowerCase()),
+      extendBodyBehindAppBar: true,
+      appBar: appBar,
+      body: Column(
+        children: [
+          Container(height: 10, width: double.infinity),
+          Expanded(
+            child: _linesList(
+              itemsStream: context.bloc<LinesBloc>().filteredItemsStream,
+              selectionChanged: context.bloc<LinesBloc>().itemSelectionChanged,
+            ),
+          ),
+          _selectedLinesText,
+        ],
       ),
-      pinned: false,
-      floating: true,
-      snap: true,
-      forceElevated: innerBoxIsScrolled,
     );
   }
 
-  Widget get _selectedLinesText => BlocBuilder<LinesBloc, LinesState>(
-        builder: (context, state) {
-          final numberOfSelectedLines = state.numberOfSelectedLines;
-          return numberOfSelectedLines > 0
-              ? Row(children: [
-                  Expanded(
-                    child: Container(
-                      color: Theme.of(context).primaryColor,
-                      child: Text(
-                        '$numberOfSelectedLines ${numberOfSelectedLines > 1 ? 'lines are' : 'line is'} selected.',
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 18),
-                      ),
+  Widget get _backButton {
+    return IconButton(
+      icon: Icon(
+        Icons.arrow_back,
+        color: Colors.black,
+      ),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  Widget get _selectedLinesText {
+    return BlocBuilder<LinesBloc, LinesState>(
+      builder: (context, state) {
+        final numberOfSelectedLines = state.numberOfSelectedLines;
+        return numberOfSelectedLines > 0
+            ? Row(children: [
+                Expanded(
+                  child: Container(
+                    color: Theme.of(context).primaryColor,
+                    child: Text(
+                      '$numberOfSelectedLines ${numberOfSelectedLines > 1 ? 'lines are' : 'line is'} selected.',
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   ),
-                  InkWell(
-                    onTap: () {
-                      Navigator.pop(context, true);
-                    },
-                    child: Text('Search'),
-                  )
-                ])
-              : Container();
-        },
-      );
+                ),
+                InkWell(
+                  onTap: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: Text('Search'),
+                )
+              ])
+            : Container();
+      },
+    );
+  }
 
   Widget _linesList({
     Stream<List<MapEntry<Line, LineState>>> itemsStream,

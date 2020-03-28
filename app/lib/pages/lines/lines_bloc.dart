@@ -2,13 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:search_app_bar/searcher.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_event.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 
-class LinesBloc extends Bloc<LinesEvent, LinesState>
-    implements Searcher<MapEntry<Line, LineState>> {
+class LinesBloc extends Bloc<LinesEvent, LinesState> {
   final Stream<Set<Line>> _trackedLines;
   StreamSubscription<Set<Line>> _trackedLinesSubscription;
 
@@ -68,13 +66,6 @@ class LinesBloc extends Bloc<LinesEvent, LinesState>
     );
   }
 
-  @override
-  List<MapEntry<Line, LineState>> get data => state.items.entries.toList();
-
-  @override
-  Function(String) get filterChanged =>
-      (filter) => add(LinesEvent.filterChanged(filter: filter));
-
   Stream<List<MapEntry<Line, LineState>>> get filteredItemsStream =>
       map((state) => state.filter == null
           ? state.items.entries.toList()
@@ -93,6 +84,8 @@ class LinesBloc extends Bloc<LinesEvent, LinesState>
       add(LinesEvent.itemSelectionChanged(item: item));
 
   selectionReset() => add(LinesEvent.selectionReset());
+
+  filterChanged(String filter) => add(LinesEvent.filterChanged(filter: filter));
 
   _trackedLinesChanged(Iterable<Line> lines) =>
       add(LinesEvent.trackedLinesChanged(lines: lines));

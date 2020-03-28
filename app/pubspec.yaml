@@ -40,9 +40,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  
-  search_app_bar:
-    path: ../search_app_bar
 
   retrofit_generator: ^1.3.1+1
   build_runner: ^1.7.4
