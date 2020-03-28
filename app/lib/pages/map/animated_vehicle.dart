@@ -46,10 +46,10 @@ class _VehicleAnimationStage {
   LatLng _current;
   LatLng _dest;
   int _animationStartTime;
-  bool _isAnimating;
   int _durationMillis;
+  bool _isAnimating;
 
-  static final Distance distance = const Distance();
+  static final Distance _distance = const Distance();
   static final double _animationThreshold = 12.5;
 
   bool get isAnimating => _isAnimating;
@@ -60,8 +60,8 @@ class _VehicleAnimationStage {
         _current = LatLng(newlyLoadedVehicle.lat, newlyLoadedVehicle.lon),
         _dest = null,
         _animationStartTime = null,
-        _isAnimating = false,
-        _durationMillis = null;
+        _durationMillis = null,
+        _isAnimating = false;
 
   _VehicleAnimationStage.forUpdatedVehicle(
     Vehicle updatedVehicle,
@@ -70,24 +70,24 @@ class _VehicleAnimationStage {
     double currentZoom,
   ) {
     final dest = LatLng(updatedVehicle.lat, updatedVehicle.lon);
-    if (shouldAnimate(previousStage, currentBounds, currentZoom, dest)) {
+    if (_shouldAnimate(previousStage, currentBounds, currentZoom, dest)) {
       _start = previousStage._current;
       _current = previousStage._current;
       _dest = dest;
       _animationStartTime = DateTime.now().millisecondsSinceEpoch;
+      _initDurationMillis(currentZoom);
       _isAnimating = true;
-      initDurationMillis();
     } else {
       _start = null;
       _current = LatLng(updatedVehicle.lat, updatedVehicle.lon);
       _dest = null;
       _animationStartTime = null;
-      _isAnimating = false;
       _durationMillis = null;
+      _isAnimating = false;
     }
   }
 
-  bool shouldAnimate(
+  bool _shouldAnimate(
     _VehicleAnimationStage previousStage,
     Maps.LatLngBounds currentBounds,
     double currentZoom,
@@ -98,14 +98,28 @@ class _VehicleAnimationStage {
             currentBounds.containsLatLng(dest));
   }
 
-  void initDurationMillis() {
-    final startDestDistance = distance(_start, _dest);
+  void _initDurationMillis(double zoom) {
+    final startDestDistance = _distance(_start, _dest);
     if (startDestDistance < 200)
-      _durationMillis = 500;
+      _durationMillis = (500 * _durationMultiplier(zoom)).toInt();
     else if (startDestDistance < 500)
-      _durationMillis = 1000;
+      _durationMillis = (1000 * _durationMultiplier(zoom)).toInt();
     else
-      _durationMillis = 1500;
+      _durationMillis = (1500 * _durationMultiplier(zoom)).toInt();
+  }
+
+  double _durationMultiplier(double zoom) {
+    if (zoom < 13) {
+      return 0.8;
+    } else if (zoom < 15) {
+      return 1;
+    } else if (zoom < 17) {
+      return 1.1;
+    } else if (zoom < 19) {
+      return 1.3;
+    } else {
+      return 1.5;
+    }
   }
 
   _VehicleAnimationStage.nextStage(
@@ -113,12 +127,12 @@ class _VehicleAnimationStage {
     Maps.LatLngBounds currentBounds,
     double currentZoom,
   ) {
-    if (shouldAnimate(
+    if (_shouldAnimate(
         previousStage, currentBounds, currentZoom, previousStage._dest)) {
       _start = previousStage._start;
 
-      final elapsedMillis = previousStage.elapsed;
-      final multiplier = previousStage.interpolation(elapsedMillis);
+      final elapsedMillis = previousStage._elapsed;
+      final multiplier = previousStage._interpolation(elapsedMillis);
       final lng = multiplier * previousStage._dest.longitude +
           (1 - multiplier) * previousStage._start.longitude;
       final lat = multiplier * previousStage._dest.latitude +
@@ -134,15 +148,15 @@ class _VehicleAnimationStage {
       _current = previousStage._dest;
       _dest = null;
       _animationStartTime = null;
-      _isAnimating = false;
       _durationMillis = null;
+      _isAnimating = false;
     }
   }
 
-  int get elapsed =>
+  int get _elapsed =>
       DateTime.now().millisecondsSinceEpoch - _animationStartTime;
 
-  double interpolation(int elapsedMillis) {
+  double _interpolation(int elapsedMillis) {
     if (!_isAnimating) throw ArgumentError();
     return (cos(((elapsedMillis / _durationMillis) + 1) * pi) / 2.0) + 0.5;
   }
