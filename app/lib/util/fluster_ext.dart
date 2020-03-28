@@ -13,12 +13,10 @@ extension FlusterMapMarkerExt on Fluster<MapMarker> {
     @required double currentZoom,
     @required Color clusterColor,
     @required Color clusterTextColor,
-    @required int clusterWidth,
   }) async {
     assert(currentZoom != null);
     assert(clusterColor != null);
     assert(clusterTextColor != null);
-    assert(clusterWidth != null);
 
     final markerImage = await _loadUiImageFromAsset('assets/img/marker.png');
 
@@ -33,7 +31,6 @@ extension FlusterMapMarkerExt on Fluster<MapMarker> {
               mapMarker.pointsSize,
               clusterColor,
               clusterTextColor,
-              clusterWidth,
             );
           } else {
             final symbol = mapMarker.id.substring(
@@ -145,11 +142,9 @@ Future<BitmapDescriptor> _getClusterMarker(
   int clusterSize,
   Color clusterColor,
   Color textColor,
-  int width,
 ) async {
   assert(clusterSize != null);
   assert(clusterColor != null);
-  assert(width != null);
 
   final UI.PictureRecorder pictureRecorder = UI.PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
@@ -158,7 +153,7 @@ Future<BitmapDescriptor> _getClusterMarker(
     textDirection: TextDirection.ltr,
   );
 
-  final double radius = width / 2;
+  final double radius = _clusterRadius(clusterSize);
 
   canvas.drawCircle(
     Offset(radius, radius),
@@ -188,4 +183,20 @@ Future<BitmapDescriptor> _getClusterMarker(
   final data = await image.toByteData(format: UI.ImageByteFormat.png);
 
   return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
+}
+
+double _clusterRadius(int pointsSize) {
+  if (pointsSize < 5) {
+    return 40;
+  } else if (pointsSize < 10) {
+    return 50;
+  } else if (pointsSize < 25) {
+    return 60;
+  } else if (pointsSize < 50) {
+    return 75;
+  } else if (pointsSize < 100) {
+    return 90;
+  } else {
+    return 120;
+  }
 }

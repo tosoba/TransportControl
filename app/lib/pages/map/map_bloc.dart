@@ -148,7 +148,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
                           currentZoom: state.zoom,
                           clusterColor: Colors.blue,
                           clusterTextColor: Colors.white,
-                          clusterWidth: 80,
                         ),
                 )
                 .then((markers) => markers.toSet()),
