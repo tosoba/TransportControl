@@ -25,6 +25,10 @@ class Line {
 
   int get hashCode {
     return hash4(
-        symbol.hashCode, dest1.hashCode, dest2.hashCode, type.hashCode);
+      symbol.hashCode,
+      dest1.hashCode,
+      dest2.hashCode,
+      type.hashCode,
+    );
   }
 }

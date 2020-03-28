@@ -5,6 +5,8 @@ import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 import 'package:transport_control/widgets/search_app_bar.dart';
+import 'package:transport_control/util/iterable_ext.dart';
+import 'package:transport_control/util/model_ext.dart';
 
 class LinesPage extends StatefulWidget {
   const LinesPage({Key key}) : super(key: key);
@@ -102,41 +104,49 @@ class _LinesPageState extends State<LinesPage> {
     Function(Line) selectionChanged,
   }) {
     return StreamBuilder(
-        stream: itemsStream,
-        builder: (
-          BuildContext context,
-          AsyncSnapshot<List<MapEntry<Line, LineState>>> snapshot,
-        ) {
-          if (snapshot.data == null) return Container();
+      stream: itemsStream,
+      builder: (
+        BuildContext context,
+        AsyncSnapshot<List<MapEntry<Line, LineState>>> snapshot,
+      ) {
+        if (snapshot.data == null) return Container();
 
-          final columnsCount =
-              MediaQuery.of(context).orientation == Orientation.portrait
-                  ? 4
-                  : 8;
-          return AnimationLimiter(
-              child: GridView.count(
-            crossAxisCount: columnsCount,
-            children: List.generate(
-              snapshot.data.length,
-              (int index) {
-                return AnimationConfiguration.staggeredGrid(
-                  position: index,
-                  duration: const Duration(milliseconds: 250),
-                  columnCount: columnsCount,
-                  child: ScaleAnimation(
-                    child: FadeInAnimation(
-                      child: _lineListItem(
-                        snapshot.data[index],
-                        index,
-                        selectionChanged,
+        final columnsCount =
+            MediaQuery.of(context).orientation == Orientation.portrait ? 4 : 8;
+        final lineGroups =
+            snapshot.data.groupBy((entry) => entry.key.group).entries;
+        return AnimationLimiter(
+          child: ListView.builder(
+            itemCount: lineGroups.length,
+            itemBuilder: (context, groupIndex) {
+              final groupItems = lineGroups.elementAt(groupIndex).value;
+              return GridView.count(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                crossAxisCount: columnsCount,
+                children: List.generate(
+                  groupItems.length,
+                  (index) => AnimationConfiguration.staggeredGrid(
+                    position: index,
+                    duration: const Duration(milliseconds: 250),
+                    columnCount: columnsCount,
+                    child: ScaleAnimation(
+                      child: FadeInAnimation(
+                        child: _lineListItem(
+                          groupItems[index],
+                          index,
+                          selectionChanged,
+                        ),
                       ),
                     ),
                   ),
-                );
-              },
-            ),
-          ));
-        });
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 
   Widget _lineListItem(
