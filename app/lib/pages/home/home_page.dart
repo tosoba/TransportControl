@@ -5,6 +5,7 @@ import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/places/places_page.dart';
+import 'package:transport_control/widgets/search_app_bar.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -15,7 +16,6 @@ class _HomePageState extends State<HomePage>
     with TickerProviderStateMixin<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  TextEditingController _searchQueryController;
   final FocusNode _searchFieldFocusNode = FocusNode();
 
   int _currentPageIndex = 0;
@@ -26,7 +26,6 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
 
-    _searchQueryController = TextEditingController();
     _searchFieldFocusNode.addListener(() {
       if (_searchFieldFocusNode.hasFocus && _currentPageIndex != 1)
         _changeSubPage(index: 1);
@@ -37,7 +36,6 @@ class _HomePageState extends State<HomePage>
 
   @override
   void dispose() {
-    _searchQueryController.dispose();
     _searchFieldFocusNode.dispose();
 
     _pageController.dispose();
@@ -59,7 +57,12 @@ class _HomePageState extends State<HomePage>
       child: Scaffold(
         key: _scaffoldKey,
         extendBodyBehindAppBar: true,
-        appBar: _appBar(context),
+        appBar: SearchAppBar(
+          searchFieldFocusNode: _searchFieldFocusNode,
+          leading: _drawerButton,
+          hint: "Transport nearby...",
+          onChanged: (query) {},
+        ),
         body: _subPagesView,
         floatingActionButton: _floatingActionButton(context),
         drawer: _navigationDrawer(context),
@@ -83,79 +86,33 @@ class _HomePageState extends State<HomePage>
     _changeSubPage(index: 0);
   }
 
-  Widget get _subPagesView => PageView(
-        scrollDirection: Axis.vertical,
-        physics: NeverScrollableScrollPhysics(),
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() => _currentPageIndex = index);
-        },
-        children: _subPages,
-      );
-
-  Widget _appBar(BuildContext context) {
-    return PreferredSize(
-      preferredSize: Size.fromHeight(kToolbarHeight + 10.0),
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 15.0,
-          right: 15.0,
-          top: MediaQuery.of(context).padding.top + 10.0,
-        ),
-        child: Container(
-          child: Row(
-            children: [_drawerButton, Flexible(child: _placesSearchField)],
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.only(
-              bottomRight: const Radius.circular(15.0),
-              topRight: const Radius.circular(15.0),
-              topLeft: const Radius.circular(15.0),
-              bottomLeft: const Radius.circular(15.0),
-            ),
-            boxShadow: [
-              const BoxShadow(
-                color: Colors.grey,
-                blurRadius: 4.0,
-                spreadRadius: 1.0,
-              )
-            ],
-            color: Colors.white,
-          ),
-          width: double.infinity,
-          height: kToolbarHeight,
-        ),
-      ),
+  Widget get _subPagesView {
+    return PageView(
+      scrollDirection: Axis.vertical,
+      physics: NeverScrollableScrollPhysics(),
+      controller: _pageController,
+      onPageChanged: (index) {
+        setState(() => _currentPageIndex = index);
+      },
+      children: _subPages,
     );
   }
 
-  Widget get _drawerButton => IconButton(
-        icon: Icon(
-          _currentPageIndex == 1 ? Icons.arrow_back : Icons.menu,
-          color: Colors.black,
-        ),
-        onPressed: () {
-          if (_currentPageIndex == 1) {
-            _showMapPage();
-          } else {
-            _scaffoldKey.currentState.openDrawer();
-          }
-        },
-      );
-
-  Widget get _placesSearchField => TextField(
-        focusNode: _searchFieldFocusNode,
-        controller: _searchQueryController,
-        autofocus: false,
-        decoration: InputDecoration(
-          hintText: "Transport nearby...",
-          border: InputBorder.none,
-          labelStyle: TextStyle(color: Colors.black12),
-          hintStyle: TextStyle(color: Colors.grey),
-        ),
-        style: TextStyle(color: Colors.white, fontSize: 16.0),
-        onChanged: (query) {},
-      );
+  Widget get _drawerButton {
+    return IconButton(
+      icon: Icon(
+        _currentPageIndex == 1 ? Icons.arrow_back : Icons.menu,
+        color: Colors.black,
+      ),
+      onPressed: () {
+        if (_currentPageIndex == 1) {
+          _showMapPage();
+        } else {
+          _scaffoldKey.currentState.openDrawer();
+        }
+      },
+    );
+  }
 
   Widget _floatingActionButton(BuildContext context) {
     return FloatingActionButton(
@@ -169,14 +126,14 @@ class _HomePageState extends State<HomePage>
       context,
       MaterialPageRoute(
         builder: (_) => BlocProvider.value(
-          value: BlocProvider.of<LinesBloc>(context),
+          value: context.bloc<LinesBloc>(),
           child: LinesPage(),
         ),
       ),
     );
     if (result != null && result) {
-      final lineBloc = BlocProvider.of<LinesBloc>(context);
-      final mapBloc = BlocProvider.of<MapBloc>(context);
+      final lineBloc = context.bloc<LinesBloc>();
+      final mapBloc = context.bloc<MapBloc>();
       mapBloc.trackedLinesAdded(lineBloc.selectedLines);
       lineBloc.selectionReset();
     }

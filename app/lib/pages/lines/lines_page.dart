@@ -41,9 +41,9 @@ class _LinesPageState extends State<LinesPage> {
               Expanded(
                 child: _linesList(
                   itemsStream:
-                      BlocProvider.of<LinesBloc>(context).filteredItemsStream,
+                      context.bloc<LinesBloc>().filteredItemsStream,
                   selectionChanged:
-                      BlocProvider.of<LinesBloc>(context).itemSelectionChanged,
+                      context.bloc<LinesBloc>().itemSelectionChanged,
                 ),
               ),
               _selectedLinesText,
@@ -60,7 +60,7 @@ class _LinesPageState extends State<LinesPage> {
       title: SearchAppBar<MapEntry<Line, LineState>>(
         iconTheme: IconThemeData(color: Colors.white),
         title: Text('Lines'),
-        searcher: BlocProvider.of<LinesBloc>(context),
+        searcher: context.bloc<LinesBloc>(),
         filter: (MapEntry<Line, LineState> item, String query) =>
             item.key.symbol.toLowerCase().contains(query.trim().toLowerCase()),
       ),
