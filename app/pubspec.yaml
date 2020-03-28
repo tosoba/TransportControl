@@ -36,6 +36,7 @@ dependencies:
   latlong: ^0.6.1
   fluster: ^1.1.2
   flutter_cache_manager: ^1.1.1
+  scrollable_positioned_list: ^0.1.2
 
 dev_dependencies:
   flutter_test:

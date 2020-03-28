@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
@@ -16,35 +17,48 @@ class LinesPage extends StatefulWidget {
 }
 
 class _LinesPageState extends State<LinesPage> {
-  ScrollController _scrollViewController;
+  final ItemScrollController _linesListScrollController =
+      ItemScrollController();
+  TextEditingController _searchFieldController;
 
   @override
   void initState() {
     super.initState();
-    _scrollViewController = ScrollController();
+    _searchFieldController = TextEditingController()
+      ..addListener(_searchTextChanged);
   }
 
   @override
   void dispose() {
-    _scrollViewController.dispose();
+    _searchFieldController.dispose();
     super.dispose();
+  }
+
+  _searchTextChanged() {
+    context.bloc<LinesBloc>().filterChanged(_searchFieldController.value.text);
   }
 
   @override
   Widget build(BuildContext context) {
+    final filter = context.bloc<LinesBloc>().state.filter;
+    if (filter != null) {
+      _searchFieldController.value = TextEditingValue(text: filter);
+    }
+
+    final appBar = SearchAppBar(
+      searchFieldController: _searchFieldController,
+      hint: "Search lines...",
+      leading: _backButton,
+    );
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: SearchAppBar(
-        hint: "Search lines...",
-        leading: _backButton,
-        onChanged: (query) {
-          context.bloc<LinesBloc>().filterChanged(query);
-        },
-      ),
+      appBar: appBar,
       body: Column(
         children: [
           Expanded(
             child: _linesList(
+              topOffset:
+                  appBar.size.height + MediaQuery.of(context).padding.top,
               itemsStream: context.bloc<LinesBloc>().filteredItemsStream,
               selectionChanged: context.bloc<LinesBloc>().itemSelectionChanged,
             ),
@@ -94,8 +108,9 @@ class _LinesPageState extends State<LinesPage> {
   }
 
   Widget _linesList({
-    Stream<List<MapEntry<Line, LineState>>> itemsStream,
-    Function(Line) selectionChanged,
+    @required double topOffset,
+    @required Stream<List<MapEntry<Line, LineState>>> itemsStream,
+    @required Function(Line) selectionChanged,
   }) {
     return StreamBuilder(
       stream: itemsStream,
@@ -106,19 +121,25 @@ class _LinesPageState extends State<LinesPage> {
         if (snapshot.data == null) return Container();
 
         final columnsCount =
-            MediaQuery.of(context).orientation == Orientation.portrait ? 4 : 8;
+            MediaQuery.of(context).orientation == Orientation.portrait ? 5 : 9;
         final lineGroups =
             snapshot.data.groupBy((entry) => entry.key.group).entries;
         return AnimationLimiter(
-          child: ListView.builder(
-            itemCount: lineGroups.length,
-            itemBuilder: (context, groupIndex) {
-              final group = lineGroups.elementAt(groupIndex);
-              return _linesGroup(
-                group,
-                columnsCount,
-                selectionChanged,
-              );
+          child: ScrollablePositionedList.builder(
+            itemScrollController: _linesListScrollController,
+            itemCount: lineGroups.length + 1,
+            itemBuilder: (context, index) {
+              if (index < 0 || index > lineGroups.length) {
+                return null;
+              } else if (index == 0) {
+                return Container(height: topOffset);
+              } else {
+                return _linesGroup(
+                  lineGroups.elementAt(index - 1),
+                  columnsCount,
+                  selectionChanged,
+                );
+              }
             },
           ),
         );
@@ -133,6 +154,7 @@ class _LinesPageState extends State<LinesPage> {
   ) {
     final groupItems = group.value;
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: double.infinity,
@@ -141,33 +163,36 @@ class _LinesPageState extends State<LinesPage> {
             group.key,
             textAlign: TextAlign.left,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 40,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
-        GridView.count(
-          physics: NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          crossAxisCount: columnsCount,
-          children: List.generate(
-            groupItems.length,
-            (index) => AnimationConfiguration.staggeredGrid(
-              position: index,
-              duration: const Duration(milliseconds: 250),
-              columnCount: columnsCount,
-              child: ScaleAnimation(
-                child: FadeInAnimation(
-                  child: _lineListItem(
-                    groupItems[index],
-                    index,
-                    lineSelectionChanged,
+        Container(
+          transform: Matrix4.translationValues(0.0, -50.0, 0.0),
+          child: GridView.count(
+            physics: NeverScrollableScrollPhysics(),
+            crossAxisCount: columnsCount,
+            shrinkWrap: true,
+            children: List.generate(
+              groupItems.length,
+              (index) => AnimationConfiguration.staggeredGrid(
+                position: index,
+                duration: const Duration(milliseconds: 250),
+                columnCount: columnsCount,
+                child: ScaleAnimation(
+                  child: FadeInAnimation(
+                    child: _lineListItem(
+                      groupItems[index],
+                      index,
+                      lineSelectionChanged,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -178,13 +203,11 @@ class _LinesPageState extends State<LinesPage> {
     Function(Line) itemSelectionChanged,
   ) {
     final inkWell = InkWell(
-      onTap: () {
-        itemSelectionChanged(item.key);
-      },
+      onTap: () => itemSelectionChanged(item.key),
       child: Center(
         child: Text(
           item.key.symbol,
-          style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SearchAppBar extends StatefulWidget implements PreferredSizeWidget {
+  final TextEditingController searchFieldController;
   final FocusNode searchFieldFocusNode;
   final Widget leading;
   final Widget trailing;
@@ -16,6 +17,7 @@ class SearchAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.trailing,
     this.hint,
     this.onChanged,
+    this.searchFieldController,
   }) : super(key: key);
 
   @override
@@ -72,6 +74,7 @@ class _SearchAppBarState extends State<SearchAppBar> {
 
   Widget get _placesSearchField {
     return TextField(
+      controller: widget.searchFieldController,
       focusNode: widget.searchFieldFocusNode,
       autofocus: false,
       decoration: InputDecoration(
