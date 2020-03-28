@@ -24,12 +24,12 @@ class TransportControlApp extends StatelessWidget {
       home: MultiBlocProvider(
         providers: [
           BlocProvider<MapBloc>(
-            create: (BuildContext context) =>
-                MapBloc(GetIt.instance<VehiclesRepo>()),
+            create: (context) => MapBloc(GetIt.instance<VehiclesRepo>()),
           ),
           BlocProvider<LinesBloc>(
-            create: (BuildContext context) =>
-                LinesBloc(BlocProvider.of<MapBloc>(context).trackedLines),
+            create: (context) => LinesBloc(
+              context.bloc<MapBloc>().trackedLines,
+            ),
           ),
         ],
         child: HomePage(),

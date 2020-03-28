@@ -50,6 +50,8 @@ class _LinesPageState extends State<LinesPage> {
       hint: "Search lines...",
       leading: _backButton,
     );
+    final topOffset =
+        appBar.size.height + MediaQuery.of(context).padding.top + 10;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: appBar,
@@ -57,8 +59,7 @@ class _LinesPageState extends State<LinesPage> {
         children: [
           Expanded(
             child: _linesList(
-              topOffset:
-                  appBar.size.height + MediaQuery.of(context).padding.top,
+              topOffset: topOffset,
               itemsStream: context.bloc<LinesBloc>().filteredItemsStream,
               selectionChanged: context.bloc<LinesBloc>().itemSelectionChanged,
             ),
@@ -66,6 +67,52 @@ class _LinesPageState extends State<LinesPage> {
           _selectedLinesText,
         ],
       ),
+      bottomNavigationBar: _listGroupNavigationButtons(
+        context.bloc<LinesBloc>().filteredItemsStream,
+        topOffset,
+      ),
+    );
+  }
+
+  Widget _listGroupNavigationButtons(
+    Stream<List<MapEntry<Line, LineState>>> itemsStream,
+    double topOffset,
+  ) {
+    return StreamBuilder(
+      stream: itemsStream,
+      builder: (
+        BuildContext context,
+        AsyncSnapshot<List<MapEntry<Line, LineState>>> snapshot,
+      ) {
+        if (snapshot.data == null) return Container();
+        final lineGroups =
+            snapshot.data.groupBy((entry) => entry.key.group).entries;
+        return Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              const BoxShadow(
+                color: Colors.grey,
+                blurRadius: 4.0,
+                spreadRadius: 1.0,
+              )
+            ],
+            color: Colors.white,
+          ),
+          height: kBottomNavigationBarHeight,
+          child: ListView.builder(
+            itemCount: lineGroups.length,
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (context, index) => MaterialButton(
+              onPressed: () => _linesListScrollController.scrollTo(
+                index: index,
+                duration: const Duration(milliseconds: 500),
+                alignment: topOffset / MediaQuery.of(context).size.height,
+              ),
+              child: Text(lineGroups.elementAt(index).key),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -126,20 +173,18 @@ class _LinesPageState extends State<LinesPage> {
             snapshot.data.groupBy((entry) => entry.key.group).entries;
         return AnimationLimiter(
           child: ScrollablePositionedList.builder(
+            padding: EdgeInsets.only(top: topOffset),
             itemScrollController: _linesListScrollController,
-            itemCount: lineGroups.length + 1,
+            itemCount: lineGroups.length,
             itemBuilder: (context, index) {
-              if (index < 0 || index > lineGroups.length) {
+              if (index < 0 || index >= lineGroups.length) {
                 return null;
-              } else if (index == 0) {
-                return Container(height: topOffset);
-              } else {
-                return _linesGroup(
-                  lineGroups.elementAt(index - 1),
-                  columnsCount,
-                  selectionChanged,
-                );
               }
+              return _linesGroup(
+                lineGroups.elementAt(index),
+                columnsCount,
+                selectionChanged,
+              );
             },
           ),
         );
