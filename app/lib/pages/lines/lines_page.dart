@@ -32,19 +32,17 @@ class _LinesPageState extends State<LinesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final appBar = SearchAppBar(
-      hint: "Search lines...",
-      leading: _backButton,
-      onChanged: (query) {
-        context.bloc<LinesBloc>().filterChanged(query);
-      },
-    );
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: appBar,
+      appBar: SearchAppBar(
+        hint: "Search lines...",
+        leading: _backButton,
+        onChanged: (query) {
+          context.bloc<LinesBloc>().filterChanged(query);
+        },
+      ),
       body: Column(
         children: [
-          Container(height: 10, width: double.infinity),
           Expanded(
             child: _linesList(
               itemsStream: context.bloc<LinesBloc>().filteredItemsStream,
@@ -63,9 +61,7 @@ class _LinesPageState extends State<LinesPage> {
         Icons.arrow_back,
         color: Colors.black,
       ),
-      onPressed: () {
-        Navigator.pop(context);
-      },
+      onPressed: () => Navigator.pop(context),
     );
   }
 
@@ -88,9 +84,7 @@ class _LinesPageState extends State<LinesPage> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {
-                    Navigator.pop(context, true);
-                  },
+                  onTap: () => Navigator.pop(context, true),
                   child: Text('Search'),
                 )
               ])
@@ -119,33 +113,62 @@ class _LinesPageState extends State<LinesPage> {
           child: ListView.builder(
             itemCount: lineGroups.length,
             itemBuilder: (context, groupIndex) {
-              final groupItems = lineGroups.elementAt(groupIndex).value;
-              return GridView.count(
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                crossAxisCount: columnsCount,
-                children: List.generate(
-                  groupItems.length,
-                  (index) => AnimationConfiguration.staggeredGrid(
-                    position: index,
-                    duration: const Duration(milliseconds: 250),
-                    columnCount: columnsCount,
-                    child: ScaleAnimation(
-                      child: FadeInAnimation(
-                        child: _lineListItem(
-                          groupItems[index],
-                          index,
-                          selectionChanged,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+              final group = lineGroups.elementAt(groupIndex);
+              return _linesGroup(
+                group,
+                columnsCount,
+                selectionChanged,
               );
             },
           ),
         );
       },
+    );
+  }
+
+  Widget _linesGroup(
+    MapEntry<String, List<MapEntry<Line, LineState>>> group,
+    int columnsCount,
+    Function(Line) lineSelectionChanged,
+  ) {
+    final groupItems = group.value;
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(10),
+          child: Text(
+            group.key,
+            textAlign: TextAlign.left,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        GridView.count(
+          physics: NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          crossAxisCount: columnsCount,
+          children: List.generate(
+            groupItems.length,
+            (index) => AnimationConfiguration.staggeredGrid(
+              position: index,
+              duration: const Duration(milliseconds: 250),
+              columnCount: columnsCount,
+              child: ScaleAnimation(
+                child: FadeInAnimation(
+                  child: _lineListItem(
+                    groupItems[index],
+                    index,
+                    lineSelectionChanged,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
 
