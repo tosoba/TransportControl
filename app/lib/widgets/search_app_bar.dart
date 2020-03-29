@@ -30,15 +30,6 @@ class SearchAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _SearchAppBarState extends State<SearchAppBar> {
   @override
   Widget build(BuildContext context) {
-    final widgets = <Widget>[];
-    if (widget.leading != null) {
-      widgets.add(widget.leading);
-    }
-    widgets.add(Flexible(child: _placesSearchField));
-    if (widget.trailing != null) {
-      widgets.add(widget.trailing);
-    }
-
     return PreferredSize(
       preferredSize: widget.size,
       child: Padding(
@@ -48,7 +39,11 @@ class _SearchAppBarState extends State<SearchAppBar> {
           top: MediaQuery.of(context).padding.top + 10.0,
         ),
         child: Container(
-          child: Row(children: widgets),
+          child: Row(children: [
+            if (widget.leading != null) widget.leading,
+            Flexible(child: _placesSearchField),
+            if (widget.trailing != null) widget.trailing,
+          ]),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.only(
               bottomRight: const Radius.circular(15.0),
