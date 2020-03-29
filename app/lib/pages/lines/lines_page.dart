@@ -23,7 +23,10 @@ class _LinesPageState extends State<LinesPage>
       ItemScrollController();
   TextEditingController _searchFieldController;
   AnimationController _hideBottomNavAnimationController;
-  Animation<Offset> _hideBottomNavAnimationOffset;
+  Animation<Offset> _bottomNavAnimationOffset;
+
+  AnimationController _moveBottomSheetController;
+  Animation<double> _bottomSheetSize;
 
   @override
   void initState() {
@@ -36,16 +39,29 @@ class _LinesPageState extends State<LinesPage>
       vsync: this,
       duration: kThemeAnimationDuration,
     );
-    _hideBottomNavAnimationOffset = Tween<Offset>(
+    _bottomNavAnimationOffset = Tween<Offset>(
       begin: Offset.zero,
       end: Offset(0.0, 1.0),
     ).animate(_hideBottomNavAnimationController);
+
+    _moveBottomSheetController = AnimationController(
+      vsync: this,
+      duration: kThemeAnimationDuration,
+    );
+    _bottomSheetSize = Tween(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(_moveBottomSheetController);
   }
 
   @override
   void dispose() {
     _searchFieldController.dispose();
+
     _hideBottomNavAnimationController.dispose();
+
+    _moveBottomSheetController.dispose();
+
     super.dispose();
   }
 
@@ -71,19 +87,31 @@ class _LinesPageState extends State<LinesPage>
       extendBodyBehindAppBar: true,
       extendBody: true,
       appBar: appBar,
-      body: _linesList(
-        topOffset: topOffset,
-        itemsStream: context.bloc<LinesBloc>().filteredItemsStream,
-        selectionChanged: context.bloc<LinesBloc>().itemSelectionChanged,
-      ),
+      body: Column(children: [
+        Expanded(
+          child: _linesList(
+            topOffset: topOffset,
+            itemsStream: context.bloc<LinesBloc>().filteredItemsStream,
+            selectionChanged: context.bloc<LinesBloc>().itemSelectionChanged,
+          ),
+        ),
+        _bottomSheet(context),
+        SizeTransition(
+          axisAlignment: -1.0,
+          sizeFactor: _bottomSheetSize,
+          child: Container(
+            width: double.infinity,
+            height: kBottomNavigationBarHeight,
+          ),
+        )
+      ]),
       bottomNavigationBar: SlideTransition(
-        position: _hideBottomNavAnimationOffset,
+        position: _bottomNavAnimationOffset,
         child: _listGroupNavigationButtons(
           context.bloc<LinesBloc>().filteredItemsStream,
           topOffset,
         ),
       ),
-      bottomSheet: _bottomSheet(context),
     );
   }
 
@@ -95,24 +123,28 @@ class _LinesPageState extends State<LinesPage>
         if (selectedLines == null || selectedLines.isEmpty) {
           return Container(width: 0, height: 0);
         } else {
-          return Row(children: [
-            Expanded(
-              child: Container(
-                color: Theme.of(context).primaryColor,
-                child: Text(
-                  '${selectedLines.length} ${selectedLines.length > 1 ? 'lines are' : 'line is'} selected.',
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white, fontSize: 18),
+          return Container(
+            height: 50,
+            width: double.infinity,
+            child: Row(children: [
+              Expanded(
+                child: Container(
+                  color: Theme.of(context).primaryColor,
+                  child: Text(
+                    '${selectedLines.length} ${selectedLines.length > 1 ? 'lines are' : 'line is'} selected.',
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white, fontSize: 18),
+                  ),
                 ),
               ),
-            ),
-            InkWell(
-              onTap: () => Navigator.pop(context, true),
-              child: Text('Search'),
-            )
-          ]);
+              InkWell(
+                onTap: () => Navigator.pop(context, true),
+                child: Text('Search'),
+              )
+            ]),
+          );
         }
       },
     );
@@ -221,9 +253,11 @@ class _LinesPageState extends State<LinesPage>
         switch (userScroll.direction) {
           case ScrollDirection.forward:
             _hideBottomNavAnimationController.reverse();
+            _moveBottomSheetController.reverse();
             break;
           case ScrollDirection.reverse:
             _hideBottomNavAnimationController.forward();
+            _moveBottomSheetController.forward();
             break;
           default:
             break;
