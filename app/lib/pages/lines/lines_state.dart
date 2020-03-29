@@ -9,10 +9,10 @@ class LinesState {
 
   factory LinesState.empty() => LinesState(items: Map(), filter: null);
 
-  int get numberOfSelectedLines => items.values.fold(
-        0,
-        (counter, state) => state == LineState.SELECTED ? counter + 1 : counter,
-      );
+  Set<Line> get selectedLines => items.entries
+      .where((entry) => entry.value == LineState.SELECTED)
+      .map((entry) => entry.key)
+      .toSet();
 }
 
 enum LineState { IDLE, SELECTED, TRACKED }

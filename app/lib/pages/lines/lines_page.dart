@@ -71,17 +71,10 @@ class _LinesPageState extends State<LinesPage>
       extendBodyBehindAppBar: true,
       extendBody: true,
       appBar: appBar,
-      body: Column(
-        children: [
-          Expanded(
-            child: _linesList(
-              topOffset: topOffset,
-              itemsStream: context.bloc<LinesBloc>().filteredItemsStream,
-              selectionChanged: context.bloc<LinesBloc>().itemSelectionChanged,
-            ),
-          ),
-          _selectedLinesText,
-        ],
+      body: _linesList(
+        topOffset: topOffset,
+        itemsStream: context.bloc<LinesBloc>().filteredItemsStream,
+        selectionChanged: context.bloc<LinesBloc>().itemSelectionChanged,
       ),
       bottomNavigationBar: SlideTransition(
         position: _hideBottomNavAnimationOffset,
@@ -90,6 +83,38 @@ class _LinesPageState extends State<LinesPage>
           topOffset,
         ),
       ),
+      bottomSheet: _bottomSheet(context),
+    );
+  }
+
+  Widget _bottomSheet(BuildContext context) {
+    return StreamBuilder(
+      stream: context.bloc<LinesBloc>().selectedLinesStream,
+      builder: (context, AsyncSnapshot<Set<Line>> snapshot) {
+        final selectedLines = snapshot.data;
+        if (selectedLines == null || selectedLines.isEmpty) {
+          return Container(width: 0, height: 0);
+        } else {
+          return Row(children: [
+            Expanded(
+              child: Container(
+                color: Theme.of(context).primaryColor,
+                child: Text(
+                  '${selectedLines.length} ${selectedLines.length > 1 ? 'lines are' : 'line is'} selected.',
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.white, fontSize: 18),
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () => Navigator.pop(context, true),
+              child: Text('Search'),
+            )
+          ]);
+        }
+      },
     );
   }
 
@@ -145,34 +170,6 @@ class _LinesPageState extends State<LinesPage>
         color: Colors.black,
       ),
       onPressed: () => Navigator.pop(context),
-    );
-  }
-
-  Widget get _selectedLinesText {
-    return BlocBuilder<LinesBloc, LinesState>(
-      builder: (context, state) {
-        final numberOfSelectedLines = state.numberOfSelectedLines;
-        return numberOfSelectedLines > 0
-            ? Row(children: [
-                Expanded(
-                  child: Container(
-                    color: Theme.of(context).primaryColor,
-                    child: Text(
-                      '$numberOfSelectedLines ${numberOfSelectedLines > 1 ? 'lines are' : 'line is'} selected.',
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.white, fontSize: 18),
-                    ),
-                  ),
-                ),
-                InkWell(
-                  onTap: () => Navigator.pop(context, true),
-                  child: Text('Search'),
-                )
-              ])
-            : Container();
-      },
     );
   }
 

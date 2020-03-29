@@ -75,10 +75,10 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
                   .contains(state.filter.trim().toLowerCase()))
               .toList());
 
-  Set<Line> get selectedLines => state.items.entries
-      .where((entry) => entry.value == LineState.SELECTED)
-      .map((entry) => entry.key)
-      .toSet();
+  Set<Line> get selectedLines => state.selectedLines;
+
+  Stream<Set<Line>> get selectedLinesStream =>
+      map((state) => state.selectedLines);
 
   itemSelectionChanged(Line item) =>
       add(LinesEvent.itemSelectionChanged(item: item));
