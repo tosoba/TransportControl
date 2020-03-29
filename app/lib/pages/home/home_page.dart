@@ -14,8 +14,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with TickerProviderStateMixin<HomePage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   final FocusNode _searchFieldFocusNode = FocusNode();
 
   int _currentPageIndex = 0;
@@ -55,7 +53,6 @@ class _HomePageState extends State<HomePage>
         }
       },
       child: Scaffold(
-        key: _scaffoldKey,
         extendBodyBehindAppBar: true,
         appBar: SearchAppBar(
           searchFieldFocusNode: _searchFieldFocusNode,
@@ -99,18 +96,20 @@ class _HomePageState extends State<HomePage>
   }
 
   Widget get _drawerButton {
-    return IconButton(
-      icon: Icon(
-        _currentPageIndex == 1 ? Icons.arrow_back : Icons.menu,
-        color: Colors.black,
+    return Builder(
+      builder: (context) => IconButton(
+        icon: Icon(
+          _currentPageIndex == 1 ? Icons.arrow_back : Icons.menu,
+          color: Colors.black,
+        ),
+        onPressed: () {
+          if (_currentPageIndex == 1) {
+            _showMapPage();
+          } else {
+            Scaffold.of(context).openDrawer();
+          }
+        },
       ),
-      onPressed: () {
-        if (_currentPageIndex == 1) {
-          _showMapPage();
-        } else {
-          _scaffoldKey.currentState.openDrawer();
-        }
-      },
     );
   }
 
