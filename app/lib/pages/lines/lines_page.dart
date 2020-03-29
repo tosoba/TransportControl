@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -16,21 +17,35 @@ class LinesPage extends StatefulWidget {
   _LinesPageState createState() => _LinesPageState();
 }
 
-class _LinesPageState extends State<LinesPage> {
+class _LinesPageState extends State<LinesPage>
+    with TickerProviderStateMixin<LinesPage> {
   final ItemScrollController _linesListScrollController =
       ItemScrollController();
   TextEditingController _searchFieldController;
+  AnimationController _hideBottomNavAnimationController;
+  Animation<Offset> _hideBottomNavAnimationOffset;
 
   @override
   void initState() {
     super.initState();
+
     _searchFieldController = TextEditingController()
       ..addListener(_searchTextChanged);
+
+    _hideBottomNavAnimationController = AnimationController(
+      vsync: this,
+      duration: kThemeAnimationDuration,
+    );
+    _hideBottomNavAnimationOffset = Tween<Offset>(
+      begin: Offset.zero,
+      end: Offset(0.0, 1.0),
+    ).animate(_hideBottomNavAnimationController);
   }
 
   @override
   void dispose() {
     _searchFieldController.dispose();
+    _hideBottomNavAnimationController.dispose();
     super.dispose();
   }
 
@@ -54,6 +69,7 @@ class _LinesPageState extends State<LinesPage> {
         appBar.size.height + MediaQuery.of(context).padding.top + 10;
     return Scaffold(
       extendBodyBehindAppBar: true,
+      extendBody: true,
       appBar: appBar,
       body: Column(
         children: [
@@ -67,9 +83,12 @@ class _LinesPageState extends State<LinesPage> {
           _selectedLinesText,
         ],
       ),
-      bottomNavigationBar: _listGroupNavigationButtons(
-        context.bloc<LinesBloc>().filteredItemsStream,
-        topOffset,
+      bottomNavigationBar: SlideTransition(
+        position: _hideBottomNavAnimationOffset,
+        child: _listGroupNavigationButtons(
+          context.bloc<LinesBloc>().filteredItemsStream,
+          topOffset,
+        ),
       ),
     );
   }
@@ -108,7 +127,10 @@ class _LinesPageState extends State<LinesPage> {
                 duration: const Duration(milliseconds: 500),
                 alignment: topOffset / MediaQuery.of(context).size.height,
               ),
-              child: Text(lineGroups.elementAt(index).key),
+              child: Text(
+                lineGroups.elementAt(index).key,
+                style: const TextStyle(fontSize: 20),
+              ),
             ),
           ),
         );
@@ -172,24 +194,46 @@ class _LinesPageState extends State<LinesPage> {
         final lineGroups =
             snapshot.data.groupBy((entry) => entry.key.group).entries;
         return AnimationLimiter(
-          child: ScrollablePositionedList.builder(
-            padding: EdgeInsets.only(top: topOffset),
-            itemScrollController: _linesListScrollController,
-            itemCount: lineGroups.length,
-            itemBuilder: (context, index) {
-              if (index < 0 || index >= lineGroups.length) {
-                return null;
-              }
-              return _linesGroup(
-                lineGroups.elementAt(index),
-                columnsCount,
-                selectionChanged,
-              );
-            },
+          child: NotificationListener<ScrollNotification>(
+            onNotification: _onScrollNotification,
+            child: ScrollablePositionedList.builder(
+              padding: EdgeInsets.only(top: topOffset),
+              itemScrollController: _linesListScrollController,
+              itemCount: lineGroups.length,
+              itemBuilder: (context, index) {
+                if (index < 0 || index >= lineGroups.length) {
+                  return null;
+                }
+                return _linesGroup(
+                  lineGroups.elementAt(index),
+                  columnsCount,
+                  selectionChanged,
+                );
+              },
+            ),
           ),
         );
       },
     );
+  }
+
+  bool _onScrollNotification(ScrollNotification notification) {
+    if (notification.depth == 0) {
+      if (notification is UserScrollNotification) {
+        final UserScrollNotification userScroll = notification;
+        switch (userScroll.direction) {
+          case ScrollDirection.forward:
+            _hideBottomNavAnimationController.reverse();
+            break;
+          case ScrollDirection.reverse:
+            _hideBottomNavAnimationController.forward();
+            break;
+          default:
+            break;
+        }
+      }
+    }
+    return false;
   }
 
   Widget _linesGroup(
@@ -203,7 +247,7 @@ class _LinesPageState extends State<LinesPage> {
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.fromLTRB(10, 25, 10, 10),
           child: Text(
             group.key,
             textAlign: TextAlign.left,
@@ -214,8 +258,8 @@ class _LinesPageState extends State<LinesPage> {
           ),
         ),
         Container(
-          transform: Matrix4.translationValues(0.0, -50.0, 0.0),
           child: GridView.count(
+            padding: EdgeInsets.only(top: 15),
             physics: NeverScrollableScrollPhysics(),
             crossAxisCount: columnsCount,
             shrinkWrap: true,
