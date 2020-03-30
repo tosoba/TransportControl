@@ -22,11 +22,9 @@ class _LinesPageState extends State<LinesPage>
   final ItemScrollController _linesListScrollController =
       ItemScrollController();
   TextEditingController _searchFieldController;
-  AnimationController _hideBottomNavAnimationController;
-  Animation<Offset> _bottomNavAnimationOffset;
 
-  AnimationController _moveBottomSheetController;
-  Animation<double> _bottomSheetSize;
+  AnimationController _bottomNavAnimController;
+  Animation<double> _bottomNavSize;
 
   @override
   void initState() {
@@ -35,32 +33,21 @@ class _LinesPageState extends State<LinesPage>
     _searchFieldController = TextEditingController()
       ..addListener(_searchTextChanged);
 
-    _hideBottomNavAnimationController = AnimationController(
+    _bottomNavAnimController = AnimationController(
       vsync: this,
       duration: kThemeAnimationDuration,
     );
-    _bottomNavAnimationOffset = Tween<Offset>(
-      begin: Offset.zero,
-      end: Offset(0.0, 1.0),
-    ).animate(_hideBottomNavAnimationController);
-
-    _moveBottomSheetController = AnimationController(
-      vsync: this,
-      duration: kThemeAnimationDuration,
-    );
-    _bottomSheetSize = Tween(
+    _bottomNavSize = Tween(
       begin: 1.0,
       end: 0.0,
-    ).animate(_moveBottomSheetController);
+    ).animate(_bottomNavAnimController);
   }
 
   @override
   void dispose() {
     _searchFieldController.dispose();
 
-    _hideBottomNavAnimationController.dispose();
-
-    _moveBottomSheetController.dispose();
+    _bottomNavAnimController.dispose();
 
     super.dispose();
   }
@@ -87,31 +74,20 @@ class _LinesPageState extends State<LinesPage>
       extendBodyBehindAppBar: true,
       extendBody: true,
       appBar: appBar,
-      body: Column(children: [
-        Expanded(
-          child: _linesList(
-            topOffset: topOffset,
-            itemsStream: context.bloc<LinesBloc>().filteredItemsStream,
-            selectionChanged: context.bloc<LinesBloc>().itemSelectionChanged,
-          ),
-        ),
-        _bottomSheet(context),
-        SizeTransition(
-          axisAlignment: -1.0,
-          sizeFactor: _bottomSheetSize,
-          child: Container(
-            width: double.infinity,
-            height: kBottomNavigationBarHeight,
-          ),
-        )
-      ]),
-      bottomNavigationBar: SlideTransition(
-        position: _bottomNavAnimationOffset,
+      body: _linesList(
+        topOffset: topOffset,
+        itemsStream: context.bloc<LinesBloc>().filteredItemsStream,
+        selectionChanged: context.bloc<LinesBloc>().itemSelectionChanged,
+      ),
+      bottomNavigationBar: SizeTransition(
+        axisAlignment: -1.0,
+        sizeFactor: _bottomNavSize,
         child: _listGroupNavigationButtons(
           context.bloc<LinesBloc>().filteredItemsStream,
           topOffset,
         ),
       ),
+      bottomSheet: _bottomSheet(context),
     );
   }
 
@@ -179,9 +155,8 @@ class _LinesPageState extends State<LinesPage>
             itemCount: lineGroups.length,
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) => MaterialButton(
-              onPressed: () => _linesListScrollController.scrollTo(
+              onPressed: () => _linesListScrollController.jumpTo(
                 index: index,
-                duration: const Duration(milliseconds: 500),
                 alignment: topOffset / MediaQuery.of(context).size.height,
               ),
               child: Text(
@@ -224,7 +199,7 @@ class _LinesPageState extends State<LinesPage>
             snapshot.data.groupBy((entry) => entry.key.group).entries;
         return AnimationLimiter(
           child: NotificationListener<ScrollNotification>(
-            onNotification: _onScrollNotification,
+            onNotification: _handleScrollNotification,
             child: ScrollablePositionedList.builder(
               padding: EdgeInsets.only(top: topOffset),
               itemScrollController: _linesListScrollController,
@@ -246,22 +221,17 @@ class _LinesPageState extends State<LinesPage>
     );
   }
 
-  bool _onScrollNotification(ScrollNotification notification) {
-    if (notification.depth == 0) {
-      if (notification is UserScrollNotification) {
-        final UserScrollNotification userScroll = notification;
-        switch (userScroll.direction) {
-          case ScrollDirection.forward:
-            _hideBottomNavAnimationController.reverse();
-            _moveBottomSheetController.reverse();
-            break;
-          case ScrollDirection.reverse:
-            _hideBottomNavAnimationController.forward();
-            _moveBottomSheetController.forward();
-            break;
-          default:
-            break;
-        }
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification.depth == 0 && notification is UserScrollNotification) {
+      switch (notification.direction) {
+        case ScrollDirection.forward:
+          _bottomNavAnimController.reverse();
+          break;
+        case ScrollDirection.reverse:
+          _bottomNavAnimController.forward();
+          break;
+        default:
+          break;
       }
     }
     return false;
