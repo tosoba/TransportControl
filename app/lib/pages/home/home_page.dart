@@ -5,6 +5,7 @@ import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/places/places_page.dart';
+import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/search_app_bar.dart';
 
 class HomePage extends StatefulWidget {
@@ -67,7 +68,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  _changeSubPage({int index}) {
+  void _changeSubPage({int index}) {
     setState(() {
       _currentPageIndex = index;
     });
@@ -78,7 +79,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  _showMapPage() {
+  void _showMapPage() {
     _searchFieldFocusNode.unfocus();
     _changeSubPage(index: 0);
   }
@@ -97,8 +98,8 @@ class _HomePageState extends State<HomePage>
 
   Widget get _drawerButton {
     return Builder(
-      builder: (context) => IconButton(
-        icon: Icon(
+      builder: (context) => CircularButton(
+        child: Icon(
           _currentPageIndex == 1 ? Icons.arrow_back : Icons.menu,
           color: Colors.black,
         ),
@@ -120,7 +121,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  _showLinesPage(BuildContext context) async {
+  Future _showLinesPage(BuildContext context) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -145,19 +146,15 @@ class _HomePageState extends State<HomePage>
         children: [
           DrawerHeader(
             child: Text('Drawer Header'),
-            decoration: BoxDecoration(color: Colors.blue),
+            decoration: const BoxDecoration(color: Colors.blue),
           ),
           ListTile(
             title: Text('Item 1'),
-            onTap: () {
-              Navigator.pop(context);
-            },
+            onTap: () => Navigator.pop(context),
           ),
           ListTile(
             title: Text('Item 2'),
-            onTap: () {
-              Navigator.pop(context);
-            },
+            onTap: () => Navigator.pop(context),
           ),
         ],
       ),

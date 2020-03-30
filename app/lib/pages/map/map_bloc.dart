@@ -100,7 +100,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
   }
 
-  _handleVehiclesResult(Result<List<Vehicle>> result) {
+  void _handleVehiclesResult(Result<List<Vehicle>> result) {
     result.when(
       success: (success) => add(MapEvent.vehiclesAdded(vehicles: success.data)),
       failure: (failure) => failure.logError(),
@@ -155,10 +155,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
   }
 
-  trackedLinesAdded(Set<Line> lines) =>
-      add(MapEvent.trackedLinesAdded(lines: lines));
+  void trackedLinesAdded(Set<Line> lines) {
+    add(MapEvent.trackedLinesAdded(lines: lines));
+  }
 
-  cameraMoved({
+  void cameraMoved({
     LatLngBounds bounds,
     double zoom,
   }) {

@@ -6,6 +6,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
+import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/search_app_bar.dart';
 import 'package:transport_control/util/iterable_ext.dart';
 import 'package:transport_control/util/model_ext.dart';
@@ -52,7 +53,7 @@ class _LinesPageState extends State<LinesPage>
     super.dispose();
   }
 
-  _searchTextChanged() {
+  void _searchTextChanged() {
     context.bloc<LinesBloc>().filterChanged(_searchFieldController.value.text);
   }
 
@@ -171,8 +172,8 @@ class _LinesPageState extends State<LinesPage>
   }
 
   Widget get _backButton {
-    return IconButton(
-      icon: Icon(
+    return CircularButton(
+      child: const Icon(
         Icons.arrow_back,
         color: Colors.black,
       ),
