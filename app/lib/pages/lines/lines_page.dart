@@ -184,7 +184,7 @@ class _LinesPageState extends State<LinesPage>
   Widget _linesList({
     @required double topOffset,
     @required Stream<List<MapEntry<Line, LineState>>> itemsStream,
-    @required Function(Line) selectionChanged,
+    @required void Function(Line) selectionChanged,
   }) {
     return StreamBuilder(
       stream: itemsStream,
@@ -195,7 +195,7 @@ class _LinesPageState extends State<LinesPage>
         if (snapshot.data == null) return Container();
 
         final columnsCount =
-            MediaQuery.of(context).orientation == Orientation.portrait ? 5 : 9;
+            MediaQuery.of(context).orientation == Orientation.portrait ? 4 : 8;
         final lineGroups =
             snapshot.data.groupBy((entry) => entry.key.group).entries;
         return AnimationLimiter(
@@ -241,7 +241,7 @@ class _LinesPageState extends State<LinesPage>
   Widget _linesGroup(
     MapEntry<String, List<MapEntry<Line, LineState>>> group,
     int columnsCount,
-    Function(Line) lineSelectionChanged,
+    void Function(Line) lineSelectionChanged,
   ) {
     final groupItems = group.value;
     return Column(
@@ -291,7 +291,7 @@ class _LinesPageState extends State<LinesPage>
   Widget _lineListItem(
     MapEntry<Line, LineState> item,
     int index,
-    Function(Line) itemSelectionChanged,
+    void Function(Line) itemSelectionChanged,
   ) {
     final inkWell = InkWell(
       onTap: () => itemSelectionChanged(item.key),
@@ -303,15 +303,12 @@ class _LinesPageState extends State<LinesPage>
       ),
     );
 
-    switch (item.value) {
-      case LineState.IDLE:
-        return Card(child: inkWell);
-      case LineState.SELECTED:
-        return Container(child: inkWell);
-      case LineState.TRACKED:
-        return Container(child: inkWell, color: Colors.lightBlue);
-      default:
-        throw ArgumentError();
+    if (item.value.tracked) {
+      return Container(child: inkWell, color: Colors.lightBlue);
+    } else if (item.value.selected) {
+      return Container(child: inkWell);
+    } else {
+      return Card(child: inkWell);
     }
   }
 }

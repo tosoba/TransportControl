@@ -15,7 +15,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
       final lineItems = Map.fromIterable(
         jsonDecode(jsonString) as List,
         key: (lineJson) => Line.fromJson(lineJson),
-        value: (_) => LineState.IDLE,
+        value: (_) => LineState.initial(),
       );
       add(LinesEvent.created(items: lineItems));
     });
@@ -40,27 +40,25 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
           LinesState(items: state.items, filter: filterChange.filter),
       itemSelectionChanged: (selectionChange) {
         final oldLineState = state.items[selectionChange.item];
-        if (oldLineState == LineState.TRACKED) return state;
+        if (oldLineState.tracked) return state;
         final updatedItems = Map.of(state.items);
-        updatedItems[selectionChange.item] = oldLineState == LineState.IDLE
-            ? LineState.SELECTED
-            : LineState.IDLE;
+        updatedItems[selectionChange.item] = oldLineState.toggleSelection;
         return LinesState(items: updatedItems, filter: state.filter);
       },
       selectionReset: (_) {
         final updatedItems = Map.of(state.items);
         updatedItems.forEach((key, value) {
-          if (value == LineState.SELECTED) updatedItems[key] = LineState.IDLE;
+          if (value.selected) updatedItems[key] = value.toggleSelection;
         });
         return LinesState(items: updatedItems, filter: state.filter);
       },
       trackedLinesChanged: (trackedLinesChange) {
         final updatedItems = Map.of(state.items);
         updatedItems.forEach((key, value) {
-          if (value == LineState.TRACKED) updatedItems[key] = LineState.IDLE;
+          if (value.tracked) updatedItems[key] = value.toggleTracked;
         });
         trackedLinesChange.lines
-            .forEach((line) => updatedItems[line] = LineState.TRACKED);
+            .forEach((line) => updatedItems[line].toggleTracked);
         return LinesState(items: updatedItems, filter: state.filter);
       },
     );
