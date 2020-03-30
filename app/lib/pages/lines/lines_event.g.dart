@@ -12,7 +12,11 @@ abstract class LinesEvent extends Equatable {
 
   factory LinesEvent.created({@required Map<Line, LineState> items}) = Created;
 
-  factory LinesEvent.filterChanged({@required String filter}) = FilterChanged;
+  factory LinesEvent.symbolFilterChanged({@required String filter}) =
+      SymbolFilterChanged;
+
+  factory LinesEvent.listFilterChanged({@required LineListFilter filter}) =
+      ListFilterChanged;
 
   factory LinesEvent.itemSelectionChanged({@required Line item}) =
       ItemSelectionChanged;
@@ -27,13 +31,15 @@ abstract class LinesEvent extends Equatable {
 //ignore: missing_return
   R when<R>(
       {@required R Function(Created) created,
-      @required R Function(FilterChanged) filterChanged,
+      @required R Function(SymbolFilterChanged) symbolFilterChanged,
+      @required R Function(ListFilterChanged) listFilterChanged,
       @required R Function(ItemSelectionChanged) itemSelectionChanged,
       @required R Function(SelectionReset) selectionReset,
       @required R Function(TrackedLinesChanged) trackedLinesChanged}) {
     assert(() {
       if (created == null ||
-          filterChanged == null ||
+          symbolFilterChanged == null ||
+          listFilterChanged == null ||
           itemSelectionChanged == null ||
           selectionReset == null ||
           trackedLinesChanged == null) {
@@ -44,8 +50,10 @@ abstract class LinesEvent extends Equatable {
     switch (this._type) {
       case _LinesEvent.Created:
         return created(this as Created);
-      case _LinesEvent.FilterChanged:
-        return filterChanged(this as FilterChanged);
+      case _LinesEvent.SymbolFilterChanged:
+        return symbolFilterChanged(this as SymbolFilterChanged);
+      case _LinesEvent.ListFilterChanged:
+        return listFilterChanged(this as ListFilterChanged);
       case _LinesEvent.ItemSelectionChanged:
         return itemSelectionChanged(this as ItemSelectionChanged);
       case _LinesEvent.SelectionReset:
@@ -60,7 +68,9 @@ abstract class LinesEvent extends Equatable {
       {@required
           FutureOr<R> Function(Created) created,
       @required
-          FutureOr<R> Function(FilterChanged) filterChanged,
+          FutureOr<R> Function(SymbolFilterChanged) symbolFilterChanged,
+      @required
+          FutureOr<R> Function(ListFilterChanged) listFilterChanged,
       @required
           FutureOr<R> Function(ItemSelectionChanged) itemSelectionChanged,
       @required
@@ -69,7 +79,8 @@ abstract class LinesEvent extends Equatable {
           FutureOr<R> Function(TrackedLinesChanged) trackedLinesChanged}) {
     assert(() {
       if (created == null ||
-          filterChanged == null ||
+          symbolFilterChanged == null ||
+          listFilterChanged == null ||
           itemSelectionChanged == null ||
           selectionReset == null ||
           trackedLinesChanged == null) {
@@ -80,8 +91,10 @@ abstract class LinesEvent extends Equatable {
     switch (this._type) {
       case _LinesEvent.Created:
         return created(this as Created);
-      case _LinesEvent.FilterChanged:
-        return filterChanged(this as FilterChanged);
+      case _LinesEvent.SymbolFilterChanged:
+        return symbolFilterChanged(this as SymbolFilterChanged);
+      case _LinesEvent.ListFilterChanged:
+        return listFilterChanged(this as ListFilterChanged);
       case _LinesEvent.ItemSelectionChanged:
         return itemSelectionChanged(this as ItemSelectionChanged);
       case _LinesEvent.SelectionReset:
@@ -93,7 +106,8 @@ abstract class LinesEvent extends Equatable {
 
   R whenOrElse<R>(
       {R Function(Created) created,
-      R Function(FilterChanged) filterChanged,
+      R Function(SymbolFilterChanged) symbolFilterChanged,
+      R Function(ListFilterChanged) listFilterChanged,
       R Function(ItemSelectionChanged) itemSelectionChanged,
       R Function(SelectionReset) selectionReset,
       R Function(TrackedLinesChanged) trackedLinesChanged,
@@ -108,9 +122,12 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.Created:
         if (created == null) break;
         return created(this as Created);
-      case _LinesEvent.FilterChanged:
-        if (filterChanged == null) break;
-        return filterChanged(this as FilterChanged);
+      case _LinesEvent.SymbolFilterChanged:
+        if (symbolFilterChanged == null) break;
+        return symbolFilterChanged(this as SymbolFilterChanged);
+      case _LinesEvent.ListFilterChanged:
+        if (listFilterChanged == null) break;
+        return listFilterChanged(this as ListFilterChanged);
       case _LinesEvent.ItemSelectionChanged:
         if (itemSelectionChanged == null) break;
         return itemSelectionChanged(this as ItemSelectionChanged);
@@ -126,7 +143,8 @@ abstract class LinesEvent extends Equatable {
 
   Future<R> asyncWhenOrElse<R>(
       {FutureOr<R> Function(Created) created,
-      FutureOr<R> Function(FilterChanged) filterChanged,
+      FutureOr<R> Function(SymbolFilterChanged) symbolFilterChanged,
+      FutureOr<R> Function(ListFilterChanged) listFilterChanged,
       FutureOr<R> Function(ItemSelectionChanged) itemSelectionChanged,
       FutureOr<R> Function(SelectionReset) selectionReset,
       FutureOr<R> Function(TrackedLinesChanged) trackedLinesChanged,
@@ -141,9 +159,12 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.Created:
         if (created == null) break;
         return created(this as Created);
-      case _LinesEvent.FilterChanged:
-        if (filterChanged == null) break;
-        return filterChanged(this as FilterChanged);
+      case _LinesEvent.SymbolFilterChanged:
+        if (symbolFilterChanged == null) break;
+        return symbolFilterChanged(this as SymbolFilterChanged);
+      case _LinesEvent.ListFilterChanged:
+        if (listFilterChanged == null) break;
+        return listFilterChanged(this as ListFilterChanged);
       case _LinesEvent.ItemSelectionChanged:
         if (itemSelectionChanged == null) break;
         return itemSelectionChanged(this as ItemSelectionChanged);
@@ -160,13 +181,15 @@ abstract class LinesEvent extends Equatable {
 //ignore: missing_return
   Future<void> whenPartial(
       {FutureOr<void> Function(Created) created,
-      FutureOr<void> Function(FilterChanged) filterChanged,
+      FutureOr<void> Function(SymbolFilterChanged) symbolFilterChanged,
+      FutureOr<void> Function(ListFilterChanged) listFilterChanged,
       FutureOr<void> Function(ItemSelectionChanged) itemSelectionChanged,
       FutureOr<void> Function(SelectionReset) selectionReset,
       FutureOr<void> Function(TrackedLinesChanged) trackedLinesChanged}) {
     assert(() {
       if (created == null &&
-          filterChanged == null &&
+          symbolFilterChanged == null &&
+          listFilterChanged == null &&
           itemSelectionChanged == null &&
           selectionReset == null &&
           trackedLinesChanged == null) {
@@ -178,9 +201,12 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.Created:
         if (created == null) break;
         return created(this as Created);
-      case _LinesEvent.FilterChanged:
-        if (filterChanged == null) break;
-        return filterChanged(this as FilterChanged);
+      case _LinesEvent.SymbolFilterChanged:
+        if (symbolFilterChanged == null) break;
+        return symbolFilterChanged(this as SymbolFilterChanged);
+      case _LinesEvent.ListFilterChanged:
+        if (listFilterChanged == null) break;
+        return listFilterChanged(this as ListFilterChanged);
       case _LinesEvent.ItemSelectionChanged:
         if (itemSelectionChanged == null) break;
         return itemSelectionChanged(this as ItemSelectionChanged);
@@ -210,14 +236,27 @@ class Created extends LinesEvent {
 }
 
 @immutable
-class FilterChanged extends LinesEvent {
-  const FilterChanged({@required this.filter})
-      : super(_LinesEvent.FilterChanged);
+class SymbolFilterChanged extends LinesEvent {
+  const SymbolFilterChanged({@required this.filter})
+      : super(_LinesEvent.SymbolFilterChanged);
 
   final String filter;
 
   @override
-  String toString() => 'FilterChanged(filter:${this.filter})';
+  String toString() => 'SymbolFilterChanged(filter:${this.filter})';
+  @override
+  List get props => [filter];
+}
+
+@immutable
+class ListFilterChanged extends LinesEvent {
+  const ListFilterChanged({@required this.filter})
+      : super(_LinesEvent.ListFilterChanged);
+
+  final LineListFilter filter;
+
+  @override
+  String toString() => 'ListFilterChanged(filter:${this.filter})';
   @override
   List get props => [filter];
 }

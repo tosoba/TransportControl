@@ -10,7 +10,10 @@ enum _LinesEvent {
   Created,
 
   @Data(fields: [DataField<String>('filter')])
-  FilterChanged,
+  SymbolFilterChanged,
+
+  @Data(fields: [DataField<LineListFilter>('filter')])
+  ListFilterChanged,
 
   @Data(fields: [DataField<Line>('item')])
   ItemSelectionChanged,

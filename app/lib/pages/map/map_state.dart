@@ -24,9 +24,10 @@ class MapState {
     LatLngBounds bounds,
   }) {
     return MapState(
-        trackedVehiclesMap ?? this.trackedVehiclesMap,
-        trackedLines ?? this.trackedLines,
-        zoom ?? this.zoom,
-        bounds ?? this.bounds);
+      trackedVehiclesMap ?? this.trackedVehiclesMap,
+      trackedLines ?? this.trackedLines,
+      zoom ?? this.zoom,
+      bounds ?? this.bounds,
+    );
   }
 }

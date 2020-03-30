@@ -3,11 +3,31 @@ import 'package:transport_control/model/line.dart';
 
 class LinesState {
   final Map<Line, LineState> items;
-  final String filter;
+  final String symbolFilter;
+  final LineListFilter listFilter;
 
-  LinesState({@required this.items, @required this.filter});
+  LinesState({
+    @required this.items,
+    @required this.symbolFilter,
+    @required this.listFilter,
+  });
 
-  factory LinesState.empty() => LinesState(items: Map(), filter: null);
+  LinesState.empty()
+      : items = Map(),
+        symbolFilter = null,
+        listFilter = LineListFilter.ALL;
+
+  LinesState copyWith({
+    Map<Line, LineState> items,
+    String symbolFilter,
+    LineListFilter listFilter,
+  }) {
+    return LinesState(
+      items: items ?? this.items,
+      symbolFilter: symbolFilter ?? this.symbolFilter,
+      listFilter: listFilter ?? this.listFilter,
+    );
+  }
 
   Set<Line> get selectedLines => items.entries
       .where((entry) => entry.value.selected)
@@ -47,3 +67,5 @@ class LineState {
     );
   }
 }
+
+enum LineListFilter { SELECTED, TRACKED, FAVOURITE, ALL }

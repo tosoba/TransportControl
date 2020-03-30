@@ -35,22 +35,30 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
   @override
   Stream<LinesState> mapEventToState(LinesEvent event) async* {
     yield event.when(
-      created: (created) => LinesState(items: created.items, filter: null),
-      filterChanged: (filterChange) =>
-          LinesState(items: state.items, filter: filterChange.filter),
+      created: (created) => LinesState(
+        items: created.items,
+        symbolFilter: null,
+        listFilter: LineListFilter.ALL,
+      ),
+      symbolFilterChanged: (filterChange) => state.copyWith(
+        symbolFilter: filterChange.filter,
+      ),
+      listFilterChanged: (filterChange) => state.copyWith(
+        listFilter: filterChange.filter,
+      ),
       itemSelectionChanged: (selectionChange) {
         final oldLineState = state.items[selectionChange.item];
         if (oldLineState.tracked) return state;
         final updatedItems = Map.of(state.items);
         updatedItems[selectionChange.item] = oldLineState.toggleSelection;
-        return LinesState(items: updatedItems, filter: state.filter);
+        return state.copyWith(items: updatedItems);
       },
       selectionReset: (_) {
         final updatedItems = Map.of(state.items);
         updatedItems.forEach((key, value) {
           if (value.selected) updatedItems[key] = value.toggleSelection;
         });
-        return LinesState(items: updatedItems, filter: state.filter);
+        return state.copyWith(items: updatedItems);
       },
       trackedLinesChanged: (trackedLinesChange) {
         final updatedItems = Map.of(state.items);
@@ -59,19 +67,26 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
         });
         trackedLinesChange.lines
             .forEach((line) => updatedItems[line].toggleTracked);
-        return LinesState(items: updatedItems, filter: state.filter);
+        return state.copyWith(items: updatedItems);
       },
     );
   }
 
-  Stream<List<MapEntry<Line, LineState>>> get filteredItemsStream =>
-      map((state) => state.filter == null
-          ? state.items.entries.toList()
-          : state.items.entries
-              .where((entry) => entry.key.symbol
-                  .toLowerCase()
-                  .contains(state.filter.trim().toLowerCase()))
-              .toList());
+  Stream<List<MapEntry<Line, LineState>>> get filteredItemsStream {
+    return map(
+      (state) {
+        final symbolFilterPred = state.symbolFilter == null
+            ? (MapEntry<Line, LineState> entry) => true
+            : (MapEntry<Line, LineState> entry) => entry.key.symbol
+                .toLowerCase()
+                .contains(state.symbolFilter.trim().toLowerCase());
+        final listFilterPred = state.listFilterPredicate;
+        return state.items.entries
+            .where((entry) => symbolFilterPred(entry) && listFilterPred(entry))
+            .toList();
+      },
+    );
+  }
 
   Set<Line> get selectedLines => state.selectedLines;
 
@@ -86,7 +101,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
   void selectionReset() => add(LinesEvent.selectionReset());
 
   void filterChanged(String filter) {
-    add(LinesEvent.filterChanged(filter: filter));
+    add(LinesEvent.symbolFilterChanged(filter: filter));
   }
 
   void _trackedLinesChanged(Iterable<Line> lines) {

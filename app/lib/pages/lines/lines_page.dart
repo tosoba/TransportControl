@@ -59,7 +59,7 @@ class _LinesPageState extends State<LinesPage>
 
   @override
   Widget build(BuildContext context) {
-    final filter = context.bloc<LinesBloc>().state.filter;
+    final filter = context.bloc<LinesBloc>().state.symbolFilter;
     if (filter != null) {
       _searchFieldController.value = TextEditingValue(text: filter);
     }
