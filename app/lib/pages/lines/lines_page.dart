@@ -174,30 +174,23 @@ class _LinesPageState extends State<LinesPage>
         final lineGroups =
             snapshot.data.groupBy((entry) => entry.key.group).entries;
         return Container(
-          decoration: BoxDecoration(
-            boxShadow: [
-              const BoxShadow(
-                color: Colors.grey,
-                blurRadius: 4.0,
-                spreadRadius: 1.0,
-              )
-            ],
-            color: Colors.white,
-          ),
+          color: Colors.white,
           height: kBottomNavigationBarHeight,
           child: ListView.builder(
             itemCount: lineGroups.length,
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) => Padding(
               padding: const EdgeInsets.all(4.0),
-              child: MaterialButton(
-                onPressed: () => _linesListScrollController.jumpTo(
-                  index: index,
-                  alignment: topOffset / MediaQuery.of(context).size.height,
-                ),
-                child: Text(
-                  lineGroups.elementAt(index).key,
-                  style: const TextStyle(fontSize: 20),
+              child: Card(
+                child: MaterialButton(
+                  onPressed: () => _linesListScrollController.jumpTo(
+                    index: index,
+                    alignment: topOffset / MediaQuery.of(context).size.height,
+                  ),
+                  child: Text(
+                    lineGroups.elementAt(index).key,
+                    style: const TextStyle(fontSize: 20),
+                  ),
                 ),
               ),
             ),
