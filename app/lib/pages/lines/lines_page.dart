@@ -174,26 +174,47 @@ class _LinesPageState extends State<LinesPage>
         final lineGroups =
             snapshot.data.groupBy((entry) => entry.key.group).entries;
         return Container(
-          color: Colors.white,
-          height: kBottomNavigationBarHeight,
-          child: ListView.builder(
-            itemCount: lineGroups.length,
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Card(
-                child: MaterialButton(
-                  onPressed: () => _linesListScrollController.jumpTo(
-                    index: index,
-                    alignment: topOffset / MediaQuery.of(context).size.height,
-                  ),
-                  child: Text(
-                    lineGroups.elementAt(index).key,
-                    style: const TextStyle(fontSize: 20),
+          height: kBottomNavigationBarHeight + 5,
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                height: 5,
+                color: Colors.transparent,
+              ),
+              Container(
+                height: kBottomNavigationBarHeight,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    const BoxShadow(
+                      blurRadius: 5,
+                      color: Colors.grey,
+                    )
+                  ],
+                ),
+                child: ListView.builder(
+                  itemCount: lineGroups.length,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) => Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Card(
+                      child: MaterialButton(
+                        onPressed: () => _linesListScrollController.jumpTo(
+                          index: index,
+                          alignment:
+                              topOffset / MediaQuery.of(context).size.height,
+                        ),
+                        child: Text(
+                          lineGroups.elementAt(index).key,
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
         );
       },
