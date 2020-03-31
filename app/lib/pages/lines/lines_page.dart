@@ -10,6 +10,7 @@ import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/search_app_bar.dart';
 import 'package:transport_control/util/iterable_ext.dart';
 import 'package:transport_control/util/model_ext.dart';
+import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 
 class LinesPage extends StatefulWidget {
   const LinesPage({Key key}) : super(key: key);
@@ -24,8 +25,9 @@ class _LinesPageState extends State<LinesPage>
       ItemScrollController();
   TextEditingController _searchFieldController;
 
-  AnimationController _bottomNavAnimController;
+  AnimationController _scrollAnimController;
   Animation<double> _bottomNavSize;
+  Animation<Offset> _appBarOffset;
 
   @override
   void initState() {
@@ -34,21 +36,25 @@ class _LinesPageState extends State<LinesPage>
     _searchFieldController = TextEditingController()
       ..addListener(_searchTextChanged);
 
-    _bottomNavAnimController = AnimationController(
+    _scrollAnimController = AnimationController(
       vsync: this,
       duration: kThemeAnimationDuration,
     );
     _bottomNavSize = Tween(
       begin: 1.0,
       end: 0.0,
-    ).animate(_bottomNavAnimController);
+    ).animate(_scrollAnimController);
+    _appBarOffset = Tween<Offset>(
+      begin: Offset.zero,
+      end: Offset(0.0, -1.0),
+    ).animate(_scrollAnimController);
   }
 
   @override
   void dispose() {
     _searchFieldController.dispose();
 
-    _bottomNavAnimController.dispose();
+    _scrollAnimController.dispose();
 
     super.dispose();
   }
@@ -77,7 +83,10 @@ class _LinesPageState extends State<LinesPage>
     return Scaffold(
       extendBodyBehindAppBar: true,
       extendBody: true,
-      appBar: appBar,
+      appBar: SlideTransitionPreferredSizeWidget(
+        offset: _appBarOffset,
+        child: appBar,
+      ),
       body: _linesList(
         topOffset: topOffset,
         itemsStream: context.bloc<LinesBloc>().filteredItemsStream,
@@ -276,10 +285,10 @@ class _LinesPageState extends State<LinesPage>
     if (notification.depth == 0 && notification is UserScrollNotification) {
       switch (notification.direction) {
         case ScrollDirection.forward:
-          _bottomNavAnimController.reverse();
+          _scrollAnimController.reverse();
           break;
         case ScrollDirection.reverse:
-          _bottomNavAnimController.forward();
+          _scrollAnimController.forward();
           break;
         default:
           break;
