@@ -33,6 +33,22 @@ class LinesState {
       .where((entry) => entry.value.selected)
       .map((entry) => entry.key)
       .toSet();
+
+  bool Function(MapEntry<Line, LineState>) get listFilterPredicate {
+    switch (listFilter) {
+      case LineListFilter.SELECTED:
+        return (entry) => entry.value.selected;
+      case LineListFilter.TRACKED:
+        return (entry) => entry.value.tracked;
+      case LineListFilter.FAVOURITE:
+        return (entry) => entry.value.favourite;
+        break;
+      case LineListFilter.ALL:
+        return (_) => true;
+      default:
+        throw Error();
+    }
+  }
 }
 
 class LineState {
