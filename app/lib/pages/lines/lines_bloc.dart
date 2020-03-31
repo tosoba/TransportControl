@@ -94,14 +94,26 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     return map((state) => state.selectedLines);
   }
 
+  Stream<List<LineListFilter>> get listFiltersStream {
+    return map(
+      (state) => LineListFilter.values
+          .where((value) => value != state.listFilter)
+          .toList(),
+    );
+  }
+
   void itemSelectionChanged(Line item) {
     add(LinesEvent.itemSelectionChanged(item: item));
   }
 
   void selectionReset() => add(LinesEvent.selectionReset());
 
-  void filterChanged(String filter) {
+  void symbolFilterChanged(String filter) {
     add(LinesEvent.symbolFilterChanged(filter: filter));
+  }
+
+  void listFilterChanged(LineListFilter filter) {
+    add(LinesEvent.listFilterChanged(filter: filter));
   }
 
   void _trackedLinesChanged(Iterable<Line> lines) {

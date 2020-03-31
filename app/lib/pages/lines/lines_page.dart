@@ -54,7 +54,9 @@ class _LinesPageState extends State<LinesPage>
   }
 
   void _searchTextChanged() {
-    context.bloc<LinesBloc>().filterChanged(_searchFieldController.value.text);
+    context
+        .bloc<LinesBloc>()
+        .symbolFilterChanged(_searchFieldController.value.text);
   }
 
   @override
@@ -68,6 +70,7 @@ class _LinesPageState extends State<LinesPage>
       searchFieldController: _searchFieldController,
       hint: "Search lines...",
       leading: _backButton,
+      trailing: _listFiltersMenu(context),
     );
     final topOffset =
         appBar.size.height + MediaQuery.of(context).padding.top + 10;
@@ -89,6 +92,35 @@ class _LinesPageState extends State<LinesPage>
         ),
       ),
       bottomSheet: _bottomSheet(context),
+    );
+  }
+
+  Widget _listFiltersMenu(BuildContext context) {
+    return StreamBuilder(
+      stream: context.bloc<LinesBloc>().listFiltersStream,
+      builder: (context, AsyncSnapshot<List<LineListFilter>> snapshot) {
+        if (snapshot.data == null) return Container(width: 0.0, height: 0.0);
+        return PopupMenuButton<LineListFilter>(
+          icon: Icon(Icons.filter_list),
+          onSelected: context.bloc<LinesBloc>().listFilterChanged,
+          itemBuilder: (context) {
+            return snapshot.data.map(
+              (filter) {
+                final filterString = filter.toString();
+                final filterName = filterString
+                    .substring(filterString.indexOf('.') + 1)
+                    .toLowerCase();
+                return PopupMenuItem<LineListFilter>(
+                  value: filter,
+                  child: Text(
+                    '${filterName[0].toUpperCase()}${filterName.substring(1)}',
+                  ),
+                );
+              },
+            ).toList();
+          },
+        );
+      },
     );
   }
 
