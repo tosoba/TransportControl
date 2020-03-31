@@ -96,9 +96,24 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
 
   Stream<List<LineListFilter>> get listFiltersStream {
     return map(
-      (state) => LineListFilter.values
-          .where((value) => value != state.listFilter)
-          .toList(),
+      (state) {
+        final availableFilters = LineListFilter.values
+            .where((value) => value != state.listFilter)
+            .toList();
+        if (availableFilters.contains(LineListFilter.SELECTED) &&
+            state.selectedLines.isEmpty) {
+          availableFilters.remove(LineListFilter.SELECTED);
+        }
+        if (availableFilters.contains(LineListFilter.TRACKED) &&
+            state.trackedLines.isEmpty) {
+          availableFilters.remove(LineListFilter.TRACKED);
+        }
+        if (availableFilters.contains(LineListFilter.FAVOURITE) &&
+            state.favouriteLines.isEmpty) {
+          availableFilters.remove(LineListFilter.FAVOURITE);
+        }
+        return availableFilters;
+      },
     );
   }
 

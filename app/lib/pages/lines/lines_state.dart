@@ -29,10 +29,17 @@ class LinesState {
     );
   }
 
-  Set<Line> get selectedLines => items.entries
-      .where((entry) => entry.value.selected)
-      .map((entry) => entry.key)
-      .toSet();
+  Set<Line> get selectedLines =>
+      _filteredLines((entry) => entry.value.selected);
+
+  Set<Line> get favouriteLines =>
+      _filteredLines((entry) => entry.value.favourite);
+
+  Set<Line> get trackedLines => _filteredLines((entry) => entry.value.tracked);
+
+  Set<Line> _filteredLines(bool Function(MapEntry<Line, LineState>) filter) {
+    return items.entries.where(filter).map((entry) => entry.key).toSet();
+  }
 
   bool Function(MapEntry<Line, LineState>) get listFilterPredicate {
     switch (listFilter) {

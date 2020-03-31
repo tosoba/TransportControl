@@ -99,7 +99,8 @@ class _LinesPageState extends State<LinesPage>
     return StreamBuilder(
       stream: context.bloc<LinesBloc>().listFiltersStream,
       builder: (context, AsyncSnapshot<List<LineListFilter>> snapshot) {
-        if (snapshot.data == null) return Container(width: 0.0, height: 0.0);
+        if (snapshot.data == null || snapshot.data.isEmpty)
+          return Container(width: 0.0, height: 0.0);
         return PopupMenuButton<LineListFilter>(
           icon: Icon(Icons.filter_list),
           onSelected: context.bloc<LinesBloc>().listFilterChanged,
@@ -187,14 +188,17 @@ class _LinesPageState extends State<LinesPage>
           child: ListView.builder(
             itemCount: lineGroups.length,
             scrollDirection: Axis.horizontal,
-            itemBuilder: (context, index) => MaterialButton(
-              onPressed: () => _linesListScrollController.jumpTo(
-                index: index,
-                alignment: topOffset / MediaQuery.of(context).size.height,
-              ),
-              child: Text(
-                lineGroups.elementAt(index).key,
-                style: const TextStyle(fontSize: 20),
+            itemBuilder: (context, index) => Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: MaterialButton(
+                onPressed: () => _linesListScrollController.jumpTo(
+                  index: index,
+                  alignment: topOffset / MediaQuery.of(context).size.height,
+                ),
+                child: Text(
+                  lineGroups.elementAt(index).key,
+                  style: const TextStyle(fontSize: 20),
+                ),
               ),
             ),
           ),
