@@ -23,11 +23,13 @@ class _LinesPageState extends State<LinesPage>
     with TickerProviderStateMixin<LinesPage> {
   final ItemScrollController _linesListScrollController =
       ItemScrollController();
-  TextEditingController _searchFieldController;
 
   AnimationController _scrollAnimController;
   Animation<double> _bottomNavSize;
   Animation<Offset> _appBarOffset;
+
+  FocusNode _searchFieldFocusNode;
+  TextEditingController _searchFieldController;
 
   @override
   void initState() {
@@ -35,6 +37,7 @@ class _LinesPageState extends State<LinesPage>
 
     _searchFieldController = TextEditingController()
       ..addListener(_searchTextChanged);
+    _searchFieldFocusNode = FocusNode();
 
     _scrollAnimController = AnimationController(
       vsync: this,
@@ -52,6 +55,7 @@ class _LinesPageState extends State<LinesPage>
 
   @override
   void dispose() {
+    _searchFieldFocusNode.dispose();
     _searchFieldController.dispose();
 
     _scrollAnimController.dispose();
@@ -73,6 +77,7 @@ class _LinesPageState extends State<LinesPage>
     }
 
     final appBar = SearchAppBar(
+      searchFieldFocusNode: _searchFieldFocusNode,
       searchFieldController: _searchFieldController,
       hint: "Search lines...",
       leading: _backButton,
@@ -236,7 +241,13 @@ class _LinesPageState extends State<LinesPage>
         Icons.arrow_back,
         color: Colors.black,
       ),
-      onPressed: () => Navigator.pop(context),
+      onPressed: () {
+        if (_searchFieldFocusNode.hasFocus) {
+          _searchFieldFocusNode.unfocus();
+        } else {
+          Navigator.pop(context);
+        }
+      },
     );
   }
 
@@ -293,6 +304,8 @@ class _LinesPageState extends State<LinesPage>
         default:
           break;
       }
+    } else if (notification is ScrollStartNotification) {
+      FocusScope.of(context).unfocus();
     }
     return false;
   }

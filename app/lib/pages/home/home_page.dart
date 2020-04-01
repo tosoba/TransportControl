@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with TickerProviderStateMixin<HomePage> {
-  final FocusNode _searchFieldFocusNode = FocusNode();
+  FocusNode _searchFieldFocusNode;
 
   int _currentPageIndex = 0;
   PageController _pageController;
@@ -25,10 +25,11 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
 
-    _searchFieldFocusNode.addListener(() {
-      if (_searchFieldFocusNode.hasFocus && _currentPageIndex != 1)
-        _changeSubPage(index: 1);
-    });
+    _searchFieldFocusNode = FocusNode()
+      ..addListener(() {
+        if (_searchFieldFocusNode.hasFocus && _currentPageIndex != 1)
+          _changeSubPage(index: 1);
+      });
 
     _pageController = PageController();
   }
