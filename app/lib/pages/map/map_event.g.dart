@@ -15,8 +15,8 @@ abstract class MapEvent extends Equatable {
   factory MapEvent.trackedLinesAdded({@required Set<Line> lines}) =
       TrackedLinesAdded;
 
-  factory MapEvent.vehiclesAdded({@required Iterable<Vehicle> vehicles}) =
-      VehiclesAdded;
+  factory MapEvent.vehiclesAdded(VehiclesAddedTemplate vehiclesAddedTemplate) =
+      VehiclesAddedTemplateWrapper;
 
   factory MapEvent.vehiclesAnimated() = VehiclesAnimated;
 
@@ -29,7 +29,7 @@ abstract class MapEvent extends Equatable {
   R when<R>(
       {@required R Function(ClearMap) clearMap,
       @required R Function(TrackedLinesAdded) trackedLinesAdded,
-      @required R Function(VehiclesAdded) vehiclesAdded,
+      @required R Function(VehiclesAddedTemplate) vehiclesAdded,
       @required R Function(VehiclesAnimated) vehiclesAnimated,
       @required R Function(CameraMoved) cameraMoved}) {
     assert(() {
@@ -48,7 +48,8 @@ abstract class MapEvent extends Equatable {
       case _MapEvent.TrackedLinesAdded:
         return trackedLinesAdded(this as TrackedLinesAdded);
       case _MapEvent.VehiclesAdded:
-        return vehiclesAdded(this as VehiclesAdded);
+        return vehiclesAdded(
+            (this as VehiclesAddedTemplateWrapper).vehiclesAddedTemplate);
       case _MapEvent.VehiclesAnimated:
         return vehiclesAnimated(this as VehiclesAnimated);
       case _MapEvent.CameraMoved:
@@ -60,7 +61,7 @@ abstract class MapEvent extends Equatable {
   Future<R> asyncWhen<R>(
       {@required FutureOr<R> Function(ClearMap) clearMap,
       @required FutureOr<R> Function(TrackedLinesAdded) trackedLinesAdded,
-      @required FutureOr<R> Function(VehiclesAdded) vehiclesAdded,
+      @required FutureOr<R> Function(VehiclesAddedTemplate) vehiclesAdded,
       @required FutureOr<R> Function(VehiclesAnimated) vehiclesAnimated,
       @required FutureOr<R> Function(CameraMoved) cameraMoved}) {
     assert(() {
@@ -79,7 +80,8 @@ abstract class MapEvent extends Equatable {
       case _MapEvent.TrackedLinesAdded:
         return trackedLinesAdded(this as TrackedLinesAdded);
       case _MapEvent.VehiclesAdded:
-        return vehiclesAdded(this as VehiclesAdded);
+        return vehiclesAdded(
+            (this as VehiclesAddedTemplateWrapper).vehiclesAddedTemplate);
       case _MapEvent.VehiclesAnimated:
         return vehiclesAnimated(this as VehiclesAnimated);
       case _MapEvent.CameraMoved:
@@ -90,7 +92,7 @@ abstract class MapEvent extends Equatable {
   R whenOrElse<R>(
       {R Function(ClearMap) clearMap,
       R Function(TrackedLinesAdded) trackedLinesAdded,
-      R Function(VehiclesAdded) vehiclesAdded,
+      R Function(VehiclesAddedTemplate) vehiclesAdded,
       R Function(VehiclesAnimated) vehiclesAnimated,
       R Function(CameraMoved) cameraMoved,
       @required R Function(MapEvent) orElse}) {
@@ -109,7 +111,8 @@ abstract class MapEvent extends Equatable {
         return trackedLinesAdded(this as TrackedLinesAdded);
       case _MapEvent.VehiclesAdded:
         if (vehiclesAdded == null) break;
-        return vehiclesAdded(this as VehiclesAdded);
+        return vehiclesAdded(
+            (this as VehiclesAddedTemplateWrapper).vehiclesAddedTemplate);
       case _MapEvent.VehiclesAnimated:
         if (vehiclesAnimated == null) break;
         return vehiclesAnimated(this as VehiclesAnimated);
@@ -123,7 +126,7 @@ abstract class MapEvent extends Equatable {
   Future<R> asyncWhenOrElse<R>(
       {FutureOr<R> Function(ClearMap) clearMap,
       FutureOr<R> Function(TrackedLinesAdded) trackedLinesAdded,
-      FutureOr<R> Function(VehiclesAdded) vehiclesAdded,
+      FutureOr<R> Function(VehiclesAddedTemplate) vehiclesAdded,
       FutureOr<R> Function(VehiclesAnimated) vehiclesAnimated,
       FutureOr<R> Function(CameraMoved) cameraMoved,
       @required FutureOr<R> Function(MapEvent) orElse}) {
@@ -142,7 +145,8 @@ abstract class MapEvent extends Equatable {
         return trackedLinesAdded(this as TrackedLinesAdded);
       case _MapEvent.VehiclesAdded:
         if (vehiclesAdded == null) break;
-        return vehiclesAdded(this as VehiclesAdded);
+        return vehiclesAdded(
+            (this as VehiclesAddedTemplateWrapper).vehiclesAddedTemplate);
       case _MapEvent.VehiclesAnimated:
         if (vehiclesAnimated == null) break;
         return vehiclesAnimated(this as VehiclesAnimated);
@@ -157,7 +161,7 @@ abstract class MapEvent extends Equatable {
   Future<void> whenPartial(
       {FutureOr<void> Function(ClearMap) clearMap,
       FutureOr<void> Function(TrackedLinesAdded) trackedLinesAdded,
-      FutureOr<void> Function(VehiclesAdded) vehiclesAdded,
+      FutureOr<void> Function(VehiclesAddedTemplate) vehiclesAdded,
       FutureOr<void> Function(VehiclesAnimated) vehiclesAnimated,
       FutureOr<void> Function(CameraMoved) cameraMoved}) {
     assert(() {
@@ -179,7 +183,8 @@ abstract class MapEvent extends Equatable {
         return trackedLinesAdded(this as TrackedLinesAdded);
       case _MapEvent.VehiclesAdded:
         if (vehiclesAdded == null) break;
-        return vehiclesAdded(this as VehiclesAdded);
+        return vehiclesAdded(
+            (this as VehiclesAddedTemplateWrapper).vehiclesAddedTemplate);
       case _MapEvent.VehiclesAnimated:
         if (vehiclesAnimated == null) break;
         return vehiclesAnimated(this as VehiclesAnimated);
@@ -219,16 +224,16 @@ class TrackedLinesAdded extends MapEvent {
 }
 
 @immutable
-class VehiclesAdded extends MapEvent {
-  const VehiclesAdded({@required this.vehicles})
+class VehiclesAddedTemplateWrapper extends MapEvent {
+  const VehiclesAddedTemplateWrapper(this.vehiclesAddedTemplate)
       : super(_MapEvent.VehiclesAdded);
 
-  final Iterable<Vehicle> vehicles;
+  final VehiclesAddedTemplate vehiclesAddedTemplate;
 
   @override
-  String toString() => 'VehiclesAdded(vehicles:${this.vehicles})';
+  String toString() => 'VehiclesAddedTemplateWrapper($vehiclesAddedTemplate)';
   @override
-  List get props => [vehicles];
+  List get props => [vehiclesAddedTemplate];
 }
 
 @immutable

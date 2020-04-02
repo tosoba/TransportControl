@@ -12,6 +12,7 @@ import 'package:transport_control/pages/map/map_event.dart';
 import 'package:transport_control/pages/map/map_marker.dart';
 import 'package:transport_control/pages/map/map_state.dart';
 import 'package:transport_control/pages/map/animated_vehicle.dart';
+import 'package:transport_control/pages/map/vehicle_source.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
 import 'package:transport_control/util/fluster_ext.dart';
 
@@ -35,7 +36,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             ),
           ),
         )
-        .listen(_handleVehiclesResult);
+        .listen((result) => _handleVehiclesResult(result, source: null));
 
     _vehiclesAnimationSubscription = Stream.periodic(_vehiclesAnimationInterval)
         .where(
@@ -53,9 +54,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     yield event.when(
       clearMap: (_) => MapState.empty(),
       trackedLinesAdded: (linesAddedEvent) {
-        _vehiclesRepo
-            .loadVehiclesOfLines(linesAddedEvent.lines)
-            .then(_handleVehiclesResult);
+        _vehiclesRepo.loadVehiclesOfLines(linesAddedEvent.lines).then(
+            (result) => _handleVehiclesResult(result, source: null)); //TODO:
         return state.copyWith(
           trackedLines: state.trackedLines.union(linesAddedEvent.lines),
         );
@@ -70,10 +70,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
               previous: animatedVehicle.stage,
               currentBounds: state.bounds,
               currentZoom: state.zoom,
+              sources: animatedVehicle.sources..add(vehiclesAddedEvent.source),
             );
           } else {
             updatedVehiclesMap[vehicle.number] =
-                AnimatedVehicle.fromNewlyLoaded(vehicle);
+                AnimatedVehicle.fromNewlyLoaded(vehicle,
+                    source: vehiclesAddedEvent.source);
           }
         });
         return state.copyWith(trackedVehiclesMap: updatedVehiclesMap);
@@ -100,9 +102,16 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
   }
 
-  void _handleVehiclesResult(Result<List<Vehicle>> result) {
+  void _handleVehiclesResult(
+    Result<List<Vehicle>> result, {
+    VehicleSource source,
+  }) {
     result.when(
-      success: (success) => add(MapEvent.vehiclesAdded(vehicles: success.data)),
+      success: (success) => add(
+        MapEvent.vehiclesAdded(
+          VehiclesAddedTemplate(success.data, source),
+        ),
+      ),
       failure: (failure) => failure.logError(),
     );
   }

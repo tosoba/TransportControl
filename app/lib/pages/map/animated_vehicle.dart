@@ -4,20 +4,26 @@ import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as Maps;
 import 'package:latlong/latlong.dart';
 import 'package:transport_control/model/vehicle.dart';
+import 'package:transport_control/pages/map/vehicle_source.dart';
 import 'package:transport_control/util/lat_lng_ext.dart';
 
 class AnimatedVehicle {
   final Vehicle vehicle;
   final _VehicleAnimationStage stage;
+  final Set<VehicleSource> sources;
 
-  AnimatedVehicle.fromNewlyLoaded(Vehicle newlyLoadedVehicle)
-      : vehicle = newlyLoadedVehicle,
+  AnimatedVehicle.fromNewlyLoaded(
+    Vehicle newlyLoadedVehicle, {
+    @required VehicleSource source,
+  })  : vehicle = newlyLoadedVehicle,
         stage = _VehicleAnimationStage.forNewlyLoadedVehicle(
           newlyLoadedVehicle,
-        );
+        ),
+        sources = Set()..add(source);
 
   AnimatedVehicle.fromUpdated(
     Vehicle updatedVehicle, {
+    @required Set<VehicleSource> sources,
     @required _VehicleAnimationStage previous,
     @required Maps.LatLngBounds currentBounds,
     @required double currentZoom,
@@ -27,7 +33,8 @@ class AnimatedVehicle {
           previous,
           currentBounds,
           currentZoom,
-        );
+        ),
+        sources = sources;
 
   AnimatedVehicle.nextStageOf(
     AnimatedVehicle animatedVehicle, {
@@ -38,7 +45,8 @@ class AnimatedVehicle {
           animatedVehicle.stage,
           currentBounds,
           currentZoom,
-        );
+        ),
+        sources = animatedVehicle.sources;
 }
 
 class _VehicleAnimationStage {
