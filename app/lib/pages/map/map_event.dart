@@ -2,7 +2,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:super_enum/super_enum.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/vehicle.dart';
-import 'package:transport_control/pages/map/vehicle_source.dart';
 
 part "map_event.g.dart";
 
@@ -14,8 +13,14 @@ enum _MapEvent {
   @Data(fields: [DataField<Set<Line>>('lines')])
   TrackedLinesAdded,
 
-  @UseClass(VehiclesAddedTemplate)
+  @Data(fields: [DataField<Iterable<Vehicle>>('vehicles')])
   VehiclesAdded,
+
+  @Data(fields: [
+    DataField<Iterable<Vehicle>>('vehicles'),
+    DataField<Set<Line>>('lines')
+  ])
+  VehiclesOfLinesAdded,
 
   @object
   VehiclesAnimated,
@@ -25,11 +30,4 @@ enum _MapEvent {
     DataField<double>('zoom'),
   ])
   CameraMoved
-}
-
-class VehiclesAddedTemplate {
-  VehiclesAddedTemplate(this.vehicles, this.source);
-
-  final Iterable<Vehicle> vehicles;
-  final VehicleSource source;
 }
