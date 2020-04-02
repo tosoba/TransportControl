@@ -164,7 +164,12 @@ class _LinesPageState extends State<LinesPage>
                 ),
               ),
               InkWell(
-                onTap: () => Navigator.pop(context, true),
+                onTap: () {
+                  context.bloc<LinesBloc>()
+                    ..addSelectedToTrackedLines()
+                    ..selectionReset();
+                  Navigator.pop(context);
+                },
                 child: Text('Search'),
               )
             ]),
@@ -187,13 +192,14 @@ class _LinesPageState extends State<LinesPage>
         if (snapshot.data == null) return Container();
         final lineGroups =
             snapshot.data.groupBy((entry) => entry.key.group).entries;
+        const shadowSize = 5.0;
         return Container(
-          height: kBottomNavigationBarHeight + 5,
+          height: kBottomNavigationBarHeight + shadowSize,
           child: Column(
             children: [
               Container(
                 width: double.infinity,
-                height: 5,
+                height: shadowSize,
                 color: Colors.transparent,
               ),
               Container(
@@ -202,7 +208,7 @@ class _LinesPageState extends State<LinesPage>
                   color: Colors.white,
                   boxShadow: [
                     const BoxShadow(
-                      blurRadius: 5,
+                      blurRadius: shadowSize,
                       color: Colors.grey,
                     )
                   ],

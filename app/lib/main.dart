@@ -18,18 +18,21 @@ class TransportControlApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Transport Control',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: MultiBlocProvider(
         providers: [
           BlocProvider<MapBloc>(
             create: (context) => MapBloc(GetIt.instance<VehiclesRepo>()),
           ),
           BlocProvider<LinesBloc>(
-            create: (context) => LinesBloc(
-              context.bloc<MapBloc>().trackedLines,
-            ),
+            create: (context) {
+              final mapBloc = context.bloc<MapBloc>();
+              return LinesBloc(
+                mapBloc.trackedLines,
+                mapBloc.addTrackedLines,
+                mapBloc.removeTrackedLines,
+              );
+            },
           ),
         ],
         child: HomePage(),

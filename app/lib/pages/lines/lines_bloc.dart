@@ -7,10 +7,17 @@ import 'package:transport_control/pages/lines/lines_event.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 
 class LinesBloc extends Bloc<LinesEvent, LinesState> {
-  final Stream<Set<Line>> _trackedLines;
+  final Stream<Set<Line>> _trackedLinesStream;
+  final void Function(Set<Line>) _addTrackedLines;
+  final void Function(Set<Line>) _removeTrackedLines;
+
   StreamSubscription<Set<Line>> _trackedLinesSubscription;
 
-  LinesBloc(this._trackedLines) {
+  LinesBloc(
+    this._trackedLinesStream,
+    this._addTrackedLines,
+    this._removeTrackedLines,
+  ) {
     rootBundle.loadString('assets/json/lines.json').then((jsonString) {
       final lineItems = Map.fromIterable(
         jsonDecode(jsonString) as List,
@@ -20,7 +27,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
       add(LinesEvent.created(items: lineItems));
     });
 
-    _trackedLinesSubscription = _trackedLines.listen(_trackedLinesChanged);
+    _trackedLinesSubscription = _trackedLinesStream.listen(_updateTrackedLines);
   }
 
   @override
@@ -88,8 +95,6 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     );
   }
 
-  Set<Line> get selectedLines => state.selectedLines;
-
   Stream<Set<Line>> get selectedLinesStream {
     return map((state) => state.selectedLines);
   }
@@ -131,7 +136,15 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     add(LinesEvent.listFilterChanged(filter: filter));
   }
 
-  void _trackedLinesChanged(Iterable<Line> lines) {
+  void _updateTrackedLines(Iterable<Line> lines) {
     add(LinesEvent.trackedLinesChanged(lines: lines));
+  }
+
+  void addSelectedToTrackedLines() {
+    _addTrackedLines(state.selectedLines);
+  }
+
+  void removeSelectedFromTrackedLines() {
+    _removeTrackedLines(state.selectedLines);
   }
 }

@@ -12,6 +12,8 @@ class AnimatedVehicle {
   final _VehicleAnimationStage stage;
   final Set<VehicleSource> sources;
 
+  AnimatedVehicle._(this.vehicle, this.stage, this.sources);
+
   AnimatedVehicle.fromNewlyLoaded(
     Vehicle newlyLoadedVehicle, {
     @required VehicleSource source,
@@ -47,6 +49,14 @@ class AnimatedVehicle {
           currentZoom,
         ),
         sources = animatedVehicle.sources;
+
+  AnimatedVehicle withRemovedSource(VehicleSource source) {
+    return AnimatedVehicle._(
+      vehicle,
+      stage,
+      sources..remove(source),
+    );
+  }
 }
 
 class _VehicleAnimationStage {

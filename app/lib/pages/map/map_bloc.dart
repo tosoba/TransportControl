@@ -41,7 +41,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
               (_) => state.trackedVehiclesMap.values
                   .any((animated) => animated.stage.isAnimating),
             )
-            .listen((_) => add(MapEvent.vehiclesAnimated()));
+            .listen((_) => add(MapEvent.animateVehicles()));
   }
 
   @override
@@ -51,24 +51,24 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   Stream<MapState> mapEventToState(MapEvent event) async* {
     yield event.when(
       clearMap: (_) => MapState.empty(),
-      trackedLinesAdded: (linesAddedEvent) {
+      addTrackedLines: (addTrackedLinesEvent) {
         _vehiclesRepo
             .loadVehiclesOfLines(
-              linesAddedEvent.lines,
+              addTrackedLinesEvent.lines,
             )
             .then(
               (result) => _handleVehiclesOfLinesResult(
                 result,
-                lines: linesAddedEvent.lines,
+                lines: addTrackedLinesEvent.lines,
               ),
             );
         return state.copyWith(
-          trackedLines: state.trackedLines.union(linesAddedEvent.lines),
+          trackedLines: state.trackedLines.union(addTrackedLinesEvent.lines),
         );
       },
-      vehiclesAdded: (vehiclesAddedEvent) {
+      updateVehicles: (updateVehiclesEvent) {
         final updatedVehiclesMap = Map.of(state.trackedVehiclesMap);
-        vehiclesAddedEvent.vehicles.forEach((vehicle) {
+        updateVehiclesEvent.vehicles.forEach((vehicle) {
           final animatedVehicle = updatedVehiclesMap[vehicle.number];
           if (animatedVehicle != null) {
             updatedVehiclesMap[vehicle.number] = AnimatedVehicle.fromUpdated(
@@ -82,7 +82,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         });
         return state.copyWith(trackedVehiclesMap: updatedVehiclesMap);
       },
-      vehiclesOfLinesAdded: (vehiclesOfLinesAddedEvent) {
+      addVehiclesOfLines: (vehiclesOfLinesAddedEvent) {
         final updatedVehiclesMap = Map.of(state.trackedVehiclesMap);
         final lineSymbols = Map.fromIterables(
           vehiclesOfLinesAddedEvent.lines.map((line) => line.symbol),
@@ -113,7 +113,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         });
         return state.copyWith(trackedVehiclesMap: updatedVehiclesMap);
       },
-      vehiclesAnimated: (_) {
+      animateVehicles: (_) {
         final updatedVehiclesMap = state.trackedVehiclesMap.map(
           (number, animated) => animated.stage.isAnimating
               ? MapEntry(
@@ -132,13 +132,39 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         zoom: cameraMovedEvent.zoom,
         bounds: cameraMovedEvent.bounds,
       ),
+      removeTrackedLines: (removeTrackedLinesEvent) {
+        final updatedVehiclesMap = Map();
+        state.trackedVehiclesMap.forEach((number, animated) {
+          final sources = animated.sources;
+          final loadedByTrackingAllOfLine = sources.any(
+            (source) =>
+                source is AllOfLine &&
+                removeTrackedLinesEvent.lines.contains(source.line),
+          );
+          if (!loadedByTrackingAllOfLine) {
+            updatedVehiclesMap[number] = animated;
+          } else if (sources.length == 1) {
+            return;
+          } else {
+            updatedVehiclesMap[number] = animated.withRemovedSource(
+              sources.first,
+            );
+          }
+        });
+        final updatedTrackedLines = Set.of(state.trackedLines)
+          ..removeAll(removeTrackedLinesEvent.lines);
+        return state.copyWith(
+          trackedVehiclesMap: updatedVehiclesMap,
+          trackedLines: updatedTrackedLines,
+        );
+      },
     );
   }
 
   void _handleVehiclesUpdateResult(Result<List<Vehicle>> result) {
     result.when(
       success: (success) => add(
-        MapEvent.vehiclesAdded(vehicles: success.data),
+        MapEvent.updateVehicles(vehicles: success.data),
       ),
       failure: (failure) => failure.logError(),
     );
@@ -150,7 +176,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }) {
     result.when(
       success: (success) => add(
-        MapEvent.vehiclesOfLinesAdded(vehicles: success.data, lines: lines),
+        MapEvent.addVehiclesOfLines(vehicles: success.data, lines: lines),
       ),
       failure: (failure) => failure.logError(),
     );
@@ -204,8 +230,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
   }
 
-  void trackedLinesAdded(Set<Line> lines) {
-    add(MapEvent.trackedLinesAdded(lines: lines));
+  void addTrackedLines(Set<Line> lines) {
+    add(MapEvent.addTrackedLines(lines: lines));
+  }
+
+  void removeTrackedLines(Set<Line> lines) {
+    add(MapEvent.removeTrackedLines(lines: lines));
   }
 
   void cameraMoved({

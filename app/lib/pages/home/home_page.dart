@@ -123,7 +123,7 @@ class _HomePageState extends State<HomePage>
   }
 
   Future _showLinesPage(BuildContext context) async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => BlocProvider.value(
@@ -132,12 +132,6 @@ class _HomePageState extends State<HomePage>
         ),
       ),
     );
-    if (result != null && result) {
-      final lineBloc = context.bloc<LinesBloc>();
-      final mapBloc = context.bloc<MapBloc>();
-      mapBloc.trackedLinesAdded(lineBloc.selectedLines);
-      lineBloc.selectionReset();
-    }
   }
 
   Widget _navigationDrawer(BuildContext context) {

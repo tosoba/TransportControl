@@ -11,19 +11,22 @@ enum _MapEvent {
   ClearMap,
 
   @Data(fields: [DataField<Set<Line>>('lines')])
-  TrackedLinesAdded,
+  AddTrackedLines,
+
+  @Data(fields: [DataField<Set<Line>>('lines')])
+  RemoveTrackedLines,
 
   @Data(fields: [DataField<Iterable<Vehicle>>('vehicles')])
-  VehiclesAdded,
+  UpdateVehicles,
 
   @Data(fields: [
     DataField<Iterable<Vehicle>>('vehicles'),
     DataField<Set<Line>>('lines')
   ])
-  VehiclesOfLinesAdded,
+  AddVehiclesOfLines,
 
   @object
-  VehiclesAnimated,
+  AnimateVehicles,
 
   @Data(fields: [
     DataField<LatLngBounds>('bounds'),
