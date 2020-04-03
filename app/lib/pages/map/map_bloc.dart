@@ -69,14 +69,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       updateVehicles: (updateVehiclesEvent) {
         final updatedVehiclesMap = Map.of(state.trackedVehiclesMap);
         updateVehiclesEvent.vehicles.forEach((vehicle) {
-          final animatedVehicle = updatedVehiclesMap[vehicle.number];
-          if (animatedVehicle != null) {
-            updatedVehiclesMap[vehicle.number] = AnimatedVehicle.fromUpdated(
+          final animated = updatedVehiclesMap[vehicle.number];
+          if (animated != null) {
+            updatedVehiclesMap[vehicle.number] = animated.withUpdatedVehicle(
               vehicle,
-              previous: animatedVehicle.stage,
               currentBounds: state.bounds,
               currentZoom: state.zoom,
-              sources: animatedVehicle.sources,
             );
           }
         });
@@ -89,21 +87,20 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           vehiclesOfLinesAddedEvent.lines,
         );
         vehiclesOfLinesAddedEvent.vehicles.forEach((vehicle) {
-          final animatedVehicle = updatedVehiclesMap[vehicle.number];
-          if (animatedVehicle != null) {
-            updatedVehiclesMap[vehicle.number] = AnimatedVehicle.fromUpdated(
+          final animated = updatedVehiclesMap[vehicle.number];
+          if (animated != null) {
+            updatedVehiclesMap[vehicle.number] = animated.withUpdatedVehicle(
               vehicle,
-              previous: animatedVehicle.stage,
               currentBounds: state.bounds,
               currentZoom: state.zoom,
-              sources: animatedVehicle.sources
+              sources: animated.sources
                 ..add(
                   VehicleSource.allOfLine(line: lineSymbols[vehicle.symbol]),
                 ),
             );
           } else {
             updatedVehiclesMap[vehicle.number] =
-                AnimatedVehicle.fromNewlyLoaded(
+                AnimatedVehicle.fromNewlyLoadedVehicle(
               vehicle,
               source: VehicleSource.allOfLine(
                 line: lineSymbols[vehicle.symbol],
@@ -118,8 +115,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           (number, animated) => animated.stage.isAnimating
               ? MapEntry(
                   number,
-                  AnimatedVehicle.nextStageOf(
-                    animated,
+                  animated.toNextStage(
                     currentBounds: state.bounds,
                     currentZoom: state.zoom,
                   ),
