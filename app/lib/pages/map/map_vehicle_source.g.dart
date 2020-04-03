@@ -1,21 +1,21 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'vehicle_source.dart';
+part of 'map_vehicle_source.dart';
 
 // **************************************************************************
 // SuperEnumGenerator
 // **************************************************************************
 
 @immutable
-abstract class VehicleSource extends Equatable {
-  const VehicleSource(this._type);
+abstract class MapVehicleSource extends Equatable {
+  const MapVehicleSource(this._type);
 
-  factory VehicleSource.allOfLine({@required Line line}) = AllOfLine;
+  factory MapVehicleSource.allOfLine({@required Line line}) = AllOfLine;
 
-  factory VehicleSource.allInBounds({@required LatLngBounds bounds}) =
+  factory MapVehicleSource.allInBounds({@required LatLngBounds bounds}) =
       AllInBounds;
 
-  final _VehicleSource _type;
+  final _MapVehicleSource _type;
 
 //ignore: missing_return
   R when<R>(
@@ -28,9 +28,9 @@ abstract class VehicleSource extends Equatable {
       return true;
     }());
     switch (this._type) {
-      case _VehicleSource.AllOfLine:
+      case _MapVehicleSource.AllOfLine:
         return allOfLine(this as AllOfLine);
-      case _VehicleSource.AllInBounds:
+      case _MapVehicleSource.AllInBounds:
         return allInBounds(this as AllInBounds);
     }
   }
@@ -46,9 +46,9 @@ abstract class VehicleSource extends Equatable {
       return true;
     }());
     switch (this._type) {
-      case _VehicleSource.AllOfLine:
+      case _MapVehicleSource.AllOfLine:
         return allOfLine(this as AllOfLine);
-      case _VehicleSource.AllInBounds:
+      case _MapVehicleSource.AllInBounds:
         return allInBounds(this as AllInBounds);
     }
   }
@@ -56,7 +56,7 @@ abstract class VehicleSource extends Equatable {
   R whenOrElse<R>(
       {R Function(AllOfLine) allOfLine,
       R Function(AllInBounds) allInBounds,
-      @required R Function(VehicleSource) orElse}) {
+      @required R Function(MapVehicleSource) orElse}) {
     assert(() {
       if (orElse == null) {
         throw 'Missing orElse case';
@@ -64,10 +64,10 @@ abstract class VehicleSource extends Equatable {
       return true;
     }());
     switch (this._type) {
-      case _VehicleSource.AllOfLine:
+      case _MapVehicleSource.AllOfLine:
         if (allOfLine == null) break;
         return allOfLine(this as AllOfLine);
-      case _VehicleSource.AllInBounds:
+      case _MapVehicleSource.AllInBounds:
         if (allInBounds == null) break;
         return allInBounds(this as AllInBounds);
     }
@@ -77,7 +77,7 @@ abstract class VehicleSource extends Equatable {
   Future<R> asyncWhenOrElse<R>(
       {FutureOr<R> Function(AllOfLine) allOfLine,
       FutureOr<R> Function(AllInBounds) allInBounds,
-      @required FutureOr<R> Function(VehicleSource) orElse}) {
+      @required FutureOr<R> Function(MapVehicleSource) orElse}) {
     assert(() {
       if (orElse == null) {
         throw 'Missing orElse case';
@@ -85,10 +85,10 @@ abstract class VehicleSource extends Equatable {
       return true;
     }());
     switch (this._type) {
-      case _VehicleSource.AllOfLine:
+      case _MapVehicleSource.AllOfLine:
         if (allOfLine == null) break;
         return allOfLine(this as AllOfLine);
-      case _VehicleSource.AllInBounds:
+      case _MapVehicleSource.AllInBounds:
         if (allInBounds == null) break;
         return allInBounds(this as AllInBounds);
     }
@@ -106,10 +106,10 @@ abstract class VehicleSource extends Equatable {
       return true;
     }());
     switch (this._type) {
-      case _VehicleSource.AllOfLine:
+      case _MapVehicleSource.AllOfLine:
         if (allOfLine == null) break;
         return allOfLine(this as AllOfLine);
-      case _VehicleSource.AllInBounds:
+      case _MapVehicleSource.AllInBounds:
         if (allInBounds == null) break;
         return allInBounds(this as AllInBounds);
     }
@@ -120,8 +120,8 @@ abstract class VehicleSource extends Equatable {
 }
 
 @immutable
-class AllOfLine extends VehicleSource {
-  const AllOfLine({@required this.line}) : super(_VehicleSource.AllOfLine);
+class AllOfLine extends MapVehicleSource {
+  const AllOfLine({@required this.line}) : super(_MapVehicleSource.AllOfLine);
 
   final Line line;
 
@@ -132,9 +132,9 @@ class AllOfLine extends VehicleSource {
 }
 
 @immutable
-class AllInBounds extends VehicleSource {
+class AllInBounds extends MapVehicleSource {
   const AllInBounds({@required this.bounds})
-      : super(_VehicleSource.AllInBounds);
+      : super(_MapVehicleSource.AllInBounds);
 
   final LatLngBounds bounds;
 

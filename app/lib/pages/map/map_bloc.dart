@@ -11,8 +11,8 @@ import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_event.dart';
 import 'package:transport_control/pages/map/map_marker.dart';
 import 'package:transport_control/pages/map/map_state.dart';
-import 'package:transport_control/pages/map/animated_vehicle.dart';
-import 'package:transport_control/pages/map/vehicle_source.dart';
+import 'package:transport_control/pages/map/map_vehicle.dart';
+import 'package:transport_control/pages/map/map_vehicle_source.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
 import 'package:transport_control/util/fluster_ext.dart';
 
@@ -24,12 +24,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   MapBloc(this._vehiclesRepo) {
     _vehicleUpdatesSubscription = Stream.periodic(const Duration(seconds: 15))
-        .where((_) => state.trackedVehiclesMap.isNotEmpty)
+        .where((_) => state.trackedVehicles.isNotEmpty)
         .asyncExpand(
           (_) => Stream.fromFuture(
             _vehiclesRepo.loadVehicles(
-              state.trackedVehiclesMap.values
-                  .map((animated) => animated.vehicle),
+              state.trackedVehicles.values.map((tracked) => tracked.vehicle),
             ),
           ),
         )
@@ -38,8 +37,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     _vehiclesAnimationSubscription =
         Stream.periodic(const Duration(milliseconds: 16))
             .where(
-              (_) => state.trackedVehiclesMap.values
-                  .any((animated) => animated.stage.isAnimating),
+              (_) => state.trackedVehicles.values
+                  .any((tracked) => tracked.animation.stage.isAnimating),
             )
             .listen((_) => add(MapEvent.animateVehicles()));
   }
@@ -67,82 +66,82 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         );
       },
       updateVehicles: (updateVehiclesEvent) {
-        final updatedVehiclesMap = Map.of(state.trackedVehiclesMap);
+        final updatedVehicles = Map.of(state.trackedVehicles);
         updateVehiclesEvent.vehicles.forEach((vehicle) {
-          final animated = updatedVehiclesMap[vehicle.number];
-          if (animated != null) {
-            updatedVehiclesMap[vehicle.number] = animated.withUpdatedVehicle(
+          final tracked = updatedVehicles[vehicle.number];
+          if (tracked != null) {
+            updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
               vehicle,
-              currentBounds: state.bounds,
-              currentZoom: state.zoom,
+              bounds: state.bounds,
+              zoom: state.zoom,
             );
           }
         });
-        return state.copyWith(trackedVehiclesMap: updatedVehiclesMap);
+        return state.copyWith(trackedVehicles: updatedVehicles);
       },
       addVehiclesOfLines: (vehiclesOfLinesAddedEvent) {
-        final updatedVehiclesMap = Map.of(state.trackedVehiclesMap);
+        final updatedVehicles = Map.of(state.trackedVehicles);
         final lineSymbols = Map.fromIterables(
           vehiclesOfLinesAddedEvent.lines.map((line) => line.symbol),
           vehiclesOfLinesAddedEvent.lines,
         );
         vehiclesOfLinesAddedEvent.vehicles.forEach((vehicle) {
-          final animated = updatedVehiclesMap[vehicle.number];
-          if (animated != null) {
-            updatedVehiclesMap[vehicle.number] = animated.withUpdatedVehicle(
+          final tracked = updatedVehicles[vehicle.number];
+          if (tracked != null) {
+            updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
               vehicle,
-              currentBounds: state.bounds,
-              currentZoom: state.zoom,
-              sources: animated.sources
+              bounds: state.bounds,
+              zoom: state.zoom,
+              sources: tracked.sources
                 ..add(
-                  VehicleSource.allOfLine(line: lineSymbols[vehicle.symbol]),
+                  MapVehicleSource.allOfLine(line: lineSymbols[vehicle.symbol]),
                 ),
             );
           } else {
-            updatedVehiclesMap[vehicle.number] =
-                AnimatedVehicle.fromNewlyLoadedVehicle(
+            updatedVehicles[vehicle.number] =
+                MapVehicle.fromNewlyLoadedVehicle(
               vehicle,
-              source: VehicleSource.allOfLine(
+              source: MapVehicleSource.allOfLine(
                 line: lineSymbols[vehicle.symbol],
               ),
             );
           }
         });
-        return state.copyWith(trackedVehiclesMap: updatedVehiclesMap);
+        return state.copyWith(trackedVehicles: updatedVehicles);
       },
       animateVehicles: (_) {
-        final updatedVehiclesMap = state.trackedVehiclesMap.map(
-          (number, animated) => animated.stage.isAnimating
+        final updatedVehicles = state.trackedVehicles.map(
+          (number, tracked) => tracked.animation.stage.isAnimating
               ? MapEntry(
                   number,
-                  animated.toNextStage(
-                    currentBounds: state.bounds,
-                    currentZoom: state.zoom,
+                  tracked.toNextStage(
+                    bounds: state.bounds,
+                    zoom: state.zoom,
                   ),
                 )
-              : MapEntry(number, animated),
+              : MapEntry(number, tracked),
         );
-        return state.copyWith(trackedVehiclesMap: updatedVehiclesMap);
+        return state.copyWith(trackedVehicles: updatedVehicles);
       },
       cameraMoved: (cameraMovedEvent) => state.copyWith(
         zoom: cameraMovedEvent.zoom,
         bounds: cameraMovedEvent.bounds,
       ),
       removeTrackedLines: (removeTrackedLinesEvent) {
-        final updatedVehiclesMap = Map();
-        state.trackedVehiclesMap.forEach((number, animated) {
-          final sources = animated.sources;
+        final updatedVehicles = Map();
+        state.trackedVehicles.forEach((number, tracked) {
+          final sources = tracked.sources;
           final loadedByTrackingAllOfLine = sources.any(
             (source) =>
                 source is AllOfLine &&
                 removeTrackedLinesEvent.lines.contains(source.line),
           );
           if (!loadedByTrackingAllOfLine) {
-            updatedVehiclesMap[number] = animated;
+            updatedVehicles[number] = tracked;
           } else if (sources.length == 1) {
             return;
           } else {
-            updatedVehiclesMap[number] = animated.withRemovedSource(
+            updatedVehicles[number] = tracked.withRemovedSource(
               sources.first,
             );
           }
@@ -150,7 +149,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         final updatedTrackedLines = Set.of(state.trackedLines)
           ..removeAll(removeTrackedLinesEvent.lines);
         return state.copyWith(
-          trackedVehiclesMap: updatedVehiclesMap,
+          trackedVehicles: updatedVehicles,
           trackedLines: updatedTrackedLines,
         );
       },
@@ -192,18 +191,18 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   Stream<Set<Marker>> get markers {
     return asyncExpand(
       (state) => Stream.fromFuture(
-        state.trackedVehiclesMap.isEmpty
+        state.trackedVehicles.isEmpty
             ? null
             : flusterFromMarkers(
-                    state.trackedVehiclesMap
+                    state.trackedVehicles
                         .map(
-                          (number, animated) => MapEntry(
+                          (number, tracked) => MapEntry(
                             number,
                             MapMarker(
-                              id: '${number}_${animated.vehicle.symbol}',
+                              id: '${number}_${tracked.vehicle.symbol}',
                               position: LatLng(
-                                animated.stage.current.latitude,
-                                animated.stage.current.longitude,
+                                tracked.animation.stage.current.latitude,
+                                tracked.animation.stage.current.longitude,
                               ),
                             ),
                           ),

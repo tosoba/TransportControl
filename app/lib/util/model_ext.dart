@@ -1,3 +1,4 @@
+import 'package:latlong/latlong.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/util/string_ext.dart';
@@ -11,6 +12,8 @@ extension VehicleExt on Vehicle {
       lastUpdate != null;
 
   int get type => _typeFrom(symbol);
+
+  LatLng get position => LatLng(lat, lon);
 }
 
 extension LineExt on Line {
