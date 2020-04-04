@@ -171,7 +171,7 @@ class _LinesPageState extends State<LinesPage>
             boxShadow: [
               BoxShadow(
                 blurRadius: 5.0,
-                color: Colors.grey.shade400,
+                color: Colors.grey.shade300,
                 offset: Offset(0.0, -5.0),
               )
             ],
@@ -249,7 +249,7 @@ class _LinesPageState extends State<LinesPage>
     @required String actionLabel,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+      padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),
       child: Row(
         children: [
           Expanded(
@@ -263,14 +263,13 @@ class _LinesPageState extends State<LinesPage>
               ),
             ),
           ),
-          Card(
-            child: MaterialButton(
-              padding: EdgeInsets.zero,
-              onPressed: actionPressed,
-              child: Text(
-                actionLabel,
-                style: const TextStyle(color: Colors.black, fontSize: 16),
-              ),
+          RaisedButton(
+            color: Colors.white,
+            padding: EdgeInsets.zero,
+            onPressed: actionPressed,
+            child: Text(
+              actionLabel,
+              style: const TextStyle(color: Colors.black, fontSize: 16),
             ),
           )
         ],
@@ -297,17 +296,16 @@ class _LinesPageState extends State<LinesPage>
           itemCount: lineGroups.length,
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) => Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Card(
-              child: MaterialButton(
-                onPressed: () => _linesListScrollController.jumpTo(
-                  index: index,
-                  alignment: topOffset / MediaQuery.of(context).size.height,
-                ),
-                child: Text(
-                  lineGroups.elementAt(index).key,
-                  style: const TextStyle(fontSize: 20),
-                ),
+            padding: const EdgeInsets.all(8.0),
+            child: RaisedButton(
+              color: Colors.white,
+              onPressed: () => _linesListScrollController.jumpTo(
+                index: index,
+                alignment: topOffset / MediaQuery.of(context).size.height,
+              ),
+              child: Text(
+                lineGroups.elementAt(index).key,
+                style: const TextStyle(fontSize: 18),
               ),
             ),
           ),
