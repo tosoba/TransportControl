@@ -7,16 +7,14 @@ import 'package:transport_control/pages/lines/lines_event.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 
 class LinesBloc extends Bloc<LinesEvent, LinesState> {
-  final Stream<Set<Line>> _trackedLinesStream;
-  final void Function(Set<Line>) _addTrackedLines;
-  final void Function(Set<Line>) _removeTrackedLines;
+  final void Function(Set<Line>) _trackedLinesAdded;
+  final void Function(Set<Line>) _trackedLinesRemoved;
 
   StreamSubscription<Set<Line>> _trackedLinesSubscription;
 
   LinesBloc(
-    this._trackedLinesStream,
-    this._addTrackedLines,
-    this._removeTrackedLines,
+    this._trackedLinesAdded,
+    this._trackedLinesRemoved,
   ) {
     rootBundle.loadString('assets/json/lines.json').then((jsonString) {
       final lineItems = Map.fromIterable(
@@ -26,8 +24,6 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
       );
       add(LinesEvent.created(items: lineItems));
     });
-
-    _trackedLinesSubscription = _trackedLinesStream.listen(_updateTrackedLines);
   }
 
   @override
@@ -67,14 +63,32 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
         });
         return state.copyWith(items: updatedItems);
       },
-      trackedLinesChanged: (trackedLinesChange) {
+      trackSelectedLines: (_) {
         final updatedItems = Map.of(state.items);
-        updatedItems.forEach((key, value) {
-          if (value.tracked) updatedItems[key] = value.toggleTracked;
+        final newlyTrackedLines = Set<Line>();
+        updatedItems.forEach((line, state) {
+          if (!state.tracked && state.selected) {
+            newlyTrackedLines.add(line);
+            updatedItems[line] = state.toggleTracked;
+          }
         });
-        trackedLinesChange.lines
-            .forEach((line) => updatedItems[line].toggleTracked);
+        _trackedLinesAdded(newlyTrackedLines);
         return state.copyWith(items: updatedItems);
+      },
+      untrackSelectedLines: (_) {
+        final updatedItems = Map.of(state.items);
+        final linesRemovedFromTracking = Set<Line>();
+        updatedItems.forEach((line, state) {
+          if (state.tracked && state.selected) {
+            linesRemovedFromTracking.add(line);
+            updatedItems[line] = state.toggleTracked;
+          }
+        });
+        _trackedLinesRemoved(linesRemovedFromTracking);
+        return state.copyWith(items: updatedItems);
+      },
+      loadingVehiclesOfLinesFailed: (loadingVehiclesOfLinesFailedEvent) {
+        return state;
       },
     );
   }
@@ -136,15 +150,11 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     add(LinesEvent.listFilterChanged(filter: filter));
   }
 
-  void _updateTrackedLines(Iterable<Line> lines) {
-    add(LinesEvent.trackedLinesChanged(lines: lines));
+  void trackSelectedLines() {
+    add(LinesEvent.trackSelectedLines());
   }
 
-  void addSelectedToTrackedLines() {
-    _addTrackedLines(state.selectedLines);
-  }
-
-  void removeSelectedFromTrackedLines() {
-    _removeTrackedLines(state.selectedLines);
+  void untrackSelectedLines() {
+    add(LinesEvent.untrackSelectedLines());
   }
 }

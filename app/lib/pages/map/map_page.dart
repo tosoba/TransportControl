@@ -39,7 +39,7 @@ class _MapPageState extends State<MapPage>
     );
   }
 
-  _cameraMoved(BuildContext context, GoogleMapController controller) {
+  void _cameraMoved(BuildContext context, GoogleMapController controller) {
     Future.wait([
       controller.getVisibleRegion(),
       controller.getZoomLevel(),

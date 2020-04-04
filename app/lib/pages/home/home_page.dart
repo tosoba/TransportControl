@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
-import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/places/places_page.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';

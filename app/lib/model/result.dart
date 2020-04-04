@@ -15,5 +15,5 @@ enum _Result {
 }
 
 extension FailureExt<T> on Failure<T> {
-  logError() => log(error?.toString() ?? 'Unknown error');
+  void logError() => log(error?.toString() ?? 'Unknown error');
 }

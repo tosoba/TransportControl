@@ -21,6 +21,12 @@ enum _LinesEvent {
   @object
   SelectionReset,
 
-  @Data(fields: [DataField<Iterable<Line>>('lines')])
-  TrackedLinesChanged,
+  @object
+  TrackSelectedLines,
+
+  @object
+  UntrackSelectedLines,
+
+  @Data(fields: [DataField<Set<Line>>('lines')])
+  LoadingVehiclesOfLinesFailed
 }

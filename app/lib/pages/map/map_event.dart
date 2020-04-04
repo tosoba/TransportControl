@@ -10,12 +10,6 @@ enum _MapEvent {
   @object
   ClearMap,
 
-  @Data(fields: [DataField<Set<Line>>('lines')])
-  AddTrackedLines,
-
-  @Data(fields: [DataField<Set<Line>>('lines')])
-  RemoveTrackedLines,
-
   @Data(fields: [DataField<Iterable<Vehicle>>('vehicles')])
   UpdateVehicles,
 
@@ -32,5 +26,8 @@ enum _MapEvent {
     DataField<LatLngBounds>('bounds'),
     DataField<double>('zoom'),
   ])
-  CameraMoved
+  CameraMoved,
+
+  @Data(fields: [DataField<Set<Line>>('lines')])
+  TrackedLinesRemoved,
 }

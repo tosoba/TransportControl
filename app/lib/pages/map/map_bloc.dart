@@ -32,7 +32,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             ),
           ),
         )
-        .listen(_handleVehiclesUpdateResult);
+        .listen(
+          (result) => result.when(
+            success: (success) => add(
+              MapEvent.updateVehicles(vehicles: success.data),
+            ),
+            failure: (failure) => failure.logError(),
+          ),
+        );
 
     _vehiclesAnimationSubscription =
         Stream.periodic(const Duration(milliseconds: 16))
@@ -50,21 +57,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   Stream<MapState> mapEventToState(MapEvent event) async* {
     yield event.when(
       clearMap: (_) => MapState.empty(),
-      addTrackedLines: (addTrackedLinesEvent) {
-        _vehiclesRepo
-            .loadVehiclesOfLines(
-              addTrackedLinesEvent.lines,
-            )
-            .then(
-              (result) => _handleVehiclesOfLinesResult(
-                result,
-                lines: addTrackedLinesEvent.lines,
-              ),
-            );
-        return state.copyWith(
-          trackedLines: state.trackedLines.union(addTrackedLinesEvent.lines),
-        );
-      },
       updateVehicles: (updateVehiclesEvent) {
         final updatedVehicles = Map.of(state.trackedVehicles);
         updateVehiclesEvent.vehicles.forEach((vehicle) {
@@ -98,8 +90,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
                 ),
             );
           } else {
-            updatedVehicles[vehicle.number] =
-                MapVehicle.fromNewlyLoadedVehicle(
+            updatedVehicles[vehicle.number] = MapVehicle.fromNewlyLoadedVehicle(
               vehicle,
               source: MapVehicleSource.allOfLine(
                 line: lineSymbols[vehicle.symbol],
@@ -127,7 +118,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         zoom: cameraMovedEvent.zoom,
         bounds: cameraMovedEvent.bounds,
       ),
-      removeTrackedLines: (removeTrackedLinesEvent) {
+      trackedLinesRemoved: (removeTrackedLinesEvent) {
         final updatedVehicles = Map();
         state.trackedVehicles.forEach((number, tracked) {
           final sources = tracked.sources;
@@ -146,34 +137,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             );
           }
         });
-        final updatedTrackedLines = Set.of(state.trackedLines)
-          ..removeAll(removeTrackedLinesEvent.lines);
-        return state.copyWith(
-          trackedVehicles: updatedVehicles,
-          trackedLines: updatedTrackedLines,
-        );
+        return state.copyWith(trackedVehicles: updatedVehicles);
       },
-    );
-  }
-
-  void _handleVehiclesUpdateResult(Result<List<Vehicle>> result) {
-    result.when(
-      success: (success) => add(
-        MapEvent.updateVehicles(vehicles: success.data),
-      ),
-      failure: (failure) => failure.logError(),
-    );
-  }
-
-  void _handleVehiclesOfLinesResult(
-    Result<List<Vehicle>> result, {
-    @required Set<Line> lines,
-  }) {
-    result.when(
-      success: (success) => add(
-        MapEvent.addVehiclesOfLines(vehicles: success.data, lines: lines),
-      ),
-      failure: (failure) => failure.logError(),
     );
   }
 
@@ -185,8 +150,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     ]);
     return super.close();
   }
-
-  Stream<Set<Line>> get trackedLines => map((state) => state.trackedLines);
 
   Stream<Set<Marker>> get markers {
     return asyncExpand(
@@ -225,12 +188,19 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
   }
 
-  void addTrackedLines(Set<Line> lines) {
-    add(MapEvent.addTrackedLines(lines: lines));
+  void trackedLinesAdded(Set<Line> lines) {
+    _vehiclesRepo.loadVehiclesOfLines(lines).then(
+          (result) => result.when(
+            success: (success) => add(
+              MapEvent.addVehiclesOfLines(vehicles: success.data, lines: lines),
+            ),
+            failure: (failure) => failure.logError(), // untrack lines on fail?
+          ),
+        );
   }
 
-  void removeTrackedLines(Set<Line> lines) {
-    add(MapEvent.removeTrackedLines(lines: lines));
+  void trackedLinesRemoved(Set<Line> lines) {
+    add(MapEvent.trackedLinesRemoved(lines: lines));
   }
 
   void cameraMoved({

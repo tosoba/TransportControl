@@ -166,7 +166,7 @@ class _LinesPageState extends State<LinesPage>
               InkWell(
                 onTap: () {
                   context.bloc<LinesBloc>()
-                    ..addSelectedToTrackedLines()
+                    ..trackSelectedLines()
                     ..selectionReset();
                   Navigator.pop(context);
                 },

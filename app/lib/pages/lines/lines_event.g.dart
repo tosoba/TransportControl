@@ -23,26 +23,43 @@ abstract class LinesEvent extends Equatable {
 
   factory LinesEvent.selectionReset() = SelectionReset;
 
-  factory LinesEvent.trackedLinesChanged({@required Iterable<Line> lines}) =
-      TrackedLinesChanged;
+  factory LinesEvent.trackSelectedLines() = TrackSelectedLines;
+
+  factory LinesEvent.untrackSelectedLines() = UntrackSelectedLines;
+
+  factory LinesEvent.loadingVehiclesOfLinesFailed({@required Set<Line> lines}) =
+      LoadingVehiclesOfLinesFailed;
 
   final _LinesEvent _type;
 
 //ignore: missing_return
   R when<R>(
-      {@required R Function(Created) created,
-      @required R Function(SymbolFilterChanged) symbolFilterChanged,
-      @required R Function(ListFilterChanged) listFilterChanged,
-      @required R Function(ItemSelectionChanged) itemSelectionChanged,
-      @required R Function(SelectionReset) selectionReset,
-      @required R Function(TrackedLinesChanged) trackedLinesChanged}) {
+      {@required
+          R Function(Created) created,
+      @required
+          R Function(SymbolFilterChanged) symbolFilterChanged,
+      @required
+          R Function(ListFilterChanged) listFilterChanged,
+      @required
+          R Function(ItemSelectionChanged) itemSelectionChanged,
+      @required
+          R Function(SelectionReset) selectionReset,
+      @required
+          R Function(TrackSelectedLines) trackSelectedLines,
+      @required
+          R Function(UntrackSelectedLines) untrackSelectedLines,
+      @required
+          R Function(LoadingVehiclesOfLinesFailed)
+              loadingVehiclesOfLinesFailed}) {
     assert(() {
       if (created == null ||
           symbolFilterChanged == null ||
           listFilterChanged == null ||
           itemSelectionChanged == null ||
           selectionReset == null ||
-          trackedLinesChanged == null) {
+          trackSelectedLines == null ||
+          untrackSelectedLines == null ||
+          loadingVehiclesOfLinesFailed == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -58,8 +75,13 @@ abstract class LinesEvent extends Equatable {
         return itemSelectionChanged(this as ItemSelectionChanged);
       case _LinesEvent.SelectionReset:
         return selectionReset(this as SelectionReset);
-      case _LinesEvent.TrackedLinesChanged:
-        return trackedLinesChanged(this as TrackedLinesChanged);
+      case _LinesEvent.TrackSelectedLines:
+        return trackSelectedLines(this as TrackSelectedLines);
+      case _LinesEvent.UntrackSelectedLines:
+        return untrackSelectedLines(this as UntrackSelectedLines);
+      case _LinesEvent.LoadingVehiclesOfLinesFailed:
+        return loadingVehiclesOfLinesFailed(
+            this as LoadingVehiclesOfLinesFailed);
     }
   }
 
@@ -76,14 +98,21 @@ abstract class LinesEvent extends Equatable {
       @required
           FutureOr<R> Function(SelectionReset) selectionReset,
       @required
-          FutureOr<R> Function(TrackedLinesChanged) trackedLinesChanged}) {
+          FutureOr<R> Function(TrackSelectedLines) trackSelectedLines,
+      @required
+          FutureOr<R> Function(UntrackSelectedLines) untrackSelectedLines,
+      @required
+          FutureOr<R> Function(LoadingVehiclesOfLinesFailed)
+              loadingVehiclesOfLinesFailed}) {
     assert(() {
       if (created == null ||
           symbolFilterChanged == null ||
           listFilterChanged == null ||
           itemSelectionChanged == null ||
           selectionReset == null ||
-          trackedLinesChanged == null) {
+          trackSelectedLines == null ||
+          untrackSelectedLines == null ||
+          loadingVehiclesOfLinesFailed == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -99,8 +128,13 @@ abstract class LinesEvent extends Equatable {
         return itemSelectionChanged(this as ItemSelectionChanged);
       case _LinesEvent.SelectionReset:
         return selectionReset(this as SelectionReset);
-      case _LinesEvent.TrackedLinesChanged:
-        return trackedLinesChanged(this as TrackedLinesChanged);
+      case _LinesEvent.TrackSelectedLines:
+        return trackSelectedLines(this as TrackSelectedLines);
+      case _LinesEvent.UntrackSelectedLines:
+        return untrackSelectedLines(this as UntrackSelectedLines);
+      case _LinesEvent.LoadingVehiclesOfLinesFailed:
+        return loadingVehiclesOfLinesFailed(
+            this as LoadingVehiclesOfLinesFailed);
     }
   }
 
@@ -110,7 +144,9 @@ abstract class LinesEvent extends Equatable {
       R Function(ListFilterChanged) listFilterChanged,
       R Function(ItemSelectionChanged) itemSelectionChanged,
       R Function(SelectionReset) selectionReset,
-      R Function(TrackedLinesChanged) trackedLinesChanged,
+      R Function(TrackSelectedLines) trackSelectedLines,
+      R Function(UntrackSelectedLines) untrackSelectedLines,
+      R Function(LoadingVehiclesOfLinesFailed) loadingVehiclesOfLinesFailed,
       @required R Function(LinesEvent) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -134,9 +170,16 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.SelectionReset:
         if (selectionReset == null) break;
         return selectionReset(this as SelectionReset);
-      case _LinesEvent.TrackedLinesChanged:
-        if (trackedLinesChanged == null) break;
-        return trackedLinesChanged(this as TrackedLinesChanged);
+      case _LinesEvent.TrackSelectedLines:
+        if (trackSelectedLines == null) break;
+        return trackSelectedLines(this as TrackSelectedLines);
+      case _LinesEvent.UntrackSelectedLines:
+        if (untrackSelectedLines == null) break;
+        return untrackSelectedLines(this as UntrackSelectedLines);
+      case _LinesEvent.LoadingVehiclesOfLinesFailed:
+        if (loadingVehiclesOfLinesFailed == null) break;
+        return loadingVehiclesOfLinesFailed(
+            this as LoadingVehiclesOfLinesFailed);
     }
     return orElse(this);
   }
@@ -147,7 +190,10 @@ abstract class LinesEvent extends Equatable {
       FutureOr<R> Function(ListFilterChanged) listFilterChanged,
       FutureOr<R> Function(ItemSelectionChanged) itemSelectionChanged,
       FutureOr<R> Function(SelectionReset) selectionReset,
-      FutureOr<R> Function(TrackedLinesChanged) trackedLinesChanged,
+      FutureOr<R> Function(TrackSelectedLines) trackSelectedLines,
+      FutureOr<R> Function(UntrackSelectedLines) untrackSelectedLines,
+      FutureOr<R> Function(LoadingVehiclesOfLinesFailed)
+          loadingVehiclesOfLinesFailed,
       @required FutureOr<R> Function(LinesEvent) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -171,9 +217,16 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.SelectionReset:
         if (selectionReset == null) break;
         return selectionReset(this as SelectionReset);
-      case _LinesEvent.TrackedLinesChanged:
-        if (trackedLinesChanged == null) break;
-        return trackedLinesChanged(this as TrackedLinesChanged);
+      case _LinesEvent.TrackSelectedLines:
+        if (trackSelectedLines == null) break;
+        return trackSelectedLines(this as TrackSelectedLines);
+      case _LinesEvent.UntrackSelectedLines:
+        if (untrackSelectedLines == null) break;
+        return untrackSelectedLines(this as UntrackSelectedLines);
+      case _LinesEvent.LoadingVehiclesOfLinesFailed:
+        if (loadingVehiclesOfLinesFailed == null) break;
+        return loadingVehiclesOfLinesFailed(
+            this as LoadingVehiclesOfLinesFailed);
     }
     return orElse(this);
   }
@@ -185,14 +238,19 @@ abstract class LinesEvent extends Equatable {
       FutureOr<void> Function(ListFilterChanged) listFilterChanged,
       FutureOr<void> Function(ItemSelectionChanged) itemSelectionChanged,
       FutureOr<void> Function(SelectionReset) selectionReset,
-      FutureOr<void> Function(TrackedLinesChanged) trackedLinesChanged}) {
+      FutureOr<void> Function(TrackSelectedLines) trackSelectedLines,
+      FutureOr<void> Function(UntrackSelectedLines) untrackSelectedLines,
+      FutureOr<void> Function(LoadingVehiclesOfLinesFailed)
+          loadingVehiclesOfLinesFailed}) {
     assert(() {
       if (created == null &&
           symbolFilterChanged == null &&
           listFilterChanged == null &&
           itemSelectionChanged == null &&
           selectionReset == null &&
-          trackedLinesChanged == null) {
+          trackSelectedLines == null &&
+          untrackSelectedLines == null &&
+          loadingVehiclesOfLinesFailed == null) {
         throw 'provide at least one branch';
       }
       return true;
@@ -213,9 +271,16 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.SelectionReset:
         if (selectionReset == null) break;
         return selectionReset(this as SelectionReset);
-      case _LinesEvent.TrackedLinesChanged:
-        if (trackedLinesChanged == null) break;
-        return trackedLinesChanged(this as TrackedLinesChanged);
+      case _LinesEvent.TrackSelectedLines:
+        if (trackSelectedLines == null) break;
+        return trackSelectedLines(this as TrackSelectedLines);
+      case _LinesEvent.UntrackSelectedLines:
+        if (untrackSelectedLines == null) break;
+        return untrackSelectedLines(this as UntrackSelectedLines);
+      case _LinesEvent.LoadingVehiclesOfLinesFailed:
+        if (loadingVehiclesOfLinesFailed == null) break;
+        return loadingVehiclesOfLinesFailed(
+            this as LoadingVehiclesOfLinesFailed);
     }
   }
 
@@ -287,14 +352,38 @@ class SelectionReset extends LinesEvent {
 }
 
 @immutable
-class TrackedLinesChanged extends LinesEvent {
-  const TrackedLinesChanged({@required this.lines})
-      : super(_LinesEvent.TrackedLinesChanged);
+class TrackSelectedLines extends LinesEvent {
+  const TrackSelectedLines._() : super(_LinesEvent.TrackSelectedLines);
 
-  final Iterable<Line> lines;
+  factory TrackSelectedLines() {
+    _instance ??= const TrackSelectedLines._();
+    return _instance;
+  }
+
+  static TrackSelectedLines _instance;
+}
+
+@immutable
+class UntrackSelectedLines extends LinesEvent {
+  const UntrackSelectedLines._() : super(_LinesEvent.UntrackSelectedLines);
+
+  factory UntrackSelectedLines() {
+    _instance ??= const UntrackSelectedLines._();
+    return _instance;
+  }
+
+  static UntrackSelectedLines _instance;
+}
+
+@immutable
+class LoadingVehiclesOfLinesFailed extends LinesEvent {
+  const LoadingVehiclesOfLinesFailed({@required this.lines})
+      : super(_LinesEvent.LoadingVehiclesOfLinesFailed);
+
+  final Set<Line> lines;
 
   @override
-  String toString() => 'TrackedLinesChanged(lines:${this.lines})';
+  String toString() => 'LoadingVehiclesOfLinesFailed(lines:${this.lines})';
   @override
   List get props => [lines];
 }

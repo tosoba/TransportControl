@@ -28,9 +28,8 @@ class TransportControlApp extends StatelessWidget {
             create: (context) {
               final mapBloc = context.bloc<MapBloc>();
               return LinesBloc(
-                mapBloc.trackedLines,
-                mapBloc.addTrackedLines,
-                mapBloc.removeTrackedLines,
+                mapBloc.trackedLinesAdded,
+                mapBloc.trackedLinesRemoved,
               );
             },
           ),
