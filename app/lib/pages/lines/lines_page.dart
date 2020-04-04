@@ -143,7 +143,7 @@ class _LinesPageState extends State<LinesPage>
     return StreamBuilder(
       stream: context.bloc<LinesBloc>().selectedLinesStream,
       builder: (
-        context,
+        BuildContext context,
         AsyncSnapshot<Iterable<MapEntry<Line, LineState>>> snapshot,
       ) {
         final selectedLines = snapshot.data;
@@ -165,56 +165,77 @@ class _LinesPageState extends State<LinesPage>
           else
             ++numberOfNonFav;
         });
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              selectedLines.length > 1
-                  ? 'Out ${selectedLines.length} selected lines:'
-                  : 'Out of ${selectedLines.length} selected line:',
-            ),
-            if (numberOfUntracked > 0)
-              _selectedLinesGroupBottomSheetRow(
-                actionLabel: 'Track all',
-                singularDescription: '$numberOfUntracked line is not tracked.',
-                pluralDescription: '$numberOfUntracked lines are not tracked.',
-                actionTapped: () {
-                  context.bloc<LinesBloc>()
-                    ..trackSelectedLines()
-                    ..selectionReset();
-                  Navigator.pop(context);
-                },
-                numberOfLines: numberOfUntracked,
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 5.0,
+                color: Colors.grey.shade400,
+                offset: Offset(0.0, -5.0),
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                selectedLines.length > 1
+                    ? 'Out ${selectedLines.length} selected lines:'
+                    : 'Out of ${selectedLines.length} selected line:',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.black, fontSize: 20),
               ),
-            if (numberOfTracked > 0)
-              _selectedLinesGroupBottomSheetRow(
-                actionLabel: 'Track all',
-                singularDescription: '$numberOfTracked line is tracked.',
-                pluralDescription: '$numberOfTracked lines are tracked.',
-                actionTapped: () {
-                  context.bloc<LinesBloc>()
-                    ..untrackSelectedLines()
-                    ..selectionReset();
-                },
-                numberOfLines: numberOfTracked,
-              ),
-            if (numberOfNonFav > 0)
-              _selectedLinesGroupBottomSheetRow(
-                actionLabel: 'Add all',
-                singularDescription: '$numberOfNonFav line is not favourited.',
-                pluralDescription: '$numberOfNonFav lines are not favourited.',
-                actionTapped: () {},
-                numberOfLines: numberOfNonFav,
-              ),
-            if (numberOfFav > 0)
-              _selectedLinesGroupBottomSheetRow(
-                actionLabel: 'Remove all',
-                singularDescription: '$numberOfFav line is favourited.',
-                pluralDescription: '$numberOfFav lines are favourited.',
-                actionTapped: () {},
-                numberOfLines: numberOfFav,
-              ),
-          ],
+              if (numberOfUntracked > 0)
+                _selectedLinesGroupBottomSheetRow(
+                  actionLabel: 'Track all',
+                  singularDescription:
+                      '$numberOfUntracked line is not tracked.',
+                  pluralDescription:
+                      '$numberOfUntracked lines are not tracked.',
+                  actionPressed: () {
+                    context.bloc<LinesBloc>()
+                      ..trackSelectedLines()
+                      ..selectionReset();
+                    Navigator.pop(context);
+                  },
+                  numberOfLines: numberOfUntracked,
+                ),
+              if (numberOfTracked > 0)
+                _selectedLinesGroupBottomSheetRow(
+                  actionLabel: 'Track all',
+                  singularDescription: '$numberOfTracked line is tracked.',
+                  pluralDescription: '$numberOfTracked lines are tracked.',
+                  actionPressed: () {
+                    context.bloc<LinesBloc>()
+                      ..untrackSelectedLines()
+                      ..selectionReset();
+                  },
+                  numberOfLines: numberOfTracked,
+                ),
+              if (numberOfNonFav > 0)
+                _selectedLinesGroupBottomSheetRow(
+                  actionLabel: 'Save all',
+                  singularDescription:
+                      '$numberOfNonFav line is not saved as favourite.',
+                  pluralDescription:
+                      '$numberOfNonFav lines are not saved as favourite.',
+                  actionPressed: () {},
+                  numberOfLines: numberOfNonFav,
+                ),
+              if (numberOfFav > 0)
+                _selectedLinesGroupBottomSheetRow(
+                  actionLabel: 'Remove all',
+                  singularDescription:
+                      '$numberOfFav line is saved as favourite.',
+                  pluralDescription:
+                      '$numberOfFav lines are saved as favourite.',
+                  actionPressed: () {},
+                  numberOfLines: numberOfFav,
+                ),
+            ],
+          ),
         );
       },
     );
@@ -224,25 +245,36 @@ class _LinesPageState extends State<LinesPage>
     @required int numberOfLines,
     @required String singularDescription,
     @required String pluralDescription,
-    @required void Function() actionTapped,
+    @required void Function() actionPressed,
     @required String actionLabel,
   }) {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            color: Theme.of(context).primaryColor,
-            child: Text(
-              numberOfLines > 1 ? pluralDescription : singularDescription,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white, fontSize: 18),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              child: Text(
+                numberOfLines > 1 ? pluralDescription : singularDescription,
+                textAlign: TextAlign.left,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.black, fontSize: 16),
+              ),
             ),
           ),
-        ),
-        InkWell(onTap: actionTapped, child: Text(actionLabel))
-      ],
+          Card(
+            child: MaterialButton(
+              padding: EdgeInsets.zero,
+              onPressed: actionPressed,
+              child: Text(
+                actionLabel,
+                style: const TextStyle(color: Colors.black, fontSize: 16),
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -257,53 +289,64 @@ class _LinesPageState extends State<LinesPage>
         AsyncSnapshot<List<MapEntry<Line, LineState>>> snapshot,
       ) {
         if (snapshot.data == null) return Container();
+
         final lineGroups =
             snapshot.data.groupBy((entry) => entry.key.group).entries;
-        const shadowSize = 5.0;
-        return Container(
-          height: kBottomNavigationBarHeight + shadowSize,
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                height: shadowSize,
-                color: Colors.transparent,
-              ),
-              Container(
-                height: kBottomNavigationBarHeight,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    const BoxShadow(
-                      blurRadius: shadowSize,
-                      color: Colors.grey,
-                    )
-                  ],
+
+        final listView = ListView.builder(
+          itemCount: lineGroups.length,
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (context, index) => Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Card(
+              child: MaterialButton(
+                onPressed: () => _linesListScrollController.jumpTo(
+                  index: index,
+                  alignment: topOffset / MediaQuery.of(context).size.height,
                 ),
-                child: ListView.builder(
-                  itemCount: lineGroups.length,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) => Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Card(
-                      child: MaterialButton(
-                        onPressed: () => _linesListScrollController.jumpTo(
-                          index: index,
-                          alignment:
-                              topOffset / MediaQuery.of(context).size.height,
-                        ),
-                        child: Text(
-                          lineGroups.elementAt(index).key,
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                      ),
-                    ),
-                  ),
+                child: Text(
+                  lineGroups.elementAt(index).key,
+                  style: const TextStyle(fontSize: 20),
                 ),
               ),
-            ],
+            ),
           ),
         );
+
+        if (snapshot.data.any((entry) => entry.value.selected)) {
+          return Container(
+            height: kBottomNavigationBarHeight,
+            color: Colors.white,
+            child: listView,
+          );
+        } else {
+          const shadowSize = 5.0;
+          return Container(
+            height: kBottomNavigationBarHeight + shadowSize,
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: shadowSize,
+                  color: Colors.transparent,
+                ),
+                Container(
+                  height: kBottomNavigationBarHeight,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      const BoxShadow(
+                        blurRadius: shadowSize,
+                        color: Colors.grey,
+                      )
+                    ],
+                  ),
+                  child: listView,
+                ),
+              ],
+            ),
+          );
+        }
       },
     );
   }
