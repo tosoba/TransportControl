@@ -88,6 +88,12 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
         return state.copyWith(items: updatedItems);
       },
       loadingVehiclesOfLinesFailed: (loadingVehiclesOfLinesFailedEvent) {
+        final updatedItems = Map.of(state.items);
+        updatedItems.forEach((line, state) {
+          if (loadingVehiclesOfLinesFailedEvent.lines.contains(line)) {
+            updatedItems[line] = state.toggleTracked;
+          }
+        });
         return state;
       },
     );
@@ -156,5 +162,9 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
 
   void untrackSelectedLines() {
     add(LinesEvent.untrackSelectedLines());
+  }
+
+  void loadingVehiclesOfLinesFailed(Set<Line> lines) {
+    add(LinesEvent.loadingVehiclesOfLinesFailed(lines: lines));
   }
 }

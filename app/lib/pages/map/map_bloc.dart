@@ -18,11 +18,12 @@ import 'package:transport_control/util/fluster_ext.dart';
 
 class MapBloc extends Bloc<MapEvent, MapState> {
   final VehiclesRepo _vehiclesRepo;
+  final void Function(Set<Line>) _loadingVehiclesOfLinesFailed;
 
   StreamSubscription<Result<List<Vehicle>>> _vehicleUpdatesSubscription;
   StreamSubscription<dynamic> _vehiclesAnimationSubscription;
 
-  MapBloc(this._vehiclesRepo) {
+  MapBloc(this._vehiclesRepo, this._loadingVehiclesOfLinesFailed) {
     _vehicleUpdatesSubscription = Stream.periodic(const Duration(seconds: 15))
         .where((_) => state.trackedVehicles.isNotEmpty)
         .asyncExpand(
@@ -189,12 +190,19 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   void trackedLinesAdded(Set<Line> lines) {
-    _vehiclesRepo.loadVehiclesOfLines(lines).then(
+    _vehiclesRepo
+        .loadVehiclesOfLines(
+          lines,
+        )
+        .then(
           (result) => result.when(
             success: (success) => add(
               MapEvent.addVehiclesOfLines(vehicles: success.data, lines: lines),
             ),
-            failure: (failure) => failure.logError(), // untrack lines on fail?
+            failure: (failure) {
+              failure.logError();
+              _loadingVehiclesOfLinesFailed(lines);
+            },
           ),
         );
   }

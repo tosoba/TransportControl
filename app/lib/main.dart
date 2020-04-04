@@ -22,16 +22,18 @@ class TransportControlApp extends StatelessWidget {
       home: MultiBlocProvider(
         providers: [
           BlocProvider<MapBloc>(
-            create: (context) => MapBloc(GetIt.instance<VehiclesRepo>()),
+            create: (context) => MapBloc(
+              GetIt.instance<VehiclesRepo>(),
+              (lines) {
+                context.bloc<LinesBloc>().loadingVehiclesOfLinesFailed(lines);
+              },
+            ),
           ),
           BlocProvider<LinesBloc>(
-            create: (context) {
-              final mapBloc = context.bloc<MapBloc>();
-              return LinesBloc(
-                mapBloc.trackedLinesAdded,
-                mapBloc.trackedLinesRemoved,
-              );
-            },
+            create: (context) => LinesBloc(
+              (lines) => context.bloc<MapBloc>().trackedLinesAdded(lines),
+              (lines) => context.bloc<MapBloc>().trackedLinesRemoved(lines),
+            ),
           ),
         ],
         child: HomePage(),
