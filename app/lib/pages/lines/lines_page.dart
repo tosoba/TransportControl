@@ -142,40 +142,107 @@ class _LinesPageState extends State<LinesPage>
   Widget _bottomSheet(BuildContext context) {
     return StreamBuilder(
       stream: context.bloc<LinesBloc>().selectedLinesStream,
-      builder: (context, AsyncSnapshot<Set<Line>> snapshot) {
+      builder: (
+        context,
+        AsyncSnapshot<Iterable<MapEntry<Line, LineState>>> snapshot,
+      ) {
         final selectedLines = snapshot.data;
         if (selectedLines == null || selectedLines.isEmpty) {
           return Container(width: 0, height: 0);
-        } else {
-          return Container(
-            height: 50,
-            width: double.infinity,
-            child: Row(children: [
-              Expanded(
-                child: Container(
-                  color: Theme.of(context).primaryColor,
-                  child: Text(
-                    '${selectedLines.length} ${selectedLines.length > 1 ? 'lines are' : 'line is'} selected.',
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white, fontSize: 18),
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: () {
+        }
+
+        int numberOfTracked = 0,
+            numberOfUntracked = 0,
+            numberOfFav = 0,
+            numberOfNonFav = 0;
+        selectedLines.forEach((entry) {
+          if (entry.value.tracked)
+            ++numberOfTracked;
+          else
+            ++numberOfUntracked;
+          if (entry.value.favourite)
+            ++numberOfFav;
+          else
+            ++numberOfNonFav;
+        });
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              selectedLines.length > 1
+                  ? 'Out ${selectedLines.length} selected lines:'
+                  : 'Out of ${selectedLines.length} selected line:',
+            ),
+            if (numberOfUntracked > 0)
+              _selectedLinesGroupBottomSheetRow(
+                actionLabel: 'Track all',
+                singularDescription: '$numberOfUntracked line is not tracked.',
+                pluralDescription: '$numberOfUntracked lines are not tracked.',
+                actionTapped: () {
                   context.bloc<LinesBloc>()
                     ..trackSelectedLines()
                     ..selectionReset();
                   Navigator.pop(context);
                 },
-                child: Text('Search'),
-              )
-            ]),
-          );
-        }
+                numberOfLines: numberOfUntracked,
+              ),
+            if (numberOfTracked > 0)
+              _selectedLinesGroupBottomSheetRow(
+                actionLabel: 'Track all',
+                singularDescription: '$numberOfTracked line is tracked.',
+                pluralDescription: '$numberOfTracked lines are tracked.',
+                actionTapped: () {
+                  context.bloc<LinesBloc>()
+                    ..untrackSelectedLines()
+                    ..selectionReset();
+                },
+                numberOfLines: numberOfTracked,
+              ),
+            if (numberOfNonFav > 0)
+              _selectedLinesGroupBottomSheetRow(
+                actionLabel: 'Add all',
+                singularDescription: '$numberOfNonFav line is not favourited.',
+                pluralDescription: '$numberOfNonFav lines are not favourited.',
+                actionTapped: () {},
+                numberOfLines: numberOfNonFav,
+              ),
+            if (numberOfFav > 0)
+              _selectedLinesGroupBottomSheetRow(
+                actionLabel: 'Remove all',
+                singularDescription: '$numberOfFav line is favourited.',
+                pluralDescription: '$numberOfFav lines are favourited.',
+                actionTapped: () {},
+                numberOfLines: numberOfFav,
+              ),
+          ],
+        );
       },
+    );
+  }
+
+  Widget _selectedLinesGroupBottomSheetRow({
+    @required int numberOfLines,
+    @required String singularDescription,
+    @required String pluralDescription,
+    @required void Function() actionTapped,
+    @required String actionLabel,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            color: Theme.of(context).primaryColor,
+            child: Text(
+              numberOfLines > 1 ? pluralDescription : singularDescription,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white, fontSize: 18),
+            ),
+          ),
+        ),
+        InkWell(onTap: actionTapped, child: Text(actionLabel))
+      ],
     );
   }
 

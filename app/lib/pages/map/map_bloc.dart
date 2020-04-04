@@ -212,8 +212,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   void cameraMoved({
-    LatLngBounds bounds,
-    double zoom,
+    @required LatLngBounds bounds,
+    @required double zoom,
   }) {
     add(MapEvent.cameraMoved(bounds: bounds, zoom: zoom));
   }

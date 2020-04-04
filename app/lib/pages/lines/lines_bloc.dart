@@ -115,7 +115,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     );
   }
 
-  Stream<Set<Line>> get selectedLinesStream {
+  Stream<Iterable<MapEntry<Line, LineState>>> get selectedLinesStream {
     return map((state) => state.selectedLines);
   }
 
