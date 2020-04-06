@@ -7,6 +7,10 @@ import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
 
 class MapPage extends StatefulWidget {
+  final void Function() mapTapped;
+
+  const MapPage({Key key, @required this.mapTapped}) : super(key: key);
+
   @override
   _MapPageState createState() => _MapPageState();
 }
@@ -34,6 +38,7 @@ class _MapPageState extends State<MapPage>
           onCameraIdle: () => _mapController.future
               .then((controller) => _cameraMoved(context, controller)),
           markers: snapshot.data,
+          onTap: (position) => widget.mapTapped(),
         );
       },
     );

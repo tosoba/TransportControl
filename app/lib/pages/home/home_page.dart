@@ -6,6 +6,7 @@ import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/places/places_page.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/search_app_bar.dart';
+import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -18,11 +19,24 @@ class _HomePageState extends State<HomePage>
 
   int _currentPageIndex = 0;
   PageController _pageController;
-  final List<Widget> _subPages = [MapPage(), PlacesPage()];
+  List<Widget> _subPages;
+
+  AnimationController _appBarAnimController;
+  Animation<Offset> _appBarOffset;
+
+  void _mapTapped() {
+    if (_appBarOffset.isCompleted) {
+      _appBarAnimController.reverse();
+    } else {
+      _appBarAnimController.forward();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+
+    _subPages = [MapPage(mapTapped: _mapTapped), PlacesPage()];
 
     _searchFieldFocusNode = FocusNode()
       ..addListener(() {
@@ -31,6 +45,15 @@ class _HomePageState extends State<HomePage>
       });
 
     _pageController = PageController();
+
+    _appBarAnimController = AnimationController(
+      vsync: this,
+      duration: kThemeAnimationDuration,
+    );
+    _appBarOffset = Tween<Offset>(
+      begin: Offset.zero,
+      end: Offset(0.0, -1.0),
+    ).animate(_appBarAnimController);
   }
 
   @override
@@ -38,6 +61,8 @@ class _HomePageState extends State<HomePage>
     _searchFieldFocusNode.dispose();
 
     _pageController.dispose();
+
+    _appBarAnimController.dispose();
 
     super.dispose();
   }
@@ -55,16 +80,23 @@ class _HomePageState extends State<HomePage>
       },
       child: Scaffold(
         extendBodyBehindAppBar: true,
-        appBar: SearchAppBar(
-          searchFieldFocusNode: _searchFieldFocusNode,
-          leading: _drawerButton,
-          hint: "Transport nearby...",
-          onChanged: (query) {},
+        appBar: SlideTransitionPreferredSizeWidget(
+          offset: _appBarOffset,
+          child: _appBar,
         ),
         body: _subPagesView,
         floatingActionButton: _floatingActionButton(context),
         drawer: _navigationDrawer(context),
       ),
+    );
+  }
+
+  SearchAppBar get _appBar {
+    return SearchAppBar(
+      searchFieldFocusNode: _searchFieldFocusNode,
+      leading: _drawerButton,
+      hint: "Transport nearby...",
+      onChanged: (query) {},
     );
   }
 
@@ -90,7 +122,10 @@ class _HomePageState extends State<HomePage>
       physics: NeverScrollableScrollPhysics(),
       controller: _pageController,
       onPageChanged: (index) {
-        setState(() => _currentPageIndex = index);
+        setState(() {
+          _currentPageIndex = index;
+          if (index == 1) _appBarAnimController.reverse();
+        });
       },
       children: _subPages,
     );
