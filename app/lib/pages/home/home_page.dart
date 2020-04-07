@@ -21,16 +21,9 @@ class _HomePageState extends State<HomePage>
   PageController _pageController;
   List<Widget> _subPages;
 
-  AnimationController _appBarAnimController;
+  AnimationController _mapTapAnimController;
   Animation<Offset> _appBarOffset;
-
-  void _mapTapped() {
-    if (_appBarOffset.isCompleted) {
-      _appBarAnimController.reverse();
-    } else {
-      _appBarAnimController.forward();
-    }
-  }
+  Animation<double> _fabOpacity;
 
   @override
   void initState() {
@@ -46,14 +39,18 @@ class _HomePageState extends State<HomePage>
 
     _pageController = PageController();
 
-    _appBarAnimController = AnimationController(
+    _mapTapAnimController = AnimationController(
       vsync: this,
       duration: kThemeAnimationDuration,
     );
     _appBarOffset = Tween<Offset>(
       begin: Offset.zero,
       end: Offset(0.0, -1.0),
-    ).animate(_appBarAnimController);
+    ).animate(_mapTapAnimController);
+    _fabOpacity = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(_mapTapAnimController);
   }
 
   @override
@@ -62,7 +59,7 @@ class _HomePageState extends State<HomePage>
 
     _pageController.dispose();
 
-    _appBarAnimController.dispose();
+    _mapTapAnimController.dispose();
 
     super.dispose();
   }
@@ -85,7 +82,10 @@ class _HomePageState extends State<HomePage>
           child: _appBar,
         ),
         body: _subPagesView,
-        floatingActionButton: _floatingActionButton(context),
+        floatingActionButton: FadeTransition(
+          child: _floatingActionButton(context),
+          opacity: _fabOpacity,
+        ),
         drawer: _navigationDrawer(context),
       ),
     );
@@ -124,7 +124,7 @@ class _HomePageState extends State<HomePage>
       onPageChanged: (index) {
         setState(() {
           _currentPageIndex = index;
-          if (index == 1) _appBarAnimController.reverse();
+          if (index == 1) _mapTapAnimController.reverse();
         });
       },
       children: _subPages,
@@ -188,5 +188,13 @@ class _HomePageState extends State<HomePage>
         ],
       ),
     );
+  }
+
+  void _mapTapped() {
+    if (_mapTapAnimController.isCompleted) {
+      _mapTapAnimController.reverse();
+    } else {
+      _mapTapAnimController.forward();
+    }
   }
 }
