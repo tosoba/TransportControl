@@ -27,6 +27,10 @@ abstract class MapEvent extends Equatable {
   factory MapEvent.trackedLinesRemoved({@required Set<Line> lines}) =
       TrackedLinesRemoved;
 
+  factory MapEvent.selectVehicle({@required String number}) = SelectVehicle;
+
+  factory MapEvent.deselectVehicle() = DeselectVehicle;
+
   final _MapEvent _type;
 
 //ignore: missing_return
@@ -36,14 +40,18 @@ abstract class MapEvent extends Equatable {
       @required R Function(AddVehiclesOfLines) addVehiclesOfLines,
       @required R Function(AnimateVehicles) animateVehicles,
       @required R Function(CameraMoved) cameraMoved,
-      @required R Function(TrackedLinesRemoved) trackedLinesRemoved}) {
+      @required R Function(TrackedLinesRemoved) trackedLinesRemoved,
+      @required R Function(SelectVehicle) selectVehicle,
+      @required R Function(DeselectVehicle) deselectVehicle}) {
     assert(() {
       if (clearMap == null ||
           updateVehicles == null ||
           addVehiclesOfLines == null ||
           animateVehicles == null ||
           cameraMoved == null ||
-          trackedLinesRemoved == null) {
+          trackedLinesRemoved == null ||
+          selectVehicle == null ||
+          deselectVehicle == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -61,30 +69,32 @@ abstract class MapEvent extends Equatable {
         return cameraMoved(this as CameraMoved);
       case _MapEvent.TrackedLinesRemoved:
         return trackedLinesRemoved(this as TrackedLinesRemoved);
+      case _MapEvent.SelectVehicle:
+        return selectVehicle(this as SelectVehicle);
+      case _MapEvent.DeselectVehicle:
+        return deselectVehicle(this as DeselectVehicle);
     }
   }
 
 //ignore: missing_return
   Future<R> asyncWhen<R>(
-      {@required
-          FutureOr<R> Function(ClearMap) clearMap,
-      @required
-          FutureOr<R> Function(UpdateVehicles) updateVehicles,
-      @required
-          FutureOr<R> Function(AddVehiclesOfLines) addVehiclesOfLines,
-      @required
-          FutureOr<R> Function(AnimateVehicles) animateVehicles,
-      @required
-          FutureOr<R> Function(CameraMoved) cameraMoved,
-      @required
-          FutureOr<R> Function(TrackedLinesRemoved) trackedLinesRemoved}) {
+      {@required FutureOr<R> Function(ClearMap) clearMap,
+      @required FutureOr<R> Function(UpdateVehicles) updateVehicles,
+      @required FutureOr<R> Function(AddVehiclesOfLines) addVehiclesOfLines,
+      @required FutureOr<R> Function(AnimateVehicles) animateVehicles,
+      @required FutureOr<R> Function(CameraMoved) cameraMoved,
+      @required FutureOr<R> Function(TrackedLinesRemoved) trackedLinesRemoved,
+      @required FutureOr<R> Function(SelectVehicle) selectVehicle,
+      @required FutureOr<R> Function(DeselectVehicle) deselectVehicle}) {
     assert(() {
       if (clearMap == null ||
           updateVehicles == null ||
           addVehiclesOfLines == null ||
           animateVehicles == null ||
           cameraMoved == null ||
-          trackedLinesRemoved == null) {
+          trackedLinesRemoved == null ||
+          selectVehicle == null ||
+          deselectVehicle == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -102,6 +112,10 @@ abstract class MapEvent extends Equatable {
         return cameraMoved(this as CameraMoved);
       case _MapEvent.TrackedLinesRemoved:
         return trackedLinesRemoved(this as TrackedLinesRemoved);
+      case _MapEvent.SelectVehicle:
+        return selectVehicle(this as SelectVehicle);
+      case _MapEvent.DeselectVehicle:
+        return deselectVehicle(this as DeselectVehicle);
     }
   }
 
@@ -112,6 +126,8 @@ abstract class MapEvent extends Equatable {
       R Function(AnimateVehicles) animateVehicles,
       R Function(CameraMoved) cameraMoved,
       R Function(TrackedLinesRemoved) trackedLinesRemoved,
+      R Function(SelectVehicle) selectVehicle,
+      R Function(DeselectVehicle) deselectVehicle,
       @required R Function(MapEvent) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -138,6 +154,12 @@ abstract class MapEvent extends Equatable {
       case _MapEvent.TrackedLinesRemoved:
         if (trackedLinesRemoved == null) break;
         return trackedLinesRemoved(this as TrackedLinesRemoved);
+      case _MapEvent.SelectVehicle:
+        if (selectVehicle == null) break;
+        return selectVehicle(this as SelectVehicle);
+      case _MapEvent.DeselectVehicle:
+        if (deselectVehicle == null) break;
+        return deselectVehicle(this as DeselectVehicle);
     }
     return orElse(this);
   }
@@ -149,6 +171,8 @@ abstract class MapEvent extends Equatable {
       FutureOr<R> Function(AnimateVehicles) animateVehicles,
       FutureOr<R> Function(CameraMoved) cameraMoved,
       FutureOr<R> Function(TrackedLinesRemoved) trackedLinesRemoved,
+      FutureOr<R> Function(SelectVehicle) selectVehicle,
+      FutureOr<R> Function(DeselectVehicle) deselectVehicle,
       @required FutureOr<R> Function(MapEvent) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -175,6 +199,12 @@ abstract class MapEvent extends Equatable {
       case _MapEvent.TrackedLinesRemoved:
         if (trackedLinesRemoved == null) break;
         return trackedLinesRemoved(this as TrackedLinesRemoved);
+      case _MapEvent.SelectVehicle:
+        if (selectVehicle == null) break;
+        return selectVehicle(this as SelectVehicle);
+      case _MapEvent.DeselectVehicle:
+        if (deselectVehicle == null) break;
+        return deselectVehicle(this as DeselectVehicle);
     }
     return orElse(this);
   }
@@ -186,14 +216,18 @@ abstract class MapEvent extends Equatable {
       FutureOr<void> Function(AddVehiclesOfLines) addVehiclesOfLines,
       FutureOr<void> Function(AnimateVehicles) animateVehicles,
       FutureOr<void> Function(CameraMoved) cameraMoved,
-      FutureOr<void> Function(TrackedLinesRemoved) trackedLinesRemoved}) {
+      FutureOr<void> Function(TrackedLinesRemoved) trackedLinesRemoved,
+      FutureOr<void> Function(SelectVehicle) selectVehicle,
+      FutureOr<void> Function(DeselectVehicle) deselectVehicle}) {
     assert(() {
       if (clearMap == null &&
           updateVehicles == null &&
           addVehiclesOfLines == null &&
           animateVehicles == null &&
           cameraMoved == null &&
-          trackedLinesRemoved == null) {
+          trackedLinesRemoved == null &&
+          selectVehicle == null &&
+          deselectVehicle == null) {
         throw 'provide at least one branch';
       }
       return true;
@@ -217,6 +251,12 @@ abstract class MapEvent extends Equatable {
       case _MapEvent.TrackedLinesRemoved:
         if (trackedLinesRemoved == null) break;
         return trackedLinesRemoved(this as TrackedLinesRemoved);
+      case _MapEvent.SelectVehicle:
+        if (selectVehicle == null) break;
+        return selectVehicle(this as SelectVehicle);
+      case _MapEvent.DeselectVehicle:
+        if (deselectVehicle == null) break;
+        return deselectVehicle(this as DeselectVehicle);
     }
   }
 
@@ -303,4 +343,28 @@ class TrackedLinesRemoved extends MapEvent {
   String toString() => 'TrackedLinesRemoved(lines:${this.lines})';
   @override
   List get props => [lines];
+}
+
+@immutable
+class SelectVehicle extends MapEvent {
+  const SelectVehicle({@required this.number}) : super(_MapEvent.SelectVehicle);
+
+  final String number;
+
+  @override
+  String toString() => 'SelectVehicle(number:${this.number})';
+  @override
+  List get props => [number];
+}
+
+@immutable
+class DeselectVehicle extends MapEvent {
+  const DeselectVehicle._() : super(_MapEvent.DeselectVehicle);
+
+  factory DeselectVehicle() {
+    _instance ??= const DeselectVehicle._();
+    return _instance;
+  }
+
+  static DeselectVehicle _instance;
 }

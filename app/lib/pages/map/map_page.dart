@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
+import 'package:transport_control/pages/map/map_marker.dart';
 
 class MapPage extends StatefulWidget {
   final void Function() mapTapped;
@@ -25,7 +26,7 @@ class _MapPageState extends State<MapPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return StreamBuilder<Set<Marker>>(
+    return StreamBuilder<List<MapMarker>>(
       stream: context.bloc<MapBloc>().markers,
       builder: (context, snapshot) {
         return GoogleMap(
@@ -37,8 +38,25 @@ class _MapPageState extends State<MapPage>
           onMapCreated: _mapController.complete,
           onCameraIdle: () => _mapController.future
               .then((controller) => _cameraMoved(context, controller)),
-          markers: snapshot.data,
-          onTap: (position) => widget.mapTapped(),
+          markers: snapshot.data == null
+              ? null
+              : snapshot.data
+                  .map(
+                    (mapMarker) => mapMarker.toMarker(
+                      onTap: mapMarker.isCluster
+                          ? null // TODO: zoom the map on cluster/normal marker
+                          : () {
+                              context
+                                  .bloc<MapBloc>()
+                                  .markerTapped(mapMarker.id);
+                            },
+                    ),
+                  )
+                  .toSet(),
+          onTap: (position) {
+            context.bloc<MapBloc>().mapTapped();
+            widget.mapTapped();
+          },
         );
       },
     );

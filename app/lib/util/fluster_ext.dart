@@ -6,10 +6,11 @@ import 'package:fluster/fluster.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_marker.dart';
 
 extension FlusterMapMarkerExt on Fluster<MapMarker> {
-  Future<List<Marker>> getClusterMarkers({
+  Future<List<MapMarker>> getMarkers({
     @required double currentZoom,
     @required Color clusterColor,
     @required Color clusterTextColor,
@@ -18,7 +19,7 @@ extension FlusterMapMarkerExt on Fluster<MapMarker> {
     assert(clusterColor != null);
     assert(clusterTextColor != null);
 
-    final markerImage = await _loadUiImageFromAsset('assets/img/marker.png');
+    final markerImage = await loadUiImageFromAsset('assets/img/marker.png');
 
     return Future.wait(
       clusters(
@@ -27,7 +28,7 @@ extension FlusterMapMarkerExt on Fluster<MapMarker> {
       ).map(
         (mapMarker) async {
           if (mapMarker.isCluster) {
-            mapMarker.icon = await _getClusterMarker(
+            mapMarker.icon = await _clusterMarkerBitmap(
               mapMarker.pointsSize,
               clusterColor,
               clusterTextColor,
@@ -36,14 +37,14 @@ extension FlusterMapMarkerExt on Fluster<MapMarker> {
             final symbol = mapMarker.id.substring(
               mapMarker.id.indexOf('_') + 1,
             );
-            mapMarker.icon = await _getMarker(
+            mapMarker.icon = await markerBitmap(
               symbol: symbol,
-              width: 60,
-              height: 80,
+              width: MapConstants.markerWidth,
+              height: MapConstants.markerHeight,
               imageAsset: markerImage,
             );
           }
-          return mapMarker.toMarker();
+          return mapMarker;
         },
       ).toList(),
     );
@@ -81,7 +82,8 @@ Future<Fluster<MapMarker>> flusterFromMarkers(
 
 final List<double> _bbox = [-180, -85, 180, 85];
 
-Future<UI.Image> _loadUiImageFromAsset(String path) async {
+//TODO: convert to ext function
+Future<UI.Image> loadUiImageFromAsset(String path) async {
   final ByteData data = await rootBundle.load(path);
   final Completer<UI.Image> completer = Completer();
   UI.decodeImageFromList(Uint8List.view(data.buffer), (UI.Image img) {
@@ -90,7 +92,7 @@ Future<UI.Image> _loadUiImageFromAsset(String path) async {
   return completer.future;
 }
 
-Future<BitmapDescriptor> _getMarker({
+Future<BitmapDescriptor> markerBitmap({
   @required String symbol,
   @required int width,
   @required int height,
@@ -117,7 +119,7 @@ Future<BitmapDescriptor> _getMarker({
   textPainter.text = TextSpan(
     text: symbol,
     style: TextStyle(
-      fontSize: 40,
+      fontSize: MapConstants.markerHeight / 2,
       fontWeight: FontWeight.bold,
       color: Colors.white,
     ),
@@ -127,8 +129,8 @@ Future<BitmapDescriptor> _getMarker({
   textPainter.paint(
     canvas,
     Offset(
-      30 - textPainter.width / 2,
-      30 - textPainter.height / 2,
+      MapConstants.markerWidth / 2 - textPainter.width / 2,
+      MapConstants.markerWidth / 2 - textPainter.height / 2,
     ),
   );
 
@@ -138,7 +140,7 @@ Future<BitmapDescriptor> _getMarker({
   return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
 }
 
-Future<BitmapDescriptor> _getClusterMarker(
+Future<BitmapDescriptor> _clusterMarkerBitmap(
   int clusterSize,
   Color clusterColor,
   Color textColor,

@@ -140,6 +140,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         });
         return state.copyWith(trackedVehicles: updatedVehicles);
       },
+      selectVehicle: (selectVehicleEvent) =>
+          selectVehicleEvent.number == state.selectedVehicleNumber
+              ? state.withNoSelectedVehicle
+              : state.copyWith(
+                  selectedVehicleNumber: selectVehicleEvent.number,
+                ),
+      deselectVehicle: (deselectVehicleEvent) => state.withNoSelectedVehicle,
     );
   }
 
@@ -152,41 +159,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     return super.close();
   }
 
-  Stream<Set<Marker>> get markers {
-    return asyncExpand(
-      (state) => Stream.fromFuture(
-        state.trackedVehicles.isEmpty
-            ? null
-            : flusterFromMarkers(
-                    state.trackedVehicles
-                        .map(
-                          (number, tracked) => MapEntry(
-                            number,
-                            MapMarker(
-                              id: '${number}_${tracked.vehicle.symbol}',
-                              position: LatLng(
-                                tracked.animation.stage.current.latitude,
-                                tracked.animation.stage.current.longitude,
-                              ),
-                            ),
-                          ),
-                        )
-                        .values
-                        .toList(),
-                    minZoom: MapConstants.minClusterZoom,
-                    maxZoom: MapConstants.maxClusterZoom)
-                .then(
-                  (fluster) => fluster == null
-                      ? Future.value(<Marker>[])
-                      : fluster.getClusterMarkers(
-                          currentZoom: state.zoom,
-                          clusterColor: Colors.blue,
-                          clusterTextColor: Colors.white,
-                        ),
-                )
-                .then((markers) => markers.toSet()),
-      ),
-    );
+  Stream<List<MapMarker>> get markers {
+    return asyncExpand((state) => Stream.fromFuture(state.markers));
   }
 
   void trackedLinesAdded(Set<Line> lines) {
@@ -216,5 +190,77 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     @required double zoom,
   }) {
     add(MapEvent.cameraMoved(bounds: bounds, zoom: zoom));
+  }
+
+  void markerTapped(String id) {
+    add(MapEvent.selectVehicle(number: id.substring(0, id.indexOf('_'))));
+  }
+
+  void mapTapped() {
+    add(MapEvent.deselectVehicle());
+  }
+}
+
+extension _MapStateExt on MapState {
+  Future<List<MapMarker>> get markers {
+    return trackedVehicles.isEmpty
+        ? null
+        : flusterFromMarkers(
+            _markersToCluster,
+            minZoom: MapConstants.minClusterZoom,
+            maxZoom: MapConstants.maxClusterZoom,
+          ).then(
+            (fluster) {
+              return fluster == null
+                  ? Future.value(<MapMarker>[])
+                  : fluster.getMarkers(
+                      currentZoom: zoom,
+                      clusterColor: Colors.blue,
+                      clusterTextColor: Colors.white,
+                    );
+            },
+          ).then(
+            (markers) async {
+              if (selectedVehicleNumber == null ||
+                  !trackedVehicles.containsKey(selectedVehicleNumber)) {
+                return markers;
+              } else {
+                final selected = trackedVehicles[selectedVehicleNumber];
+                final position = selected.animation.stage.current;
+                return List.of(markers)
+                  ..add(
+                    MapMarker(
+                      id: '${selectedVehicleNumber}_${selected.vehicle.symbol}',
+                      position: LatLng(position.latitude, position.longitude),
+                      icon: await markerBitmap(
+                        symbol: selected.vehicle.symbol,
+                        width: MapConstants.markerWidth,
+                        height: MapConstants.markerHeight,
+                        imageAsset: await loadUiImageFromAsset(
+                          'assets/img/selected_marker.png',
+                        ),
+                      ),
+                    ),
+                  );
+              }
+            },
+          );
+  }
+
+  List<MapMarker> get _markersToCluster {
+    final markers = trackedVehicles.map(
+      (number, tracked) => MapEntry(
+        number,
+        MapMarker(
+          id: '${number}_${tracked.vehicle.symbol}',
+          position: LatLng(
+            tracked.animation.stage.current.latitude,
+            tracked.animation.stage.current.longitude,
+          ),
+        ),
+      ),
+    );
+    if (selectedVehicleNumber != null) markers.remove(selectedVehicleNumber);
+    return markers.values.toList();
   }
 }

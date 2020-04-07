@@ -25,7 +25,7 @@ class MapMarker extends Clusterable {
           childMarkerId: childMarkerId,
         );
 
-  Marker toMarker() {
+  Marker toMarker({void Function() onTap}) {
     return Marker(
       markerId: MarkerId(isCluster ? 'cl_$id' : id),
       position: LatLng(
@@ -33,6 +33,7 @@ class MapMarker extends Clusterable {
         position.longitude,
       ),
       icon: icon,
+      onTap: onTap,
     );
   }
 }

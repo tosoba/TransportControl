@@ -30,4 +30,10 @@ enum _MapEvent {
 
   @Data(fields: [DataField<Set<Line>>('lines')])
   TrackedLinesRemoved,
+
+  @Data(fields: [DataField<String>('number')])
+  SelectVehicle,
+
+  @object
+  DeselectVehicle,
 }
