@@ -82,9 +82,12 @@ class _HomePageState extends State<HomePage>
           child: _appBar,
         ),
         body: _subPagesView,
-        floatingActionButton: FadeTransition(
-          child: _floatingActionButton(context),
-          opacity: _fabOpacity,
+        floatingActionButton: Visibility(
+          visible: _currentPageIndex == 0,
+          child: FadeTransition(
+            child: _floatingActionButton(context),
+            opacity: _fabOpacity,
+          ),
         ),
         drawer: _navigationDrawer(context),
       ),
