@@ -44,12 +44,8 @@ class _MapPageState extends State<MapPage>
                   .map(
                     (mapMarker) => mapMarker.toMarker(
                       onTap: mapMarker.isCluster
-                          ? null // TODO: zoom the map on cluster/normal marker
-                          : () {
-                              context
-                                  .bloc<MapBloc>()
-                                  .markerTapped(mapMarker.id);
-                            },
+                          ? () => _zoomOnCluster(mapMarker.position)
+                          : () => _markerTapped(mapMarker.id),
                     ),
                   )
                   .toSet(),
@@ -72,5 +68,20 @@ class _MapPageState extends State<MapPage>
             zoom: results[1] as double,
           );
     });
+  }
+
+  void _zoomOnCluster(LatLng position) {
+    _mapController.future.then((controller) async {
+      final increasedZoom = (await controller.getZoomLevel()) + 1.0;
+      controller.animateCamera(
+        increasedZoom < MapConstants.maxClusterZoom
+            ? CameraUpdate.newLatLngZoom(position, increasedZoom)
+            : CameraUpdate.newLatLng(position),
+      );
+    });
+  }
+
+  void _markerTapped(String id) {
+    context.bloc<MapBloc>().markerTapped(id);
   }
 }
