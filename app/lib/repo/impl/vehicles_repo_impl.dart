@@ -9,7 +9,7 @@ import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/model/vehicles_response.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
 import 'package:transport_control/res/strings.dart';
-import 'package:transport_control/util/model_ext.dart';
+import 'package:transport_control/util/model_util.dart';
 
 @RegisterAs(VehiclesRepo, env: Env.dev)
 @singleton

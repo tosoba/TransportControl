@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as Maps;
 import 'package:latlong/latlong.dart';
-import 'package:transport_control/util/lat_lng_ext.dart';
+import 'package:transport_control/util/lat_lng_util.dart';
 
 class MapPositionAnimation {
   final LatLng position;

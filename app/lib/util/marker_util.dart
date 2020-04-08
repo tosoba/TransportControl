@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as UI;
 
 import 'package:fluster/fluster.dart';
@@ -8,6 +7,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_marker.dart';
+import 'package:transport_control/util/asset_util.dart';
 
 extension FlusterMapMarkerExt on Fluster<MapMarker> {
   Future<List<MapMarker>> getMarkers({
@@ -15,23 +15,18 @@ extension FlusterMapMarkerExt on Fluster<MapMarker> {
     @required Color clusterColor,
     @required Color clusterTextColor,
   }) async {
-    assert(currentZoom != null);
-    assert(clusterColor != null);
-    assert(clusterTextColor != null);
-
-    final markerImage = await loadUiImageFromAsset('assets/img/marker.png');
-
+    final markerImage = await rootBundle.loadUiImage(Assets.marker);
     return Future.wait(
       clusters(
-        _bbox,
+        const [-180, -85, 180, 85],
         currentZoom.toInt(),
       ).map(
         (mapMarker) async {
           if (mapMarker.isCluster) {
             mapMarker.icon = await _clusterMarkerBitmap(
-              mapMarker.pointsSize,
-              clusterColor,
-              clusterTextColor,
+              clusterSize: mapMarker.pointsSize,
+              clusterColor: clusterColor,
+              textColor: clusterTextColor,
             );
           } else {
             final symbol = mapMarker.id.substring(
@@ -51,45 +46,30 @@ extension FlusterMapMarkerExt on Fluster<MapMarker> {
   }
 }
 
-Future<Fluster<MapMarker>> flusterFromMarkers(
-  List<MapMarker> markers, {
-  @required int minZoom,
-  @required int maxZoom,
-}) async {
-  assert(markers != null);
-  assert(minZoom != null);
-  assert(maxZoom != null);
-
-  return Fluster<MapMarker>(
-    minZoom: minZoom,
-    maxZoom: maxZoom,
-    radius: 150,
-    extent: 2048,
-    nodeSize: 64,
-    points: markers,
-    createCluster: (BaseCluster cluster, double lng, double lat) {
-      return MapMarker(
-        id: cluster.id.toString(),
-        position: LatLng(lat, lng),
-        isCluster: cluster.isCluster,
-        clusterId: cluster.id,
-        pointsSize: cluster.pointsSize,
-        childMarkerId: cluster.childMarkerId,
-      );
-    },
-  );
-}
-
-final List<double> _bbox = [-180, -85, 180, 85];
-
-//TODO: convert to ext function
-Future<UI.Image> loadUiImageFromAsset(String path) async {
-  final ByteData data = await rootBundle.load(path);
-  final Completer<UI.Image> completer = Completer();
-  UI.decodeImageFromList(Uint8List.view(data.buffer), (UI.Image img) {
-    return completer.complete(img);
-  });
-  return completer.future;
+extension MapMarkerListExt on List<MapMarker> {
+  Future<Fluster<MapMarker>> fluster({
+    @required int minZoom,
+    @required int maxZoom,
+  }) async {
+    return Fluster<MapMarker>(
+      minZoom: minZoom,
+      maxZoom: maxZoom,
+      radius: 150,
+      extent: 2048,
+      nodeSize: 64,
+      points: this,
+      createCluster: (BaseCluster cluster, double lng, double lat) {
+        return MapMarker(
+          id: cluster.id.toString(),
+          position: LatLng(lat, lng),
+          isCluster: cluster.isCluster,
+          clusterId: cluster.id,
+          pointsSize: cluster.pointsSize,
+          childMarkerId: cluster.childMarkerId,
+        );
+      },
+    );
+  }
 }
 
 Future<BitmapDescriptor> markerBitmap({
@@ -98,17 +78,10 @@ Future<BitmapDescriptor> markerBitmap({
   @required int height,
   @required UI.Image imageAsset,
 }) async {
-  assert(symbol != null);
-  assert(width != null);
-  assert(height != null);
-  assert(imageAsset != null);
-
-  final UI.PictureRecorder pictureRecorder = UI.PictureRecorder();
-  final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint();
-  final TextPainter textPainter = TextPainter(
-    textDirection: TextDirection.ltr,
-  );
+  final pictureRecorder = UI.PictureRecorder();
+  final canvas = Canvas(pictureRecorder);
+  final paint = Paint();
+  final textPainter = TextPainter(textDirection: TextDirection.ltr);
 
   canvas.drawImage(
     imageAsset,
@@ -140,22 +113,16 @@ Future<BitmapDescriptor> markerBitmap({
   return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
 }
 
-Future<BitmapDescriptor> _clusterMarkerBitmap(
-  int clusterSize,
-  Color clusterColor,
-  Color textColor,
-) async {
-  assert(clusterSize != null);
-  assert(clusterColor != null);
-
-  final UI.PictureRecorder pictureRecorder = UI.PictureRecorder();
-  final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint()..color = clusterColor;
-  final TextPainter textPainter = TextPainter(
-    textDirection: TextDirection.ltr,
-  );
-
-  final double radius = _clusterRadius(clusterSize);
+Future<BitmapDescriptor> _clusterMarkerBitmap({
+  @required int clusterSize,
+  @required Color clusterColor,
+  @required Color textColor,
+}) async {
+  final pictureRecorder = UI.PictureRecorder();
+  final canvas = Canvas(pictureRecorder);
+  final paint = Paint()..color = clusterColor;
+  final textPainter = TextPainter(textDirection: TextDirection.ltr);
+  final radius = _clusterRadius(clusterSize);
 
   canvas.drawCircle(
     Offset(radius, radius),

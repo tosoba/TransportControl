@@ -1,7 +1,7 @@
 import 'package:latlong/latlong.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/vehicle.dart';
-import 'package:transport_control/util/string_ext.dart';
+import 'package:transport_control/util/string_util.dart';
 
 extension VehicleExt on Vehicle {
   bool get isValid =>

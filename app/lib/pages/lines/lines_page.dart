@@ -8,8 +8,8 @@ import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/search_app_bar.dart';
-import 'package:transport_control/util/iterable_ext.dart';
-import 'package:transport_control/util/model_ext.dart';
+import 'package:transport_control/util/collection_util.dart';
+import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 
 class LinesPage extends StatefulWidget {

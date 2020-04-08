@@ -3,7 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as Maps;
 import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/pages/map/map_position_animation.dart';
 import 'package:transport_control/pages/map/map_vehicle_source.dart';
-import 'package:transport_control/util/model_ext.dart';
+import 'package:transport_control/util/model_util.dart';
 
 class MapVehicle {
   final Vehicle vehicle;

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:super_enum/super_enum.dart';
@@ -14,7 +15,8 @@ import 'package:transport_control/pages/map/map_state.dart';
 import 'package:transport_control/pages/map/map_vehicle.dart';
 import 'package:transport_control/pages/map/map_vehicle_source.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
-import 'package:transport_control/util/fluster_ext.dart';
+import 'package:transport_control/util/asset_util.dart';
+import 'package:transport_control/util/marker_util.dart';
 
 class MapBloc extends Bloc<MapEvent, MapState> {
   final VehiclesRepo _vehiclesRepo;
@@ -203,48 +205,47 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
 extension _MapStateExt on MapState {
   Future<List<MapMarker>> get markers {
-    return trackedVehicles.isEmpty
-        ? null
-        : flusterFromMarkers(
-            _markersToCluster,
-            minZoom: MapConstants.minClusterZoom,
-            maxZoom: MapConstants.maxClusterZoom,
-          ).then(
-            (fluster) {
-              return fluster == null
-                  ? Future.value(<MapMarker>[])
-                  : fluster.getMarkers(
-                      currentZoom: zoom,
-                      clusterColor: Colors.blue,
-                      clusterTextColor: Colors.white,
-                    );
-            },
-          ).then(
-            (markers) async {
-              if (selectedVehicleNumber == null ||
-                  !trackedVehicles.containsKey(selectedVehicleNumber)) {
-                return markers;
-              } else {
-                final selected = trackedVehicles[selectedVehicleNumber];
-                final position = selected.animation.stage.current;
-                return List.of(markers)
-                  ..add(
-                    MapMarker(
-                      id: '${selectedVehicleNumber}_${selected.vehicle.symbol}',
-                      position: LatLng(position.latitude, position.longitude),
-                      icon: await markerBitmap(
-                        symbol: selected.vehicle.symbol,
-                        width: MapConstants.markerWidth,
-                        height: MapConstants.markerHeight,
-                        imageAsset: await loadUiImageFromAsset(
-                          'assets/img/selected_marker.png',
-                        ),
-                      ),
-                    ),
-                  );
-              }
-            },
-          );
+    if (trackedVehicles.isEmpty) return null;
+    return _markersToCluster
+        .fluster(
+          minZoom: MapConstants.minClusterZoom,
+          maxZoom: MapConstants.maxClusterZoom,
+        )
+        .then(
+          (fluster) => fluster == null
+              ? Future.value(<MapMarker>[])
+              : fluster.getMarkers(
+                  currentZoom: zoom,
+                  clusterColor: Colors.blue,
+                  clusterTextColor: Colors.white,
+                ),
+        )
+        .then(
+      (markers) async {
+        if (selectedVehicleNumber == null ||
+            !trackedVehicles.containsKey(selectedVehicleNumber)) {
+          return markers;
+        } else {
+          final selected = trackedVehicles[selectedVehicleNumber];
+          final position = selected.animation.stage.current;
+          return List.of(markers)
+            ..add(
+              MapMarker(
+                id: '${selectedVehicleNumber}_${selected.vehicle.symbol}',
+                position: LatLng(position.latitude, position.longitude),
+                icon: await markerBitmap(
+                  symbol: selected.vehicle.symbol,
+                  width: MapConstants.markerWidth,
+                  height: MapConstants.markerHeight,
+                  imageAsset: await rootBundle.loadUiImage(
+                    Assets.selectedMarker,
+                  ),
+                ),
+              ),
+            );
+        }
+      },
+    );
   }
 
   List<MapMarker> get _markersToCluster {
