@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:transport_control/di/injection.dart';
+import 'package:transport_control/pages/home/home_bloc.dart';
 import 'package:transport_control/pages/home/home_page.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
@@ -21,19 +22,14 @@ class TransportControlApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       home: MultiBlocProvider(
         providers: [
+          BlocProvider<HomeBloc>(
+            create: (context) => HomeBloc(GetIt.instance<VehiclesRepo>()),
+          ),
           BlocProvider<MapBloc>(
-            create: (context) => MapBloc(
-              GetIt.instance<VehiclesRepo>(),
-              (lines) {
-                context.bloc<LinesBloc>().loadingVehiclesOfLinesFailed(lines);
-              },
-            ),
+            create: (context) => context.bloc<HomeBloc>().mapBloc,
           ),
           BlocProvider<LinesBloc>(
-            create: (context) => LinesBloc(
-              (lines) => context.bloc<MapBloc>().trackedLinesAdded(lines),
-              (lines) => context.bloc<MapBloc>().trackedLinesRemoved(lines),
-            ),
+            create: (context) => context.bloc<HomeBloc>().linesBloc,
           ),
         ],
         child: HomePage(),
