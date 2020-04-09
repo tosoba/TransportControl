@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import 'package:moor_flutter/moor_flutter.dart';
 import 'package:transport_control/db/database.dart';
 import 'package:transport_control/model/favourite_lines.dart';
@@ -5,9 +6,13 @@ import 'package:transport_control/model/favourite_lines.dart';
 part 'favourite_lines_dao.g.dart';
 
 @UseDao(tables: [FavouriteLines])
+@injectable
 class FavouriteLinesDao extends DatabaseAccessor<Database>
     with _$FavouriteLinesDaoMixin {
   FavouriteLinesDao(Database db) : super(db);
+
+  @factoryMethod
+  static FavouriteLinesDao of(Database db) => db.favouriteLinesDao;
 
   Future insertLine(FavouriteLine line) {
     return into(favouriteLines).insert(line);
@@ -24,7 +29,7 @@ class FavouriteLinesDao extends DatabaseAccessor<Database>
     );
   }
 
-  Stream<List<FavouriteLine>> favouriteLinesStream() {
+  Stream<List<FavouriteLine>> get favouriteLinesStream {
     return select(favouriteLines).watch();
   }
 }

@@ -5,16 +5,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_event.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
+import 'package:transport_control/repo/lines_repo.dart';
 
 class LinesBloc extends Bloc<LinesEvent, LinesState> {
   final void Function(Set<Line>) _trackedLinesAdded;
   final void Function(Set<Line>) _trackedLinesRemoved;
+  final LinesRepo _linesRepo;
 
   StreamSubscription<Set<Line>> _trackedLinesSubscription;
 
   LinesBloc(
     this._trackedLinesAdded,
     this._trackedLinesRemoved,
+    this._linesRepo,
   ) {
     rootBundle.loadString('assets/json/lines.json').then((jsonString) {
       final lineItems = Map.fromIterable(

@@ -6,6 +6,7 @@ import 'package:transport_control/pages/home/home_bloc.dart';
 import 'package:transport_control/pages/home/home_page.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
+import 'package:transport_control/repo/lines_repo.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
 
 void main() {
@@ -23,7 +24,10 @@ class TransportControlApp extends StatelessWidget {
       home: MultiBlocProvider(
         providers: [
           BlocProvider<HomeBloc>(
-            create: (context) => HomeBloc(GetIt.instance<VehiclesRepo>()),
+            create: (context) => HomeBloc(
+              GetIt.instance<VehiclesRepo>(),
+              GetIt.instance<LinesRepo>(),
+            ),
           ),
           BlocProvider<MapBloc>(
             create: (context) => context.bloc<HomeBloc>().mapBloc,
