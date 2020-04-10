@@ -14,49 +14,49 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
   final LinesRepo _linesRepo;
 
   StreamSubscription<Set<Line>> _trackedLinesSubscription;
-  StreamSubscription<Iterable<Line>> _favouriteLinesSubscription;
+  StreamSubscription<Map<Line, LineState>> _linesSubscription;
 
   LinesBloc(
     this._trackedLinesAdded,
     this._trackedLinesRemoved,
     this._linesRepo,
   ) {
-    Future.wait([
-      rootBundle
-          .loadString(
-            JsonAssets.lines,
-          )
-          .then(
-            (jsonString) => (jsonDecode(jsonString) as Iterable).map(
-              (lineJson) => Line.fromJson(lineJson),
-            ),
-          ),
-      _linesRepo.favouriteLines
-    ]).then((lineLists) {
-      final allLines = lineLists.first;
-      final favouriteLines = lineLists.last.toSet();
-      final linesMap = Map.fromIterable(
-        allLines,
-        key: (line) => line as Line,
-        value: (line) => favouriteLines.contains(line)
-            ? LineState.initialFavourite()
-            : LineState.initial(),
-      );
-      add(LinesEvent.created(lines: linesMap));
-    });
-
-    _favouriteLinesSubscription = _linesRepo.favouriteLinesStream
-        .skip(1)
-        .listen((lines) =>
-            add(LinesEvent.favouriteLinesUpdated(lines: lines.toSet())));
+    _linesSubscription = _linesRepo.favouriteLinesStream.asyncMap(
+      (favouriteLines) {
+        if (state.lines.isEmpty) {
+          return rootBundle
+              .loadString(
+                JsonAssets.lines,
+              )
+              .then(
+                (jsonString) => Map.fromIterable(
+                    jsonDecode(jsonString) as Iterable,
+                    key: (lineJson) => Line.fromJson(lineJson),
+                    value: (line) => favouriteLines.contains(line)
+                        ? LineState.initialFavourite()
+                        : LineState.initial()),
+              );
+        } else {
+          return Future.value(state.lines.map((line, state) {
+            final isFavourite = favouriteLines.contains(line);
+            if ((state.favourite && !isFavourite) ||
+                (!state.favourite && isFavourite)) {
+              return MapEntry(line, state.toggleFavourite);
+            } else {
+              return MapEntry(line, state);
+            }
+          }));
+        }
+      },
+    ).listen(
+      (lines) => add(LinesEvent.created(lines: lines)),
+    );
   }
 
   @override
   Future<void> close() async {
-    await Future.wait([
-      _trackedLinesSubscription.cancel(),
-      _favouriteLinesSubscription.cancel()
-    ]);
+    await Future.wait(
+        [_trackedLinesSubscription.cancel(), _linesSubscription.cancel()]);
     return super.close();
   }
 
