@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
 import 'package:transport_control/db/dao/favourite_lines_dao.dart';
-import 'package:transport_control/db/database.dart';
 import 'package:transport_control/di/injection.dart';
+import 'package:transport_control/model/line.dart';
 import 'package:transport_control/repo/lines_repo.dart';
 
 @RegisterAs(LinesRepo, env: Env.dev)
@@ -12,17 +12,27 @@ class LinesRepoImpl extends LinesRepo {
   LinesRepoImpl(this._dao);
 
   @override
-  Stream<List<FavouriteLine>> get favouriteLinesStream {
-    return _dao.favouriteLinesStream;
+  Stream<Iterable<Line>> get favouriteLinesStream {
+    return _dao.selectFavouriteLinesStream
+        .map((dbLines) => dbLines.map((dbLine) => Line.fromDb(dbLine)));
   }
 
   @override
-  Future insertLine(FavouriteLine line) {
-    return _dao.insertLine(line);
+  Future insertLine(Line line) {
+    return _dao.insertLine(line.db);
   }
 
   @override
-  Future<void> insertLines(Iterable<FavouriteLine> lines) {
-    return _dao.insertLines(lines);
+  Future<int> deleteLines(Iterable<String> symbols) {
+    return _dao.deleteLines(symbols);
   }
+
+  @override
+  Future<void> insertLines(Iterable<Line> lines) {
+    return _dao.insertLines(lines.map((line) => line.db));
+  }
+
+  @override
+  Future<Iterable<Line>> get favouriteLines => _dao.selectFavouriteLines
+      .then((dbLines) => dbLines.map((dbLine) => Line.fromDb(dbLine)));
 }

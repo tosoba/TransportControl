@@ -238,7 +238,7 @@ extension _MapStateExt on MapState {
                   width: MapConstants.markerWidth,
                   height: MapConstants.markerHeight,
                   imageAsset: await rootBundle.loadUiImage(
-                    Assets.selectedMarker,
+                    ImageAssets.selectedMarker,
                   ),
                 ),
               ),

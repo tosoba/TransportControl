@@ -15,7 +15,7 @@ extension FlusterMapMarkerExt on Fluster<MapMarker> {
     @required Color clusterColor,
     @required Color clusterTextColor,
   }) async {
-    final markerImage = await rootBundle.loadUiImage(Assets.marker);
+    final markerImage = await rootBundle.loadUiImage(ImageAssets.marker);
     return Future.wait(
       clusters(
         const [-180, -85, 180, 85],

@@ -9,15 +9,28 @@ part of 'database.dart';
 // ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
 class FavouriteLine extends DataClass implements Insertable<FavouriteLine> {
   final String symbol;
-  FavouriteLine({@required this.symbol});
+  final String dest1;
+  final String dest2;
+  final int type;
+  FavouriteLine(
+      {@required this.symbol,
+      @required this.dest1,
+      @required this.dest2,
+      @required this.type});
   factory FavouriteLine.fromData(
       Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final intType = db.typeSystem.forDartType<int>();
     return FavouriteLine(
       symbol:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}symbol']),
+      dest1:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}dest1']),
+      dest2:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}dest2']),
+      type: intType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
     );
   }
   factory FavouriteLine.fromJson(Map<String, dynamic> json,
@@ -25,6 +38,9 @@ class FavouriteLine extends DataClass implements Insertable<FavouriteLine> {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return FavouriteLine(
       symbol: serializer.fromJson<String>(json['symbol']),
+      dest1: serializer.fromJson<String>(json['dest1']),
+      dest2: serializer.fromJson<String>(json['dest2']),
+      type: serializer.fromJson<int>(json['type']),
     );
   }
   @override
@@ -32,6 +48,9 @@ class FavouriteLine extends DataClass implements Insertable<FavouriteLine> {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'symbol': serializer.toJson<String>(symbol),
+      'dest1': serializer.toJson<String>(dest1),
+      'dest2': serializer.toJson<String>(dest2),
+      'type': serializer.toJson<int>(type),
     };
   }
 
@@ -40,39 +59,76 @@ class FavouriteLine extends DataClass implements Insertable<FavouriteLine> {
     return FavouriteLinesCompanion(
       symbol:
           symbol == null && nullToAbsent ? const Value.absent() : Value(symbol),
+      dest1:
+          dest1 == null && nullToAbsent ? const Value.absent() : Value(dest1),
+      dest2:
+          dest2 == null && nullToAbsent ? const Value.absent() : Value(dest2),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
     );
   }
 
-  FavouriteLine copyWith({String symbol}) => FavouriteLine(
+  FavouriteLine copyWith(
+          {String symbol, String dest1, String dest2, int type}) =>
+      FavouriteLine(
         symbol: symbol ?? this.symbol,
+        dest1: dest1 ?? this.dest1,
+        dest2: dest2 ?? this.dest2,
+        type: type ?? this.type,
       );
   @override
   String toString() {
     return (StringBuffer('FavouriteLine(')
-          ..write('symbol: $symbol')
+          ..write('symbol: $symbol, ')
+          ..write('dest1: $dest1, ')
+          ..write('dest2: $dest2, ')
+          ..write('type: $type')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => $mrjf(symbol.hashCode);
+  int get hashCode => $mrjf($mrjc(symbol.hashCode,
+      $mrjc(dest1.hashCode, $mrjc(dest2.hashCode, type.hashCode))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is FavouriteLine && other.symbol == this.symbol);
+      (other is FavouriteLine &&
+          other.symbol == this.symbol &&
+          other.dest1 == this.dest1 &&
+          other.dest2 == this.dest2 &&
+          other.type == this.type);
 }
 
 class FavouriteLinesCompanion extends UpdateCompanion<FavouriteLine> {
   final Value<String> symbol;
+  final Value<String> dest1;
+  final Value<String> dest2;
+  final Value<int> type;
   const FavouriteLinesCompanion({
     this.symbol = const Value.absent(),
+    this.dest1 = const Value.absent(),
+    this.dest2 = const Value.absent(),
+    this.type = const Value.absent(),
   });
   FavouriteLinesCompanion.insert({
     @required String symbol,
-  }) : symbol = Value(symbol);
-  FavouriteLinesCompanion copyWith({Value<String> symbol}) {
+    @required String dest1,
+    @required String dest2,
+    @required int type,
+  })  : symbol = Value(symbol),
+        dest1 = Value(dest1),
+        dest2 = Value(dest2),
+        type = Value(type);
+  FavouriteLinesCompanion copyWith(
+      {Value<String> symbol,
+      Value<String> dest1,
+      Value<String> dest2,
+      Value<int> type}) {
     return FavouriteLinesCompanion(
       symbol: symbol ?? this.symbol,
+      dest1: dest1 ?? this.dest1,
+      dest2: dest2 ?? this.dest2,
+      type: type ?? this.type,
     );
   }
 }
@@ -94,8 +150,44 @@ class $FavouriteLinesTable extends FavouriteLines
     );
   }
 
+  final VerificationMeta _dest1Meta = const VerificationMeta('dest1');
+  GeneratedTextColumn _dest1;
   @override
-  List<GeneratedColumn> get $columns => [symbol];
+  GeneratedTextColumn get dest1 => _dest1 ??= _constructDest1();
+  GeneratedTextColumn _constructDest1() {
+    return GeneratedTextColumn(
+      'dest1',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _dest2Meta = const VerificationMeta('dest2');
+  GeneratedTextColumn _dest2;
+  @override
+  GeneratedTextColumn get dest2 => _dest2 ??= _constructDest2();
+  GeneratedTextColumn _constructDest2() {
+    return GeneratedTextColumn(
+      'dest2',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _typeMeta = const VerificationMeta('type');
+  GeneratedIntColumn _type;
+  @override
+  GeneratedIntColumn get type => _type ??= _constructType();
+  GeneratedIntColumn _constructType() {
+    return GeneratedIntColumn(
+      'type',
+      $tableName,
+      false,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [symbol, dest1, dest2, type];
   @override
   $FavouriteLinesTable get asDslTable => this;
   @override
@@ -111,6 +203,24 @@ class $FavouriteLinesTable extends FavouriteLines
           _symbolMeta, symbol.isAcceptableValue(d.symbol.value, _symbolMeta));
     } else if (isInserting) {
       context.missing(_symbolMeta);
+    }
+    if (d.dest1.present) {
+      context.handle(
+          _dest1Meta, dest1.isAcceptableValue(d.dest1.value, _dest1Meta));
+    } else if (isInserting) {
+      context.missing(_dest1Meta);
+    }
+    if (d.dest2.present) {
+      context.handle(
+          _dest2Meta, dest2.isAcceptableValue(d.dest2.value, _dest2Meta));
+    } else if (isInserting) {
+      context.missing(_dest2Meta);
+    }
+    if (d.type.present) {
+      context.handle(
+          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
     }
     return context;
   }
@@ -128,6 +238,15 @@ class $FavouriteLinesTable extends FavouriteLines
     final map = <String, Variable>{};
     if (d.symbol.present) {
       map['symbol'] = Variable<String, StringType>(d.symbol.value);
+    }
+    if (d.dest1.present) {
+      map['dest1'] = Variable<String, StringType>(d.dest1.value);
+    }
+    if (d.dest2.present) {
+      map['dest2'] = Variable<String, StringType>(d.dest2.value);
+    }
+    if (d.type.present) {
+      map['type'] = Variable<int, IntType>(d.type.value);
     }
     return map;
   }

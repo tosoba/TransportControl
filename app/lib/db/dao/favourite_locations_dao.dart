@@ -18,7 +18,7 @@ class FavouriteLocationsDao extends DatabaseAccessor<Database>
     return into(favouriteLocations).insert(location);
   }
 
-  Stream<List<FavouriteLocation>> favouriteLocationsStream() {
+  Stream<List<FavouriteLocation>> selectFavouriteLocationsStream() {
     return select(favouriteLocations).watch();
   }
 }

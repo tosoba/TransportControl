@@ -4,11 +4,15 @@ import 'dart:ui' as UI;
 
 import 'package:flutter/services.dart';
 
-class Assets {
-  static const String marker = 'assets/img/marker.png';
-  static const String selectedMarker = 'assets/img/selected_marker.png';
+class ImageAssets {
+  static const marker = 'assets/img/marker.png';
+  static const selectedMarker = 'assets/img/selected_marker.png';
 
-  Assets._();
+  ImageAssets._();
+}
+
+class JsonAssets {
+  static const lines = 'assets/json/lines.json';
 }
 
 extension AssetBundleExt on AssetBundle {

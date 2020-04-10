@@ -23,13 +23,29 @@ class FavouriteLinesDao extends DatabaseAccessor<Database>
       (batch) => batch.insertAll(
         favouriteLines,
         lines
-            .map((line) => FavouriteLinesCompanion.insert(symbol: line.symbol))
+            .map(
+              (line) => FavouriteLinesCompanion.insert(
+                symbol: line.symbol,
+                dest1: line.dest1,
+                dest2: line.dest2,
+                type: line.type,
+              ),
+            )
             .toList(),
       ),
     );
   }
 
-  Stream<List<FavouriteLine>> get favouriteLinesStream {
+  Future<int> deleteLines(Iterable<String> symbols) {
+    return (delete(favouriteLines)..where((line) => line.symbol.isIn(symbols)))
+        .go();
+  }
+
+  Future<List<FavouriteLine>> get selectFavouriteLines {
+    return select(favouriteLines).get();
+  }
+
+  Stream<List<FavouriteLine>> get selectFavouriteLinesStream {
     return select(favouriteLines).watch();
   }
 }

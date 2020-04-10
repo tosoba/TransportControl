@@ -4,4 +4,7 @@ import 'package:transport_control/db/tables.dart';
 @DataClassName(Tables.favouriteLine)
 class FavouriteLines extends Table {
   TextColumn get symbol => text()();
+  TextColumn get dest1 => text()();
+  TextColumn get dest2 => text()();
+  IntColumn get type => integer()();
 }

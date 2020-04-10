@@ -1,9 +1,13 @@
-import 'package:transport_control/db/database.dart';
+import 'package:transport_control/model/line.dart';
 
 abstract class LinesRepo {
-  Future insertLine(FavouriteLine line);
+  Future insertLine(Line line);
 
-  Future<void> insertLines(Iterable<FavouriteLine> lines);
+  Future<void> insertLines(Iterable<Line> lines);
 
-  Stream<List<FavouriteLine>> get favouriteLinesStream;
+  Future<int> deleteLines(Iterable<String> symbols);
+
+  Stream<Iterable<Line>> get favouriteLinesStream;
+
+  Future<Iterable<Line>> get favouriteLines;
 }

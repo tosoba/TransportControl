@@ -2,28 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:transport_control/model/line.dart';
 
 class LinesState {
-  final Map<Line, LineState> items;
+  final Map<Line, LineState> lines;
   final String symbolFilter;
   final LineListFilter listFilter;
 
   LinesState({
-    @required this.items,
+    @required this.lines,
     @required this.symbolFilter,
     @required this.listFilter,
   });
 
   LinesState.empty()
-      : items = Map(),
+      : lines = Map(),
         symbolFilter = null,
         listFilter = LineListFilter.ALL;
 
   LinesState copyWith({
-    Map<Line, LineState> items,
+    Map<Line, LineState> lines,
     String symbolFilter,
     LineListFilter listFilter,
   }) {
     return LinesState(
-      items: items ?? this.items,
+      lines: lines ?? this.lines,
       symbolFilter: symbolFilter ?? this.symbolFilter,
       listFilter: listFilter ?? this.listFilter,
     );
@@ -41,7 +41,7 @@ class LinesState {
   Iterable<MapEntry<Line, LineState>> _filteredLines(
     bool Function(MapEntry<Line, LineState>) filter,
   ) {
-    return items.entries.where(filter);
+    return lines.entries.where(filter);
   }
 
   bool Function(MapEntry<Line, LineState>) get listFilterPredicate {
@@ -77,6 +77,11 @@ class LineState {
         tracked = false,
         selected = false;
 
+  LineState.initialFavourite()
+      : favourite = true,
+        tracked = false,
+        selected = false;
+
   LineState get toggleSelection {
     return LineState(
       favourite: favourite,
@@ -89,6 +94,14 @@ class LineState {
     return LineState(
       favourite: favourite,
       tracked: !tracked,
+      selected: selected,
+    );
+  }
+
+  LineState get toggleFavourite {
+    return LineState(
+      favourite: !favourite,
+      tracked: tracked,
       selected: selected,
     );
   }

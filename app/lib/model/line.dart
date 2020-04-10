@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:quiver/core.dart';
+import 'package:transport_control/db/database.dart';
 
 part 'line.g.dart';
 
@@ -31,4 +32,19 @@ class Line {
       type.hashCode,
     );
   }
+
+  FavouriteLine get db {
+    return FavouriteLine(
+      symbol: symbol,
+      dest1: dest1,
+      dest2: dest2,
+      type: type,
+    );
+  }
+
+  Line.fromDb(FavouriteLine line)
+      : symbol = line.symbol,
+        dest1 = line.dest1,
+        dest2 = line.dest2,
+        type = line.type;
 }

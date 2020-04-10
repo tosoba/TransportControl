@@ -6,7 +6,7 @@ part "lines_event.g.dart";
 
 @superEnum
 enum _LinesEvent {
-  @Data(fields: [DataField<Map<Line, LineState>>('items')])
+  @Data(fields: [DataField<Map<Line, LineState>>('lines')])
   Created,
 
   @Data(fields: [DataField<String>('filter')])
@@ -15,8 +15,8 @@ enum _LinesEvent {
   @Data(fields: [DataField<LineListFilter>('filter')])
   ListFilterChanged,
 
-  @Data(fields: [DataField<Line>('item')])
-  ItemSelectionChanged,
+  @Data(fields: [DataField<Line>('line')])
+  LineSelectionChanged,
 
   @object
   SelectionReset,
@@ -28,5 +28,8 @@ enum _LinesEvent {
   UntrackSelectedLines,
 
   @Data(fields: [DataField<Set<Line>>('lines')])
-  LoadingVehiclesOfLinesFailed
+  LoadingVehiclesOfLinesFailed,
+
+  @Data(fields: [DataField<Set<Line>>('lines')])
+  FavouriteLinesUpdated,
 }

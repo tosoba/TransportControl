@@ -94,14 +94,14 @@ class _LinesPageState extends State<LinesPage>
       ),
       body: _linesList(
         topOffset: topOffset,
-        itemsStream: context.bloc<LinesBloc>().filteredItemsStream,
-        selectionChanged: context.bloc<LinesBloc>().itemSelectionChanged,
+        linesStream: context.bloc<LinesBloc>().filteredLinesStream,
+        selectionChanged: context.bloc<LinesBloc>().lineSelectionChanged,
       ),
       bottomNavigationBar: SizeTransition(
         axisAlignment: -1.0,
         sizeFactor: _bottomNavSize,
         child: _listGroupNavigationButtons(
-          context.bloc<LinesBloc>().filteredItemsStream,
+          context.bloc<LinesBloc>().filteredLinesStream,
           topOffset,
         ),
       ),
@@ -221,7 +221,11 @@ class _LinesPageState extends State<LinesPage>
                       '$numberOfNonFav line is not saved as favourite.',
                   pluralDescription:
                       '$numberOfNonFav lines are not saved as favourite.',
-                  actionPressed: () {},
+                  actionPressed: () {
+                    context.bloc<LinesBloc>()
+                      ..addSelectedLinesToFavourites()
+                      ..selectionReset();
+                  },
                   numberOfLines: numberOfNonFav,
                 ),
               if (numberOfFav > 0)
@@ -231,7 +235,11 @@ class _LinesPageState extends State<LinesPage>
                       '$numberOfFav line is saved as favourite.',
                   pluralDescription:
                       '$numberOfFav lines are saved as favourite.',
-                  actionPressed: () {},
+                  actionPressed: () {
+                    context.bloc<LinesBloc>()
+                      ..removeSelectedLinesFromFavourites()
+                      ..selectionReset();
+                  },
                   numberOfLines: numberOfFav,
                 ),
             ],
@@ -278,11 +286,11 @@ class _LinesPageState extends State<LinesPage>
   }
 
   Widget _listGroupNavigationButtons(
-    Stream<List<MapEntry<Line, LineState>>> itemsStream,
+    Stream<List<MapEntry<Line, LineState>>> linesStream,
     double topOffset,
   ) {
     return StreamBuilder(
-      stream: itemsStream,
+      stream: linesStream,
       builder: (
         BuildContext context,
         AsyncSnapshot<List<MapEntry<Line, LineState>>> snapshot,
@@ -367,11 +375,11 @@ class _LinesPageState extends State<LinesPage>
 
   Widget _linesList({
     @required double topOffset,
-    @required Stream<List<MapEntry<Line, LineState>>> itemsStream,
+    @required Stream<List<MapEntry<Line, LineState>>> linesStream,
     @required void Function(Line) selectionChanged,
   }) {
     return StreamBuilder(
-      stream: itemsStream,
+      stream: linesStream,
       builder: (
         BuildContext context,
         AsyncSnapshot<List<MapEntry<Line, LineState>>> snapshot,
@@ -427,9 +435,9 @@ class _LinesPageState extends State<LinesPage>
   Widget _linesGroup(
     MapEntry<String, List<MapEntry<Line, LineState>>> group,
     int columnsCount,
-    void Function(Line) lineSelectionChanged,
+    void Function(Line) selectionChanged,
   ) {
-    final groupItems = group.value;
+    final groupLines = group.value;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -452,7 +460,7 @@ class _LinesPageState extends State<LinesPage>
             crossAxisCount: columnsCount,
             shrinkWrap: true,
             children: List.generate(
-              groupItems.length,
+              groupLines.length,
               (index) => AnimationConfiguration.staggeredGrid(
                 position: index,
                 duration: const Duration(milliseconds: 250),
@@ -460,9 +468,9 @@ class _LinesPageState extends State<LinesPage>
                 child: ScaleAnimation(
                   child: FadeInAnimation(
                     child: _lineListItem(
-                      groupItems[index],
+                      groupLines[index],
                       index,
-                      lineSelectionChanged,
+                      selectionChanged,
                     ),
                   ),
                 ),
@@ -475,23 +483,25 @@ class _LinesPageState extends State<LinesPage>
   }
 
   Widget _lineListItem(
-    MapEntry<Line, LineState> item,
+    MapEntry<Line, LineState> line,
     int index,
-    void Function(Line) itemSelectionChanged,
+    void Function(Line) selectionChanged,
   ) {
     final inkWell = InkWell(
-      onTap: () => itemSelectionChanged(item.key),
+      onTap: () => selectionChanged(line.key),
       child: Center(
         child: Text(
-          item.key.symbol,
+          line.key.symbol,
           style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
         ),
       ),
     );
 
-    if (item.value.tracked) {
+    if (line.value.tracked) {
       return Container(child: inkWell, color: Colors.lightBlue);
-    } else if (item.value.selected) {
+    } else if (line.value.favourite) {
+      return Container(child: inkWell, color: Colors.red);
+    } else if (line.value.selected) {
       return Container(child: inkWell);
     } else {
       return Card(child: inkWell);
