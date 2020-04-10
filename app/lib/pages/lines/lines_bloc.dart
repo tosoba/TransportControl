@@ -37,15 +37,19 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
                         : LineState.initial()),
               );
         } else {
-          return Future.value(state.lines.map((line, state) {
-            final isFavourite = favouriteLines.contains(line);
-            if ((state.favourite && !isFavourite) ||
-                (!state.favourite && isFavourite)) {
-              return MapEntry(line, state.toggleFavourite);
-            } else {
-              return MapEntry(line, state);
-            }
-          }));
+          return Future.value(
+            state.lines.map(
+              (line, state) {
+                final isFavourite = favouriteLines.contains(line);
+                if ((state.favourite && !isFavourite) ||
+                    (!state.favourite && isFavourite)) {
+                  return MapEntry(line, state.toggleFavourite);
+                } else {
+                  return MapEntry(line, state);
+                }
+              },
+            ),
+          );
         }
       },
     ).listen(
@@ -55,8 +59,10 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
 
   @override
   Future<void> close() async {
-    await Future.wait(
-        [_trackedLinesSubscription.cancel(), _linesSubscription.cancel()]);
+    await Future.wait([
+      _trackedLinesSubscription.cancel(),
+      _linesSubscription.cancel(),
+    ]);
     return super.close();
   }
 
@@ -123,19 +129,6 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
           }
         });
         return state.copyWith(lines: updatedLines);
-      },
-      favouriteLinesUpdated: (favouriteLinesUpdatedEvent) {
-        return state.copyWith(
-          lines: state.lines.map((line, state) {
-            final isFavourite = favouriteLinesUpdatedEvent.lines.contains(line);
-            if ((state.favourite && !isFavourite) ||
-                (!state.favourite && isFavourite)) {
-              return MapEntry(line, state.toggleFavourite);
-            } else {
-              return MapEntry(line, state);
-            }
-          }),
-        );
       },
     );
   }

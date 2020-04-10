@@ -29,7 +29,4 @@ enum _LinesEvent {
 
   @Data(fields: [DataField<Set<Line>>('lines')])
   LoadingVehiclesOfLinesFailed,
-
-  @Data(fields: [DataField<Set<Line>>('lines')])
-  FavouriteLinesUpdated,
 }

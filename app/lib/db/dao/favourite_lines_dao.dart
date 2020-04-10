@@ -41,10 +41,6 @@ class FavouriteLinesDao extends DatabaseAccessor<Database>
         .go();
   }
 
-  Future<List<FavouriteLine>> get selectFavouriteLines {
-    return select(favouriteLines).get();
-  }
-
   Stream<List<FavouriteLine>> get selectFavouriteLinesStream {
     return select(favouriteLines).watch();
   }

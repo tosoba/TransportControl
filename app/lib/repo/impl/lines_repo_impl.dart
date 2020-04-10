@@ -31,8 +31,4 @@ class LinesRepoImpl extends LinesRepo {
   Future<void> insertLines(Iterable<Line> lines) {
     return _dao.insertLines(lines.map((line) => line.db));
   }
-
-  @override
-  Future<Iterable<Line>> get favouriteLines => _dao.selectFavouriteLines
-      .then((dbLines) => dbLines.map((dbLine) => Line.fromDb(dbLine)));
 }
