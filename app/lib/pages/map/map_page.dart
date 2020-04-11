@@ -26,7 +26,7 @@ class _MapPageState extends State<MapPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return StreamBuilder<List<MapMarker>>(
+    return StreamBuilder<List<IconifiedMarker>>(
       stream: context.bloc<MapBloc>().markers,
       builder: (context, snapshot) {
         return GoogleMap(
@@ -42,10 +42,10 @@ class _MapPageState extends State<MapPage>
               ? null
               : snapshot.data
                   .map(
-                    (mapMarker) => mapMarker.toMarker(
-                      onTap: mapMarker.isCluster
-                          ? () => _zoomOnCluster(mapMarker.position)
-                          : () => _markerTapped(mapMarker.id),
+                    (marker) => marker.toGoogleMapMarker(
+                      onTap: marker.isCluster
+                          ? () => _zoomOnCluster(marker.position)
+                          : () => _markerTapped(marker.number),
                     ),
                   )
                   .toSet(),

@@ -204,7 +204,7 @@ class _LinesPageState extends State<LinesPage>
                 ),
               if (numberOfTracked > 0)
                 _selectedLinesGroupBottomSheetRow(
-                  actionLabel: 'Track all',
+                  actionLabel: 'Untrack all',
                   singularDescription: '$numberOfTracked line is tracked.',
                   pluralDescription: '$numberOfTracked lines are tracked.',
                   actionPressed: () {

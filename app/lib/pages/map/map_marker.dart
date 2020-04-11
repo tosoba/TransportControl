@@ -2,36 +2,47 @@ import 'package:fluster/fluster.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:meta/meta.dart';
 
-class MapMarker extends Clusterable {
-  final String id;
-  final LatLng position;
-  BitmapDescriptor icon;
+class ClusterableMarker extends Clusterable {
+  final String number;
+  final String symbol;
 
-  MapMarker({
-    @required this.id,
-    @required this.position,
-    this.icon,
-    isCluster = false,
-    clusterId,
-    pointsSize,
-    childMarkerId,
+  ClusterableMarker({
+    @required String id,
+    @required double lat,
+    @required double lng,
+    this.symbol,
+    this.number,
+    bool isCluster = false,
+    int clusterId,
+    int pointsSize,
+    String childMarkerId,
   }) : super(
           markerId: id,
-          latitude: position.latitude,
-          longitude: position.longitude,
+          latitude: lat,
+          longitude: lng,
           isCluster: isCluster,
           clusterId: clusterId,
           pointsSize: pointsSize,
           childMarkerId: childMarkerId,
         );
+}
 
-  Marker toMarker({void Function() onTap}) {
+class IconifiedMarker {
+  final BitmapDescriptor icon;
+  final ClusterableMarker _marker;
+
+  IconifiedMarker(this._marker, {@required this.icon});
+
+  String get number => _marker.number;
+  LatLng get position => LatLng(_marker.latitude, _marker.longitude);
+  bool get isCluster => _marker.isCluster;
+
+  Marker toGoogleMapMarker({void Function() onTap}) {
     return Marker(
-      markerId: MarkerId(isCluster ? 'cl_$id' : id),
-      position: LatLng(
-        position.latitude,
-        position.longitude,
+      markerId: MarkerId(
+        _marker.isCluster ? 'cl_${_marker.markerId}' : _marker.markerId,
       ),
+      position: LatLng(_marker.latitude, _marker.longitude),
       icon: icon,
       onTap: onTap,
     );

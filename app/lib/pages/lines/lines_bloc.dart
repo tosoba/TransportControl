@@ -80,7 +80,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
       selectionReset: (_) => state.copyWith(
         lines: state.lines.map(
           (line, lineState) => lineState.selected
-              ? MapEntry(line, lineState.toggleFavourite)
+              ? MapEntry(line, lineState.toggleSelection)
               : MapEntry(line, lineState),
         ),
       ),

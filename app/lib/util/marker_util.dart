@@ -9,8 +9,8 @@ import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_marker.dart';
 import 'package:transport_control/util/asset_util.dart';
 
-extension FlusterMapMarkerExt on Fluster<MapMarker> {
-  Future<List<MapMarker>> getMarkers({
+extension FlusterMapMarkerExt on Fluster<ClusterableMarker> {
+  Future<List<IconifiedMarker>> getMarkers({
     @required double currentZoom,
     @required Color clusterColor,
     @required Color clusterTextColor,
@@ -21,54 +21,59 @@ extension FlusterMapMarkerExt on Fluster<MapMarker> {
         const [-180, -85, 180, 85],
         currentZoom.toInt(),
       ).map(
-        (mapMarker) async {
-          if (mapMarker.isCluster) {
-            mapMarker.icon = await _clusterMarkerBitmap(
-              clusterSize: mapMarker.pointsSize,
-              clusterColor: clusterColor,
-              textColor: clusterTextColor,
+        (marker) async {
+          if (marker.isCluster) {
+            return IconifiedMarker(
+              marker,
+              icon: await _clusterMarkerBitmap(
+                clusterSize: marker.pointsSize,
+                clusterColor: clusterColor,
+                textColor: clusterTextColor,
+              ),
             );
           } else {
-            final symbol = mapMarker.id.substring(
-              mapMarker.id.indexOf('_') + 1,
-            );
-            mapMarker.icon = await markerBitmap(
-              symbol: symbol,
-              width: MapConstants.markerWidth,
-              height: MapConstants.markerHeight,
-              imageAsset: markerImage,
+            return IconifiedMarker(
+              marker,
+              icon: await markerBitmap(
+                symbol: marker.symbol,
+                width: MapConstants.markerWidth,
+                height: MapConstants.markerHeight,
+                imageAsset: markerImage,
+              ),
             );
           }
-          return mapMarker;
         },
       ).toList(),
     );
   }
 }
 
-extension MapMarkerListExt on List<MapMarker> {
-  Future<Fluster<MapMarker>> fluster({
+extension MapMarkerListExt on Map<String, ClusterableMarker> {
+  Future<Fluster<ClusterableMarker>> fluster({
     @required int minZoom,
     @required int maxZoom,
-  }) async {
-    return Fluster<MapMarker>(
+  }) {
+    return Future.value(Fluster<ClusterableMarker>(
       minZoom: minZoom,
       maxZoom: maxZoom,
       radius: 150,
       extent: 2048,
       nodeSize: 64,
-      points: this,
+      points: values.toList(),
       createCluster: (BaseCluster cluster, double lng, double lat) {
-        return MapMarker(
+        return ClusterableMarker(
           id: cluster.id.toString(),
-          position: LatLng(lat, lng),
+          lat: lat,
+          lng: lng,
           isCluster: cluster.isCluster,
           clusterId: cluster.id,
           pointsSize: cluster.pointsSize,
           childMarkerId: cluster.childMarkerId,
+          number: cluster.markerId,
+          symbol: cluster.isCluster ? null : this[cluster.markerId].symbol,
         );
       },
-    );
+    ));
   }
 }
 

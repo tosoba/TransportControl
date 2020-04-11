@@ -152,22 +152,21 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     return super.close();
   }
 
-  Stream<List<MapMarker>> get markers {
+  Stream<List<IconifiedMarker>> get markers {
     return asyncMap((state) => state.markers);
   }
 
-  void trackedLinesAdded(Set<Line> lines) {
-    _vehiclesRepo.loadVehiclesOfLines(lines).then(
-          (result) => result.when(
-            success: (success) => add(
-              MapEvent.addVehiclesOfLines(vehicles: success.data, lines: lines),
-            ),
-            failure: (failure) {
-              failure.logError();
-              _loadingVehiclesOfLinesFailed(lines);
-            },
-          ),
-        );
+  void trackedLinesAdded(Set<Line> lines) async {
+    final result = await _vehiclesRepo.loadVehiclesOfLines(lines);
+    result.when(
+      success: (success) => add(
+        MapEvent.addVehiclesOfLines(vehicles: success.data, lines: lines),
+      ),
+      failure: (failure) {
+        failure.logError();
+        _loadingVehiclesOfLinesFailed(lines);
+      },
+    );
   }
 
   void trackedLinesRemoved(Set<Line> lines) {
@@ -181,8 +180,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     add(MapEvent.cameraMoved(bounds: bounds, zoom: zoom));
   }
 
-  void markerTapped(String id) {
-    add(MapEvent.selectVehicle(number: id.substring(0, id.indexOf('_'))));
+  void markerTapped(String number) {
+    add(MapEvent.selectVehicle(number: number));
   }
 
   void mapTapped() {
@@ -191,7 +190,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 }
 
 extension _MapStateExt on MapState {
-  Future<List<MapMarker>> get markers {
+  Future<List<IconifiedMarker>> get markers {
     if (trackedVehicles.isEmpty) return null;
     return _markersToCluster
         .fluster(
@@ -200,7 +199,7 @@ extension _MapStateExt on MapState {
         )
         .then(
           (fluster) => fluster == null
-              ? Future.value(<MapMarker>[])
+              ? Future.value(<IconifiedMarker>[])
               : fluster.getMarkers(
                   currentZoom: zoom,
                   clusterColor: Colors.blue,
@@ -217,9 +216,13 @@ extension _MapStateExt on MapState {
           final position = selected.animation.stage.current;
           return List.of(markers)
             ..add(
-              MapMarker(
-                id: '${selectedVehicleNumber}_${selected.vehicle.symbol}',
-                position: LatLng(position.latitude, position.longitude),
+              IconifiedMarker(
+                ClusterableMarker(
+                  symbol: selected.vehicle.symbol,
+                  id: selectedVehicleNumber,
+                  lat: position.latitude,
+                  lng: position.longitude,
+                ),
                 icon: await markerBitmap(
                   symbol: selected.vehicle.symbol,
                   width: MapConstants.markerWidth,
@@ -235,20 +238,23 @@ extension _MapStateExt on MapState {
     );
   }
 
-  List<MapMarker> get _markersToCluster {
+  Map<String, ClusterableMarker> get _markersToCluster {
     final markers = trackedVehicles.map(
-      (number, tracked) => MapEntry(
-        number,
-        MapMarker(
-          id: '${number}_${tracked.vehicle.symbol}',
-          position: LatLng(
-            tracked.animation.stage.current.latitude,
-            tracked.animation.stage.current.longitude,
+      (number, tracked) {
+        final position = tracked.animation.stage.current;
+        return MapEntry(
+          number,
+          ClusterableMarker(
+            id: number,
+            lat: position.latitude,
+            lng: position.longitude,
+            number: number,
+            symbol: tracked.vehicle.symbol,
           ),
-        ),
-      ),
+        );
+      },
     );
     if (selectedVehicleNumber != null) markers.remove(selectedVehicleNumber);
-    return markers.values.toList();
+    return markers;
   }
 }
