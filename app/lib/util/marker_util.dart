@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
-import 'package:transport_control/pages/map/map_marker.dart';
+import 'package:transport_control/pages/map/map_markers.dart';
 import 'package:transport_control/util/asset_util.dart';
 
 extension FlusterMapMarkerExt on Fluster<ClusterableMarker> {

@@ -10,7 +10,7 @@ import 'package:transport_control/model/result.dart';
 import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_event.dart';
-import 'package:transport_control/pages/map/map_marker.dart';
+import 'package:transport_control/pages/map/map_markers.dart';
 import 'package:transport_control/pages/map/map_state.dart';
 import 'package:transport_control/pages/map/map_vehicle.dart';
 import 'package:transport_control/pages/map/map_vehicle_source.dart';

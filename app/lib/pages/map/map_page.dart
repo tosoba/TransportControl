@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
-import 'package:transport_control/pages/map/map_marker.dart';
+import 'package:transport_control/pages/map/map_markers.dart';
 
 class MapPage extends StatefulWidget {
   final void Function() mapTapped;
