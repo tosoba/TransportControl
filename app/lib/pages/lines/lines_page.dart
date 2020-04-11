@@ -489,22 +489,35 @@ class _LinesPageState extends State<LinesPage>
   ) {
     final inkWell = InkWell(
       onTap: () => selectionChanged(line.key),
-      child: Center(
-        child: Text(
-          line.key.symbol,
-          style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Text(
+                line.key.symbol,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            if (line.value.tracked || line.value.favourite)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (line.value.tracked) Icon(Icons.location_on),
+                    if (line.value.favourite) Icon(Icons.favorite),
+                  ],
+                ),
+              )
+          ],
         ),
       ),
     );
-
-    if (line.value.tracked) {
-      return Container(child: inkWell, color: Colors.lightBlue);
-    } else if (line.value.favourite) {
-      return Container(child: inkWell, color: Colors.red);
-    } else if (line.value.selected) {
-      return Container(child: inkWell);
-    } else {
-      return Card(child: inkWell);
-    }
+    return Card(child: inkWell, elevation: line.value.selected ? 0.0 : 5.0);
   }
 }

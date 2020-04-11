@@ -116,7 +116,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       ),
       cameraMoved: (evt) => state.copyWith(zoom: evt.zoom, bounds: evt.bounds),
       trackedLinesRemoved: (evt) {
-        final updatedVehicles = Map();
+        final updatedVehicles = Map<String, MapVehicle>();
         state.trackedVehicles.forEach((number, tracked) {
           final sources = tracked.sources;
           final loadedByTrackingAllOfLine = sources.any(

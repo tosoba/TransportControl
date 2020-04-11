@@ -72,7 +72,6 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
       listFilterChanged: (evt) => state.copyWith(listFilter: evt.filter),
       lineSelectionChanged: (evt) {
         final oldLineState = state.lines[evt.line];
-        if (oldLineState.tracked) return state;
         final updatedLines = Map.of(state.lines);
         updatedLines[evt.line] = oldLineState.toggleSelection;
         return state.copyWith(lines: updatedLines);
