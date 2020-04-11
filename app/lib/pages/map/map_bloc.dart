@@ -127,18 +127,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           } else if (sources.length == 1) {
             return;
           } else {
-            updatedVehicles[number] = tracked.withRemovedSource(
-              sources.first,
-            );
+            updatedVehicles[number] = tracked.withRemovedSource(sources.first);
           }
         });
         return state.copyWith(trackedVehicles: updatedVehicles);
       },
       selectVehicle: (evt) => evt.number == state.selectedVehicleNumber
           ? state.withNoSelectedVehicle
-          : state.copyWith(
-              selectedVehicleNumber: evt.number,
-            ),
+          : state.copyWith(selectedVehicleNumber: evt.number),
       deselectVehicle: (_) => state.withNoSelectedVehicle,
     );
   }
@@ -190,52 +186,43 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 }
 
 extension _MapStateExt on MapState {
-  Future<List<IconifiedMarker>> get markers {
+  Future<List<IconifiedMarker>> get markers async {
     if (trackedVehicles.isEmpty) return null;
-    return _markersToCluster
-        .fluster(
-          minZoom: MapConstants.minClusterZoom,
-          maxZoom: MapConstants.maxClusterZoom,
-        )
-        .then(
-          (fluster) => fluster == null
-              ? Future.value(<IconifiedMarker>[])
-              : fluster.getMarkers(
-                  currentZoom: zoom,
-                  clusterColor: Colors.blue,
-                  clusterTextColor: Colors.white,
-                ),
-        )
-        .then(
-      (markers) async {
-        if (selectedVehicleNumber == null ||
-            !trackedVehicles.containsKey(selectedVehicleNumber)) {
-          return markers;
-        } else {
-          final selected = trackedVehicles[selectedVehicleNumber];
-          final position = selected.animation.stage.current;
-          return List.of(markers)
-            ..add(
-              IconifiedMarker(
-                ClusterableMarker(
-                  symbol: selected.vehicle.symbol,
-                  id: selectedVehicleNumber,
-                  lat: position.latitude,
-                  lng: position.longitude,
-                ),
-                icon: await markerBitmap(
-                  symbol: selected.vehicle.symbol,
-                  width: MapConstants.markerWidth,
-                  height: MapConstants.markerHeight,
-                  imageAsset: await rootBundle.loadUiImage(
-                    ImageAssets.selectedMarker,
-                  ),
-                ),
-              ),
-            );
-        }
-      },
+    final fluster = await _markersToCluster.fluster(
+      minZoom: MapConstants.minClusterZoom,
+      maxZoom: MapConstants.maxClusterZoom,
     );
+    final markers = await fluster.getMarkers(
+      currentZoom: zoom,
+      clusterColor: Colors.blue,
+      clusterTextColor: Colors.white,
+    );
+    if (selectedVehicleNumber == null ||
+        !trackedVehicles.containsKey(selectedVehicleNumber)) {
+      return markers;
+    } else {
+      final selected = trackedVehicles[selectedVehicleNumber];
+      final position = selected.animation.stage.current;
+      return List.of(markers)
+        ..add(
+          IconifiedMarker(
+            ClusterableMarker(
+              symbol: selected.vehicle.symbol,
+              id: selectedVehicleNumber,
+              lat: position.latitude,
+              lng: position.longitude,
+            ),
+            icon: await markerBitmap(
+              symbol: selected.vehicle.symbol,
+              width: MapConstants.markerWidth,
+              height: MapConstants.markerHeight,
+              imageAsset: await rootBundle.loadUiImage(
+                ImageAssets.selectedMarker,
+              ),
+            ),
+          ),
+        );
+    }
   }
 
   Map<String, ClusterableMarker> get _markersToCluster {
