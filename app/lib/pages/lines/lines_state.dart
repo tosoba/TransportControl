@@ -29,19 +29,30 @@ class LinesState {
     );
   }
 
-  Iterable<MapEntry<Line, LineState>> get selectedLines =>
-      _filteredLines((entry) => entry.value.selected);
+  Iterable<MapEntry<Line, LineState>> get selectedLines {
+    return _filteredLines((entry) => entry.value.selected);
+  }
 
-  Iterable<MapEntry<Line, LineState>> get favouriteLines =>
-      _filteredLines((entry) => entry.value.favourite);
+  Iterable<MapEntry<Line, LineState>> get favouriteLines {
+    return _filteredLines((entry) => entry.value.favourite);
+  }
 
-  Iterable<MapEntry<Line, LineState>> get trackedLines =>
-      _filteredLines((entry) => entry.value.tracked);
+  Iterable<MapEntry<Line, LineState>> get trackedLines {
+    return _filteredLines((entry) => entry.value.tracked);
+  }
 
   Iterable<MapEntry<Line, LineState>> _filteredLines(
     bool Function(MapEntry<Line, LineState>) filter,
   ) {
     return lines.entries.where(filter);
+  }
+
+  bool Function(MapEntry<Line, LineState>) get symbolFilterPredicate {
+    return symbolFilter == null
+        ? (MapEntry<Line, LineState> entry) => true
+        : (MapEntry<Line, LineState> entry) => entry.key.symbol
+            .toLowerCase()
+            .contains(symbolFilter.trim().toLowerCase());
   }
 
   bool Function(MapEntry<Line, LineState>) get listFilterPredicate {

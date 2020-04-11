@@ -21,40 +21,31 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     this._trackedLinesRemoved,
     this._linesRepo,
   ) {
-    _linesSubscription = _linesRepo.favouriteLinesStream.asyncMap(
-      (favouriteLines) {
-        if (state.lines.isEmpty) {
-          return rootBundle
-              .loadString(
-                JsonAssets.lines,
-              )
-              .then(
-                (jsonString) => Map.fromIterable(
-                    jsonDecode(jsonString) as Iterable,
-                    key: (lineJson) => Line.fromJson(lineJson),
-                    value: (line) => favouriteLines.contains(line)
-                        ? LineState.initialFavourite()
-                        : LineState.initial()),
-              );
-        } else {
-          return Future.value(
-            state.lines.map(
-              (line, state) {
-                final isFavourite = favouriteLines.contains(line);
-                if ((state.favourite && !isFavourite) ||
-                    (!state.favourite && isFavourite)) {
-                  return MapEntry(line, state.toggleFavourite);
-                } else {
-                  return MapEntry(line, state);
-                }
-              },
-            ),
-          );
-        }
-      },
-    ).listen(
-      (lines) => add(LinesEvent.created(lines: lines)),
-    );
+    _linesSubscription = _linesRepo.favouriteLinesStream
+        .asyncMap(
+          (favouriteLines) => state.lines.isEmpty
+              ? rootBundle.loadString(JsonAssets.lines).then(
+                    (jsonString) => Map.fromIterable(
+                      jsonDecode(jsonString) as Iterable,
+                      key: (lineJson) => Line.fromJson(lineJson),
+                      value: (line) => favouriteLines.contains(line)
+                          ? LineState.initialFavourite()
+                          : LineState.initial(),
+                    ),
+                  )
+              : Future.value(
+                  state.lines.map((line, state) {
+                    final isFavourite = favouriteLines.contains(line);
+                    if ((state.favourite && !isFavourite) ||
+                        (!state.favourite && isFavourite)) {
+                      return MapEntry(line, state.toggleFavourite);
+                    } else {
+                      return MapEntry(line, state);
+                    }
+                  }),
+                ),
+        )
+        .listen((lines) => add(LinesEvent.created(lines: lines)));
   }
 
   @override
@@ -72,38 +63,34 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
   @override
   Stream<LinesState> mapEventToState(LinesEvent event) async* {
     yield event.when(
-      created: (created) => LinesState(
-        lines: created.lines,
+      created: (evt) => LinesState(
+        lines: evt.lines,
         symbolFilter: null,
         listFilter: LineListFilter.ALL,
       ),
-      symbolFilterChanged: (filterChange) => state.copyWith(
-        symbolFilter: filterChange.filter,
-      ),
-      listFilterChanged: (filterChange) => state.copyWith(
-        listFilter: filterChange.filter,
-      ),
-      lineSelectionChanged: (selectionChange) {
-        final oldLineState = state.lines[selectionChange.line];
+      symbolFilterChanged: (evt) => state.copyWith(symbolFilter: evt.filter),
+      listFilterChanged: (evt) => state.copyWith(listFilter: evt.filter),
+      lineSelectionChanged: (evt) {
+        final oldLineState = state.lines[evt.line];
         if (oldLineState.tracked) return state;
         final updatedLines = Map.of(state.lines);
-        updatedLines[selectionChange.line] = oldLineState.toggleSelection;
+        updatedLines[evt.line] = oldLineState.toggleSelection;
         return state.copyWith(lines: updatedLines);
       },
-      selectionReset: (_) {
-        final updatedLines = Map.of(state.lines);
-        updatedLines.forEach((key, value) {
-          if (value.selected) updatedLines[key] = value.toggleSelection;
-        });
-        return state.copyWith(lines: updatedLines);
-      },
+      selectionReset: (_) => state.copyWith(
+        lines: state.lines.map(
+          (line, lineState) => lineState.selected
+              ? MapEntry(line, lineState.toggleFavourite)
+              : MapEntry(line, lineState),
+        ),
+      ),
       trackSelectedLines: (_) {
         final updatedLines = Map.of(state.lines);
         final newlyTrackedLines = Set<Line>();
-        updatedLines.forEach((line, state) {
-          if (!state.tracked && state.selected) {
+        updatedLines.forEach((line, lineState) {
+          if (!lineState.tracked && lineState.selected) {
             newlyTrackedLines.add(line);
-            updatedLines[line] = state.toggleTracked;
+            updatedLines[line] = lineState.toggleTracked;
           }
         });
         _trackedLinesAdded(newlyTrackedLines);
@@ -121,26 +108,20 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
         _trackedLinesRemoved(linesRemovedFromTracking);
         return state.copyWith(lines: updatedLines);
       },
-      loadingVehiclesOfLinesFailed: (loadingVehiclesOfLinesFailedEvent) {
-        final updatedLines = Map.of(state.lines);
-        updatedLines.forEach((line, state) {
-          if (loadingVehiclesOfLinesFailedEvent.lines.contains(line)) {
-            updatedLines[line] = state.toggleTracked;
-          }
-        });
-        return state.copyWith(lines: updatedLines);
-      },
+      loadingVehiclesOfLinesFailed: (evt) => state.copyWith(
+        lines: state.lines.map(
+          (line, lineState) => evt.lines.contains(line)
+              ? MapEntry(line, lineState.toggleTracked)
+              : MapEntry(line, lineState),
+        ),
+      ),
     );
   }
 
   Stream<List<MapEntry<Line, LineState>>> get filteredLinesStream {
     return map(
       (state) {
-        final symbolFilterPred = state.symbolFilter == null
-            ? (MapEntry<Line, LineState> entry) => true
-            : (MapEntry<Line, LineState> entry) => entry.key.symbol
-                .toLowerCase()
-                .contains(state.symbolFilter.trim().toLowerCase());
+        final symbolFilterPred = state.symbolFilterPredicate;
         final listFilterPred = state.listFilterPredicate;
         return state.lines.entries
             .where((entry) => symbolFilterPred(entry) && listFilterPred(entry))
@@ -156,19 +137,15 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
   Stream<List<LineListFilter>> get listFiltersStream {
     return map(
       (state) {
-        final availableFilters = LineListFilter.values
-            .where((value) => value != state.listFilter)
-            .toList();
-        if (availableFilters.contains(LineListFilter.SELECTED) &&
-            state.selectedLines.isEmpty) {
+        final availableFilters = List.of(LineListFilter.values)
+          ..remove(state.listFilter);
+        if (state.selectedLines.isEmpty) {
           availableFilters.remove(LineListFilter.SELECTED);
         }
-        if (availableFilters.contains(LineListFilter.TRACKED) &&
-            state.trackedLines.isEmpty) {
+        if (state.trackedLines.isEmpty) {
           availableFilters.remove(LineListFilter.TRACKED);
         }
-        if (availableFilters.contains(LineListFilter.FAVOURITE) &&
-            state.favouriteLines.isEmpty) {
+        if (state.favouriteLines.isEmpty) {
           availableFilters.remove(LineListFilter.FAVOURITE);
         }
         return availableFilters;
