@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage>
   AnimationController _mapTapAnimController;
   Animation<Offset> _appBarOffset;
   Animation<double> _bottomNavSize;
+  Animation<double> _bottomNavButtonsOpacity;
 
   @override
   void initState() {
@@ -52,6 +53,10 @@ class _HomePageState extends State<HomePage>
       begin: 1.0,
       end: 0.0,
     ).animate(_mapTapAnimController);
+    _bottomNavButtonsOpacity = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(_mapTapAnimController);
   }
 
   @override
@@ -68,14 +73,7 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () {
-        if (_currentPageIndex == 1) {
-          _showMapPage();
-          return Future.value(false);
-        } else {
-          return Future.value(true);
-        }
-      },
+      onWillPop: _onWillPop,
       child: Scaffold(
         extendBodyBehindAppBar: true,
         extendBody: true,
@@ -91,6 +89,15 @@ class _HomePageState extends State<HomePage>
         drawer: _navigationDrawer(context),
       ),
     );
+  }
+
+  Future<bool> _onWillPop() {
+    if (_currentPageIndex == 1) {
+      _showMapPage();
+      return Future.value(false);
+    } else {
+      return Future.value(true);
+    }
   }
 
   Widget _bottomNavBar(BuildContext context) {
@@ -123,14 +130,17 @@ class _HomePageState extends State<HomePage>
     @required IconData icon,
   }) {
     return Expanded(
-      child: FlatButton.icon(
-        padding: EdgeInsets.zero,
-        icon: Icon(icon),
-        color: Colors.white,
-        onPressed: onPressed,
-        label: Text(
-          labelText,
-          style: const TextStyle(fontSize: 18),
+      child: FadeTransition(
+        opacity: _bottomNavButtonsOpacity,
+        child: FlatButton.icon(
+          padding: EdgeInsets.zero,
+          icon: Icon(icon),
+          color: Colors.white,
+          onPressed: onPressed,
+          label: Text(
+            labelText,
+            style: const TextStyle(fontSize: 18),
+          ),
         ),
       ),
     );
