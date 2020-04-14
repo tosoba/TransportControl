@@ -5,6 +5,7 @@ import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/places/places_page.dart';
+import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/search_app_bar.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
@@ -110,12 +111,12 @@ class _HomePageState extends State<HomePage>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _bottomNavBarButton(
-            labelText: 'Lines',
+            labelText: Strings.lines,
             onPressed: () => _showLinesPage(context),
             icon: Icons.grid_on,
           ),
           _bottomNavBarButton(
-            labelText: 'Locations',
+            labelText: Strings.locations,
             onPressed: () => _showLocationsPage(context),
             icon: Icons.location_on,
           ),
@@ -150,7 +151,7 @@ class _HomePageState extends State<HomePage>
     return SearchAppBar(
       searchFieldFocusNode: _searchFieldFocusNode,
       leading: _drawerButton,
-      hint: "Transport nearby...",
+      hint: Strings.transportNearby,
       onChanged: (query) {},
     );
   }
@@ -251,11 +252,11 @@ class _HomePageState extends State<HomePage>
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            child: Text('Transport Control'),
+            child: Text(Strings.transportControl),
             decoration: const BoxDecoration(color: Colors.blue),
           ),
           _drawerListTile(
-            labelText: 'Lines',
+            labelText: Strings.lines,
             icon: Icons.grid_on,
             onTap: () {
               Navigator.pop(context);
@@ -263,7 +264,7 @@ class _HomePageState extends State<HomePage>
             },
           ),
           _drawerListTile(
-            labelText: 'Locations',
+            labelText: Strings.locations,
             icon: Icons.location_on,
             onTap: () {
               Navigator.pop(context);

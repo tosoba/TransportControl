@@ -6,6 +6,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
+import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/search_app_bar.dart';
 import 'package:transport_control/util/collection_util.dart';
@@ -189,7 +190,7 @@ class _LinesPageState extends State<LinesPage>
               ),
               if (numberOfUntracked > 0)
                 _selectedLinesGroupBottomSheetRow(
-                  actionLabel: 'Track all',
+                  actionLabel: Strings.trackAll,
                   singularDescription:
                       '$numberOfUntracked line is not tracked.',
                   pluralDescription:
@@ -204,7 +205,7 @@ class _LinesPageState extends State<LinesPage>
                 ),
               if (numberOfTracked > 0)
                 _selectedLinesGroupBottomSheetRow(
-                  actionLabel: 'Untrack all',
+                  actionLabel: Strings.untrackAll,
                   singularDescription: '$numberOfTracked line is tracked.',
                   pluralDescription: '$numberOfTracked lines are tracked.',
                   actionPressed: () {
@@ -216,7 +217,7 @@ class _LinesPageState extends State<LinesPage>
                 ),
               if (numberOfNonFav > 0)
                 _selectedLinesGroupBottomSheetRow(
-                  actionLabel: 'Save all',
+                  actionLabel: Strings.saveAll,
                   singularDescription:
                       '$numberOfNonFav line is not saved as favourite.',
                   pluralDescription:
@@ -230,7 +231,7 @@ class _LinesPageState extends State<LinesPage>
                 ),
               if (numberOfFav > 0)
                 _selectedLinesGroupBottomSheetRow(
-                  actionLabel: 'Remove all',
+                  actionLabel: Strings.removeAll,
                   singularDescription:
                       '$numberOfFav line is saved as favourite.',
                   pluralDescription:
