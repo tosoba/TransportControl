@@ -24,6 +24,7 @@ class _HomePageState extends State<HomePage>
 
   AnimationController _mapTapAnimController;
   Animation<Offset> _appBarOffset;
+  Animation<double> _bottomNavSize;
 
   @override
   void initState() {
@@ -46,6 +47,10 @@ class _HomePageState extends State<HomePage>
     _appBarOffset = Tween<Offset>(
       begin: Offset.zero,
       end: Offset(0.0, -1.0),
+    ).animate(_mapTapAnimController);
+    _bottomNavSize = Tween(
+      begin: 1.0,
+      end: 0.0,
     ).animate(_mapTapAnimController);
   }
 
@@ -73,32 +78,42 @@ class _HomePageState extends State<HomePage>
       },
       child: Scaffold(
         extendBodyBehindAppBar: true,
+        extendBody: true,
         appBar: SlideTransitionPreferredSizeWidget(
           offset: _appBarOffset,
           child: _appBar,
         ),
         body: _subPagesView,
-        bottomNavigationBar: _bottomNavBar(context),
+        bottomNavigationBar: SizeTransition(
+          child: _bottomNavBar(context),
+          sizeFactor: _bottomNavSize,
+        ),
         drawer: _navigationDrawer(context),
       ),
     );
   }
 
   Widget _bottomNavBar(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _bottomNavBarButton(
-          labelText: 'Lines',
-          onPressed: () => _showLinesPage(context),
-          icon: Icons.grid_on,
-        ),
-        _bottomNavBarButton(
-          labelText: 'Locations',
-          onPressed: () => _showLocationsPage(context),
-          icon: Icons.location_on,
-        ),
-      ],
+    return Container(
+      padding: EdgeInsets.zero,
+      color: Colors.white,
+      height: kBottomNavigationBarHeight,
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _bottomNavBarButton(
+            labelText: 'Lines',
+            onPressed: () => _showLinesPage(context),
+            icon: Icons.grid_on,
+          ),
+          _bottomNavBarButton(
+            labelText: 'Locations',
+            onPressed: () => _showLocationsPage(context),
+            icon: Icons.location_on,
+          ),
+        ],
+      ),
     );
   }
 
@@ -109,6 +124,7 @@ class _HomePageState extends State<HomePage>
   }) {
     return Expanded(
       child: FlatButton.icon(
+        padding: EdgeInsets.zero,
         icon: Icon(icon),
         color: Colors.white,
         onPressed: onPressed,
