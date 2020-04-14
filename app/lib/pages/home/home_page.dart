@@ -78,33 +78,44 @@ class _HomePageState extends State<HomePage>
           child: _appBar,
         ),
         body: _subPagesView,
-        bottomNavigationBar: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: RaisedButton(
-                color: Colors.white,
-                onPressed: () => _showLinesPage(context),
-                child: Text(
-                  'Lines',
-                  style: const TextStyle(fontSize: 18),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: RaisedButton(
-                color: Colors.white,
-                onPressed: () => _showLocationsPage(context),
-                child: Text(
-                  'Locations',
-                  style: const TextStyle(fontSize: 18),
-                ),
-              ),
-            ),
-          ],
-        ),
+        bottomNavigationBar: _bottomNavBar(context),
         drawer: _navigationDrawer(context),
+      ),
+    );
+  }
+
+  Widget _bottomNavBar(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _bottomNavBarButton(
+          labelText: 'Lines',
+          onPressed: () => _showLinesPage(context),
+          icon: Icons.grid_on,
+        ),
+        _bottomNavBarButton(
+          labelText: 'Locations',
+          onPressed: () => _showLocationsPage(context),
+          icon: Icons.location_on,
+        ),
+      ],
+    );
+  }
+
+  Widget _bottomNavBarButton({
+    @required String labelText,
+    @required void Function() onPressed,
+    @required IconData icon,
+  }) {
+    return Expanded(
+      child: FlatButton.icon(
+        icon: Icon(icon),
+        color: Colors.white,
+        onPressed: onPressed,
+        label: Text(
+          labelText,
+          style: const TextStyle(fontSize: 18),
+        ),
       ),
     );
   }
