@@ -223,6 +223,28 @@ class _HomePageState extends State<HomePage>
     );
   }
 
+  Widget _drawerListTile({
+    @required String labelText,
+    @required IconData icon,
+    @required void Function() onTap,
+  }) {
+    return ListTile(
+      title: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 15.0),
+            child: Icon(icon),
+          ),
+          Text(
+            labelText,
+            style: const TextStyle(fontSize: 16),
+          ),
+        ],
+      ),
+      onTap: onTap,
+    );
+  }
+
   Widget _navigationDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -232,15 +254,17 @@ class _HomePageState extends State<HomePage>
             child: Text('Transport Control'),
             decoration: const BoxDecoration(color: Colors.blue),
           ),
-          ListTile(
-            title: Text('Lines'),
+          _drawerListTile(
+            labelText: 'Lines',
+            icon: Icons.grid_on,
             onTap: () {
               Navigator.pop(context);
               _showLinesPage(context);
             },
           ),
-          ListTile(
-            title: Text('Locations'),
+          _drawerListTile(
+            labelText: 'Locations',
+            icon: Icons.location_on,
             onTap: () {
               Navigator.pop(context);
               _showLocationsPage(context);
