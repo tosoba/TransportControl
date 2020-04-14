@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
+import 'package:transport_control/pages/locations/locations_page.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/places/places_page.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
@@ -23,7 +24,6 @@ class _HomePageState extends State<HomePage>
 
   AnimationController _mapTapAnimController;
   Animation<Offset> _appBarOffset;
-  Animation<double> _fabOpacity;
 
   @override
   void initState() {
@@ -46,10 +46,6 @@ class _HomePageState extends State<HomePage>
     _appBarOffset = Tween<Offset>(
       begin: Offset.zero,
       end: Offset(0.0, -1.0),
-    ).animate(_mapTapAnimController);
-    _fabOpacity = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
     ).animate(_mapTapAnimController);
   }
 
@@ -82,12 +78,31 @@ class _HomePageState extends State<HomePage>
           child: _appBar,
         ),
         body: _subPagesView,
-        floatingActionButton: Visibility(
-          visible: _currentPageIndex == 0,
-          child: FadeTransition(
-            child: _floatingActionButton(context),
-            opacity: _fabOpacity,
-          ),
+        bottomNavigationBar: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RaisedButton(
+                color: Colors.white,
+                onPressed: () => _showLinesPage(context),
+                child: Text(
+                  'Lines',
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RaisedButton(
+                color: Colors.white,
+                onPressed: () => _showLocationsPage(context),
+                child: Text(
+                  'Locations',
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
+          ],
         ),
         drawer: _navigationDrawer(context),
       ),
@@ -152,13 +167,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  Widget _floatingActionButton(BuildContext context) {
-    return FloatingActionButton(
-      child: Icon(Icons.grid_on),
-      onPressed: () => _showLinesPage(context),
-    );
-  }
-
   Future _showLinesPage(BuildContext context) async {
     await Navigator.push(
       context,
@@ -171,22 +179,35 @@ class _HomePageState extends State<HomePage>
     );
   }
 
+  Future _showLocationsPage(BuildContext context) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => LocationsPage()),
+    );
+  }
+
   Widget _navigationDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            child: Text('Drawer Header'),
+            child: Text('Transport Control'),
             decoration: const BoxDecoration(color: Colors.blue),
           ),
           ListTile(
-            title: Text('Item 1'),
-            onTap: () => Navigator.pop(context),
+            title: Text('Lines'),
+            onTap: () {
+              Navigator.pop(context);
+              _showLinesPage(context);
+            },
           ),
           ListTile(
-            title: Text('Item 2'),
-            onTap: () => Navigator.pop(context),
+            title: Text('Locations'),
+            onTap: () {
+              Navigator.pop(context);
+              _showLocationsPage(context);
+            },
           ),
         ],
       ),
