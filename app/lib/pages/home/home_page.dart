@@ -83,9 +83,12 @@ class _HomePageState extends State<HomePage>
           child: _appBar,
         ),
         body: _subPagesView,
-        bottomNavigationBar: SizeTransition(
-          child: _bottomNavBar(context),
-          sizeFactor: _bottomNavSize,
+        bottomNavigationBar: Visibility(
+          visible: _currentPageIndex == 0,
+          child: SizeTransition(
+            child: _bottomNavBar(context),
+            sizeFactor: _bottomNavSize,
+          ),
         ),
         drawer: _navigationDrawer(context),
       ),
