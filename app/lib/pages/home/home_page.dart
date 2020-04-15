@@ -15,12 +15,13 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+enum _SubPage { map, places }
+
 class _HomePageState extends State<HomePage>
     with TickerProviderStateMixin<HomePage> {
   FocusNode _searchFieldFocusNode;
 
-  int _currentPageIndex = 0;
-  List<Widget> _subPages;
+  _SubPage _currentPage = _SubPage.map;
 
   AnimationController _mapTapAnimController;
   Animation<Offset> _appBarOffset;
@@ -43,18 +44,10 @@ class _HomePageState extends State<HomePage>
       end: Offset.zero,
     ).animate(_placesPageAnimController);
 
-    _subPages = [
-      MapPage(mapTapped: _mapTapped),
-      SlideTransition(
-        child: PlacesPage(),
-        position: _placesPageOffset,
-      )
-    ];
-
     _searchFieldFocusNode = FocusNode()
       ..addListener(() {
-        if (_searchFieldFocusNode.hasFocus && _currentPageIndex != 1)
-          _changeSubPage(index: 1);
+        if (_searchFieldFocusNode.hasFocus && _currentPage != _SubPage.places)
+          _changeSubPage(_SubPage.places);
       });
 
     _mapTapAnimController = AnimationController(
@@ -95,9 +88,15 @@ class _HomePageState extends State<HomePage>
           offset: _appBarOffset,
           child: _appBar,
         ),
-        body: _subPagesStack,
+        body: Stack(children: [
+          MapPage(mapTapped: _mapTapped),
+          SlideTransition(
+            child: PlacesPage(),
+            position: _placesPageOffset,
+          )
+        ]),
         bottomNavigationBar: Visibility(
-          visible: _currentPageIndex == 0,
+          visible: _currentPage == _SubPage.map,
           child: SizeTransition(
             child: _bottomNavBar(context),
             sizeFactor: _bottomNavSize,
@@ -109,7 +108,7 @@ class _HomePageState extends State<HomePage>
   }
 
   Future<bool> _onWillPop() {
-    if (_currentPageIndex == 1) {
+    if (_currentPage == _SubPage.places) {
       _showMapPage();
       return Future.value(false);
     } else {
@@ -172,11 +171,11 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  void _changeSubPage({int index}) {
-    setState(() => _currentPageIndex = index);
-    if (index == 0) {
+  void _changeSubPage(_SubPage page) {
+    setState(() => _currentPage = page);
+    if (page == _SubPage.map) {
       _placesPageAnimController.reverse();
-    } else if (index == 1) {
+    } else if (page == _SubPage.places) {
       _placesPageAnimController.forward();
       _mapTapAnimController.reverse();
     }
@@ -184,22 +183,18 @@ class _HomePageState extends State<HomePage>
 
   void _showMapPage() {
     _searchFieldFocusNode.unfocus();
-    _changeSubPage(index: 0);
-  }
-
-  Widget get _subPagesStack {
-    return Stack(children: _subPages);
+    _changeSubPage(_SubPage.map);
   }
 
   Widget get _drawerButton {
     return Builder(
       builder: (context) => CircularButton(
         child: Icon(
-          _currentPageIndex == 1 ? Icons.arrow_back : Icons.menu,
+          _currentPage == _SubPage.places ? Icons.arrow_back : Icons.menu,
           color: Colors.black,
         ),
         onPressed: () {
-          if (_currentPageIndex == 1) {
+          if (_currentPage == _SubPage.places) {
             _showMapPage();
           } else {
             Scaffold.of(context).openDrawer();
