@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:transport_control/db/dao/favourite_lines_dao.dart';
+import 'package:transport_control/db/dao/lines_dao.dart';
 import 'package:transport_control/di/injection.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/repo/lines_repo.dart';
@@ -7,7 +7,7 @@ import 'package:transport_control/repo/lines_repo.dart';
 @RegisterAs(LinesRepo, env: Env.dev)
 @singleton
 class LinesRepoImpl extends LinesRepo {
-  final FavouriteLinesDao _dao;
+  final LinesDao _dao;
 
   LinesRepoImpl(this._dao);
 
@@ -18,9 +18,7 @@ class LinesRepoImpl extends LinesRepo {
   }
 
   @override
-  Future insertLine(Line line) {
-    return _dao.insertLine(line.db);
-  }
+  Future insertLine(Line line) => _dao.insertLine(line.db);
 
   @override
   Future<int> deleteLines(Iterable<String> symbols) {

@@ -90,9 +90,7 @@ class VehiclesRepoImpl extends VehiclesRepo {
 }
 
 extension _VehicleResponsesExt on List<VehiclesResponse> {
-  List<Vehicle> filterVehicles(
-    bool Function(Vehicle) filter,
-  ) {
+  List<Vehicle> filterVehicles(bool Function(Vehicle) filter) {
     return map(
       (response) => response.vehicles.where(filter).toList(),
     ).fold<List<Vehicle>>(

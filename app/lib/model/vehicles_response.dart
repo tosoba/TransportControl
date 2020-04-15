@@ -10,6 +10,9 @@ class VehiclesResponse {
 
   VehiclesResponse({this.vehicles});
 
-  factory VehiclesResponse.fromJson(Map<String, dynamic> json) => _$VehiclesResponseFromJson(json);
+  factory VehiclesResponse.fromJson(Map<String, dynamic> json) {
+    return _$VehiclesResponseFromJson(json);
+  }
+
   Map<String, dynamic> toJson() => _$VehiclesResponseToJson(this);
 }

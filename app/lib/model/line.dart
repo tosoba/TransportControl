@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:quiver/core.dart';
-import 'package:transport_control/db/database.dart';
+import 'package:transport_control/db/database.dart' as Db;
 
 part 'line.g.dart';
 
@@ -14,6 +14,7 @@ class Line {
   Line(this.symbol, this.dest1, this.dest2, this.type);
 
   factory Line.fromJson(Map<String, dynamic> json) => _$LineFromJson(json);
+
   Map<String, dynamic> toJson() => _$LineToJson(this);
 
   bool operator ==(o) {
@@ -33,8 +34,8 @@ class Line {
     );
   }
 
-  FavouriteLine get db {
-    return FavouriteLine(
+  Db.Line get db {
+    return Db.Line(
       symbol: symbol,
       dest1: dest1,
       dest2: dest2,
@@ -42,7 +43,7 @@ class Line {
     );
   }
 
-  Line.fromDb(FavouriteLine line)
+  Line.fromDb(Db.Line line)
       : symbol = line.symbol,
         dest1 = line.dest1,
         dest2 = line.dest2,

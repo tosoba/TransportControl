@@ -7,23 +7,22 @@ part of 'database.dart';
 // **************************************************************************
 
 // ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
-class FavouriteLine extends DataClass implements Insertable<FavouriteLine> {
+class Line extends DataClass implements Insertable<Line> {
   final String symbol;
   final String dest1;
   final String dest2;
   final int type;
-  FavouriteLine(
+  Line(
       {@required this.symbol,
       @required this.dest1,
       @required this.dest2,
       @required this.type});
-  factory FavouriteLine.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
+  factory Line.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
-    return FavouriteLine(
+    return Line(
       symbol:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}symbol']),
       dest1:
@@ -33,10 +32,10 @@ class FavouriteLine extends DataClass implements Insertable<FavouriteLine> {
       type: intType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
     );
   }
-  factory FavouriteLine.fromJson(Map<String, dynamic> json,
+  factory Line.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
-    return FavouriteLine(
+    return Line(
       symbol: serializer.fromJson<String>(json['symbol']),
       dest1: serializer.fromJson<String>(json['dest1']),
       dest2: serializer.fromJson<String>(json['dest2']),
@@ -55,8 +54,8 @@ class FavouriteLine extends DataClass implements Insertable<FavouriteLine> {
   }
 
   @override
-  FavouriteLinesCompanion createCompanion(bool nullToAbsent) {
-    return FavouriteLinesCompanion(
+  LinesCompanion createCompanion(bool nullToAbsent) {
+    return LinesCompanion(
       symbol:
           symbol == null && nullToAbsent ? const Value.absent() : Value(symbol),
       dest1:
@@ -67,9 +66,7 @@ class FavouriteLine extends DataClass implements Insertable<FavouriteLine> {
     );
   }
 
-  FavouriteLine copyWith(
-          {String symbol, String dest1, String dest2, int type}) =>
-      FavouriteLine(
+  Line copyWith({String symbol, String dest1, String dest2, int type}) => Line(
         symbol: symbol ?? this.symbol,
         dest1: dest1 ?? this.dest1,
         dest2: dest2 ?? this.dest2,
@@ -77,7 +74,7 @@ class FavouriteLine extends DataClass implements Insertable<FavouriteLine> {
       );
   @override
   String toString() {
-    return (StringBuffer('FavouriteLine(')
+    return (StringBuffer('Line(')
           ..write('symbol: $symbol, ')
           ..write('dest1: $dest1, ')
           ..write('dest2: $dest2, ')
@@ -92,25 +89,25 @@ class FavouriteLine extends DataClass implements Insertable<FavouriteLine> {
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is FavouriteLine &&
+      (other is Line &&
           other.symbol == this.symbol &&
           other.dest1 == this.dest1 &&
           other.dest2 == this.dest2 &&
           other.type == this.type);
 }
 
-class FavouriteLinesCompanion extends UpdateCompanion<FavouriteLine> {
+class LinesCompanion extends UpdateCompanion<Line> {
   final Value<String> symbol;
   final Value<String> dest1;
   final Value<String> dest2;
   final Value<int> type;
-  const FavouriteLinesCompanion({
+  const LinesCompanion({
     this.symbol = const Value.absent(),
     this.dest1 = const Value.absent(),
     this.dest2 = const Value.absent(),
     this.type = const Value.absent(),
   });
-  FavouriteLinesCompanion.insert({
+  LinesCompanion.insert({
     @required String symbol,
     @required String dest1,
     @required String dest2,
@@ -119,12 +116,12 @@ class FavouriteLinesCompanion extends UpdateCompanion<FavouriteLine> {
         dest1 = Value(dest1),
         dest2 = Value(dest2),
         type = Value(type);
-  FavouriteLinesCompanion copyWith(
+  LinesCompanion copyWith(
       {Value<String> symbol,
       Value<String> dest1,
       Value<String> dest2,
       Value<int> type}) {
-    return FavouriteLinesCompanion(
+    return LinesCompanion(
       symbol: symbol ?? this.symbol,
       dest1: dest1 ?? this.dest1,
       dest2: dest2 ?? this.dest2,
@@ -133,11 +130,10 @@ class FavouriteLinesCompanion extends UpdateCompanion<FavouriteLine> {
   }
 }
 
-class $FavouriteLinesTable extends FavouriteLines
-    with TableInfo<$FavouriteLinesTable, FavouriteLine> {
+class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
   final GeneratedDatabase _db;
   final String _alias;
-  $FavouriteLinesTable(this._db, [this._alias]);
+  $LinesTable(this._db, [this._alias]);
   final VerificationMeta _symbolMeta = const VerificationMeta('symbol');
   GeneratedTextColumn _symbol;
   @override
@@ -189,13 +185,13 @@ class $FavouriteLinesTable extends FavouriteLines
   @override
   List<GeneratedColumn> get $columns => [symbol, dest1, dest2, type];
   @override
-  $FavouriteLinesTable get asDslTable => this;
+  $LinesTable get asDslTable => this;
   @override
-  String get $tableName => _alias ?? 'favourite_lines';
+  String get $tableName => _alias ?? 'lines';
   @override
-  final String actualTableName = 'favourite_lines';
+  final String actualTableName = 'lines';
   @override
-  VerificationContext validateIntegrity(FavouriteLinesCompanion d,
+  VerificationContext validateIntegrity(LinesCompanion d,
       {bool isInserting = false}) {
     final context = VerificationContext();
     if (d.symbol.present) {
@@ -228,13 +224,13 @@ class $FavouriteLinesTable extends FavouriteLines
   @override
   Set<GeneratedColumn> get $primaryKey => <GeneratedColumn>{};
   @override
-  FavouriteLine map(Map<String, dynamic> data, {String tablePrefix}) {
+  Line map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return FavouriteLine.fromData(data, _db, prefix: effectivePrefix);
+    return Line.fromData(data, _db, prefix: effectivePrefix);
   }
 
   @override
-  Map<String, Variable> entityToSql(FavouriteLinesCompanion d) {
+  Map<String, Variable> entityToSql(LinesCompanion d) {
     final map = <String, Variable>{};
     if (d.symbol.present) {
       map['symbol'] = Variable<String, StringType>(d.symbol.value);
@@ -252,34 +248,40 @@ class $FavouriteLinesTable extends FavouriteLines
   }
 
   @override
-  $FavouriteLinesTable createAlias(String alias) {
-    return $FavouriteLinesTable(_db, alias);
+  $LinesTable createAlias(String alias) {
+    return $LinesTable(_db, alias);
   }
 }
 
-class FavouriteLocation extends DataClass
-    implements Insertable<FavouriteLocation> {
+class Location extends DataClass implements Insertable<Location> {
   final int id;
   final String name;
   final double southWestLat;
   final double southWestLng;
   final double northEastLat;
   final double northEastLng;
-  FavouriteLocation(
+  final bool isFavourite;
+  final DateTime lastSearched;
+  final int timesSearched;
+  Location(
       {@required this.id,
       @required this.name,
       @required this.southWestLat,
       @required this.southWestLng,
       @required this.northEastLat,
-      @required this.northEastLng});
-  factory FavouriteLocation.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
+      @required this.northEastLng,
+      @required this.isFavourite,
+      @required this.lastSearched,
+      @required this.timesSearched});
+  factory Location.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final intType = db.typeSystem.forDartType<int>();
     final stringType = db.typeSystem.forDartType<String>();
     final doubleType = db.typeSystem.forDartType<double>();
-    return FavouriteLocation(
+    final boolType = db.typeSystem.forDartType<bool>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    return Location(
       id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       southWestLat: doubleType
@@ -290,18 +292,27 @@ class FavouriteLocation extends DataClass
           .mapFromDatabaseResponse(data['${effectivePrefix}north_east_lat']),
       northEastLng: doubleType
           .mapFromDatabaseResponse(data['${effectivePrefix}north_east_lng']),
+      isFavourite: boolType
+          .mapFromDatabaseResponse(data['${effectivePrefix}is_favourite']),
+      lastSearched: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}last_searched']),
+      timesSearched: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}times_searched']),
     );
   }
-  factory FavouriteLocation.fromJson(Map<String, dynamic> json,
+  factory Location.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
-    return FavouriteLocation(
+    return Location(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       southWestLat: serializer.fromJson<double>(json['southWestLat']),
       southWestLng: serializer.fromJson<double>(json['southWestLng']),
       northEastLat: serializer.fromJson<double>(json['northEastLat']),
       northEastLng: serializer.fromJson<double>(json['northEastLng']),
+      isFavourite: serializer.fromJson<bool>(json['isFavourite']),
+      lastSearched: serializer.fromJson<DateTime>(json['lastSearched']),
+      timesSearched: serializer.fromJson<int>(json['timesSearched']),
     );
   }
   @override
@@ -314,12 +325,15 @@ class FavouriteLocation extends DataClass
       'southWestLng': serializer.toJson<double>(southWestLng),
       'northEastLat': serializer.toJson<double>(northEastLat),
       'northEastLng': serializer.toJson<double>(northEastLng),
+      'isFavourite': serializer.toJson<bool>(isFavourite),
+      'lastSearched': serializer.toJson<DateTime>(lastSearched),
+      'timesSearched': serializer.toJson<int>(timesSearched),
     };
   }
 
   @override
-  FavouriteLocationsCompanion createCompanion(bool nullToAbsent) {
-    return FavouriteLocationsCompanion(
+  LocationsCompanion createCompanion(bool nullToAbsent) {
+    return LocationsCompanion(
       id: id == null && nullToAbsent ? const Value.absent() : Value(id),
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
       southWestLat: southWestLat == null && nullToAbsent
@@ -334,33 +348,51 @@ class FavouriteLocation extends DataClass
       northEastLng: northEastLng == null && nullToAbsent
           ? const Value.absent()
           : Value(northEastLng),
+      isFavourite: isFavourite == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isFavourite),
+      lastSearched: lastSearched == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSearched),
+      timesSearched: timesSearched == null && nullToAbsent
+          ? const Value.absent()
+          : Value(timesSearched),
     );
   }
 
-  FavouriteLocation copyWith(
+  Location copyWith(
           {int id,
           String name,
           double southWestLat,
           double southWestLng,
           double northEastLat,
-          double northEastLng}) =>
-      FavouriteLocation(
+          double northEastLng,
+          bool isFavourite,
+          DateTime lastSearched,
+          int timesSearched}) =>
+      Location(
         id: id ?? this.id,
         name: name ?? this.name,
         southWestLat: southWestLat ?? this.southWestLat,
         southWestLng: southWestLng ?? this.southWestLng,
         northEastLat: northEastLat ?? this.northEastLat,
         northEastLng: northEastLng ?? this.northEastLng,
+        isFavourite: isFavourite ?? this.isFavourite,
+        lastSearched: lastSearched ?? this.lastSearched,
+        timesSearched: timesSearched ?? this.timesSearched,
       );
   @override
   String toString() {
-    return (StringBuffer('FavouriteLocation(')
+    return (StringBuffer('Location(')
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('southWestLat: $southWestLat, ')
           ..write('southWestLng: $southWestLng, ')
           ..write('northEastLat: $northEastLat, ')
-          ..write('northEastLng: $northEastLng')
+          ..write('northEastLng: $northEastLng, ')
+          ..write('isFavourite: $isFavourite, ')
+          ..write('lastSearched: $lastSearched, ')
+          ..write('timesSearched: $timesSearched')
           ..write(')'))
         .toString();
   }
@@ -372,70 +404,97 @@ class FavouriteLocation extends DataClass
           name.hashCode,
           $mrjc(
               southWestLat.hashCode,
-              $mrjc(southWestLng.hashCode,
-                  $mrjc(northEastLat.hashCode, northEastLng.hashCode))))));
+              $mrjc(
+                  southWestLng.hashCode,
+                  $mrjc(
+                      northEastLat.hashCode,
+                      $mrjc(
+                          northEastLng.hashCode,
+                          $mrjc(
+                              isFavourite.hashCode,
+                              $mrjc(lastSearched.hashCode,
+                                  timesSearched.hashCode)))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is FavouriteLocation &&
+      (other is Location &&
           other.id == this.id &&
           other.name == this.name &&
           other.southWestLat == this.southWestLat &&
           other.southWestLng == this.southWestLng &&
           other.northEastLat == this.northEastLat &&
-          other.northEastLng == this.northEastLng);
+          other.northEastLng == this.northEastLng &&
+          other.isFavourite == this.isFavourite &&
+          other.lastSearched == this.lastSearched &&
+          other.timesSearched == this.timesSearched);
 }
 
-class FavouriteLocationsCompanion extends UpdateCompanion<FavouriteLocation> {
+class LocationsCompanion extends UpdateCompanion<Location> {
   final Value<int> id;
   final Value<String> name;
   final Value<double> southWestLat;
   final Value<double> southWestLng;
   final Value<double> northEastLat;
   final Value<double> northEastLng;
-  const FavouriteLocationsCompanion({
+  final Value<bool> isFavourite;
+  final Value<DateTime> lastSearched;
+  final Value<int> timesSearched;
+  const LocationsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.southWestLat = const Value.absent(),
     this.southWestLng = const Value.absent(),
     this.northEastLat = const Value.absent(),
     this.northEastLng = const Value.absent(),
+    this.isFavourite = const Value.absent(),
+    this.lastSearched = const Value.absent(),
+    this.timesSearched = const Value.absent(),
   });
-  FavouriteLocationsCompanion.insert({
+  LocationsCompanion.insert({
     this.id = const Value.absent(),
     @required String name,
     @required double southWestLat,
     @required double southWestLng,
     @required double northEastLat,
     @required double northEastLng,
+    this.isFavourite = const Value.absent(),
+    @required DateTime lastSearched,
+    this.timesSearched = const Value.absent(),
   })  : name = Value(name),
         southWestLat = Value(southWestLat),
         southWestLng = Value(southWestLng),
         northEastLat = Value(northEastLat),
-        northEastLng = Value(northEastLng);
-  FavouriteLocationsCompanion copyWith(
+        northEastLng = Value(northEastLng),
+        lastSearched = Value(lastSearched);
+  LocationsCompanion copyWith(
       {Value<int> id,
       Value<String> name,
       Value<double> southWestLat,
       Value<double> southWestLng,
       Value<double> northEastLat,
-      Value<double> northEastLng}) {
-    return FavouriteLocationsCompanion(
+      Value<double> northEastLng,
+      Value<bool> isFavourite,
+      Value<DateTime> lastSearched,
+      Value<int> timesSearched}) {
+    return LocationsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       southWestLat: southWestLat ?? this.southWestLat,
       southWestLng: southWestLng ?? this.southWestLng,
       northEastLat: northEastLat ?? this.northEastLat,
       northEastLng: northEastLng ?? this.northEastLng,
+      isFavourite: isFavourite ?? this.isFavourite,
+      lastSearched: lastSearched ?? this.lastSearched,
+      timesSearched: timesSearched ?? this.timesSearched,
     );
   }
 }
 
-class $FavouriteLocationsTable extends FavouriteLocations
-    with TableInfo<$FavouriteLocationsTable, FavouriteLocation> {
+class $LocationsTable extends Locations
+    with TableInfo<$LocationsTable, Location> {
   final GeneratedDatabase _db;
   final String _alias;
-  $FavouriteLocationsTable(this._db, [this._alias]);
+  $LocationsTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   GeneratedIntColumn _id;
   @override
@@ -513,17 +572,62 @@ class $FavouriteLocationsTable extends FavouriteLocations
     );
   }
 
+  final VerificationMeta _isFavouriteMeta =
+      const VerificationMeta('isFavourite');
+  GeneratedBoolColumn _isFavourite;
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, southWestLat, southWestLng, northEastLat, northEastLng];
+  GeneratedBoolColumn get isFavourite =>
+      _isFavourite ??= _constructIsFavourite();
+  GeneratedBoolColumn _constructIsFavourite() {
+    return GeneratedBoolColumn('is_favourite', $tableName, false,
+        defaultValue: const Constant(false));
+  }
+
+  final VerificationMeta _lastSearchedMeta =
+      const VerificationMeta('lastSearched');
+  GeneratedDateTimeColumn _lastSearched;
   @override
-  $FavouriteLocationsTable get asDslTable => this;
+  GeneratedDateTimeColumn get lastSearched =>
+      _lastSearched ??= _constructLastSearched();
+  GeneratedDateTimeColumn _constructLastSearched() {
+    return GeneratedDateTimeColumn(
+      'last_searched',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _timesSearchedMeta =
+      const VerificationMeta('timesSearched');
+  GeneratedIntColumn _timesSearched;
   @override
-  String get $tableName => _alias ?? 'favourite_locations';
+  GeneratedIntColumn get timesSearched =>
+      _timesSearched ??= _constructTimesSearched();
+  GeneratedIntColumn _constructTimesSearched() {
+    return GeneratedIntColumn('times_searched', $tableName, false,
+        defaultValue: const Constant(1));
+  }
+
   @override
-  final String actualTableName = 'favourite_locations';
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        southWestLat,
+        southWestLng,
+        northEastLat,
+        northEastLng,
+        isFavourite,
+        lastSearched,
+        timesSearched
+      ];
   @override
-  VerificationContext validateIntegrity(FavouriteLocationsCompanion d,
+  $LocationsTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'locations';
+  @override
+  final String actualTableName = 'locations';
+  @override
+  VerificationContext validateIntegrity(LocationsCompanion d,
       {bool isInserting = false}) {
     final context = VerificationContext();
     if (d.id.present) {
@@ -567,19 +671,37 @@ class $FavouriteLocationsTable extends FavouriteLocations
     } else if (isInserting) {
       context.missing(_northEastLngMeta);
     }
+    if (d.isFavourite.present) {
+      context.handle(_isFavouriteMeta,
+          isFavourite.isAcceptableValue(d.isFavourite.value, _isFavouriteMeta));
+    }
+    if (d.lastSearched.present) {
+      context.handle(
+          _lastSearchedMeta,
+          lastSearched.isAcceptableValue(
+              d.lastSearched.value, _lastSearchedMeta));
+    } else if (isInserting) {
+      context.missing(_lastSearchedMeta);
+    }
+    if (d.timesSearched.present) {
+      context.handle(
+          _timesSearchedMeta,
+          timesSearched.isAcceptableValue(
+              d.timesSearched.value, _timesSearchedMeta));
+    }
     return context;
   }
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  FavouriteLocation map(Map<String, dynamic> data, {String tablePrefix}) {
+  Location map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return FavouriteLocation.fromData(data, _db, prefix: effectivePrefix);
+    return Location.fromData(data, _db, prefix: effectivePrefix);
   }
 
   @override
-  Map<String, Variable> entityToSql(FavouriteLocationsCompanion d) {
+  Map<String, Variable> entityToSql(LocationsCompanion d) {
     final map = <String, Variable>{};
     if (d.id.present) {
       map['id'] = Variable<int, IntType>(d.id.value);
@@ -599,32 +721,38 @@ class $FavouriteLocationsTable extends FavouriteLocations
     if (d.northEastLng.present) {
       map['north_east_lng'] = Variable<double, RealType>(d.northEastLng.value);
     }
+    if (d.isFavourite.present) {
+      map['is_favourite'] = Variable<bool, BoolType>(d.isFavourite.value);
+    }
+    if (d.lastSearched.present) {
+      map['last_searched'] =
+          Variable<DateTime, DateTimeType>(d.lastSearched.value);
+    }
+    if (d.timesSearched.present) {
+      map['times_searched'] = Variable<int, IntType>(d.timesSearched.value);
+    }
     return map;
   }
 
   @override
-  $FavouriteLocationsTable createAlias(String alias) {
-    return $FavouriteLocationsTable(_db, alias);
+  $LocationsTable createAlias(String alias) {
+    return $LocationsTable(_db, alias);
   }
 }
 
 abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
-  $FavouriteLinesTable _favouriteLines;
-  $FavouriteLinesTable get favouriteLines =>
-      _favouriteLines ??= $FavouriteLinesTable(this);
-  $FavouriteLocationsTable _favouriteLocations;
-  $FavouriteLocationsTable get favouriteLocations =>
-      _favouriteLocations ??= $FavouriteLocationsTable(this);
-  FavouriteLinesDao _favouriteLinesDao;
-  FavouriteLinesDao get favouriteLinesDao =>
-      _favouriteLinesDao ??= FavouriteLinesDao(this as Database);
-  FavouriteLocationsDao _favouriteLocationsDao;
-  FavouriteLocationsDao get favouriteLocationsDao =>
-      _favouriteLocationsDao ??= FavouriteLocationsDao(this as Database);
+  $LinesTable _lines;
+  $LinesTable get lines => _lines ??= $LinesTable(this);
+  $LocationsTable _locations;
+  $LocationsTable get locations => _locations ??= $LocationsTable(this);
+  LinesDao _linesDao;
+  LinesDao get linesDao => _linesDao ??= LinesDao(this as Database);
+  LocationsDao _locationsDao;
+  LocationsDao get locationsDao =>
+      _locationsDao ??= LocationsDao(this as Database);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [favouriteLines, favouriteLocations];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [lines, locations];
 }

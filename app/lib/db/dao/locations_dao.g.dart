@@ -1,11 +1,11 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'favourite_lines_dao.dart';
+part of 'locations_dao.dart';
 
 // **************************************************************************
 // DaoGenerator
 // **************************************************************************
 
-mixin _$FavouriteLinesDaoMixin on DatabaseAccessor<Database> {
-  $FavouriteLinesTable get favouriteLines => db.favouriteLines;
+mixin _$LocationsDaoMixin on DatabaseAccessor<Database> {
+  $LocationsTable get locations => db.locations;
 }

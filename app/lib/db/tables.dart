@@ -1,4 +1,6 @@
 class Tables {
-  static const favouriteLine = 'FavouriteLine';
-  static const favouriteLocation = 'FavouriteLocation';
+  static const lines = 'Line';
+  static const locations = 'Location';
+
+  Tables._();
 }

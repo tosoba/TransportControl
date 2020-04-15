@@ -7,9 +7,9 @@
 import 'package:transport_control/db/database.dart';
 import 'package:dio/dio.dart';
 import 'package:transport_control/di/module/api_module.dart';
+import 'package:transport_control/db/dao/lines_dao.dart';
+import 'package:transport_control/db/dao/locations_dao.dart';
 import 'package:transport_control/api/vehicles_api.dart';
-import 'package:transport_control/db/dao/favourite_lines_dao.dart';
-import 'package:transport_control/db/dao/favourite_locations_dao.dart';
 import 'package:transport_control/repo/impl/lines_repo_impl.dart';
 import 'package:transport_control/repo/lines_repo.dart';
 import 'package:transport_control/repo/impl/vehicles_repo_impl.dart';
@@ -18,10 +18,10 @@ import 'package:get_it/get_it.dart';
 
 void $initGetIt(GetIt g, {String environment}) {
   final apiModule = _$ApiModule();
-  g.registerFactory<FavouriteLinesDao>(() => FavouriteLinesDao.of(
+  g.registerFactory<LinesDao>(() => LinesDao.of(
         g<Database>(),
       ));
-  g.registerFactory<FavouriteLocationsDao>(() => FavouriteLocationsDao.of(
+  g.registerFactory<LocationsDao>(() => LocationsDao.of(
         g<Database>(),
       ));
 
@@ -33,7 +33,7 @@ void $initGetIt(GetIt g, {String environment}) {
   ));
   if (environment == 'dev') {
     g.registerSingleton<LinesRepo>(LinesRepoImpl(
-      g<FavouriteLinesDao>(),
+      g<LinesDao>(),
     ));
     g.registerSingleton<VehiclesRepo>(VehiclesRepoImpl(
       g<VehiclesApi>(),
