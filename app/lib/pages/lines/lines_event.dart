@@ -19,7 +19,7 @@ enum _LinesEvent {
   LineSelectionChanged,
 
   @object
-  SelectionReset,
+  ResetSelection,
 
   @object
   TrackSelectedLines,

@@ -72,7 +72,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
         updatedLines[evt.line] = oldLineState.toggleSelection;
         return state.copyWith(lines: updatedLines);
       },
-      selectionReset: (_) => state.copyWith(
+      resetSelection: (_) => state.copyWith(
         lines: state.lines.map(
           (line, lineState) => lineState.selected
               ? MapEntry(line, lineState.toggleSelection)
@@ -152,7 +152,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     add(LinesEvent.lineSelectionChanged(line: line));
   }
 
-  void selectionReset() => add(LinesEvent.selectionReset());
+  void resetSelection() => add(LinesEvent.resetSelection());
 
   void symbolFilterChanged(String filter) {
     add(LinesEvent.symbolFilterChanged(filter: filter));

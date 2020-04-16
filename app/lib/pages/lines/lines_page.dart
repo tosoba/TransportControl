@@ -198,7 +198,7 @@ class _LinesPageState extends State<LinesPage>
                   actionPressed: () {
                     context.bloc<LinesBloc>()
                       ..trackSelectedLines()
-                      ..selectionReset();
+                      ..resetSelection();
                     Navigator.pop(context);
                   },
                   numberOfLines: numberOfUntracked,
@@ -211,7 +211,7 @@ class _LinesPageState extends State<LinesPage>
                   actionPressed: () {
                     context.bloc<LinesBloc>()
                       ..untrackSelectedLines()
-                      ..selectionReset();
+                      ..resetSelection();
                   },
                   numberOfLines: numberOfTracked,
                 ),
@@ -225,7 +225,7 @@ class _LinesPageState extends State<LinesPage>
                   actionPressed: () {
                     context.bloc<LinesBloc>()
                       ..addSelectedLinesToFavourites()
-                      ..selectionReset();
+                      ..resetSelection();
                   },
                   numberOfLines: numberOfNonFav,
                 ),
@@ -239,7 +239,7 @@ class _LinesPageState extends State<LinesPage>
                   actionPressed: () {
                     context.bloc<LinesBloc>()
                       ..removeSelectedLinesFromFavourites()
-                      ..selectionReset();
+                      ..resetSelection();
                   },
                   numberOfLines: numberOfFav,
                 ),

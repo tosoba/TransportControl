@@ -22,7 +22,7 @@ abstract class LinesEvent extends Equatable {
   factory LinesEvent.lineSelectionChanged({@required Line line}) =
       LineSelectionChanged;
 
-  factory LinesEvent.selectionReset() = SelectionReset;
+  factory LinesEvent.resetSelection() = ResetSelection;
 
   factory LinesEvent.trackSelectedLines() = TrackSelectedLines;
 
@@ -44,7 +44,7 @@ abstract class LinesEvent extends Equatable {
       @required
           R Function(LineSelectionChanged) lineSelectionChanged,
       @required
-          R Function(SelectionReset) selectionReset,
+          R Function(ResetSelection) resetSelection,
       @required
           R Function(TrackSelectedLines) trackSelectedLines,
       @required
@@ -57,7 +57,7 @@ abstract class LinesEvent extends Equatable {
           symbolFilterChanged == null ||
           listFilterChanged == null ||
           lineSelectionChanged == null ||
-          selectionReset == null ||
+          resetSelection == null ||
           trackSelectedLines == null ||
           untrackSelectedLines == null ||
           loadingVehiclesOfLinesFailed == null) {
@@ -74,8 +74,8 @@ abstract class LinesEvent extends Equatable {
         return listFilterChanged(this as ListFilterChanged);
       case _LinesEvent.LineSelectionChanged:
         return lineSelectionChanged(this as LineSelectionChanged);
-      case _LinesEvent.SelectionReset:
-        return selectionReset(this as SelectionReset);
+      case _LinesEvent.ResetSelection:
+        return resetSelection(this as ResetSelection);
       case _LinesEvent.TrackSelectedLines:
         return trackSelectedLines(this as TrackSelectedLines);
       case _LinesEvent.UntrackSelectedLines:
@@ -97,7 +97,7 @@ abstract class LinesEvent extends Equatable {
       @required
           FutureOr<R> Function(LineSelectionChanged) lineSelectionChanged,
       @required
-          FutureOr<R> Function(SelectionReset) selectionReset,
+          FutureOr<R> Function(ResetSelection) resetSelection,
       @required
           FutureOr<R> Function(TrackSelectedLines) trackSelectedLines,
       @required
@@ -110,7 +110,7 @@ abstract class LinesEvent extends Equatable {
           symbolFilterChanged == null ||
           listFilterChanged == null ||
           lineSelectionChanged == null ||
-          selectionReset == null ||
+          resetSelection == null ||
           trackSelectedLines == null ||
           untrackSelectedLines == null ||
           loadingVehiclesOfLinesFailed == null) {
@@ -127,8 +127,8 @@ abstract class LinesEvent extends Equatable {
         return listFilterChanged(this as ListFilterChanged);
       case _LinesEvent.LineSelectionChanged:
         return lineSelectionChanged(this as LineSelectionChanged);
-      case _LinesEvent.SelectionReset:
-        return selectionReset(this as SelectionReset);
+      case _LinesEvent.ResetSelection:
+        return resetSelection(this as ResetSelection);
       case _LinesEvent.TrackSelectedLines:
         return trackSelectedLines(this as TrackSelectedLines);
       case _LinesEvent.UntrackSelectedLines:
@@ -144,7 +144,7 @@ abstract class LinesEvent extends Equatable {
       R Function(SymbolFilterChanged) symbolFilterChanged,
       R Function(ListFilterChanged) listFilterChanged,
       R Function(LineSelectionChanged) lineSelectionChanged,
-      R Function(SelectionReset) selectionReset,
+      R Function(ResetSelection) resetSelection,
       R Function(TrackSelectedLines) trackSelectedLines,
       R Function(UntrackSelectedLines) untrackSelectedLines,
       R Function(LoadingVehiclesOfLinesFailed) loadingVehiclesOfLinesFailed,
@@ -168,9 +168,9 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.LineSelectionChanged:
         if (lineSelectionChanged == null) break;
         return lineSelectionChanged(this as LineSelectionChanged);
-      case _LinesEvent.SelectionReset:
-        if (selectionReset == null) break;
-        return selectionReset(this as SelectionReset);
+      case _LinesEvent.ResetSelection:
+        if (resetSelection == null) break;
+        return resetSelection(this as ResetSelection);
       case _LinesEvent.TrackSelectedLines:
         if (trackSelectedLines == null) break;
         return trackSelectedLines(this as TrackSelectedLines);
@@ -190,7 +190,7 @@ abstract class LinesEvent extends Equatable {
       FutureOr<R> Function(SymbolFilterChanged) symbolFilterChanged,
       FutureOr<R> Function(ListFilterChanged) listFilterChanged,
       FutureOr<R> Function(LineSelectionChanged) lineSelectionChanged,
-      FutureOr<R> Function(SelectionReset) selectionReset,
+      FutureOr<R> Function(ResetSelection) resetSelection,
       FutureOr<R> Function(TrackSelectedLines) trackSelectedLines,
       FutureOr<R> Function(UntrackSelectedLines) untrackSelectedLines,
       FutureOr<R> Function(LoadingVehiclesOfLinesFailed)
@@ -215,9 +215,9 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.LineSelectionChanged:
         if (lineSelectionChanged == null) break;
         return lineSelectionChanged(this as LineSelectionChanged);
-      case _LinesEvent.SelectionReset:
-        if (selectionReset == null) break;
-        return selectionReset(this as SelectionReset);
+      case _LinesEvent.ResetSelection:
+        if (resetSelection == null) break;
+        return resetSelection(this as ResetSelection);
       case _LinesEvent.TrackSelectedLines:
         if (trackSelectedLines == null) break;
         return trackSelectedLines(this as TrackSelectedLines);
@@ -238,7 +238,7 @@ abstract class LinesEvent extends Equatable {
       FutureOr<void> Function(SymbolFilterChanged) symbolFilterChanged,
       FutureOr<void> Function(ListFilterChanged) listFilterChanged,
       FutureOr<void> Function(LineSelectionChanged) lineSelectionChanged,
-      FutureOr<void> Function(SelectionReset) selectionReset,
+      FutureOr<void> Function(ResetSelection) resetSelection,
       FutureOr<void> Function(TrackSelectedLines) trackSelectedLines,
       FutureOr<void> Function(UntrackSelectedLines) untrackSelectedLines,
       FutureOr<void> Function(LoadingVehiclesOfLinesFailed)
@@ -248,7 +248,7 @@ abstract class LinesEvent extends Equatable {
           symbolFilterChanged == null &&
           listFilterChanged == null &&
           lineSelectionChanged == null &&
-          selectionReset == null &&
+          resetSelection == null &&
           trackSelectedLines == null &&
           untrackSelectedLines == null &&
           loadingVehiclesOfLinesFailed == null) {
@@ -269,9 +269,9 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.LineSelectionChanged:
         if (lineSelectionChanged == null) break;
         return lineSelectionChanged(this as LineSelectionChanged);
-      case _LinesEvent.SelectionReset:
-        if (selectionReset == null) break;
-        return selectionReset(this as SelectionReset);
+      case _LinesEvent.ResetSelection:
+        if (resetSelection == null) break;
+        return resetSelection(this as ResetSelection);
       case _LinesEvent.TrackSelectedLines:
         if (trackSelectedLines == null) break;
         return trackSelectedLines(this as TrackSelectedLines);
@@ -341,15 +341,15 @@ class LineSelectionChanged extends LinesEvent {
 }
 
 @immutable
-class SelectionReset extends LinesEvent {
-  const SelectionReset._() : super(_LinesEvent.SelectionReset);
+class ResetSelection extends LinesEvent {
+  const ResetSelection._() : super(_LinesEvent.ResetSelection);
 
-  factory SelectionReset() {
-    _instance ??= const SelectionReset._();
+  factory ResetSelection() {
+    _instance ??= const ResetSelection._();
     return _instance;
   }
 
-  static SelectionReset _instance;
+  static ResetSelection _instance;
 }
 
 @immutable
