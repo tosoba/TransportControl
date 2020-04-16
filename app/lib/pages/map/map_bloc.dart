@@ -57,7 +57,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   @override
   Stream<MapState> mapEventToState(MapEvent event) async* {
     yield event.when(
-      clearMap: (_) => MapState.initial(),
+      clearMap: (_) => state.copyWith(trackedVehicles: {}),
       updateVehicles: (evt) {
         final updatedVehicles = Map.of(state.trackedVehicles);
         evt.vehicles.forEach((vehicle) {
