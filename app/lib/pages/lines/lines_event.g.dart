@@ -10,7 +10,8 @@ part of 'lines_event.dart';
 abstract class LinesEvent extends Equatable {
   const LinesEvent(this._type);
 
-  factory LinesEvent.created({@required Map<Line, LineState> lines}) = Created;
+  factory LinesEvent.updateLines({@required Map<Line, LineState> lines}) =
+      UpdateLines;
 
   factory LinesEvent.symbolFilterChanged({@required String filter}) =
       SymbolFilterChanged;
@@ -35,7 +36,7 @@ abstract class LinesEvent extends Equatable {
 //ignore: missing_return
   R when<R>(
       {@required
-          R Function(Created) created,
+          R Function(UpdateLines) updateLines,
       @required
           R Function(SymbolFilterChanged) symbolFilterChanged,
       @required
@@ -52,7 +53,7 @@ abstract class LinesEvent extends Equatable {
           R Function(LoadingVehiclesOfLinesFailed)
               loadingVehiclesOfLinesFailed}) {
     assert(() {
-      if (created == null ||
+      if (updateLines == null ||
           symbolFilterChanged == null ||
           listFilterChanged == null ||
           lineSelectionChanged == null ||
@@ -65,8 +66,8 @@ abstract class LinesEvent extends Equatable {
       return true;
     }());
     switch (this._type) {
-      case _LinesEvent.Created:
-        return created(this as Created);
+      case _LinesEvent.UpdateLines:
+        return updateLines(this as UpdateLines);
       case _LinesEvent.SymbolFilterChanged:
         return symbolFilterChanged(this as SymbolFilterChanged);
       case _LinesEvent.ListFilterChanged:
@@ -88,7 +89,7 @@ abstract class LinesEvent extends Equatable {
 //ignore: missing_return
   Future<R> asyncWhen<R>(
       {@required
-          FutureOr<R> Function(Created) created,
+          FutureOr<R> Function(UpdateLines) updateLines,
       @required
           FutureOr<R> Function(SymbolFilterChanged) symbolFilterChanged,
       @required
@@ -105,7 +106,7 @@ abstract class LinesEvent extends Equatable {
           FutureOr<R> Function(LoadingVehiclesOfLinesFailed)
               loadingVehiclesOfLinesFailed}) {
     assert(() {
-      if (created == null ||
+      if (updateLines == null ||
           symbolFilterChanged == null ||
           listFilterChanged == null ||
           lineSelectionChanged == null ||
@@ -118,8 +119,8 @@ abstract class LinesEvent extends Equatable {
       return true;
     }());
     switch (this._type) {
-      case _LinesEvent.Created:
-        return created(this as Created);
+      case _LinesEvent.UpdateLines:
+        return updateLines(this as UpdateLines);
       case _LinesEvent.SymbolFilterChanged:
         return symbolFilterChanged(this as SymbolFilterChanged);
       case _LinesEvent.ListFilterChanged:
@@ -139,7 +140,7 @@ abstract class LinesEvent extends Equatable {
   }
 
   R whenOrElse<R>(
-      {R Function(Created) created,
+      {R Function(UpdateLines) updateLines,
       R Function(SymbolFilterChanged) symbolFilterChanged,
       R Function(ListFilterChanged) listFilterChanged,
       R Function(LineSelectionChanged) lineSelectionChanged,
@@ -155,9 +156,9 @@ abstract class LinesEvent extends Equatable {
       return true;
     }());
     switch (this._type) {
-      case _LinesEvent.Created:
-        if (created == null) break;
-        return created(this as Created);
+      case _LinesEvent.UpdateLines:
+        if (updateLines == null) break;
+        return updateLines(this as UpdateLines);
       case _LinesEvent.SymbolFilterChanged:
         if (symbolFilterChanged == null) break;
         return symbolFilterChanged(this as SymbolFilterChanged);
@@ -185,7 +186,7 @@ abstract class LinesEvent extends Equatable {
   }
 
   Future<R> asyncWhenOrElse<R>(
-      {FutureOr<R> Function(Created) created,
+      {FutureOr<R> Function(UpdateLines) updateLines,
       FutureOr<R> Function(SymbolFilterChanged) symbolFilterChanged,
       FutureOr<R> Function(ListFilterChanged) listFilterChanged,
       FutureOr<R> Function(LineSelectionChanged) lineSelectionChanged,
@@ -202,9 +203,9 @@ abstract class LinesEvent extends Equatable {
       return true;
     }());
     switch (this._type) {
-      case _LinesEvent.Created:
-        if (created == null) break;
-        return created(this as Created);
+      case _LinesEvent.UpdateLines:
+        if (updateLines == null) break;
+        return updateLines(this as UpdateLines);
       case _LinesEvent.SymbolFilterChanged:
         if (symbolFilterChanged == null) break;
         return symbolFilterChanged(this as SymbolFilterChanged);
@@ -233,7 +234,7 @@ abstract class LinesEvent extends Equatable {
 
 //ignore: missing_return
   Future<void> whenPartial(
-      {FutureOr<void> Function(Created) created,
+      {FutureOr<void> Function(UpdateLines) updateLines,
       FutureOr<void> Function(SymbolFilterChanged) symbolFilterChanged,
       FutureOr<void> Function(ListFilterChanged) listFilterChanged,
       FutureOr<void> Function(LineSelectionChanged) lineSelectionChanged,
@@ -243,7 +244,7 @@ abstract class LinesEvent extends Equatable {
       FutureOr<void> Function(LoadingVehiclesOfLinesFailed)
           loadingVehiclesOfLinesFailed}) {
     assert(() {
-      if (created == null &&
+      if (updateLines == null &&
           symbolFilterChanged == null &&
           listFilterChanged == null &&
           lineSelectionChanged == null &&
@@ -256,9 +257,9 @@ abstract class LinesEvent extends Equatable {
       return true;
     }());
     switch (this._type) {
-      case _LinesEvent.Created:
-        if (created == null) break;
-        return created(this as Created);
+      case _LinesEvent.UpdateLines:
+        if (updateLines == null) break;
+        return updateLines(this as UpdateLines);
       case _LinesEvent.SymbolFilterChanged:
         if (symbolFilterChanged == null) break;
         return symbolFilterChanged(this as SymbolFilterChanged);
@@ -289,13 +290,13 @@ abstract class LinesEvent extends Equatable {
 }
 
 @immutable
-class Created extends LinesEvent {
-  const Created({@required this.lines}) : super(_LinesEvent.Created);
+class UpdateLines extends LinesEvent {
+  const UpdateLines({@required this.lines}) : super(_LinesEvent.UpdateLines);
 
   final Map<Line, LineState> lines;
 
   @override
-  String toString() => 'Created(lines:${this.lines})';
+  String toString() => 'UpdateLines(lines:${this.lines})';
   @override
   List get props => [lines];
 }

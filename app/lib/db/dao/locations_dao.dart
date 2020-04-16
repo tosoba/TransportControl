@@ -17,7 +17,9 @@ class LocationsDao extends DatabaseAccessor<Database> with _$LocationsDaoMixin {
     return into(locations).insert(location);
   }
 
-  Stream<List<Location>> selectFavouriteLocationsStream() {
-    return select(locations).watch();
+  Stream<List<Location>> get selectFavouriteLocationsStream {
+    return (select(locations)
+          ..where((location) => location.isFavourite.equals(true)))
+        .watch();
   }
 }

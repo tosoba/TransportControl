@@ -52,12 +52,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   @override
-  MapState get initialState => MapState.empty();
+  MapState get initialState => MapState.initial();
 
   @override
   Stream<MapState> mapEventToState(MapEvent event) async* {
     yield event.when(
-      clearMap: (_) => MapState.empty(),
+      clearMap: (_) => MapState.initial(),
       updateVehicles: (evt) {
         final updatedVehicles = Map.of(state.trackedVehicles);
         evt.vehicles.forEach((vehicle) {

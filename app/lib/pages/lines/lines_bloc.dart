@@ -45,7 +45,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
                   }),
                 ),
         )
-        .listen((lines) => add(LinesEvent.created(lines: lines)));
+        .listen((lines) => add(LinesEvent.updateLines(lines: lines)));
   }
 
   @override
@@ -58,16 +58,12 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
   }
 
   @override
-  LinesState get initialState => LinesState.empty();
+  LinesState get initialState => LinesState.initial();
 
   @override
   Stream<LinesState> mapEventToState(LinesEvent event) async* {
     yield event.when(
-      created: (evt) => LinesState(
-        lines: evt.lines,
-        symbolFilter: null,
-        listFilter: LineListFilter.ALL,
-      ),
+      updateLines: (evt) => state.copyWith(lines: evt.lines),
       symbolFilterChanged: (evt) => state.copyWith(symbolFilter: evt.filter),
       listFilterChanged: (evt) => state.copyWith(listFilter: evt.filter),
       lineSelectionChanged: (evt) {
@@ -139,13 +135,13 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
         final availableFilters = List.of(LineListFilter.values)
           ..remove(state.listFilter);
         if (state.selectedLines.isEmpty) {
-          availableFilters.remove(LineListFilter.SELECTED);
+          availableFilters.remove(LineListFilter.selected);
         }
         if (state.trackedLines.isEmpty) {
-          availableFilters.remove(LineListFilter.TRACKED);
+          availableFilters.remove(LineListFilter.tracked);
         }
         if (state.favouriteLines.isEmpty) {
-          availableFilters.remove(LineListFilter.FAVOURITE);
+          availableFilters.remove(LineListFilter.favourite);
         }
         return availableFilters;
       },

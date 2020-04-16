@@ -6,23 +6,23 @@ class LinesState {
   final String symbolFilter;
   final LineListFilter listFilter;
 
-  LinesState({
+  LinesState._({
     @required this.lines,
     @required this.symbolFilter,
     @required this.listFilter,
   });
 
-  LinesState.empty()
+  LinesState.initial()
       : lines = Map(),
         symbolFilter = null,
-        listFilter = LineListFilter.ALL;
+        listFilter = LineListFilter.all;
 
   LinesState copyWith({
     Map<Line, LineState> lines,
     String symbolFilter,
     LineListFilter listFilter,
   }) {
-    return LinesState(
+    return LinesState._(
       lines: lines ?? this.lines,
       symbolFilter: symbolFilter ?? this.symbolFilter,
       listFilter: listFilter ?? this.listFilter,
@@ -57,14 +57,14 @@ class LinesState {
 
   bool Function(MapEntry<Line, LineState>) get listFilterPredicate {
     switch (listFilter) {
-      case LineListFilter.SELECTED:
+      case LineListFilter.selected:
         return (entry) => entry.value.selected;
-      case LineListFilter.TRACKED:
+      case LineListFilter.tracked:
         return (entry) => entry.value.tracked;
-      case LineListFilter.FAVOURITE:
+      case LineListFilter.favourite:
         return (entry) => entry.value.favourite;
         break;
-      case LineListFilter.ALL:
+      case LineListFilter.all:
         return (_) => true;
       default:
         throw Error();
@@ -118,4 +118,4 @@ class LineState {
   }
 }
 
-enum LineListFilter { SELECTED, TRACKED, FAVOURITE, ALL }
+enum LineListFilter { selected, tracked, favourite, all }

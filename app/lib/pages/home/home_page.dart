@@ -4,7 +4,7 @@ import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
 import 'package:transport_control/pages/map/map_page.dart';
-import 'package:transport_control/pages/places/places_page.dart';
+import 'package:transport_control/pages/nearby/nearby_page.dart';
 import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/search_app_bar.dart';
@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage>
         body: Stack(children: [
           MapPage(mapTapped: _mapTapped),
           SlideTransition(
-            child: PlacesPage(),
+            child: NearbyPage(),
             position: _placesPageOffset,
           )
         ]),

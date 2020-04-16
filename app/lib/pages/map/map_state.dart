@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_vehicle.dart';
@@ -8,14 +9,14 @@ class MapState {
   final LatLngBounds bounds;
   final String selectedVehicleNumber;
 
-  MapState(
-    this.trackedVehicles,
-    this.zoom,
-    this.bounds,
-    this.selectedVehicleNumber,
-  );
+  MapState._({
+    @required this.trackedVehicles,
+    @required this.zoom,
+    @required this.bounds,
+    @required this.selectedVehicleNumber,
+  });
 
-  MapState.empty()
+  MapState.initial()
       : trackedVehicles = {},
         zoom = MapConstants.initialZoom,
         bounds = null,
@@ -27,18 +28,21 @@ class MapState {
     LatLngBounds bounds,
     String selectedVehicleNumber,
   }) {
-    return MapState(
-      trackedVehicles ?? this.trackedVehicles,
-      zoom ?? this.zoom,
-      bounds ?? this.bounds,
-      selectedVehicleNumber ?? this.selectedVehicleNumber,
+    return MapState._(
+      trackedVehicles: trackedVehicles ?? this.trackedVehicles,
+      zoom: zoom ?? this.zoom,
+      bounds: bounds ?? this.bounds,
+      selectedVehicleNumber:
+          selectedVehicleNumber ?? this.selectedVehicleNumber,
     );
   }
 
-  MapState get withNoSelectedVehicle => MapState(
-        trackedVehicles,
-        zoom,
-        bounds,
-        null,
-      );
+  MapState get withNoSelectedVehicle {
+    return MapState._(
+      trackedVehicles: trackedVehicles,
+      zoom: zoom,
+      bounds: bounds,
+      selectedVehicleNumber: null,
+    );
+  }
 }

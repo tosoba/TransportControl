@@ -7,7 +7,7 @@ part "lines_event.g.dart";
 @superEnum
 enum _LinesEvent {
   @Data(fields: [DataField<Map<Line, LineState>>('lines')])
-  Created,
+  UpdateLines,
 
   @Data(fields: [DataField<String>('filter')])
   SymbolFilterChanged,
