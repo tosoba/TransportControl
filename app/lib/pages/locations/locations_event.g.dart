@@ -13,6 +13,9 @@ abstract class LocationsEvent extends Equatable {
   factory LocationsEvent.updateLocations({@required List<Location> locations}) =
       UpdateLocations;
 
+  factory LocationsEvent.nameFilterChanged({@required String filter}) =
+      NameFilterChanged;
+
   factory LocationsEvent.changeListOrder({@required LocationsListOrder order}) =
       ChangeListOrder;
 
@@ -21,9 +24,12 @@ abstract class LocationsEvent extends Equatable {
 //ignore: missing_return
   R when<R>(
       {@required R Function(UpdateLocations) updateLocations,
+      @required R Function(NameFilterChanged) nameFilterChanged,
       @required R Function(ChangeListOrder) changeListOrder}) {
     assert(() {
-      if (updateLocations == null || changeListOrder == null) {
+      if (updateLocations == null ||
+          nameFilterChanged == null ||
+          changeListOrder == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -31,6 +37,8 @@ abstract class LocationsEvent extends Equatable {
     switch (this._type) {
       case _LocationsEvent.UpdateLocations:
         return updateLocations(this as UpdateLocations);
+      case _LocationsEvent.NameFilterChanged:
+        return nameFilterChanged(this as NameFilterChanged);
       case _LocationsEvent.ChangeListOrder:
         return changeListOrder(this as ChangeListOrder);
     }
@@ -39,9 +47,12 @@ abstract class LocationsEvent extends Equatable {
 //ignore: missing_return
   Future<R> asyncWhen<R>(
       {@required FutureOr<R> Function(UpdateLocations) updateLocations,
+      @required FutureOr<R> Function(NameFilterChanged) nameFilterChanged,
       @required FutureOr<R> Function(ChangeListOrder) changeListOrder}) {
     assert(() {
-      if (updateLocations == null || changeListOrder == null) {
+      if (updateLocations == null ||
+          nameFilterChanged == null ||
+          changeListOrder == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -49,6 +60,8 @@ abstract class LocationsEvent extends Equatable {
     switch (this._type) {
       case _LocationsEvent.UpdateLocations:
         return updateLocations(this as UpdateLocations);
+      case _LocationsEvent.NameFilterChanged:
+        return nameFilterChanged(this as NameFilterChanged);
       case _LocationsEvent.ChangeListOrder:
         return changeListOrder(this as ChangeListOrder);
     }
@@ -56,6 +69,7 @@ abstract class LocationsEvent extends Equatable {
 
   R whenOrElse<R>(
       {R Function(UpdateLocations) updateLocations,
+      R Function(NameFilterChanged) nameFilterChanged,
       R Function(ChangeListOrder) changeListOrder,
       @required R Function(LocationsEvent) orElse}) {
     assert(() {
@@ -68,6 +82,9 @@ abstract class LocationsEvent extends Equatable {
       case _LocationsEvent.UpdateLocations:
         if (updateLocations == null) break;
         return updateLocations(this as UpdateLocations);
+      case _LocationsEvent.NameFilterChanged:
+        if (nameFilterChanged == null) break;
+        return nameFilterChanged(this as NameFilterChanged);
       case _LocationsEvent.ChangeListOrder:
         if (changeListOrder == null) break;
         return changeListOrder(this as ChangeListOrder);
@@ -77,6 +94,7 @@ abstract class LocationsEvent extends Equatable {
 
   Future<R> asyncWhenOrElse<R>(
       {FutureOr<R> Function(UpdateLocations) updateLocations,
+      FutureOr<R> Function(NameFilterChanged) nameFilterChanged,
       FutureOr<R> Function(ChangeListOrder) changeListOrder,
       @required FutureOr<R> Function(LocationsEvent) orElse}) {
     assert(() {
@@ -89,6 +107,9 @@ abstract class LocationsEvent extends Equatable {
       case _LocationsEvent.UpdateLocations:
         if (updateLocations == null) break;
         return updateLocations(this as UpdateLocations);
+      case _LocationsEvent.NameFilterChanged:
+        if (nameFilterChanged == null) break;
+        return nameFilterChanged(this as NameFilterChanged);
       case _LocationsEvent.ChangeListOrder:
         if (changeListOrder == null) break;
         return changeListOrder(this as ChangeListOrder);
@@ -99,9 +120,12 @@ abstract class LocationsEvent extends Equatable {
 //ignore: missing_return
   Future<void> whenPartial(
       {FutureOr<void> Function(UpdateLocations) updateLocations,
+      FutureOr<void> Function(NameFilterChanged) nameFilterChanged,
       FutureOr<void> Function(ChangeListOrder) changeListOrder}) {
     assert(() {
-      if (updateLocations == null && changeListOrder == null) {
+      if (updateLocations == null &&
+          nameFilterChanged == null &&
+          changeListOrder == null) {
         throw 'provide at least one branch';
       }
       return true;
@@ -110,6 +134,9 @@ abstract class LocationsEvent extends Equatable {
       case _LocationsEvent.UpdateLocations:
         if (updateLocations == null) break;
         return updateLocations(this as UpdateLocations);
+      case _LocationsEvent.NameFilterChanged:
+        if (nameFilterChanged == null) break;
+        return nameFilterChanged(this as NameFilterChanged);
       case _LocationsEvent.ChangeListOrder:
         if (changeListOrder == null) break;
         return changeListOrder(this as ChangeListOrder);
@@ -131,6 +158,19 @@ class UpdateLocations extends LocationsEvent {
   String toString() => 'UpdateLocations(locations:${this.locations})';
   @override
   List get props => [locations];
+}
+
+@immutable
+class NameFilterChanged extends LocationsEvent {
+  const NameFilterChanged({@required this.filter})
+      : super(_LocationsEvent.NameFilterChanged);
+
+  final String filter;
+
+  @override
+  String toString() => 'NameFilterChanged(filter:${this.filter})';
+  @override
+  List get props => [filter];
 }
 
 @immutable

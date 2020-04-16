@@ -9,6 +9,9 @@ enum _LocationsEvent {
   @Data(fields: [DataField<List<Location>>('locations')])
   UpdateLocations,
 
+  @Data(fields: [DataField<String>('filter')])
+  NameFilterChanged,
+
   @Data(fields: [DataField<LocationsListOrder>('order')])
   ChangeListOrder,
 }

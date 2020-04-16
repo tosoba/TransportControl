@@ -31,11 +31,24 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     yield event.when(
       changeListOrder: (evt) => state.copyWith(listOrder: evt.order),
       updateLocations: (evt) => state.copyWith(locations: evt.locations),
+      nameFilterChanged: (evt) => state.copyWith(nameFilter: evt.filter),
     );
   }
 
-  Stream<List<Location>> get locationsStream {
-    return map((state) => state.locations..orderBy(state.listOrder));
+  Stream<List<Location>> get filteredLocationsStream {
+    return map((state) {
+      final filter = state.nameFilter == null
+          ? (Location location) => true
+          : (Location location) => location.name
+              .toLowerCase()
+              .contains(state.nameFilter.trim().toLowerCase());
+      return state.locations.where(filter).toList()
+        ..orderBy(state.listOrder);
+    });
+  }
+
+  void nameFilterChanged(String filter) {
+    add(LocationsEvent.nameFilterChanged(filter: filter));
   }
 }
 

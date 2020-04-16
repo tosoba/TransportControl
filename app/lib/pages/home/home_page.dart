@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:transport_control/pages/home/home_bloc.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
+import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/nearby/nearby_page.dart';
+import 'package:transport_control/repo/locations_repo.dart';
 import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/search_app_bar.dart';
@@ -208,7 +212,7 @@ class _HomePageState extends State<HomePage>
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
+        builder: (context) => BlocProvider.value(
           value: context.bloc<LinesBloc>(),
           child: LinesPage(),
         ),
@@ -219,7 +223,12 @@ class _HomePageState extends State<HomePage>
   Future _showLocationsPage(BuildContext context) async {
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => LocationsPage()),
+      MaterialPageRoute(
+        builder: (_) => BlocProvider<LocationsBloc>(
+          create: (_) => LocationsBloc(GetIt.instance<LocationsRepo>()),
+          child: LocationsPage(),
+        ),
+      ),
     );
   }
 

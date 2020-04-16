@@ -1,8 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
+import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/repo/lines_repo.dart';
+import 'package:transport_control/repo/locations_repo.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
 
 class _HomeEvent {}
@@ -11,10 +14,15 @@ class _HomeState {}
 
 class HomeBloc extends Bloc<_HomeEvent, _HomeState> {
   LinesBloc _linesBloc;
+  MapBloc _mapBloc;
+
   LinesBloc get linesBloc => _linesBloc;
 
-  MapBloc _mapBloc;
   MapBloc get mapBloc => _mapBloc;
+
+  LocationsBloc get locationsBloc {
+    return LocationsBloc(GetIt.instance<LocationsRepo>());
+  }
 
   HomeBloc(VehiclesRepo vehiclesRepo, LinesRepo linesRepo) {
     _linesBloc = LinesBloc(_trackedLinesAdded, _trackedLinesRemoved, linesRepo);

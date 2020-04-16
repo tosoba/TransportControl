@@ -162,13 +162,9 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     add(LinesEvent.listFilterChanged(filter: filter));
   }
 
-  void trackSelectedLines() {
-    add(LinesEvent.trackSelectedLines());
-  }
+  void trackSelectedLines() => add(LinesEvent.trackSelectedLines());
 
-  void untrackSelectedLines() {
-    add(LinesEvent.untrackSelectedLines());
-  }
+  void untrackSelectedLines() => add(LinesEvent.untrackSelectedLines());
 
   void loadingVehiclesOfLinesFailed(Set<Line> lines) {
     add(LinesEvent.loadingVehiclesOfLinesFailed(lines: lines));

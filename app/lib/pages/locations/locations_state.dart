@@ -3,28 +3,28 @@ import 'package:transport_control/model/location.dart';
 
 class LocationsState {
   final List<Location> locations;
-  final String filter;
+  final String nameFilter;
   final LocationsListOrder listOrder;
 
   LocationsState._({
     @required this.locations,
-    @required this.filter,
+    @required this.nameFilter,
     @required this.listOrder,
   });
 
   LocationsState.initial()
       : locations = [],
-        filter = null,
+        nameFilter = null,
         listOrder = LocationsListOrder.lastSearched;
 
   LocationsState copyWith({
     List<Location> locations,
-    String filter,
+    String nameFilter,
     LocationsListOrder listOrder,
   }) {
     return LocationsState._(
       locations: locations ?? this.locations,
-      filter: filter ?? this.filter,
+      nameFilter: nameFilter ?? this.nameFilter,
       listOrder: listOrder ?? this.listOrder,
     );
   }

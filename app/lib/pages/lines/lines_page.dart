@@ -11,6 +11,7 @@ import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/search_app_bar.dart';
 import 'package:transport_control/util/collection_util.dart';
 import 'package:transport_control/util/model_util.dart';
+import 'package:transport_control/widgets/search_app_bar_back_button.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 
 class LinesPage extends StatefulWidget {
@@ -81,7 +82,7 @@ class _LinesPageState extends State<LinesPage>
       searchFieldFocusNode: _searchFieldFocusNode,
       searchFieldController: _searchFieldController,
       hint: "Search lines...",
-      leading: _backButton,
+      leading: SearchAppBarBackButton(_searchFieldFocusNode),
       trailing: _listFiltersMenu(context),
     );
     final topOffset =
@@ -358,33 +359,14 @@ class _LinesPageState extends State<LinesPage>
     );
   }
 
-  Widget get _backButton {
-    return CircularButton(
-      child: const Icon(
-        Icons.arrow_back,
-        color: Colors.black,
-      ),
-      onPressed: () {
-        if (_searchFieldFocusNode.hasFocus) {
-          _searchFieldFocusNode.unfocus();
-        } else {
-          Navigator.pop(context);
-        }
-      },
-    );
-  }
-
   Widget _linesList({
     @required double topOffset,
     @required Stream<List<MapEntry<Line, LineState>>> linesStream,
     @required void Function(Line) selectionChanged,
   }) {
-    return StreamBuilder(
+    return StreamBuilder<List<MapEntry<Line, LineState>>>(
       stream: linesStream,
-      builder: (
-        BuildContext context,
-        AsyncSnapshot<List<MapEntry<Line, LineState>>> snapshot,
-      ) {
+      builder: (context, snapshot) {
         if (snapshot.data == null) return Container();
 
         final columnsCount =
@@ -464,7 +446,6 @@ class _LinesPageState extends State<LinesPage>
               groupLines.length,
               (index) => AnimationConfiguration.staggeredGrid(
                 position: index,
-                duration: const Duration(milliseconds: 250),
                 columnCount: columnsCount,
                 child: ScaleAnimation(
                   child: FadeInAnimation(
