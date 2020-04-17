@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:transport_control/model/line.dart';
@@ -13,75 +14,42 @@ import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/widgets/search_app_bar_back_button.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 
-class LinesPage extends StatefulWidget {
-  const LinesPage({Key key}) : super(key: key);
+class LinesPage extends HookWidget {
+  LinesPage({Key key}) : super(key: key);
 
-  @override
-  _LinesPageState createState() => _LinesPageState();
-}
-
-class _LinesPageState extends State<LinesPage>
-    with TickerProviderStateMixin<LinesPage> {
   final ItemScrollController _linesListScrollController =
       ItemScrollController();
 
-  AnimationController _scrollAnimController;
-  Animation<double> _bottomNavSize;
-  Animation<Offset> _appBarOffset;
-
-  FocusNode _searchFieldFocusNode;
-  TextEditingController _searchFieldController;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _searchFieldController = TextEditingController()
-      ..addListener(_searchTextChanged);
-    _searchFieldFocusNode = FocusNode();
-
-    _scrollAnimController = AnimationController(
-      vsync: this,
-      duration: kThemeAnimationDuration,
-    );
-    _bottomNavSize = Tween(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(_scrollAnimController);
-    _appBarOffset = Tween<Offset>(
-      begin: Offset.zero,
-      end: Offset(0.0, -1.0),
-    ).animate(_scrollAnimController);
-  }
-
-  @override
-  void dispose() {
-    _searchFieldFocusNode.dispose();
-    _searchFieldController.dispose();
-
-    _scrollAnimController.dispose();
-
-    super.dispose();
-  }
-
-  void _searchTextChanged() {
-    context
-        .bloc<LinesBloc>()
-        .symbolFilterChanged(_searchFieldController.value.text);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final searchFieldFocusNode = useFocusNode();
+    final searchFieldController = useTextEditingController();
+    searchFieldController.addListener(
+      () => context
+          .bloc<LinesBloc>()
+          .symbolFilterChanged(searchFieldController.text),
+    );
     final filter = context.bloc<LinesBloc>().state.symbolFilter;
     if (filter != null) {
-      _searchFieldController.value = TextEditingValue(text: filter);
+      searchFieldController.value = TextEditingValue(text: filter);
     }
 
+    final scrollAnimController = useAnimationController(
+      duration: kThemeAnimationDuration,
+    );
+    final bottomNavSize = useMemoized(
+      () => Tween(begin: 1.0, end: 0.0).animate(scrollAnimController),
+    );
+    final appBarOffset = useMemoized(
+      () => Tween(begin: Offset.zero, end: Offset(0.0, -1.0))
+          .animate(scrollAnimController),
+    );
+
     final appBar = SearchAppBar(
-      searchFieldFocusNode: _searchFieldFocusNode,
-      searchFieldController: _searchFieldController,
+      searchFieldFocusNode: searchFieldFocusNode,
+      searchFieldController: searchFieldController,
       hint: "Search lines...",
-      leading: SearchAppBarBackButton(_searchFieldFocusNode),
+      leading: SearchAppBarBackButton(searchFieldFocusNode),
       trailing: _listFiltersMenu(context),
     );
     final topOffset =
@@ -90,17 +58,18 @@ class _LinesPageState extends State<LinesPage>
       extendBodyBehindAppBar: true,
       extendBody: true,
       appBar: SlideTransitionPreferredSizeWidget(
-        offset: _appBarOffset,
+        offset: appBarOffset,
         child: appBar,
       ),
       body: _linesList(
         topOffset: topOffset,
         linesStream: context.bloc<LinesBloc>().filteredLinesStream,
         selectionChanged: context.bloc<LinesBloc>().lineSelectionChanged,
+        scrollAnimationController: scrollAnimController,
       ),
       bottomNavigationBar: SizeTransition(
         axisAlignment: -1.0,
-        sizeFactor: _bottomNavSize,
+        sizeFactor: bottomNavSize,
         child: _listGroupNavigationButtons(
           context.bloc<LinesBloc>().filteredLinesStream,
           topOffset,
@@ -111,9 +80,9 @@ class _LinesPageState extends State<LinesPage>
   }
 
   Widget _listFiltersMenu(BuildContext context) {
-    return StreamBuilder(
+    return StreamBuilder<List<LineListFilter>>(
       stream: context.bloc<LinesBloc>().listFiltersStream,
-      builder: (context, AsyncSnapshot<List<LineListFilter>> snapshot) {
+      builder: (context, snapshot) {
         if (snapshot.data == null || snapshot.data.isEmpty)
           return Container(width: 0.0, height: 0.0);
         return PopupMenuButton<LineListFilter>(
@@ -141,12 +110,9 @@ class _LinesPageState extends State<LinesPage>
   }
 
   Widget _bottomSheet(BuildContext context) {
-    return StreamBuilder(
+    return StreamBuilder<Iterable<MapEntry<Line, LineState>>>(
       stream: context.bloc<LinesBloc>().selectedLinesStream,
-      builder: (
-        BuildContext context,
-        AsyncSnapshot<Iterable<MapEntry<Line, LineState>>> snapshot,
-      ) {
+      builder: (context, snapshot) {
         final selectedLines = snapshot.data;
         if (selectedLines == null || selectedLines.isEmpty) {
           return Container(width: 0, height: 0);
@@ -290,12 +256,9 @@ class _LinesPageState extends State<LinesPage>
     Stream<List<MapEntry<Line, LineState>>> linesStream,
     double topOffset,
   ) {
-    return StreamBuilder(
+    return StreamBuilder<List<MapEntry<Line, LineState>>>(
       stream: linesStream,
-      builder: (
-        BuildContext context,
-        AsyncSnapshot<List<MapEntry<Line, LineState>>> snapshot,
-      ) {
+      builder: (context, snapshot) {
         if (snapshot.data == null) return Container();
 
         final lineGroups =
@@ -362,6 +325,7 @@ class _LinesPageState extends State<LinesPage>
     @required double topOffset,
     @required Stream<List<MapEntry<Line, LineState>>> linesStream,
     @required void Function(Line) selectionChanged,
+    @required AnimationController scrollAnimationController,
   }) {
     return StreamBuilder<List<MapEntry<Line, LineState>>>(
       stream: linesStream,
@@ -374,7 +338,11 @@ class _LinesPageState extends State<LinesPage>
             snapshot.data.groupBy((entry) => entry.key.group).entries;
         return AnimationLimiter(
           child: NotificationListener<ScrollNotification>(
-            onNotification: _handleScrollNotification,
+            onNotification: (notification) => _handleScrollNotification(
+              notification,
+              context: context,
+              scrollAnimationController: scrollAnimationController,
+            ),
             child: ScrollablePositionedList.builder(
               padding: EdgeInsets.only(top: topOffset),
               itemScrollController: _linesListScrollController,
@@ -396,14 +364,18 @@ class _LinesPageState extends State<LinesPage>
     );
   }
 
-  bool _handleScrollNotification(ScrollNotification notification) {
+  bool _handleScrollNotification(
+    ScrollNotification notification, {
+    @required BuildContext context,
+    @required AnimationController scrollAnimationController,
+  }) {
     if (notification.depth == 0 && notification is UserScrollNotification) {
       switch (notification.direction) {
         case ScrollDirection.forward:
-          _scrollAnimController.reverse();
+          scrollAnimationController.reverse();
           break;
         case ScrollDirection.reverse:
-          _scrollAnimController.forward();
+          scrollAnimationController.forward();
           break;
         default:
           break;

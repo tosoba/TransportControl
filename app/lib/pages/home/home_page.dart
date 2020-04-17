@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
@@ -211,8 +210,8 @@ class _HomePageState extends State<HomePage>
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => BlocProvider.value(
-          value: context.bloc<LinesBloc>(),
+        builder: (_) => BlocProvider.value(
+          value: context.bloc<HomeBloc>().linesBloc,
           child: LinesPage(),
         ),
       ),
