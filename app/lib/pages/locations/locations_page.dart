@@ -101,8 +101,9 @@ class _LocationsPageState extends State<LocationsPage>
     return StreamBuilder<List<Location>>(
       stream: locationsStream,
       builder: (context, snapshot) {
-        if (snapshot.data == null)
+        if (snapshot.data == null || snapshot.data.isEmpty) {
           return Center(child: Text('No saved locations'));
+        }
 
         return AnimationLimiter(
           child: NotificationListener<ScrollNotification>(

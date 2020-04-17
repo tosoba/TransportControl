@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
-import 'package:transport_control/pages/home/home_bloc.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/nearby/nearby_page.dart';
-import 'package:transport_control/repo/locations_repo.dart';
 import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/search_app_bar.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
+
+import 'home_bloc.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -225,7 +224,7 @@ class _HomePageState extends State<HomePage>
       context,
       MaterialPageRoute(
         builder: (_) => BlocProvider<LocationsBloc>(
-          create: (_) => LocationsBloc(GetIt.instance<LocationsRepo>()),
+          create: (_) => context.bloc<HomeBloc>().locationsBloc,
           child: LocationsPage(),
         ),
       ),
