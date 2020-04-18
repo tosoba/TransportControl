@@ -8,10 +8,10 @@ import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 import 'package:transport_control/util/string_util.dart';
-import 'package:transport_control/widgets/search_app_bar.dart';
+import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/util/collection_util.dart';
 import 'package:transport_control/util/model_util.dart';
-import 'package:transport_control/widgets/search_app_bar_back_button.dart';
+import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 
 class LinesPage extends HookWidget {
@@ -45,11 +45,11 @@ class LinesPage extends HookWidget {
           .animate(scrollAnimController),
     );
 
-    final appBar = SearchAppBar(
-      searchFieldFocusNode: searchFieldFocusNode,
-      searchFieldController: searchFieldController,
+    final appBar = TextFieldAppBar(
+      textFieldFocusNode: searchFieldFocusNode,
+      textFieldController: searchFieldController,
       hint: "Search lines...",
-      leading: SearchAppBarBackButton(searchFieldFocusNode),
+      leading: TextFieldAppBarBackButton(searchFieldFocusNode),
       trailing: _listFiltersMenu(context),
     );
     final topOffset =

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 
-class SearchAppBarBackButton extends StatelessWidget {
-  final FocusNode _searchFieldFocusNode;
+class TextFieldAppBarBackButton extends StatelessWidget {
+  final FocusNode _textFieldFocusNode;
 
-  const SearchAppBarBackButton(
-    this._searchFieldFocusNode, {
+  const TextFieldAppBarBackButton(
+    this._textFieldFocusNode, {
     Key key,
   }) : super(key: key);
 
@@ -17,8 +17,8 @@ class SearchAppBarBackButton extends StatelessWidget {
         color: Colors.black,
       ),
       onPressed: () {
-        if (_searchFieldFocusNode.hasFocus) {
-          _searchFieldFocusNode.unfocus();
+        if (_textFieldFocusNode.hasFocus) {
+          _textFieldFocusNode.unfocus();
         } else {
           Navigator.pop(context);
         }

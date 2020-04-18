@@ -7,8 +7,8 @@ import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/map_location/map_location_page.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
-import 'package:transport_control/widgets/search_app_bar.dart';
-import 'package:transport_control/widgets/search_app_bar_back_button.dart';
+import 'package:transport_control/widgets/text_field_app_bar.dart';
+import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 
 class LocationsPage extends StatefulWidget {
@@ -64,11 +64,11 @@ class _LocationsPageState extends State<LocationsPage>
 
   @override
   Widget build(BuildContext context) {
-    final appBar = SearchAppBar(
-      searchFieldFocusNode: _searchFieldFocusNode,
-      searchFieldController: _searchFieldController,
+    final appBar = TextFieldAppBar(
+      textFieldFocusNode: _searchFieldFocusNode,
+      textFieldController: _searchFieldController,
       hint: "Search locations...",
-      leading: SearchAppBarBackButton(_searchFieldFocusNode),
+      leading: TextFieldAppBarBackButton(_searchFieldFocusNode),
       //trailing: _listOrderMenu(context), //TODO:
     );
     final topOffset =

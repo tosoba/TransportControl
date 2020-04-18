@@ -7,7 +7,7 @@ import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/nearby/nearby_page.dart';
 import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
-import 'package:transport_control/widgets/search_app_bar.dart';
+import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 
 import 'home_bloc.dart';
@@ -164,9 +164,9 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  SearchAppBar get _appBar {
-    return SearchAppBar(
-      searchFieldFocusNode: _searchFieldFocusNode,
+  TextFieldAppBar get _appBar {
+    return TextFieldAppBar(
+      textFieldFocusNode: _searchFieldFocusNode,
       leading: _drawerButton,
       hint: Strings.transportNearby,
       onChanged: (query) {},

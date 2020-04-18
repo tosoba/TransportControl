@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-class SearchAppBar extends StatefulWidget implements PreferredSizeWidget {
-  final TextEditingController searchFieldController;
-  final FocusNode searchFieldFocusNode;
+class TextFieldAppBar extends StatefulWidget implements PreferredSizeWidget {
+  final TextEditingController textFieldController;
+  final FocusNode textFieldFocusNode;
   final Widget leading;
   final Widget trailing;
   final String hint;
@@ -10,24 +10,24 @@ class SearchAppBar extends StatefulWidget implements PreferredSizeWidget {
 
   final Size size = Size.fromHeight(kToolbarHeight + 10.0);
 
-  SearchAppBar({
+  TextFieldAppBar({
     Key key,
-    this.searchFieldFocusNode,
+    this.textFieldFocusNode,
     this.leading,
     this.trailing,
     this.hint,
     this.onChanged,
-    this.searchFieldController,
+    this.textFieldController,
   }) : super(key: key);
 
   @override
-  _SearchAppBarState createState() => _SearchAppBarState();
+  _TextFieldAppBarState createState() => _TextFieldAppBarState();
 
   @override
   Size get preferredSize => size;
 }
 
-class _SearchAppBarState extends State<SearchAppBar> {
+class _TextFieldAppBarState extends State<TextFieldAppBar> {
   @override
   Widget build(BuildContext context) {
     return PreferredSize(
@@ -41,7 +41,7 @@ class _SearchAppBarState extends State<SearchAppBar> {
         child: Container(
           child: Row(children: [
             if (widget.leading != null) widget.leading,
-            Flexible(child: _placesSearchField),
+            Flexible(child: _textField),
             if (widget.trailing != null) widget.trailing,
           ]),
           decoration: BoxDecoration(
@@ -67,10 +67,10 @@ class _SearchAppBarState extends State<SearchAppBar> {
     );
   }
 
-  Widget get _placesSearchField {
+  Widget get _textField {
     return TextField(
-      controller: widget.searchFieldController,
-      focusNode: widget.searchFieldFocusNode,
+      controller: widget.textFieldController,
+      focusNode: widget.textFieldFocusNode,
       autofocus: false,
       decoration: InputDecoration(
         hintText: widget.hint,
