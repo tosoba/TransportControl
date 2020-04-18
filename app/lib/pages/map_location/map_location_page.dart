@@ -19,18 +19,65 @@ class _MapLocationPageState extends State<MapLocationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final query = MediaQuery.of(context);
+    final size = query.size;
+    final List<Widget> boundsLimiters = [];
+    if (query.orientation == Orientation.portrait) {
+      final boundsLimiterHeight = (size.height - size.width) / 2;
+      boundsLimiters.add(
+        Container(
+          width: double.infinity,
+          height: boundsLimiterHeight,
+          color: Colors.white,
+        ),
+      );
+      boundsLimiters.add(
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            width: double.infinity,
+            height: boundsLimiterHeight,
+            color: Colors.white,
+          ),
+        ),
+      );
+    } else {
+      final boundsLimiterWidth = (size.width - size.height) / 2;
+      boundsLimiters.add(
+        Container(
+          width: boundsLimiterWidth,
+          height: double.infinity,
+          color: Colors.white,
+        ),
+      );
+      boundsLimiters.add(
+        Align(
+          alignment: Alignment.centerRight,
+          child: Container(
+            width: boundsLimiterWidth,
+            height: double.infinity,
+            color: Colors.white,
+          ),
+        ),
+      );
+    }
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         extendBodyBehindAppBar: true,
         extendBody: true,
-        body: GoogleMap(
-          mapType: MapType.normal,
-          initialCameraPosition: CameraPosition(
-            target: MapConstants.initialTarget,
-            zoom: MapConstants.initialZoom,
-          ),
-          onMapCreated: _mapController.complete,
+        body: Stack(
+          children: [
+            GoogleMap(
+              mapType: MapType.normal,
+              initialCameraPosition: CameraPosition(
+                target: MapConstants.initialTarget,
+                zoom: MapConstants.initialZoom,
+              ),
+              onMapCreated: _mapController.complete,
+            ),
+            ...boundsLimiters
+          ],
         ),
       ),
     );
