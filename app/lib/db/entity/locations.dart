@@ -17,7 +17,7 @@ class Locations extends Table {
 
   BoolColumn get isFavourite => boolean().withDefault(const Constant(false))();
 
-  DateTimeColumn get lastSearched => dateTime()();
+  DateTimeColumn get lastSearched => dateTime().nullable()();
 
   IntColumn get timesSearched => integer().withDefault(const Constant(1))();
 }

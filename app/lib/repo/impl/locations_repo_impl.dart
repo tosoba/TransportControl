@@ -16,4 +16,14 @@ class LocationsRepoImpl extends LocationsRepo {
     return _dao.selectFavouriteLocationsStream.map((locationList) =>
         locationList.map((location) => Location.fromDb(location)).toList());
   }
+
+  @override
+  Future<int> insertLocation(Location location) {
+    return _dao.insertLocation(location.db);
+  }
+
+  @override
+  Future<int> updateLocation(Location location) {
+    return _dao.updateLocation(location.db);
+  }
 }

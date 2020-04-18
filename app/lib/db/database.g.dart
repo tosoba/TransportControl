@@ -271,7 +271,7 @@ class Location extends DataClass implements Insertable<Location> {
       @required this.northEastLat,
       @required this.northEastLng,
       @required this.isFavourite,
-      @required this.lastSearched,
+      this.lastSearched,
       @required this.timesSearched});
   factory Location.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
@@ -458,14 +458,13 @@ class LocationsCompanion extends UpdateCompanion<Location> {
     @required double northEastLat,
     @required double northEastLng,
     this.isFavourite = const Value.absent(),
-    @required DateTime lastSearched,
+    this.lastSearched = const Value.absent(),
     this.timesSearched = const Value.absent(),
   })  : name = Value(name),
         southWestLat = Value(southWestLat),
         southWestLng = Value(southWestLng),
         northEastLat = Value(northEastLat),
-        northEastLng = Value(northEastLng),
-        lastSearched = Value(lastSearched);
+        northEastLng = Value(northEastLng);
   LocationsCompanion copyWith(
       {Value<int> id,
       Value<String> name,
@@ -593,7 +592,7 @@ class $LocationsTable extends Locations
     return GeneratedDateTimeColumn(
       'last_searched',
       $tableName,
-      false,
+      true,
     );
   }
 
@@ -680,8 +679,6 @@ class $LocationsTable extends Locations
           _lastSearchedMeta,
           lastSearched.isAcceptableValue(
               d.lastSearched.value, _lastSearchedMeta));
-    } else if (isInserting) {
-      context.missing(_lastSearchedMeta);
     }
     if (d.timesSearched.present) {
       context.handle(

@@ -7,6 +7,7 @@ import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/map_location/map_location_page.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
+import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
@@ -85,12 +86,31 @@ class _LocationsPageState extends State<LocationsPage>
         locationsStream: context.bloc<LocationsBloc>().filteredLocationsStream,
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => MapLocationPage(MapLocationPageMode.add()),
-          ),
-        ),
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MapLocationPage(MapLocationPageMode.add()),
+            ),
+          );
+          if (result is MapLocationPageResult) {
+            result.action.when(
+              save: (_) => result.mode.when(
+                add: (_) =>
+                    context.bloc<LocationsBloc>().saveLocation(result.location),
+                existing: (_) => context
+                    .bloc<LocationsBloc>()
+                    .updateLocation(result.location),
+              ),
+              load: (_) {
+                //TODO:
+              },
+              saveAndLoad: (_) {
+                //TODO:
+              },
+            );
+          }
+        },
         label: Text(
           'New location',
           style: const TextStyle(color: Colors.black),

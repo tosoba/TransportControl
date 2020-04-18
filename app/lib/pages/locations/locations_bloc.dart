@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_event.dart';
@@ -8,10 +9,16 @@ import 'package:transport_control/repo/locations_repo.dart';
 
 class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   final LocationsRepo _repo;
+  final void Function(Location) saveLocation;
+  final void Function(Location) updateLocation;
 
   StreamSubscription<List<Location>> _locationUpdatesSubscription;
 
-  LocationsBloc(this._repo) {
+  LocationsBloc(
+    this._repo, {
+    @required this.saveLocation,
+    @required this.updateLocation,
+  }) {
     _locationUpdatesSubscription = _repo.favouriteLocationsStream.listen(
       (locations) => add(LocationsEvent.updateLocations(locations: locations)),
     );
@@ -42,8 +49,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
           : (Location location) => location.name
               .toLowerCase()
               .contains(state.nameFilter.trim().toLowerCase());
-      return state.locations.where(filter).toList()
-        ..orderBy(state.listOrder);
+      return state.locations.where(filter).toList()..orderBy(state.listOrder);
     });
   }
 

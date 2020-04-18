@@ -17,6 +17,11 @@ class LocationsDao extends DatabaseAccessor<Database> with _$LocationsDaoMixin {
     return into(locations).insert(location);
   }
 
+  Future<int> updateLocation(Location location) {
+    return (update(locations)..where((loc) => loc.id.equals(location.id)))
+        .write(location);
+  }
+
   Stream<List<Location>> get selectFavouriteLocationsStream {
     return (select(locations)
           ..where((location) => location.isFavourite.equals(true)))

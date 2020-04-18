@@ -39,7 +39,7 @@ class Location {
       : id = null,
         name = null,
         bounds = null,
-        isFavourite = false,
+        isFavourite = true,
         lastSearched = null,
         timesSearched = 0;
 
@@ -59,4 +59,18 @@ class Location {
         isFavourite = line.isFavourite,
         lastSearched = line.lastSearched,
         timesSearched = line.timesSearched;
+
+  Db.Location get db {
+    return Db.Location(
+      id: id,
+      name: name,
+      southWestLat: bounds.southwest.latitude,
+      southWestLng: bounds.southwest.longitude,
+      northEastLat: bounds.northeast.latitude,
+      northEastLng: bounds.northeast.longitude,
+      isFavourite: isFavourite,
+      lastSearched: lastSearched,
+      timesSearched: timesSearched,
+    );
+  }
 }

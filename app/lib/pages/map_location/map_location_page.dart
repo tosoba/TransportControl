@@ -7,6 +7,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
+import 'package:transport_control/pages/map_location/map_location_page_result.dart';
+import 'package:transport_control/pages/map_location/map_location_page_result_action.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
@@ -20,11 +22,7 @@ class MapLocationPage extends HookWidget {
     return useState(
       _mode.when(
         add: (mode) => Location.initial(),
-        edit: (mode) {
-          controller.value = TextEditingValue(text: mode.location.name);
-          return mode.location;
-        },
-        view: (mode) {
+        existing: (mode) {
           controller.value = TextEditingValue(text: mode.location.name);
           return mode.location;
         },
@@ -55,12 +53,14 @@ class MapLocationPage extends HookWidget {
 
     final queryData = MediaQuery.of(context);
 
+    //TODO: reset bounds button for existing mode
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         extendBodyBehindAppBar: true,
         extendBody: true,
         resizeToAvoidBottomPadding: false,
+        //TODO: trailing reset name button for existing mode
         appBar: TextFieldAppBar(
           textFieldController: textFieldController,
           textFieldFocusNode: textFieldFocusNode,
@@ -92,6 +92,53 @@ class MapLocationPage extends HookWidget {
             ..._boundsLimiters(queryData)
           ],
         ),
+        persistentFooterButtons: [
+          Builder(
+            builder: (context) => RaisedButton(
+              color: Colors.white,
+              onPressed: () {
+                final locationValue = location.value;
+                if (locationValue.name == null ||
+                    locationValue.name.trim().isEmpty) {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Enter a name for location to save'),
+                    ),
+                  );
+                } else {
+                  Navigator.pop(
+                    context,
+                    MapLocationPageResult(
+                      location: location.value,
+                      mode: _mode,
+                      action: MapLocationPageResultAction.save(),
+                    ),
+                  );
+                }
+              },
+              child: Text(
+                'Save',
+                style: const TextStyle(fontSize: 18),
+              ),
+            ),
+          ),
+          RaisedButton(
+            color: Colors.white,
+            onPressed: () {},
+            child: Text(
+              'Load',
+              style: const TextStyle(fontSize: 18),
+            ),
+          ),
+          RaisedButton(
+            color: Colors.white,
+            onPressed: () {},
+            child: Text(
+              'Save & load',
+              style: const TextStyle(fontSize: 18),
+            ),
+          )
+        ],
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:transport_control/model/line.dart';
+import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
@@ -13,18 +14,26 @@ class _HomeEvent {}
 class _HomeState {}
 
 class HomeBloc extends Bloc<_HomeEvent, _HomeState> {
+  final LocationsRepo _locationsRepo;
   LinesBloc _linesBloc;
   MapBloc _mapBloc;
 
   LinesBloc get linesBloc => _linesBloc;
-
   MapBloc get mapBloc => _mapBloc;
 
   LocationsBloc get locationsBloc {
-    return LocationsBloc(GetIt.instance<LocationsRepo>());
+    return LocationsBloc(
+      GetIt.instance<LocationsRepo>(),
+      saveLocation: _saveLocation,
+      updateLocation: _updateLocation,
+    );
   }
 
-  HomeBloc(VehiclesRepo vehiclesRepo, LinesRepo linesRepo) {
+  HomeBloc(
+    VehiclesRepo vehiclesRepo,
+    LinesRepo linesRepo,
+    LocationsRepo locationsRepo,
+  ) : _locationsRepo = locationsRepo {
     _linesBloc = LinesBloc(_trackedLinesAdded, _trackedLinesRemoved, linesRepo);
     _mapBloc = MapBloc(vehiclesRepo, _loadingVehiclesOfLinesFailed);
   }
@@ -47,5 +56,13 @@ class HomeBloc extends Bloc<_HomeEvent, _HomeState> {
 
   void _loadingVehiclesOfLinesFailed(Set<Line> lines) {
     _linesBloc.loadingVehiclesOfLinesFailed(lines);
+  }
+
+  void _saveLocation(Location location) {
+    _locationsRepo.insertLocation(location);
+  }
+
+  void _updateLocation(Location location) {
+    _locationsRepo.updateLocation(location);
   }
 }
