@@ -57,6 +57,7 @@ class LinesPage extends HookWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       extendBody: true,
+      resizeToAvoidBottomPadding: false,
       appBar: SlideTransitionPreferredSizeWidget(
         offset: appBarOffset,
         child: appBar,

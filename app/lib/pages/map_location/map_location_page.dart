@@ -2,29 +2,34 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
+import 'package:transport_control/widgets/circular_icon_button.dart';
+import 'package:transport_control/widgets/search_app_bar.dart';
 
-class MapLocationPage extends StatefulWidget {
-  final MapLocationPageMode mode;
-
-  const MapLocationPage({Key key, this.mode}) : super(key: key);
-
-  @override
-  _MapLocationPageState createState() => _MapLocationPageState();
-}
-
-class _MapLocationPageState extends State<MapLocationPage> {
+class MapLocationPage extends HookWidget {
+  final MapLocationPageMode _mode;
   final Completer<GoogleMapController> _mapController = Completer();
+
+  MapLocationPage(this._mode, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final searchFieldFocusNode = useFocusNode();
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         extendBodyBehindAppBar: true,
         extendBody: true,
+        resizeToAvoidBottomPadding: false,
+        appBar: SearchAppBar(
+          searchFieldFocusNode: searchFieldFocusNode,
+          leading: _backButton(searchFieldFocusNode, context),
+          hint: 'Location name',
+          onChanged: (query) {},
+        ),
         body: Stack(
           children: [
             GoogleMap(
@@ -35,14 +40,30 @@ class _MapLocationPageState extends State<MapLocationPage> {
               ),
               onMapCreated: _mapController.complete,
             ),
-            ...boundsLimiters(context)
+            ..._boundsLimiters(context)
           ],
         ),
       ),
     );
   }
 
-  List<Widget> boundsLimiters(BuildContext context) {
+  Widget _backButton(
+    FocusNode searchFieldFocusNode,
+    BuildContext context,
+  ) {
+    return CircularButton(
+      child: Icon(Icons.arrow_back, color: Colors.black),
+      onPressed: () {
+        if (searchFieldFocusNode.hasFocus) {
+          searchFieldFocusNode.unfocus();
+        } else {
+          Navigator.pop(context);
+        }
+      },
+    );
+  }
+
+  List<Widget> _boundsLimiters(BuildContext context) {
     final query = MediaQuery.of(context);
     final size = query.size;
     if (query.orientation == Orientation.portrait) {
