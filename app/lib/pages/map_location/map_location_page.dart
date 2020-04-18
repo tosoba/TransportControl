@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
@@ -15,9 +16,45 @@ class MapLocationPage extends HookWidget {
 
   MapLocationPage(this._mode, {Key key}) : super(key: key);
 
+  ValueNotifier<Location> _useLocationState(TextEditingController controller) {
+    return useState(
+      _mode.when(
+        add: (mode) => Location.initial(),
+        edit: (mode) {
+          controller.value = TextEditingValue(text: mode.location.name);
+          return mode.location;
+        },
+        view: (mode) {
+          controller.value = TextEditingValue(text: mode.location.name);
+          return mode.location;
+        },
+      ),
+    );
+  }
+
+  LatLng _targetFor(Location location) {
+    final bounds = location.bounds;
+    return bounds != null
+        ? LatLng(
+            (bounds.northeast.latitude + bounds.southwest.latitude) / 2,
+            (bounds.northeast.longitude + bounds.southwest.longitude) / 2,
+          )
+        : MapConstants.initialTarget;
+  }
+
   @override
   Widget build(BuildContext context) {
     final textFieldFocusNode = useFocusNode();
+    final textFieldController = useTextEditingController();
+    final location = _useLocationState(textFieldController);
+    textFieldController.addListener(() {
+      location.value = location.value.copyWith(
+        name: textFieldController.value.text?.trim(),
+      );
+    });
+
+    final queryData = MediaQuery.of(context);
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -25,32 +62,99 @@ class MapLocationPage extends HookWidget {
         extendBody: true,
         resizeToAvoidBottomPadding: false,
         appBar: TextFieldAppBar(
+          textFieldController: textFieldController,
           textFieldFocusNode: textFieldFocusNode,
           leading: TextFieldAppBarBackButton(textFieldFocusNode),
           hint: 'Location name',
-          onChanged: (query) {},
         ),
         body: Stack(
           children: [
             GoogleMap(
               mapType: MapType.normal,
               initialCameraPosition: CameraPosition(
-                target: MapConstants.initialTarget,
+                target: _targetFor(location.value),
                 zoom: MapConstants.initialZoom,
               ),
-              onMapCreated: _mapController.complete,
+              onMapCreated: (controller) {
+                _mapController.complete(controller);
+                if (location.value.bounds != null) {
+                  controller.moveCamera(CameraUpdate.newLatLngBounds(
+                    location.value.bounds,
+                    0,
+                  ));
+                }
+              },
+              onCameraIdle: () => _updateLocationBounds(
+                location,
+                _screenCoordinateBounds(queryData),
+              ),
             ),
-            ..._boundsLimiters(context)
+            ..._boundsLimiters(queryData)
           ],
         ),
       ),
     );
   }
 
-  List<Widget> _boundsLimiters(BuildContext context) {
-    final query = MediaQuery.of(context);
-    final size = query.size;
-    if (query.orientation == Orientation.portrait) {
+  _ScreenCoordinateBounds _screenCoordinateBounds(MediaQueryData queryData) {
+    final size = queryData.size;
+    if (queryData.orientation == Orientation.portrait) {
+      final southWestY = (size.height + size.width) / 2;
+      final southWestScreenCoordinate = ScreenCoordinate(
+        x: 0,
+        y: southWestY.toInt(),
+      );
+      final northEastY = (size.height - size.width) / 2;
+      final northEastScreenCoordinate = ScreenCoordinate(
+        x: size.width.toInt(),
+        y: northEastY.toInt(),
+      );
+      return _ScreenCoordinateBounds(
+        northEast: northEastScreenCoordinate,
+        southWest: southWestScreenCoordinate,
+      );
+    } else {
+      final southWestX = (size.width - size.height) / 2;
+      final southWestScreenCoordinate = ScreenCoordinate(
+        x: southWestX.toInt(),
+        y: size.height.toInt(),
+      );
+      final northEastX = (size.height + size.width) / 2;
+      final northEastScreenCoordinate = ScreenCoordinate(
+        x: northEastX.toInt(),
+        y: 0,
+      );
+      return _ScreenCoordinateBounds(
+        northEast: northEastScreenCoordinate,
+        southWest: southWestScreenCoordinate,
+      );
+    }
+  }
+
+  void _updateLocationBounds(
+    ValueNotifier<Location> location,
+    _ScreenCoordinateBounds bounds,
+  ) {
+    _mapController.future
+        .then(
+          (controller) => Future.wait([
+            controller.getLatLng(bounds.southWest),
+            controller.getLatLng(bounds.northEast)
+          ]),
+        )
+        .then(
+          (boundsLatLngs) => location.value = location.value.copyWith(
+            bounds: LatLngBounds(
+              southwest: boundsLatLngs[0],
+              northeast: boundsLatLngs[1],
+            ),
+          ),
+        );
+  }
+
+  List<Widget> _boundsLimiters(MediaQueryData queryData) {
+    final size = queryData.size;
+    if (queryData.orientation == Orientation.portrait) {
       final boundsLimiterHeight = (size.height - size.width) / 2;
       final limiter = _boundsLimiter(height: boundsLimiterHeight);
       return [
@@ -87,4 +191,11 @@ class MapLocationPage extends HookWidget {
     //TODO: show dialog if in edit/add mode asking for save/cancel confirmation
     return Future.value(true);
   }
+}
+
+class _ScreenCoordinateBounds {
+  final ScreenCoordinate northEast;
+  final ScreenCoordinate southWest;
+
+  _ScreenCoordinateBounds({@required this.northEast, @required this.southWest});
 }

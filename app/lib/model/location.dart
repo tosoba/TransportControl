@@ -9,7 +9,7 @@ class Location {
   final DateTime lastSearched;
   final int timesSearched;
 
-  Location(
+  Location._(
     this.id,
     this.name,
     this.bounds,
@@ -17,6 +17,31 @@ class Location {
     this.lastSearched,
     this.timesSearched,
   );
+
+  Location copyWith({
+    String name,
+    LatLngBounds bounds,
+    bool isFavourite,
+    DateTime lastSearched,
+    int timesSearched,
+  }) {
+    return Location._(
+      id,
+      name ?? this.name,
+      bounds ?? this.bounds,
+      isFavourite ?? this.isFavourite,
+      lastSearched ?? this.lastSearched,
+      timesSearched ?? this.timesSearched,
+    );
+  }
+
+  Location.initial()
+      : id = null,
+        name = null,
+        bounds = null,
+        isFavourite = false,
+        lastSearched = null,
+        timesSearched = 0;
 
   Location.fromDb(Db.Location line)
       : id = line.id,

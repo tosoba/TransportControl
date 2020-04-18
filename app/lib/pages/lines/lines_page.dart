@@ -89,22 +89,20 @@ class LinesPage extends HookWidget {
         return PopupMenuButton<LineListFilter>(
           icon: Icon(Icons.filter_list),
           onSelected: context.bloc<LinesBloc>().listFilterChanged,
-          itemBuilder: (context) {
-            return snapshot.data.map(
-              (filter) {
-                final filterString = filter.toString();
-                final filterName = filterString
-                    .substring(filterString.indexOf('.') + 1)
-                    .toLowerCase();
-                return PopupMenuItem<LineListFilter>(
-                  value: filter,
-                  child: Text(
-                    '${filterName[0].toUpperCase()}${filterName.substring(1)}',
-                  ),
-                );
-              },
-            ).toList();
-          },
+          itemBuilder: (context) => snapshot.data.map(
+            (filter) {
+              final filterString = filter.toString();
+              final filterName = filterString
+                  .substring(filterString.indexOf('.') + 1)
+                  .toLowerCase();
+              return PopupMenuItem<LineListFilter>(
+                value: filter,
+                child: Text(
+                  '${filterName[0].toUpperCase()}${filterName.substring(1)}',
+                ),
+              );
+            },
+          ).toList(),
         );
       },
     );
