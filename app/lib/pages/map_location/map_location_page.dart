@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -19,48 +20,6 @@ class _MapLocationPageState extends State<MapLocationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final query = MediaQuery.of(context);
-    final size = query.size;
-    final List<Widget> boundsLimiters = [];
-    if (query.orientation == Orientation.portrait) {
-      final boundsLimiterHeight = (size.height - size.width) / 2;
-      boundsLimiters.add(
-        Container(
-          width: double.infinity,
-          height: boundsLimiterHeight,
-          color: Colors.white,
-        ),
-      );
-      boundsLimiters.add(
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            width: double.infinity,
-            height: boundsLimiterHeight,
-            color: Colors.white,
-          ),
-        ),
-      );
-    } else {
-      final boundsLimiterWidth = (size.width - size.height) / 2;
-      boundsLimiters.add(
-        Container(
-          width: boundsLimiterWidth,
-          height: double.infinity,
-          color: Colors.white,
-        ),
-      );
-      boundsLimiters.add(
-        Align(
-          alignment: Alignment.centerRight,
-          child: Container(
-            width: boundsLimiterWidth,
-            height: double.infinity,
-            color: Colors.white,
-          ),
-        ),
-      );
-    }
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -76,8 +35,44 @@ class _MapLocationPageState extends State<MapLocationPage> {
               ),
               onMapCreated: _mapController.complete,
             ),
-            ...boundsLimiters
+            ...boundsLimiters(context)
           ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> boundsLimiters(BuildContext context) {
+    final query = MediaQuery.of(context);
+    final size = query.size;
+    if (query.orientation == Orientation.portrait) {
+      final boundsLimiterHeight = (size.height - size.width) / 2;
+      final limiter = boundsLimiter(height: boundsLimiterHeight);
+      return [
+        limiter,
+        Align(alignment: Alignment.bottomCenter, child: limiter),
+      ];
+    } else {
+      final boundsLimiterWidth = (size.width - size.height) / 2;
+      final limiter = boundsLimiter(width: boundsLimiterWidth);
+      return [
+        limiter,
+        Align(alignment: Alignment.centerRight, child: limiter),
+      ];
+    }
+  }
+
+  Widget boundsLimiter({
+    double width = double.infinity,
+    double height = double.infinity,
+  }) {
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: Container(
+          width: width,
+          height: height,
+          color: Colors.black.withOpacity(0),
         ),
       ),
     );
