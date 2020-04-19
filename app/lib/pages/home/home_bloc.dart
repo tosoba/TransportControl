@@ -26,6 +26,7 @@ class HomeBloc extends Bloc<_HomeEvent, _HomeState> {
       GetIt.instance<LocationsRepo>(),
       saveLocation: _saveLocation,
       updateLocation: _updateLocation,
+      deleteLocation: _deleteLocation,
     );
   }
 
@@ -64,5 +65,9 @@ class HomeBloc extends Bloc<_HomeEvent, _HomeState> {
 
   void _updateLocation(Location location) {
     _locationsRepo.updateLocation(location);
+  }
+
+  void _deleteLocation(Location location) {
+    _locationsRepo.deleteLocation(location);
   }
 }

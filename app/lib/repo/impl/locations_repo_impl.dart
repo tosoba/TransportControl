@@ -26,4 +26,9 @@ class LocationsRepoImpl extends LocationsRepo {
   Future<int> updateLocation(Location location) {
     return _dao.updateLocation(location.db);
   }
+
+  @override
+  Future<int> deleteLocation(Location location) {
+    return _dao.deleteLocation(location.db);
+  }
 }

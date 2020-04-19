@@ -11,6 +11,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   final LocationsRepo _repo;
   final void Function(Location) saveLocation;
   final void Function(Location) updateLocation;
+  final void Function(Location) deleteLocation;
 
   StreamSubscription<List<Location>> _locationUpdatesSubscription;
 
@@ -18,6 +19,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     this._repo, {
     @required this.saveLocation,
     @required this.updateLocation,
+    @required this.deleteLocation,
   }) {
     _locationUpdatesSubscription = _repo.favouriteLocationsStream.listen(
       (locations) => add(LocationsEvent.updateLocations(locations: locations)),

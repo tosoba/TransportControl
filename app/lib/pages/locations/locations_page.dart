@@ -168,7 +168,7 @@ class _LocationsPageState extends State<LocationsPage>
           //subtitle: Text('SlidableDrawerDelegate'), TODO: last searched/number of searches depending on current list order
         ),
       ),
-      actions: <Widget>[
+      actions: [
         IconSlideAction(
           caption: 'Show',
           color: Colors.blue,
@@ -187,12 +187,14 @@ class _LocationsPageState extends State<LocationsPage>
           onTap: () {},
         ),
       ],
-      secondaryActions: <Widget>[
-        IconSlideAction(
-          caption: 'Delete',
-          color: Colors.red,
-          icon: Icons.delete,
-          onTap: () {},
+      secondaryActions: [
+        Builder(
+          builder: (context) => IconSlideAction(
+            caption: 'Delete',
+            color: Colors.red,
+            icon: Icons.delete,
+            onTap: () => context.bloc<LocationsBloc>().deleteLocation(location),
+          ),
         ),
       ],
     );
