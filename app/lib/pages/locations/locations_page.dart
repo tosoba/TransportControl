@@ -85,40 +85,45 @@ class _LocationsPageState extends State<LocationsPage>
         topOffset: topOffset,
         locationsStream: context.bloc<LocationsBloc>().filteredLocationsStream,
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => MapLocationPage(MapLocationPageMode.add()),
-            ),
-          );
-          if (result is MapLocationPageResult) {
-            result.action.when(
-              save: (_) => result.mode.when(
-                add: (_) =>
-                    context.bloc<LocationsBloc>().saveLocation(result.location),
-                existing: (_) => context
-                    .bloc<LocationsBloc>()
-                    .updateLocation(result.location),
-              ),
-              load: (_) {
-                //TODO:
-              },
-              saveAndLoad: (_) {
-                //TODO:
-              },
-            );
-          }
-        },
-        label: Text(
-          'New location',
-          style: const TextStyle(color: Colors.black),
-        ),
-        icon: Icon(Icons.add, color: Colors.black),
-        backgroundColor: Colors.white,
+      floatingActionButton: _floatingActionButton,
+    );
+  }
+
+  Widget get _floatingActionButton {
+    return FloatingActionButton.extended(
+      onPressed: () => _showMapLocationPage(MapLocationPageMode.add()),
+      label: Text(
+        'New location',
+        style: const TextStyle(color: Colors.black),
+      ),
+      icon: Icon(Icons.add, color: Colors.black),
+      backgroundColor: Colors.white,
+    );
+  }
+
+  void _showMapLocationPage(MapLocationPageMode mode) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MapLocationPage(mode),
       ),
     );
+    if (result is MapLocationPageResult) {
+      result.action.when(
+        save: (_) => result.mode.when(
+          add: (_) =>
+              context.bloc<LocationsBloc>().saveLocation(result.location),
+          existing: (_) =>
+              context.bloc<LocationsBloc>().updateLocation(result.location),
+        ),
+        load: (_) {
+          //TODO:
+        },
+        saveAndLoad: (_) {
+          //TODO:
+        },
+      );
+    }
   }
 
   Widget _locationsList({
@@ -168,7 +173,12 @@ class _LocationsPageState extends State<LocationsPage>
           caption: 'Show',
           color: Colors.blue,
           icon: Icons.map,
-          onTap: () {},
+          onTap: () => _showMapLocationPage(
+            MapLocationPageMode.existing(
+              location: location,
+              edit: false,
+            ),
+          ),
         ),
         IconSlideAction(
           caption: 'Edit',

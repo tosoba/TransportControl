@@ -50,6 +50,9 @@ class MapLocationPage extends HookWidget {
         name: textFieldController.value.text?.trim(),
       );
     });
+    final readOnly = useState(
+      _mode.when(add: (_) => false, existing: (mode) => !mode.edit),
+    );
 
     final queryData = MediaQuery.of(context);
 
@@ -64,8 +67,13 @@ class MapLocationPage extends HookWidget {
         appBar: TextFieldAppBar(
           textFieldController: textFieldController,
           textFieldFocusNode: textFieldFocusNode,
-          leading: TextFieldAppBarBackButton(textFieldFocusNode),
+          leading: TextFieldAppBarBackButton(
+            textFieldFocusNode,
+            textFieldDisabled: readOnly.value,
+          ),
           hint: 'Location name',
+          enabled: readOnly.value,
+          readOnly: readOnly.value,
         ),
         body: Stack(
           children: [
@@ -93,35 +101,36 @@ class MapLocationPage extends HookWidget {
           ],
         ),
         persistentFooterButtons: [
-          Builder(
-            builder: (context) => RaisedButton(
-              color: Colors.white,
-              onPressed: () {
-                final locationValue = location.value;
-                if (locationValue.name == null ||
-                    locationValue.name.trim().isEmpty) {
-                  Scaffold.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Enter a name for location to save'),
-                    ),
-                  );
-                } else {
-                  Navigator.pop(
-                    context,
-                    MapLocationPageResult(
-                      location: location.value,
-                      mode: _mode,
-                      action: MapLocationPageResultAction.save(),
-                    ),
-                  );
-                }
-              },
-              child: Text(
-                'Save',
-                style: const TextStyle(fontSize: 18),
+          if (!readOnly.value)
+            Builder(
+              builder: (context) => RaisedButton(
+                color: Colors.white,
+                onPressed: () {
+                  final locationValue = location.value;
+                  if (locationValue.name == null ||
+                      locationValue.name.trim().isEmpty) {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Enter a name for location to save'),
+                      ),
+                    );
+                  } else {
+                    Navigator.pop(
+                      context,
+                      MapLocationPageResult(
+                        location: location.value,
+                        mode: _mode,
+                        action: MapLocationPageResultAction.save(),
+                      ),
+                    );
+                  }
+                },
+                child: Text(
+                  'Save',
+                  style: const TextStyle(fontSize: 18),
+                ),
               ),
             ),
-          ),
           RaisedButton(
             color: Colors.white,
             onPressed: () {},
@@ -130,14 +139,15 @@ class MapLocationPage extends HookWidget {
               style: const TextStyle(fontSize: 18),
             ),
           ),
-          RaisedButton(
-            color: Colors.white,
-            onPressed: () {},
-            child: Text(
-              'Save & load',
-              style: const TextStyle(fontSize: 18),
-            ),
-          )
+          if (!readOnly.value)
+            RaisedButton(
+              color: Colors.white,
+              onPressed: () {},
+              child: Text(
+                'Save & load',
+                style: const TextStyle(fontSize: 18),
+              ),
+            )
         ],
       ),
     );

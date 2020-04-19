@@ -7,6 +7,8 @@ class TextFieldAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Widget trailing;
   final String hint;
   final Function(String) onChanged;
+  final bool enabled;
+  final bool readOnly;
 
   final Size size = Size.fromHeight(kToolbarHeight + 10.0);
 
@@ -18,6 +20,8 @@ class TextFieldAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.hint,
     this.onChanged,
     this.textFieldController,
+    this.enabled = false,
+    this.readOnly = false,
   }) : super(key: key);
 
   @override
@@ -72,6 +76,8 @@ class _TextFieldAppBarState extends State<TextFieldAppBar> {
       controller: widget.textFieldController,
       focusNode: widget.textFieldFocusNode,
       autofocus: false,
+      enabled: widget.enabled,
+      readOnly: widget.readOnly,
       decoration: InputDecoration(
         hintText: widget.hint,
         border: InputBorder.none,
