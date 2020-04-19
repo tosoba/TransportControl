@@ -1,14 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/result.dart';
 import 'package:transport_control/model/vehicle.dart';
 
 abstract class VehiclesRepo {
-  Future<Result<List<Vehicle>>> loadVehiclesInArea({
-    @required double southWestLat,
-    @required double southWestLon,
-    @required double northEastLat,
-    @required double northEastLon,
+  Future<Result<List<Vehicle>>> loadVehiclesInBounds(
+    LatLngBounds bounds, {
     int type,
   });
 

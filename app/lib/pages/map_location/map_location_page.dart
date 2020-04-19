@@ -72,7 +72,7 @@ class MapLocationPage extends HookWidget {
             textFieldDisabled: readOnly.value,
           ),
           hint: 'Location name',
-          enabled: readOnly.value,
+          enabled: !readOnly.value,
           readOnly: readOnly.value,
         ),
         body: Stack(
@@ -85,31 +85,17 @@ class MapLocationPage extends HookWidget {
             ..._boundsLimiters(queryData)
           ],
         ),
+        //TODO: replace these with bottom nav buttons like in HomePage
         persistentFooterButtons: [
           if (!readOnly.value)
             Builder(
               builder: (context) => RaisedButton(
                 color: Colors.white,
-                onPressed: () {
-                  final locationValue = location.value;
-                  if (locationValue.name == null ||
-                      locationValue.name.trim().isEmpty) {
-                    Scaffold.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Enter a name for location to save'),
-                      ),
-                    );
-                  } else {
-                    Navigator.pop(
-                      context,
-                      MapLocationPageResult(
-                        location: location.value,
-                        mode: _mode,
-                        action: MapLocationPageResultAction.save(),
-                      ),
-                    );
-                  }
-                },
+                onPressed: () => _savePressed(
+                  context,
+                  location: location,
+                  action: MapLocationPageResultAction.save(),
+                ),
                 child: Text(
                   'Save',
                   style: const TextStyle(fontSize: 18),
@@ -125,17 +111,45 @@ class MapLocationPage extends HookWidget {
             ),
           ),
           if (!readOnly.value)
-            RaisedButton(
-              color: Colors.white,
-              onPressed: () {},
-              child: Text(
-                'Save & load',
-                style: const TextStyle(fontSize: 18),
+            Builder(
+              builder: (context) => RaisedButton(
+                color: Colors.white,
+                child: Text(
+                  'Save & load',
+                  style: const TextStyle(fontSize: 18),
+                ),
+                onPressed: () => _savePressed(
+                  context,
+                  location: location,
+                  action: MapLocationPageResultAction.saveAndLoad(),
+                ),
               ),
             )
         ],
       ),
     );
+  }
+
+  void _savePressed(
+    BuildContext context, {
+    @required ValueNotifier<Location> location,
+    @required MapLocationPageResultAction action,
+  }) {
+    final locationValue = location.value;
+    if (locationValue.name == null || locationValue.name.trim().isEmpty) {
+      Scaffold.of(context).showSnackBar(
+        SnackBar(content: Text('Enter a name for location to save')),
+      );
+    } else {
+      Navigator.pop(
+        context,
+        MapLocationPageResult(
+          location: location.value,
+          mode: _mode,
+          action: action,
+        ),
+      );
+    }
   }
 
   GoogleMap _googleMap({

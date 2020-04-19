@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_event.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
@@ -12,6 +13,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   final void Function(Location) saveLocation;
   final void Function(Location) updateLocation;
   final void Function(Location) deleteLocation;
+  final void Function(LatLngBounds) loadVehiclesInBounds;
 
   StreamSubscription<List<Location>> _locationUpdatesSubscription;
 
@@ -20,6 +22,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     @required this.saveLocation,
     @required this.updateLocation,
     @required this.deleteLocation,
+    @required this.loadVehiclesInBounds,
   }) {
     _locationUpdatesSubscription = _repo.favouriteLocationsStream.listen(
       (locations) => add(LocationsEvent.updateLocations(locations: locations)),

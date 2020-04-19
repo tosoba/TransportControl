@@ -27,6 +27,7 @@ class HomeBloc extends Bloc<_HomeEvent, _HomeState> {
       saveLocation: _saveLocation,
       updateLocation: _updateLocation,
       deleteLocation: _deleteLocation,
+      loadVehiclesInBounds: _mapBloc.loadVehiclesInBounds,
     );
   }
 

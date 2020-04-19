@@ -109,21 +109,32 @@ class _LocationsPageState extends State<LocationsPage>
       ),
     );
     if (result is MapLocationPageResult) {
-      result.action.when(
-        save: (_) => result.mode.when(
-          add: (_) =>
-              context.bloc<LocationsBloc>().saveLocation(result.location),
-          existing: (_) =>
-              context.bloc<LocationsBloc>().updateLocation(result.location),
-        ),
-        load: (_) {
-          //TODO:
-        },
-        saveAndLoad: (_) {
-          //TODO:
-        },
-      );
+      _handleLocationMapPageResult(result);
     }
+  }
+
+  void _handleLocationMapPageResult(MapLocationPageResult result) {
+    result.action.when(
+      save: (_) => _saveOrUpdateLocation(result),
+      load: (_) => _loadVehiclesAndPop(result),
+      saveAndLoad: (_) {
+        _saveOrUpdateLocation(result);
+        _loadVehiclesAndPop(result);
+      },
+    );
+  }
+
+  void _loadVehiclesAndPop(MapLocationPageResult result) {
+    context.bloc<LocationsBloc>().loadVehiclesInBounds(result.location.bounds);
+    Navigator.pop(context);
+  }
+
+  void _saveOrUpdateLocation(MapLocationPageResult result) {
+    result.mode.when(
+      add: (_) => context.bloc<LocationsBloc>().saveLocation(result.location),
+      existing: (_) =>
+          context.bloc<LocationsBloc>().updateLocation(result.location),
+    );
   }
 
   Widget _locationsList({
@@ -158,45 +169,45 @@ class _LocationsPageState extends State<LocationsPage>
   }
 
   Widget _locationListItem(Location location) {
-    return Slidable(
-      actionPane: SlidableDrawerActionPane(),
-      actionExtentRatio: 0.25,
-      child: Container(
-        color: Colors.white,
-        child: ListTile(
-          title: Text(location.name),
-          //subtitle: Text('SlidableDrawerDelegate'), TODO: last searched/number of searches depending on current list order
-        ),
-      ),
-      actions: [
-        IconSlideAction(
-          caption: 'Show',
-          color: Colors.blue,
-          icon: Icons.map,
-          onTap: () => _showMapLocationPage(
-            MapLocationPageMode.existing(
-              location: location,
-              edit: false,
-            ),
+    return Builder(
+      builder: (context) => Slidable(
+        actionPane: SlidableDrawerActionPane(),
+        actionExtentRatio: 0.25,
+        child: Container(
+          color: Colors.white,
+          child: ListTile(
+            title: Text(location.name),
+            //subtitle: Text('SlidableDrawerDelegate'), TODO: last searched/number of searches depending on current list order
           ),
         ),
-        IconSlideAction(
-          caption: 'Edit',
-          color: Colors.indigo,
-          icon: Icons.edit,
-          onTap: () {},
-        ),
-      ],
-      secondaryActions: [
-        Builder(
-          builder: (context) => IconSlideAction(
+        actions: [
+          IconSlideAction(
+            caption: 'Show',
+            color: Colors.blue,
+            icon: Icons.map,
+            onTap: () => _showMapLocationPage(
+              MapLocationPageMode.existing(
+                location: location,
+                edit: false,
+              ),
+            ),
+          ),
+          IconSlideAction(
+            caption: 'Edit',
+            color: Colors.indigo,
+            icon: Icons.edit,
+            onTap: () {},
+          ),
+        ],
+        secondaryActions: [
+          IconSlideAction(
             caption: 'Delete',
             color: Colors.red,
             icon: Icons.delete,
             onTap: () => context.bloc<LocationsBloc>().deleteLocation(location),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

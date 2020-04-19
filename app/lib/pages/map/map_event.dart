@@ -19,6 +19,12 @@ enum _MapEvent {
   ])
   AddVehiclesOfLines,
 
+  @Data(fields: [
+    DataField<Iterable<Vehicle>>('vehicles'),
+    DataField<LatLngBounds>('bounds')
+  ])
+  AddVehiclesInBounds,
+
   @object
   AnimateVehicles,
 

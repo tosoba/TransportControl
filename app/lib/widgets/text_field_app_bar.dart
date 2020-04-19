@@ -20,7 +20,7 @@ class TextFieldAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.hint,
     this.onChanged,
     this.textFieldController,
-    this.enabled = false,
+    this.enabled = true,
     this.readOnly = false,
   }) : super(key: key);
 

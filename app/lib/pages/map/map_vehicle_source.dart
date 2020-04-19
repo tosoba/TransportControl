@@ -11,6 +11,4 @@ enum _MapVehicleSource {
 
   @Data(fields: [DataField<LatLngBounds>('bounds')])
   AllInBounds,
-
-  // All nearby location?
 }

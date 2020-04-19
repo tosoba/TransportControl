@@ -81,21 +81,41 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         evt.vehicles.forEach((vehicle) {
           final tracked = updatedVehicles[vehicle.number];
           if (tracked != null) {
+            updatedVehicles[vehicle.number] =
+                tracked.withUpdatedVehicle(vehicle,
+                    bounds: state.bounds,
+                    zoom: state.zoom,
+                    sources: tracked.sources
+                      ..add(
+                        MapVehicleSource.allOfLine(
+                            line: lineSymbols[vehicle.symbol]),
+                      ));
+          } else {
+            updatedVehicles[vehicle.number] = MapVehicle.fromNewlyLoadedVehicle(
+              vehicle,
+              source:
+                  MapVehicleSource.allOfLine(line: lineSymbols[vehicle.symbol]),
+            );
+          }
+        });
+        return state.copyWith(trackedVehicles: updatedVehicles);
+      },
+      addVehiclesInBounds: (evt) {
+        final updatedVehicles = Map.of(state.trackedVehicles);
+        evt.vehicles.forEach((vehicle) {
+          final tracked = updatedVehicles[vehicle.number];
+          if (tracked != null) {
             updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
               vehicle,
               bounds: state.bounds,
               zoom: state.zoom,
               sources: tracked.sources
-                ..add(
-                  MapVehicleSource.allOfLine(line: lineSymbols[vehicle.symbol]),
-                ),
+                ..add(MapVehicleSource.allInBounds(bounds: evt.bounds)),
             );
           } else {
             updatedVehicles[vehicle.number] = MapVehicle.fromNewlyLoadedVehicle(
               vehicle,
-              source: MapVehicleSource.allOfLine(
-                line: lineSymbols[vehicle.symbol],
-              ),
+              source: MapVehicleSource.allInBounds(bounds: evt.bounds),
             );
           }
         });
@@ -162,6 +182,16 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         failure.logError();
         _loadingVehiclesOfLinesFailed(lines);
       },
+    );
+  }
+
+  void loadVehiclesInBounds(LatLngBounds bounds) async {
+    final result = await _vehiclesRepo.loadVehiclesInBounds(bounds);
+    result.when(
+      success: (success) => add(
+        MapEvent.addVehiclesInBounds(vehicles: success.data, bounds: bounds),
+      ),
+      failure: (failure) => failure.logError(),
     );
   }
 

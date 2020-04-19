@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:injectable/injectable.dart';
 import 'package:transport_control/api/vehicles_api.dart';
 import 'package:transport_control/di/injection.dart';
@@ -18,7 +19,8 @@ class VehiclesRepoImpl extends VehiclesRepo {
 
   VehiclesRepoImpl(this._api);
 
-  static final Duration _timeoutDuration = Duration(seconds: 3);
+  static const Duration _timeoutDuration = const Duration(seconds: 3);
+  static const List<int> _vehicleTypes = const [1, 2];
 
   @override
   Future<Result<List<Vehicle>>> loadVehiclesOfLines(Iterable<Line> lines) {
@@ -67,14 +69,23 @@ class VehiclesRepoImpl extends VehiclesRepo {
   }
 
   @override
-  Future<Result<List<Vehicle>>> loadVehiclesInArea({
-    double southWestLat,
-    double southWestLon,
-    double northEastLat,
-    double northEastLon,
+  Future<Result<List<Vehicle>>> loadVehiclesInBounds(
+    LatLngBounds bounds, {
     int type,
-  }) {
-    throw UnimplementedError();
+  }) async {
+    try {
+      final responses = await _loadVehiclesOfTypesUsing<int>(
+          type != null ? [type] : _vehicleTypes, (type) => type);
+      return Result.success(
+        data: responses.filterVehicles(
+          (vehicle) =>
+              vehicle.isValid &&
+              bounds.contains(LatLng(vehicle.lat, vehicle.lon)),
+        ),
+      );
+    } catch (error) {
+      return Result<List<Vehicle>>.failure(error: error);
+    }
   }
 
   Future<List<VehiclesResponse>> _loadVehiclesOfTypesUsing<T>(
