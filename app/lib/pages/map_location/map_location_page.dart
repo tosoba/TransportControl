@@ -77,25 +77,10 @@ class MapLocationPage extends HookWidget {
         ),
         body: Stack(
           children: [
-            GoogleMap(
-              mapType: MapType.normal,
-              initialCameraPosition: CameraPosition(
-                target: _targetFor(location.value),
-                zoom: MapConstants.initialZoom,
-              ),
-              onMapCreated: (controller) {
-                _mapController.complete(controller);
-                if (location.value.bounds != null) {
-                  controller.moveCamera(CameraUpdate.newLatLngBounds(
-                    location.value.bounds,
-                    0,
-                  ));
-                }
-              },
-              onCameraIdle: () => _updateLocationBounds(
-                location,
-                _screenCoordinateBounds(queryData),
-              ),
+            _googleMap(
+              location: location,
+              readOnly: readOnly,
+              queryData: queryData,
             ),
             ..._boundsLimiters(queryData)
           ],
@@ -149,6 +134,43 @@ class MapLocationPage extends HookWidget {
               ),
             )
         ],
+      ),
+    );
+  }
+
+  GoogleMap _googleMap({
+    @required ValueNotifier<Location> location,
+    @required ValueNotifier<bool> readOnly,
+    @required MediaQueryData queryData,
+  }) {
+    final interactionEnabled = !readOnly.value;
+    return GoogleMap(
+      mapType: MapType.normal,
+      rotateGesturesEnabled: interactionEnabled,
+      scrollGesturesEnabled: interactionEnabled,
+      zoomGesturesEnabled: interactionEnabled,
+      tiltGesturesEnabled: interactionEnabled,
+      //TODO:
+      // minMaxZoomPreference: MinMaxZoomPreference(
+      //   MapConstants.minLocationPageMapZoom,
+      //   MapConstants.maxLocationPageMapZoom,
+      // ),
+      initialCameraPosition: CameraPosition(
+        target: _targetFor(location.value),
+        zoom: MapConstants.initialZoom,
+      ),
+      onMapCreated: (controller) {
+        _mapController.complete(controller);
+        if (location.value.bounds != null) {
+          controller.moveCamera(CameraUpdate.newLatLngBounds(
+            location.value.bounds,
+            0,
+          ));
+        }
+      },
+      onCameraIdle: () => _updateLocationBounds(
+        location,
+        _screenCoordinateBounds(queryData),
       ),
     );
   }
