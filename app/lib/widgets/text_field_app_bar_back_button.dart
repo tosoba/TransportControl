@@ -8,7 +8,7 @@ class TextFieldAppBarBackButton extends StatelessWidget {
   const TextFieldAppBarBackButton(
     this._textFieldFocusNode, {
     Key key,
-    this.textFieldDisabled,
+    this.textFieldDisabled = false,
   }) : super(key: key);
 
   @override

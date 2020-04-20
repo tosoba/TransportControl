@@ -31,3 +31,13 @@ class LocationsState {
 }
 
 enum LocationsListOrder { lastSearched, timesSearched }
+
+class FilteredLocationsResult {
+  final List<Location> locations;
+  final bool anyLocationsSaved;
+
+  FilteredLocationsResult({
+    @required this.locations,
+    @required this.anyLocationsSaved,
+  });
+}

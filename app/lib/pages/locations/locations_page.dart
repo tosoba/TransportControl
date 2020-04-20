@@ -9,6 +9,7 @@ import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/map_location/map_location_page.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
+import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
@@ -123,14 +124,17 @@ class LocationsPage extends HookWidget {
 
   Widget _locationsList({
     @required double topOffset,
-    @required Stream<List<Location>> locationsStream,
+    @required Stream<FilteredLocationsResult> locationsStream,
     @required AnimationController scrollAnimationController,
   }) {
-    return StreamBuilder<List<Location>>(
+    return StreamBuilder<FilteredLocationsResult>(
       stream: locationsStream,
       builder: (context, snapshot) {
-        if (snapshot.data == null || snapshot.data.isEmpty) {
-          return Center(child: Text('No saved locations'));
+        final result = snapshot.data;
+        if (result == null || !result.anyLocationsSaved) {
+          return Center(child: Text('No saved locations.'));
+        } else if (result.locations.isEmpty && result.anyLocationsSaved) {
+          return Center(child: Text('No saved locations match entered name.'));
         }
 
         return AnimationLimiter(
@@ -141,12 +145,12 @@ class LocationsPage extends HookWidget {
               scrollAnimationController: scrollAnimationController,
             ),
             child: ListView.builder(
-              itemCount: snapshot.data.length,
+              itemCount: result.locations.length,
               itemBuilder: (context, index) {
                 return AnimationConfiguration.staggeredList(
                   position: index,
                   child: FadeInAnimation(
-                    child: _locationListItem(snapshot.data.elementAt(index)),
+                    child: _locationListItem(result.locations.elementAt(index)),
                   ),
                 );
               },

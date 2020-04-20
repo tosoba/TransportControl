@@ -47,14 +47,18 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     );
   }
 
-  Stream<List<Location>> get filteredLocationsStream {
+  Stream<FilteredLocationsResult> get filteredLocationsStream {
     return map((state) {
       final filter = state.nameFilter == null
           ? (Location location) => true
           : (Location location) => location.name
               .toLowerCase()
               .contains(state.nameFilter.trim().toLowerCase());
-      return state.locations.where(filter).toList()..orderBy(state.listOrder);
+      return FilteredLocationsResult(
+        locations: state.locations.where(filter).toList()
+          ..orderBy(state.listOrder),
+        anyLocationsSaved: state.locations.isNotEmpty,
+      );
     });
   }
 
