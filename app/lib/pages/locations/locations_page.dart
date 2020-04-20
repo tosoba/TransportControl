@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:transport_control/model/location.dart';
@@ -12,64 +13,32 @@ import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 
-class LocationsPage extends StatefulWidget {
-  const LocationsPage({Key key}) : super(key: key);
-
-  @override
-  _LocationsPageState createState() => _LocationsPageState();
-}
-
-class _LocationsPageState extends State<LocationsPage>
-    with TickerProviderStateMixin<LocationsPage> {
-  final ScrollController scrollController = ScrollController();
-
-  FocusNode _searchFieldFocusNode;
-  TextEditingController _searchFieldController;
-
-  AnimationController _scrollAnimController;
-  Animation<Offset> _appBarOffset;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _searchFieldController = TextEditingController()
-      ..addListener(_searchTextChanged);
-    _searchFieldFocusNode = FocusNode();
-
-    _scrollAnimController = AnimationController(
-      vsync: this,
-      duration: kThemeAnimationDuration,
-    );
-    _appBarOffset = Tween<Offset>(
-      begin: Offset.zero,
-      end: Offset(0.0, -1.0),
-    ).animate(_scrollAnimController);
-  }
-
-  @override
-  void dispose() {
-    _searchFieldFocusNode.dispose();
-    _searchFieldController.dispose();
-
-    _scrollAnimController.dispose();
-
-    super.dispose();
-  }
-
-  void _searchTextChanged() {
-    context
-        .bloc<LocationsBloc>()
-        .nameFilterChanged(_searchFieldController.value.text);
-  }
+class LocationsPage extends HookWidget {
+  LocationsPage({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final searchFieldFocusNode = useFocusNode();
+    final searchFieldController = useTextEditingController();
+    searchFieldController.addListener(
+      () => context
+          .bloc<LocationsBloc>()
+          .nameFilterChanged(searchFieldController.value.text),
+    );
+
+    final scrollAnimController = useAnimationController(
+      duration: kThemeAnimationDuration,
+    );
+    final appBarOffset = useMemoized(
+      () => Tween(begin: Offset.zero, end: Offset(0.0, -1.0))
+          .animate(scrollAnimController),
+    );
+
     final appBar = TextFieldAppBar(
-      textFieldFocusNode: _searchFieldFocusNode,
-      textFieldController: _searchFieldController,
+      textFieldFocusNode: searchFieldFocusNode,
+      textFieldController: searchFieldController,
       hint: "Search locations...",
-      leading: TextFieldAppBarBackButton(_searchFieldFocusNode),
+      leading: TextFieldAppBarBackButton(searchFieldFocusNode),
       //trailing: _listOrderMenu(context), //TODO:
     );
     final topOffset =
@@ -78,30 +47,39 @@ class _LocationsPageState extends State<LocationsPage>
       extendBodyBehindAppBar: true,
       extendBody: true,
       appBar: SlideTransitionPreferredSizeWidget(
-        offset: _appBarOffset,
+        offset: appBarOffset,
         child: appBar,
       ),
       body: _locationsList(
         topOffset: topOffset,
         locationsStream: context.bloc<LocationsBloc>().filteredLocationsStream,
+        scrollAnimationController: scrollAnimController,
       ),
       floatingActionButton: _floatingActionButton,
     );
   }
 
   Widget get _floatingActionButton {
-    return FloatingActionButton.extended(
-      onPressed: () => _showMapLocationPage(MapLocationPageMode.add()),
-      label: Text(
-        'New location',
-        style: const TextStyle(color: Colors.black),
+    return Builder(
+      builder: (context) => FloatingActionButton.extended(
+        onPressed: () => _showMapLocationPage(
+          context,
+          mode: MapLocationPageMode.add(),
+        ),
+        label: Text(
+          'New location',
+          style: const TextStyle(color: Colors.black),
+        ),
+        icon: Icon(Icons.add, color: Colors.black),
+        backgroundColor: Colors.white,
       ),
-      icon: Icon(Icons.add, color: Colors.black),
-      backgroundColor: Colors.white,
     );
   }
 
-  void _showMapLocationPage(MapLocationPageMode mode) async {
+  void _showMapLocationPage(
+    BuildContext context, {
+    @required MapLocationPageMode mode,
+  }) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -109,27 +87,33 @@ class _LocationsPageState extends State<LocationsPage>
       ),
     );
     if (result is MapLocationPageResult) {
-      _handleLocationMapPageResult(result);
+      _handleLocationMapPageResult(result, context: context);
     }
   }
 
-  void _handleLocationMapPageResult(MapLocationPageResult result) {
+  void _handleLocationMapPageResult(
+    MapLocationPageResult result, {
+    @required BuildContext context,
+  }) {
     result.action.when(
-      save: (_) => _saveOrUpdateLocation(result),
-      load: (_) => _loadVehiclesAndPop(result),
+      save: (_) => _saveOrUpdateLocation(context, result),
+      load: (_) => _loadVehiclesAndPop(context, result),
       saveAndLoad: (_) {
-        _saveOrUpdateLocation(result);
-        _loadVehiclesAndPop(result);
+        _saveOrUpdateLocation(context, result);
+        _loadVehiclesAndPop(context, result);
       },
     );
   }
 
-  void _loadVehiclesAndPop(MapLocationPageResult result) {
+  void _loadVehiclesAndPop(BuildContext context, MapLocationPageResult result) {
     context.bloc<LocationsBloc>().loadVehiclesInBounds(result.location.bounds);
     Navigator.pop(context);
   }
 
-  void _saveOrUpdateLocation(MapLocationPageResult result) {
+  void _saveOrUpdateLocation(
+    BuildContext context,
+    MapLocationPageResult result,
+  ) {
     result.mode.when(
       add: (_) => context.bloc<LocationsBloc>().saveLocation(result.location),
       existing: (_) =>
@@ -140,6 +124,7 @@ class _LocationsPageState extends State<LocationsPage>
   Widget _locationsList({
     @required double topOffset,
     @required Stream<List<Location>> locationsStream,
+    @required AnimationController scrollAnimationController,
   }) {
     return StreamBuilder<List<Location>>(
       stream: locationsStream,
@@ -150,7 +135,11 @@ class _LocationsPageState extends State<LocationsPage>
 
         return AnimationLimiter(
           child: NotificationListener<ScrollNotification>(
-            onNotification: _handleScrollNotification,
+            onNotification: (notification) => _handleScrollNotification(
+              notification,
+              context: context,
+              scrollAnimationController: scrollAnimationController,
+            ),
             child: ListView.builder(
               itemCount: snapshot.data.length,
               itemBuilder: (context, index) {
@@ -186,7 +175,8 @@ class _LocationsPageState extends State<LocationsPage>
             color: Colors.blue,
             icon: Icons.map,
             onTap: () => _showMapLocationPage(
-              MapLocationPageMode.existing(
+              context,
+              mode: MapLocationPageMode.existing(
                 location: location,
                 edit: false,
               ),
@@ -211,14 +201,18 @@ class _LocationsPageState extends State<LocationsPage>
     );
   }
 
-  bool _handleScrollNotification(ScrollNotification notification) {
+  bool _handleScrollNotification(
+    ScrollNotification notification, {
+    @required BuildContext context,
+    @required AnimationController scrollAnimationController,
+  }) {
     if (notification.depth == 0 && notification is UserScrollNotification) {
       switch (notification.direction) {
         case ScrollDirection.forward:
-          _scrollAnimController.reverse();
+          scrollAnimationController.reverse();
           break;
         case ScrollDirection.reverse:
-          _scrollAnimController.forward();
+          scrollAnimationController.forward();
           break;
         default:
           break;
