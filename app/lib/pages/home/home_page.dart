@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:transport_control/pages/home/home_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
@@ -10,98 +12,92 @@ import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 
-import 'home_bloc.dart';
+enum _HomeSubPage { map, places }
 
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-enum _SubPage { map, places }
-
-class _HomePageState extends State<HomePage>
-    with TickerProviderStateMixin<HomePage> {
-  FocusNode _searchFieldFocusNode;
-
-  _SubPage _currentPage = _SubPage.map;
-
-  AnimationController _mapTapAnimController;
-  Animation<Offset> _appBarOffset;
-  Animation<double> _bottomNavSize;
-  Animation<double> _bottomNavButtonsOpacity;
-
-  AnimationController _placesPageAnimController;
-  Animation<Offset> _placesPageOffset;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _placesPageAnimController = AnimationController(
-      vsync: this,
-      duration: kThemeAnimationDuration,
-    );
-    _placesPageOffset = Tween<Offset>(
-      begin: Offset(0.0, 1.0),
-      end: Offset.zero,
-    ).animate(_placesPageAnimController);
-
-    _searchFieldFocusNode = FocusNode()
-      ..addListener(() {
-        if (_searchFieldFocusNode.hasFocus && _currentPage != _SubPage.places)
-          _changeSubPage(_SubPage.places);
-      });
-
-    _mapTapAnimController = AnimationController(
-      vsync: this,
-      duration: kThemeAnimationDuration,
-    );
-    _appBarOffset = Tween<Offset>(
-      begin: Offset.zero,
-      end: Offset(0.0, -1.0),
-    ).animate(_mapTapAnimController);
-    _bottomNavSize = Tween(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(_mapTapAnimController);
-    _bottomNavButtonsOpacity = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(_mapTapAnimController);
-  }
-
-  @override
-  void dispose() {
-    _searchFieldFocusNode.dispose();
-
-    _mapTapAnimController.dispose();
-
-    super.dispose();
-  }
-
+class HomePage extends HookWidget {
   @override
   Widget build(BuildContext context) {
+    final currentPage = useState(_HomeSubPage.map);
+
+    final placesPageAnimController = useAnimationController(
+      duration: kThemeAnimationDuration,
+    );
+    final placesPageOffset = useMemoized(
+      () => Tween<Offset>(
+        begin: Offset(0.0, 1.0),
+        end: Offset.zero,
+      ).animate(placesPageAnimController),
+    );
+
+    final mapTapAnimController = useAnimationController(
+      duration: kThemeAnimationDuration,
+    );
+    final appBarOffset = useMemoized(
+      () => Tween<Offset>(
+        begin: Offset.zero,
+        end: Offset(0.0, -1.0),
+      ).animate(mapTapAnimController),
+    );
+    final bottomNavSize = useMemoized(
+      () => Tween(
+        begin: 1.0,
+        end: 0.0,
+      ).animate(mapTapAnimController),
+    );
+    final bottomNavButtonsOpacity = useMemoized(
+      () => Tween<double>(
+        begin: 1.0,
+        end: 0.0,
+      ).animate(mapTapAnimController),
+    );
+
+    final searchFieldFocusNode = useFocusNode();
+    searchFieldFocusNode.addListener(() {
+      if (searchFieldFocusNode.hasFocus &&
+          currentPage.value != _HomeSubPage.places)
+        _changeSubPage(
+          _HomeSubPage.places,
+          currentPage: currentPage,
+          placesPageAnimController: placesPageAnimController,
+          mapTapAnimController: mapTapAnimController,
+        );
+    });
+
     return WillPopScope(
-      onWillPop: _onWillPop,
+      onWillPop: () => _onWillPop(
+        currentPage: currentPage,
+        searchFieldFocusNode: searchFieldFocusNode,
+        mapTapAnimController: mapTapAnimController,
+        placesPageAnimController: placesPageAnimController,
+      ),
       child: Scaffold(
         extendBodyBehindAppBar: true,
         extendBody: true,
+        resizeToAvoidBottomPadding: false,
         appBar: SlideTransitionPreferredSizeWidget(
-          offset: _appBarOffset,
-          child: _appBar,
+          offset: appBarOffset,
+          child: _appBar(
+            currentPage: currentPage,
+            searchFieldFocusNode: searchFieldFocusNode,
+            placesPageAnimController: placesPageAnimController,
+            mapTapAnimController: mapTapAnimController,
+          ),
         ),
         body: Stack(children: [
-          MapPage(mapTapped: _mapTapped),
+          MapPage(mapTapped: () => _mapTapped(mapTapAnimController)),
           SlideTransition(
             child: NearbyPage(),
-            position: _placesPageOffset,
+            position: placesPageOffset,
           )
         ]),
         bottomNavigationBar: Visibility(
-          visible: _currentPage == _SubPage.map,
+          visible: currentPage.value == _HomeSubPage.map,
           child: SizeTransition(
-            child: _bottomNavBar(context),
-            sizeFactor: _bottomNavSize,
+            child: _bottomNavBar(
+              context,
+              bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+            ),
+            sizeFactor: bottomNavSize,
           ),
         ),
         drawer: _navigationDrawer(context),
@@ -109,16 +105,29 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  Future<bool> _onWillPop() {
-    if (_currentPage == _SubPage.places) {
-      _showMapPage();
+  Future<bool> _onWillPop({
+    @required ValueNotifier<_HomeSubPage> currentPage,
+    @required FocusNode searchFieldFocusNode,
+    @required AnimationController placesPageAnimController,
+    @required AnimationController mapTapAnimController,
+  }) {
+    if (currentPage.value == _HomeSubPage.places) {
+      _showMapPage(
+        currentPage: currentPage,
+        searchFieldFocusNode: searchFieldFocusNode,
+        placesPageAnimController: placesPageAnimController,
+        mapTapAnimController: mapTapAnimController,
+      );
       return Future.value(false);
     } else {
       return Future.value(true);
     }
   }
 
-  Widget _bottomNavBar(BuildContext context) {
+  Widget _bottomNavBar(
+    BuildContext context, {
+    @required Animation<double> bottomNavButtonsOpacity,
+  }) {
     return Container(
       padding: EdgeInsets.zero,
       color: Colors.white,
@@ -130,11 +139,13 @@ class _HomePageState extends State<HomePage>
           _bottomNavBarButton(
             labelText: Strings.lines,
             onPressed: () => _showLinesPage(context),
+            bottomNavButtonsOpacity: bottomNavButtonsOpacity,
             icon: Icons.grid_on,
           ),
           _bottomNavBarButton(
             labelText: Strings.locations,
             onPressed: () => _showLocationsPage(context),
+            bottomNavButtonsOpacity: bottomNavButtonsOpacity,
             icon: Icons.location_on,
           ),
         ],
@@ -145,11 +156,12 @@ class _HomePageState extends State<HomePage>
   Widget _bottomNavBarButton({
     @required String labelText,
     @required void Function() onPressed,
+    @required Animation<double> bottomNavButtonsOpacity,
     @required IconData icon,
   }) {
     return Expanded(
       child: FadeTransition(
-        opacity: _bottomNavButtonsOpacity,
+        opacity: bottomNavButtonsOpacity,
         child: FlatButton.icon(
           padding: EdgeInsets.zero,
           icon: Icon(icon),
@@ -164,40 +176,77 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  TextFieldAppBar get _appBar {
+  TextFieldAppBar _appBar({
+    @required FocusNode searchFieldFocusNode,
+    @required ValueNotifier<_HomeSubPage> currentPage,
+    @required AnimationController placesPageAnimController,
+    @required AnimationController mapTapAnimController,
+  }) {
     return TextFieldAppBar(
-      textFieldFocusNode: _searchFieldFocusNode,
-      leading: _drawerButton,
+      textFieldFocusNode: searchFieldFocusNode,
+      leading: _drawerButton(
+        currentPage: currentPage,
+        searchFieldFocusNode: searchFieldFocusNode,
+        placesPageAnimController: placesPageAnimController,
+        mapTapAnimController: mapTapAnimController,
+      ),
       hint: Strings.transportNearby,
       onChanged: (query) {},
     );
   }
 
-  void _changeSubPage(_SubPage page) {
-    setState(() => _currentPage = page);
-    if (page == _SubPage.map) {
-      _placesPageAnimController.reverse();
-    } else if (page == _SubPage.places) {
-      _placesPageAnimController.forward();
-      _mapTapAnimController.reverse();
+  void _changeSubPage(
+    _HomeSubPage page, {
+    @required ValueNotifier<_HomeSubPage> currentPage,
+    @required AnimationController placesPageAnimController,
+    @required AnimationController mapTapAnimController,
+  }) {
+    currentPage.value = page;
+    if (page == _HomeSubPage.map) {
+      placesPageAnimController.reverse();
+    } else if (page == _HomeSubPage.places) {
+      placesPageAnimController.forward();
+      mapTapAnimController.reverse();
     }
   }
 
-  void _showMapPage() {
-    _searchFieldFocusNode.unfocus();
-    _changeSubPage(_SubPage.map);
+  void _showMapPage({
+    @required FocusNode searchFieldFocusNode,
+    @required ValueNotifier<_HomeSubPage> currentPage,
+    @required AnimationController placesPageAnimController,
+    @required AnimationController mapTapAnimController,
+  }) {
+    searchFieldFocusNode.unfocus();
+    _changeSubPage(
+      _HomeSubPage.map,
+      currentPage: currentPage,
+      placesPageAnimController: placesPageAnimController,
+      mapTapAnimController: mapTapAnimController,
+    );
   }
 
-  Widget get _drawerButton {
+  Widget _drawerButton({
+    @required ValueNotifier<_HomeSubPage> currentPage,
+    @required FocusNode searchFieldFocusNode,
+    @required AnimationController placesPageAnimController,
+    @required AnimationController mapTapAnimController,
+  }) {
     return Builder(
       builder: (context) => CircularButton(
         child: Icon(
-          _currentPage == _SubPage.places ? Icons.arrow_back : Icons.menu,
+          currentPage.value == _HomeSubPage.places
+              ? Icons.arrow_back
+              : Icons.menu,
           color: Colors.black,
         ),
         onPressed: () {
-          if (_currentPage == _SubPage.places) {
-            _showMapPage();
+          if (currentPage.value == _HomeSubPage.places) {
+            _showMapPage(
+              searchFieldFocusNode: searchFieldFocusNode,
+              currentPage: currentPage,
+              placesPageAnimController: placesPageAnimController,
+              mapTapAnimController: mapTapAnimController,
+            );
           } else {
             Scaffold.of(context).openDrawer();
           }
@@ -282,11 +331,11 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  void _mapTapped() {
-    if (_mapTapAnimController.isCompleted) {
-      _mapTapAnimController.reverse();
+  void _mapTapped(AnimationController mapTapAnimController) {
+    if (mapTapAnimController.isCompleted) {
+      mapTapAnimController.reverse();
     } else {
-      _mapTapAnimController.forward();
+      mapTapAnimController.forward();
     }
   }
 }
