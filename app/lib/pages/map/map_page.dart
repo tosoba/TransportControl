@@ -26,8 +26,23 @@ class _MapPageState extends State<MapPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    final bloc = context.bloc<MapBloc>();
+    //TODO: replace snackbars with a view (maybe with blur or smth and animation)...
+    bloc.signals.listen(
+      (signal) => signal.when(
+        loading: (loading) => Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text(loading.message)),
+        ),
+        loadedSuccessfully: (_) => Scaffold.of(context).hideCurrentSnackBar(),
+        loadingError: (loadingError) => Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text(loadingError.message)),
+        ),
+      ),
+    );
+
     return StreamBuilder<List<IconifiedMarker>>(
-      stream: context.bloc<MapBloc>().markers,
+      stream: bloc.markers,
       builder: (context, snapshot) {
         return GoogleMap(
           mapType: MapType.normal,

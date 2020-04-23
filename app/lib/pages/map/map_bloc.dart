@@ -11,6 +11,7 @@ import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_event.dart';
 import 'package:transport_control/pages/map/map_markers.dart';
+import 'package:transport_control/pages/map/map_signal.dart';
 import 'package:transport_control/pages/map/map_state.dart';
 import 'package:transport_control/pages/map/map_vehicle.dart';
 import 'package:transport_control/pages/map/map_vehicle_source.dart';
@@ -24,6 +25,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   StreamSubscription<Result<List<Vehicle>>> _vehicleUpdatesSubscription;
   StreamSubscription<dynamic> _vehiclesAnimationSubscription;
+
+  StreamController<MapSignal> _signals = StreamController.broadcast();
+  Stream<MapSignal> get signals => _signals.stream;
 
   MapBloc(this._vehiclesRepo, this._loadingVehiclesOfLinesFailed) {
     _vehicleUpdatesSubscription = Stream.periodic(const Duration(seconds: 15))
@@ -163,7 +167,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   Future<void> close() async {
     await Future.wait([
       _vehicleUpdatesSubscription.cancel(),
-      _vehiclesAnimationSubscription.cancel()
+      _vehiclesAnimationSubscription.cancel(),
+      _signals.close(),
     ]);
     return super.close();
   }
@@ -173,12 +178,21 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   void trackedLinesAdded(Set<Line> lines) async {
+    _signals.add(
+      MapSignal.loading(
+        message:
+            'Loading vehicles in of ${lines.length} ${lines.length > 1 ? 'lines' : 'line'}...',
+      ),
+    );
     final result = await _vehiclesRepo.loadVehiclesOfLines(lines);
     result.when(
-      success: (success) => add(
-        MapEvent.addVehiclesOfLines(vehicles: success.data, lines: lines),
-      ),
+      success: (success) {
+        _signals.add(MapSignal.loadedSuccessfully());
+        add(MapEvent.addVehiclesOfLines(vehicles: success.data, lines: lines));
+      },
       failure: (failure) {
+        _signals
+            .add(MapSignal.loadingError(message: 'Loading error occurred.'));
         failure.logError();
         _loadingVehiclesOfLinesFailed(lines);
       },
@@ -186,12 +200,20 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   void loadVehiclesInBounds(LatLngBounds bounds) async {
+    _signals.add(MapSignal.loading(message: 'Loading vehicles in bounds...'));
     final result = await _vehiclesRepo.loadVehiclesInBounds(bounds);
     result.when(
-      success: (success) => add(
-        MapEvent.addVehiclesInBounds(vehicles: success.data, bounds: bounds),
-      ),
-      failure: (failure) => failure.logError(),
+      success: (success) {
+        _signals.add(MapSignal.loadedSuccessfully());
+        add(
+          MapEvent.addVehiclesInBounds(vehicles: success.data, bounds: bounds),
+        );
+      },
+      failure: (failure) {
+        _signals
+            .add(MapSignal.loadingError(message: 'Loading error occurred.'));
+        failure.logError();
+      },
     );
   }
 
