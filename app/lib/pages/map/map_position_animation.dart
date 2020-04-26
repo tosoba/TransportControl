@@ -147,11 +147,11 @@ class _AnimationStage {
   }) {
     final startDestDistance = _distance(start, dest);
     if (startDestDistance < 200)
-      return (500 * _durationMultiplierFor(zoom)).toInt();
+      return (250 * _durationMultiplierFor(zoom)).toInt();
     else if (startDestDistance < 500)
-      return (1000 * _durationMultiplierFor(zoom)).toInt();
+      return (500 * _durationMultiplierFor(zoom)).toInt();
     else
-      return (1500 * _durationMultiplierFor(zoom)).toInt();
+      return (1000 * _durationMultiplierFor(zoom)).toInt();
   }
 
   static double _durationMultiplierFor(double zoom) {

@@ -17,6 +17,7 @@ import 'package:transport_control/pages/map/map_vehicle.dart';
 import 'package:transport_control/pages/map/map_vehicle_source.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
 import 'package:transport_control/util/asset_util.dart';
+import 'package:transport_control/util/lat_lng_util.dart';
 import 'package:transport_control/util/marker_util.dart';
 
 class MapBloc extends Bloc<MapEvent, MapState> {
@@ -293,7 +294,11 @@ extension _MapStateExt on MapState {
   }
 
   Map<String, ClusterableMarker> get _markersToCluster {
-    final markers = trackedVehicles.map(
+    final markers = Map.fromEntries(
+      trackedVehicles.entries.where(
+        (entry) => bounds.containsLatLng(entry.value.animation.stage.current),
+      ),
+    ).map(
       (number, tracked) {
         final position = tracked.animation.stage.current;
         return MapEntry(
