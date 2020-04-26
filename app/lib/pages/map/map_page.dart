@@ -28,7 +28,6 @@ class _MapPageState extends State<MapPage>
     super.build(context);
 
     final bloc = context.bloc<MapBloc>();
-    //TODO: replace snackbars with a view (maybe with blur or smth and animation)...
     bloc.signals.listen(
       (signal) => signal.when(
         loading: (loading) => Scaffold.of(context).showSnackBar(

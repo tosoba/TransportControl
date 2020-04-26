@@ -178,41 +178,56 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   void trackedLinesAdded(Set<Line> lines) async {
-    _signals.add(
-      MapSignal.loading(
-        message:
-            'Loading vehicles in of ${lines.length} ${lines.length > 1 ? 'lines' : 'line'}...',
+    _loadVehicles(
+      loadingMsg:
+          'Loading vehicles in of ${lines.length} ${lines.length > 1 ? 'lines' : 'line'}...',
+      emptyResultErrorMsg: 'No vehicles of requested lines were found.',
+      loadVehicles: () => _vehiclesRepo.loadVehiclesOfLines(lines),
+      successEvent: (vehicles) => MapEvent.addVehiclesOfLines(
+        vehicles: vehicles,
+        lines: lines,
       ),
-    );
-    final result = await _vehiclesRepo.loadVehiclesOfLines(lines);
-    result.when(
-      success: (success) {
-        _signals.add(MapSignal.loadedSuccessfully());
-        add(MapEvent.addVehiclesOfLines(vehicles: success.data, lines: lines));
-      },
-      failure: (failure) {
-        _signals
-            .add(MapSignal.loadingError(message: 'Loading error occurred.'));
-        failure.logError();
-        _loadingVehiclesOfLinesFailed(lines);
-      },
+      onFailure: (_) => _loadingVehiclesOfLinesFailed(lines),
     );
   }
 
   void loadVehiclesInBounds(LatLngBounds bounds) async {
-    _signals.add(MapSignal.loading(message: 'Loading vehicles in bounds...'));
-    final result = await _vehiclesRepo.loadVehiclesInBounds(bounds);
+    _loadVehicles(
+      loadingMsg: 'Loading vehicles in bounds...',
+      emptyResultErrorMsg: 'No vehicles were found in bounds.',
+      loadVehicles: () => _vehiclesRepo.loadVehiclesInBounds(bounds),
+      successEvent: (vehicles) => MapEvent.addVehiclesInBounds(
+        vehicles: vehicles,
+        bounds: bounds,
+      ),
+    );
+  }
+
+  void _loadVehicles({
+    @required String loadingMsg,
+    @required String emptyResultErrorMsg,
+    @required Future<Result<List<Vehicle>>> Function() loadVehicles,
+    @required MapEvent Function(List<Vehicle>) successEvent,
+    void Function(Failure<List<Vehicle>>) onFailure,
+  }) async {
+    _signals.add(MapSignal.loading(message: loadingMsg));
+    final result = await loadVehicles();
     result.when(
       success: (success) {
-        _signals.add(MapSignal.loadedSuccessfully());
-        add(
-          MapEvent.addVehiclesInBounds(vehicles: success.data, bounds: bounds),
-        );
+        final vehicles = success.data;
+        if (vehicles.isEmpty) {
+          _signals.add(MapSignal.loadingError(message: emptyResultErrorMsg));
+        } else {
+          _signals.add(MapSignal.loadedSuccessfully());
+          add(successEvent(vehicles));
+        }
       },
       failure: (failure) {
-        _signals
-            .add(MapSignal.loadingError(message: 'Loading error occurred.'));
+        _signals.add(
+          MapSignal.loadingError(message: 'Loading error occurred.'),
+        );
         failure.logError();
+        onFailure?.call(failure);
       },
     );
   }
