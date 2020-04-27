@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_markers.dart';
+import 'package:transport_control/pages/map/map_signal.dart';
 
 class MapPage extends StatefulWidget {
   final void Function() mapTapped;
@@ -19,16 +20,26 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage>
     with AutomaticKeepAliveClientMixin<MapPage> {
   final Completer<GoogleMapController> _mapController = Completer();
+  StreamSubscription<MapSignal> _signalsSubscription;
 
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void dispose() {
+    if (_signalsSubscription != null) {
+      _signalsSubscription.cancel();
+      _signalsSubscription = null;
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
     final bloc = context.bloc<MapBloc>();
-    bloc.signals.listen(
+    _signalsSubscription = bloc.signals.listen(
       (signal) => signal.when(
         loading: (loading) => Scaffold.of(context).showSnackBar(
           SnackBar(content: Text(loading.message)),
@@ -37,6 +48,14 @@ class _MapPageState extends State<MapPage>
         loadingError: (loadingError) => Scaffold.of(context).showSnackBar(
           SnackBar(content: Text(loadingError.message)),
         ),
+        zoomToBoundsAfterLoadedSuccessfully: (signal) {
+          Scaffold.of(context).hideCurrentSnackBar();
+          _mapController.future.then(
+            (controller) => controller.animateCamera(
+              CameraUpdate.newLatLngBounds(signal.bounds, 10.0),
+            ),
+          );
+        },
       ),
     );
 

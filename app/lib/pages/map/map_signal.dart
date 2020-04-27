@@ -1,3 +1,4 @@
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:super_enum/super_enum.dart';
 
 part "map_signal.g.dart";
@@ -9,6 +10,9 @@ enum _MapSignal {
 
   @object
   LoadedSuccessfully,
+
+  @Data(fields: [DataField<LatLngBounds>('bounds')])
+  ZoomToBoundsAfterLoadedSuccessfully,
 
   @Data(fields: [DataField<String>('message')])
   LoadingError,

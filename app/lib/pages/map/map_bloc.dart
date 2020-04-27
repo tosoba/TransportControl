@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:super_enum/super_enum.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/result.dart';
@@ -19,8 +20,10 @@ import 'package:transport_control/repo/vehicles_repo.dart';
 import 'package:transport_control/util/asset_util.dart';
 import 'package:transport_control/util/lat_lng_util.dart';
 import 'package:transport_control/util/marker_util.dart';
+import 'package:transport_control/util/preferences_util.dart';
 
 class MapBloc extends Bloc<MapEvent, MapState> {
+  final RxSharedPreferences _preferences;
   final VehiclesRepo _vehiclesRepo;
   final void Function(Set<Line>) _loadingVehiclesOfLinesFailed;
 
@@ -30,7 +33,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   StreamController<MapSignal> _signals = StreamController.broadcast();
   Stream<MapSignal> get signals => _signals.stream;
 
-  MapBloc(this._vehiclesRepo, this._loadingVehiclesOfLinesFailed) {
+  MapBloc(
+    this._vehiclesRepo,
+    this._loadingVehiclesOfLinesFailed,
+    this._preferences,
+  ) {
     _vehicleUpdatesSubscription = Stream.periodic(const Duration(seconds: 15))
         .where((_) => state.trackedVehicles.isNotEmpty)
         .asyncMap(
@@ -213,14 +220,25 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }) async {
     _signals.add(MapSignal.loading(message: loadingMsg));
     final result = await loadVehicles();
-    result.when(
-      success: (success) {
+    result.asyncWhen(
+      success: (success) async {
         final vehicles = success.data;
         if (vehicles.isEmpty) {
           _signals.add(MapSignal.loadingError(message: emptyResultErrorMsg));
         } else {
-          _signals.add(MapSignal.loadedSuccessfully());
           add(successEvent(vehicles));
+          final zoomToLoadedMarkersBounds = await _preferences.getBool(
+            Preferences.zoomToLoadedMarkersBounds.key,
+          );
+          _signals.add(
+            zoomToLoadedMarkersBounds
+                ? MapSignal.zoomToBoundsAfterLoadedSuccessfully(
+                    bounds: vehicles
+                        .map((vehicle) => LatLng(vehicle.lat, vehicle.lon))
+                        .bounds,
+                  )
+                : MapSignal.loadedSuccessfully(),
+          );
         }
       },
       failure: (failure) {

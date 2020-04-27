@@ -14,18 +14,28 @@ abstract class MapSignal extends Equatable {
 
   factory MapSignal.loadedSuccessfully() = LoadedSuccessfully;
 
+  factory MapSignal.zoomToBoundsAfterLoadedSuccessfully(
+      {@required LatLngBounds bounds}) = ZoomToBoundsAfterLoadedSuccessfully;
+
   factory MapSignal.loadingError({@required String message}) = LoadingError;
 
   final _MapSignal _type;
 
 //ignore: missing_return
   R when<R>(
-      {@required R Function(Loading) loading,
-      @required R Function(LoadedSuccessfully) loadedSuccessfully,
-      @required R Function(LoadingError) loadingError}) {
+      {@required
+          R Function(Loading) loading,
+      @required
+          R Function(LoadedSuccessfully) loadedSuccessfully,
+      @required
+          R Function(ZoomToBoundsAfterLoadedSuccessfully)
+              zoomToBoundsAfterLoadedSuccessfully,
+      @required
+          R Function(LoadingError) loadingError}) {
     assert(() {
       if (loading == null ||
           loadedSuccessfully == null ||
+          zoomToBoundsAfterLoadedSuccessfully == null ||
           loadingError == null) {
         throw 'check for all possible cases';
       }
@@ -36,6 +46,9 @@ abstract class MapSignal extends Equatable {
         return loading(this as Loading);
       case _MapSignal.LoadedSuccessfully:
         return loadedSuccessfully(this as LoadedSuccessfully);
+      case _MapSignal.ZoomToBoundsAfterLoadedSuccessfully:
+        return zoomToBoundsAfterLoadedSuccessfully(
+            this as ZoomToBoundsAfterLoadedSuccessfully);
       case _MapSignal.LoadingError:
         return loadingError(this as LoadingError);
     }
@@ -43,12 +56,19 @@ abstract class MapSignal extends Equatable {
 
 //ignore: missing_return
   Future<R> asyncWhen<R>(
-      {@required FutureOr<R> Function(Loading) loading,
-      @required FutureOr<R> Function(LoadedSuccessfully) loadedSuccessfully,
-      @required FutureOr<R> Function(LoadingError) loadingError}) {
+      {@required
+          FutureOr<R> Function(Loading) loading,
+      @required
+          FutureOr<R> Function(LoadedSuccessfully) loadedSuccessfully,
+      @required
+          FutureOr<R> Function(ZoomToBoundsAfterLoadedSuccessfully)
+              zoomToBoundsAfterLoadedSuccessfully,
+      @required
+          FutureOr<R> Function(LoadingError) loadingError}) {
     assert(() {
       if (loading == null ||
           loadedSuccessfully == null ||
+          zoomToBoundsAfterLoadedSuccessfully == null ||
           loadingError == null) {
         throw 'check for all possible cases';
       }
@@ -59,6 +79,9 @@ abstract class MapSignal extends Equatable {
         return loading(this as Loading);
       case _MapSignal.LoadedSuccessfully:
         return loadedSuccessfully(this as LoadedSuccessfully);
+      case _MapSignal.ZoomToBoundsAfterLoadedSuccessfully:
+        return zoomToBoundsAfterLoadedSuccessfully(
+            this as ZoomToBoundsAfterLoadedSuccessfully);
       case _MapSignal.LoadingError:
         return loadingError(this as LoadingError);
     }
@@ -67,6 +90,8 @@ abstract class MapSignal extends Equatable {
   R whenOrElse<R>(
       {R Function(Loading) loading,
       R Function(LoadedSuccessfully) loadedSuccessfully,
+      R Function(ZoomToBoundsAfterLoadedSuccessfully)
+          zoomToBoundsAfterLoadedSuccessfully,
       R Function(LoadingError) loadingError,
       @required R Function(MapSignal) orElse}) {
     assert(() {
@@ -82,6 +107,10 @@ abstract class MapSignal extends Equatable {
       case _MapSignal.LoadedSuccessfully:
         if (loadedSuccessfully == null) break;
         return loadedSuccessfully(this as LoadedSuccessfully);
+      case _MapSignal.ZoomToBoundsAfterLoadedSuccessfully:
+        if (zoomToBoundsAfterLoadedSuccessfully == null) break;
+        return zoomToBoundsAfterLoadedSuccessfully(
+            this as ZoomToBoundsAfterLoadedSuccessfully);
       case _MapSignal.LoadingError:
         if (loadingError == null) break;
         return loadingError(this as LoadingError);
@@ -92,6 +121,8 @@ abstract class MapSignal extends Equatable {
   Future<R> asyncWhenOrElse<R>(
       {FutureOr<R> Function(Loading) loading,
       FutureOr<R> Function(LoadedSuccessfully) loadedSuccessfully,
+      FutureOr<R> Function(ZoomToBoundsAfterLoadedSuccessfully)
+          zoomToBoundsAfterLoadedSuccessfully,
       FutureOr<R> Function(LoadingError) loadingError,
       @required FutureOr<R> Function(MapSignal) orElse}) {
     assert(() {
@@ -107,6 +138,10 @@ abstract class MapSignal extends Equatable {
       case _MapSignal.LoadedSuccessfully:
         if (loadedSuccessfully == null) break;
         return loadedSuccessfully(this as LoadedSuccessfully);
+      case _MapSignal.ZoomToBoundsAfterLoadedSuccessfully:
+        if (zoomToBoundsAfterLoadedSuccessfully == null) break;
+        return zoomToBoundsAfterLoadedSuccessfully(
+            this as ZoomToBoundsAfterLoadedSuccessfully);
       case _MapSignal.LoadingError:
         if (loadingError == null) break;
         return loadingError(this as LoadingError);
@@ -118,10 +153,13 @@ abstract class MapSignal extends Equatable {
   Future<void> whenPartial(
       {FutureOr<void> Function(Loading) loading,
       FutureOr<void> Function(LoadedSuccessfully) loadedSuccessfully,
+      FutureOr<void> Function(ZoomToBoundsAfterLoadedSuccessfully)
+          zoomToBoundsAfterLoadedSuccessfully,
       FutureOr<void> Function(LoadingError) loadingError}) {
     assert(() {
       if (loading == null &&
           loadedSuccessfully == null &&
+          zoomToBoundsAfterLoadedSuccessfully == null &&
           loadingError == null) {
         throw 'provide at least one branch';
       }
@@ -134,6 +172,10 @@ abstract class MapSignal extends Equatable {
       case _MapSignal.LoadedSuccessfully:
         if (loadedSuccessfully == null) break;
         return loadedSuccessfully(this as LoadedSuccessfully);
+      case _MapSignal.ZoomToBoundsAfterLoadedSuccessfully:
+        if (zoomToBoundsAfterLoadedSuccessfully == null) break;
+        return zoomToBoundsAfterLoadedSuccessfully(
+            this as ZoomToBoundsAfterLoadedSuccessfully);
       case _MapSignal.LoadingError:
         if (loadingError == null) break;
         return loadingError(this as LoadingError);
@@ -166,6 +208,20 @@ class LoadedSuccessfully extends MapSignal {
   }
 
   static LoadedSuccessfully _instance;
+}
+
+@immutable
+class ZoomToBoundsAfterLoadedSuccessfully extends MapSignal {
+  const ZoomToBoundsAfterLoadedSuccessfully({@required this.bounds})
+      : super(_MapSignal.ZoomToBoundsAfterLoadedSuccessfully);
+
+  final LatLngBounds bounds;
+
+  @override
+  String toString() =>
+      'ZoomToBoundsAfterLoadedSuccessfully(bounds:${this.bounds})';
+  @override
+  List get props => [bounds];
 }
 
 @immutable

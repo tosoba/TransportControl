@@ -31,7 +31,19 @@ void _initSettings() async {
   }
 }
 
-class TransportControlApp extends StatelessWidget {
+class TransportControlApp extends StatefulWidget {
+  @override
+  _TransportControlAppState createState() => _TransportControlAppState();
+}
+
+class _TransportControlAppState extends State<TransportControlApp> {
+  
+  @override
+  void dispose() {
+    GetIt.instance<RxSharedPreferences>().dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -45,6 +57,7 @@ class TransportControlApp extends StatelessWidget {
               GetIt.instance<VehiclesRepo>(),
               GetIt.instance<LinesRepo>(),
               GetIt.instance<LocationsRepo>(),
+              GetIt.instance<RxSharedPreferences>(),
             ),
           ),
           BlocProvider<MapBloc>(

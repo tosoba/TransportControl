@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
@@ -35,9 +36,14 @@ class HomeBloc extends Bloc<_HomeEvent, _HomeState> {
     VehiclesRepo vehiclesRepo,
     LinesRepo linesRepo,
     LocationsRepo locationsRepo,
+    RxSharedPreferences preferences,
   ) : _locationsRepo = locationsRepo {
     _linesBloc = LinesBloc(_trackedLinesAdded, _trackedLinesRemoved, linesRepo);
-    _mapBloc = MapBloc(vehiclesRepo, _loadingVehiclesOfLinesFailed);
+    _mapBloc = MapBloc(
+      vehiclesRepo,
+      _loadingVehiclesOfLinesFailed,
+      preferences,
+    );
   }
 
   @override
