@@ -35,24 +35,20 @@ class LocationsPage extends HookWidget {
           .animate(scrollAnimController),
     );
 
-    final appBar = TextFieldAppBar(
-      textFieldFocusNode: searchFieldFocusNode,
-      textFieldController: searchFieldController,
-      hint: "Search locations...",
-      leading: TextFieldAppBarBackButton(searchFieldFocusNode),
-      //trailing: _listOrderMenu(context), //TODO:
-    );
-    final topOffset =
-        appBar.size.height + MediaQuery.of(context).padding.top + 10;
     return Scaffold(
       extendBodyBehindAppBar: true,
       extendBody: true,
       appBar: SlideTransitionPreferredSizeWidget(
         offset: appBarOffset,
-        child: appBar,
+        child: TextFieldAppBar(
+          textFieldFocusNode: searchFieldFocusNode,
+          textFieldController: searchFieldController,
+          hint: "Search locations...",
+          leading: TextFieldAppBarBackButton(searchFieldFocusNode),
+          //trailing: _listOrderMenu(context), //TODO:
+        ),
       ),
       body: _locationsList(
-        topOffset: topOffset,
         locationsStream: context.bloc<LocationsBloc>().filteredLocationsStream,
         scrollAnimationController: scrollAnimController,
       ),
@@ -123,7 +119,6 @@ class LocationsPage extends HookWidget {
   }
 
   Widget _locationsList({
-    @required double topOffset,
     @required Stream<FilteredLocationsResult> locationsStream,
     @required AnimationController scrollAnimationController,
   }) {

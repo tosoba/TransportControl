@@ -7,6 +7,7 @@ import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/nearby/nearby_page.dart';
+import 'package:transport_control/pages/settings/settings_page.dart';
 import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
@@ -324,6 +325,17 @@ class HomePage extends HookWidget {
             onTap: () {
               Navigator.pop(context);
               _showLocationsPage(context);
+            },
+          ),
+          _drawerListTile(
+            labelText: 'Settings',
+            icon: Icons.settings,
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => SettingsPage()),
+              );
             },
           ),
         ],
