@@ -24,9 +24,11 @@ abstract class LinesEvent extends Equatable {
 
   factory LinesEvent.resetSelection() = ResetSelection;
 
-  factory LinesEvent.trackSelectedLines() = TrackSelectedLines;
+  factory LinesEvent.trackSelectedLines({@required bool resetSelection}) =
+      TrackSelectedLines;
 
-  factory LinesEvent.untrackSelectedLines() = UntrackSelectedLines;
+  factory LinesEvent.untrackSelectedLines({@required bool resetSelection}) =
+      UntrackSelectedLines;
 
   factory LinesEvent.loadingVehiclesOfLinesFailed({@required Set<Line> lines}) =
       LoadingVehiclesOfLinesFailed;
@@ -354,26 +356,30 @@ class ResetSelection extends LinesEvent {
 
 @immutable
 class TrackSelectedLines extends LinesEvent {
-  const TrackSelectedLines._() : super(_LinesEvent.TrackSelectedLines);
+  const TrackSelectedLines({@required this.resetSelection})
+      : super(_LinesEvent.TrackSelectedLines);
 
-  factory TrackSelectedLines() {
-    _instance ??= const TrackSelectedLines._();
-    return _instance;
-  }
+  final bool resetSelection;
 
-  static TrackSelectedLines _instance;
+  @override
+  String toString() =>
+      'TrackSelectedLines(resetSelection:${this.resetSelection})';
+  @override
+  List get props => [resetSelection];
 }
 
 @immutable
 class UntrackSelectedLines extends LinesEvent {
-  const UntrackSelectedLines._() : super(_LinesEvent.UntrackSelectedLines);
+  const UntrackSelectedLines({@required this.resetSelection})
+      : super(_LinesEvent.UntrackSelectedLines);
 
-  factory UntrackSelectedLines() {
-    _instance ??= const UntrackSelectedLines._();
-    return _instance;
-  }
+  final bool resetSelection;
 
-  static UntrackSelectedLines _instance;
+  @override
+  String toString() =>
+      'UntrackSelectedLines(resetSelection:${this.resetSelection})';
+  @override
+  List get props => [resetSelection];
 }
 
 @immutable

@@ -27,10 +27,7 @@ class _MapPageState extends State<MapPage>
 
   @override
   void dispose() {
-    if (_signalsSubscription != null) {
-      _signalsSubscription.cancel();
-      _signalsSubscription = null;
-    }
+    _signalsSubscription?.cancel();
     super.dispose();
   }
 
@@ -41,13 +38,22 @@ class _MapPageState extends State<MapPage>
     final bloc = context.bloc<MapBloc>();
     _signalsSubscription = bloc.signals.listen(
       (signal) => signal.when(
-        loading: (loading) => Scaffold.of(context).showSnackBar(
-          SnackBar(content: Text(loading.message)),
-        ),
+        loading: (loading) {
+          Scaffold.of(context).showSnackBar(
+            SnackBar(
+              content: Text(loading.message),
+              duration: Duration(days: 1),
+            ),
+          );
+        },
         loadedSuccessfully: (_) => Scaffold.of(context).hideCurrentSnackBar(),
-        loadingError: (loadingError) => Scaffold.of(context).showSnackBar(
-          SnackBar(content: Text(loadingError.message)),
-        ),
+        loadingError: (loadingError) {
+          Scaffold.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(content: Text(loadingError.message)),
+            );
+        },
         zoomToBoundsAfterLoadedSuccessfully: (signal) {
           Scaffold.of(context).hideCurrentSnackBar();
           _mapController.future.then(

@@ -188,7 +188,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   void trackedLinesAdded(Set<Line> lines) async {
     _loadVehicles(
       loadingMsg:
-          'Loading vehicles in of ${lines.length} ${lines.length > 1 ? 'lines' : 'line'}...',
+          'Loading vehicles of ${lines.length} ${lines.length > 1 ? 'lines' : 'line'}...',
       emptyResultErrorMsg: 'No vehicles of requested lines were found.',
       loadVehicles: () => _vehiclesRepo.loadVehiclesOfLines(lines),
       successEvent: (vehicles) => MapEvent.addVehiclesOfLines(

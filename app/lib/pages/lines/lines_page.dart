@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
@@ -50,7 +53,8 @@ class LinesPage extends HookWidget {
       textFieldController: searchFieldController,
       hint: "Search lines...",
       leading: TextFieldAppBarBackButton(searchFieldFocusNode),
-      trailing: _listFiltersMenu(context),
+      trailing: _listFiltersMenu(
+          context), //TODO: X button for clearing search text if not empty
     );
     final topOffset =
         appBar.size.height + MediaQuery.of(context).padding.top + 10;
@@ -160,11 +164,16 @@ class LinesPage extends HookWidget {
                       '$numberOfUntracked line is not tracked.',
                   pluralDescription:
                       '$numberOfUntracked lines are not tracked.',
-                  actionPressed: () {
-                    context.bloc<LinesBloc>()
-                      ..trackSelectedLines()
-                      ..resetSelection();
-                    Navigator.pop(context);
+                  actionPressed: () async {
+                    if (await context.bloc<LinesBloc>().trackSelectedLines()) {
+                      Navigator.pop(context);
+                    } else {
+                      Fluttertoast.showToast(
+                        msg:
+                            'Unable to track selected lines - no internet connection.',
+                        gravity: ToastGravity.CENTER,
+                      );
+                    }
                   },
                   numberOfLines: numberOfUntracked,
                 ),
@@ -174,9 +183,7 @@ class LinesPage extends HookWidget {
                   singularDescription: '$numberOfTracked line is tracked.',
                   pluralDescription: '$numberOfTracked lines are tracked.',
                   actionPressed: () {
-                    context.bloc<LinesBloc>()
-                      ..untrackSelectedLines()
-                      ..resetSelection();
+                    context.bloc<LinesBloc>().untrackSelectedLines();
                   },
                   numberOfLines: numberOfTracked,
                 ),
@@ -188,9 +195,7 @@ class LinesPage extends HookWidget {
                   pluralDescription:
                       '$numberOfNonFav lines are not saved as favourite.',
                   actionPressed: () {
-                    context.bloc<LinesBloc>()
-                      ..addSelectedLinesToFavourites()
-                      ..resetSelection();
+                    context.bloc<LinesBloc>().addSelectedLinesToFavourites();
                   },
                   numberOfLines: numberOfNonFav,
                 ),
@@ -202,9 +207,9 @@ class LinesPage extends HookWidget {
                   pluralDescription:
                       '$numberOfFav lines are saved as favourite.',
                   actionPressed: () {
-                    context.bloc<LinesBloc>()
-                      ..removeSelectedLinesFromFavourites()
-                      ..resetSelection();
+                    context
+                        .bloc<LinesBloc>()
+                        .removeSelectedLinesFromFavourites();
                   },
                   numberOfLines: numberOfFav,
                 ),
@@ -219,7 +224,7 @@ class LinesPage extends HookWidget {
     @required int numberOfLines,
     @required String singularDescription,
     @required String pluralDescription,
-    @required void Function() actionPressed,
+    @required FutureOr<void> Function() actionPressed,
     @required String actionLabel,
   }) {
     return Padding(
@@ -240,7 +245,7 @@ class LinesPage extends HookWidget {
           RaisedButton(
             color: Colors.white,
             padding: EdgeInsets.zero,
-            onPressed: actionPressed,
+            onPressed: () => actionPressed(),
             child: Text(
               actionLabel,
               style: const TextStyle(color: Colors.black, fontSize: 16),

@@ -109,6 +109,14 @@ class LineState {
     );
   }
 
+  LineState get toggleTrackedAndSelection {
+    return LineState(
+      favourite: favourite,
+      tracked: !tracked,
+      selected: !selected,
+    );
+  }
+
   LineState get toggleFavourite {
     return LineState(
       favourite: !favourite,

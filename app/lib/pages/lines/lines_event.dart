@@ -21,10 +21,10 @@ enum _LinesEvent {
   @object
   ResetSelection,
 
-  @object
+  @Data(fields: [DataField<bool>('resetSelection')])
   TrackSelectedLines,
 
-  @object
+  @Data(fields: [DataField<bool>('resetSelection')])
   UntrackSelectedLines,
 
   @Data(fields: [DataField<Set<Line>>('lines')])

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transport_control/model/line.dart';
@@ -79,25 +80,31 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
               : MapEntry(line, lineState),
         ),
       ),
-      trackSelectedLines: (_) {
+      trackSelectedLines: (evt) {
         final updatedLines = Map.of(state.lines);
         final newlyTrackedLines = Set<Line>();
+        final toggle = evt.resetSelection
+            ? (LineState state) => state.toggleTrackedAndSelection
+            : (LineState state) => state.toggleTracked;
         updatedLines.forEach((line, lineState) {
           if (!lineState.tracked && lineState.selected) {
             newlyTrackedLines.add(line);
-            updatedLines[line] = lineState.toggleTracked;
+            updatedLines[line] = toggle(lineState);
           }
         });
         _trackedLinesAdded(newlyTrackedLines);
         return state.copyWith(lines: updatedLines);
       },
-      untrackSelectedLines: (_) {
+      untrackSelectedLines: (evt) {
         final updatedLines = Map.of(state.lines);
         final linesRemovedFromTracking = Set<Line>();
-        updatedLines.forEach((line, state) {
-          if (state.tracked && state.selected) {
+        final toggle = evt.resetSelection
+            ? (LineState state) => state.toggleTrackedAndSelection
+            : (LineState state) => state.toggleTracked;
+        updatedLines.forEach((line, lineState) {
+          if (lineState.tracked && lineState.selected) {
             linesRemovedFromTracking.add(line);
-            updatedLines[line] = state.toggleTracked;
+            updatedLines[line] = toggle(lineState);
           }
         });
         _trackedLinesRemoved(linesRemovedFromTracking);
@@ -162,20 +169,30 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     add(LinesEvent.listFilterChanged(filter: filter));
   }
 
-  void trackSelectedLines() => add(LinesEvent.trackSelectedLines());
+  Future<bool> trackSelectedLines({bool resetSelection = true}) async {
+    if (await Connectivity().checkConnectivity() == ConnectivityResult.none) {
+      return false;
+    }
+    add(LinesEvent.trackSelectedLines(resetSelection: resetSelection));
+    return true;
+  }
 
-  void untrackSelectedLines() => add(LinesEvent.untrackSelectedLines());
+  void untrackSelectedLines({bool resetSelection = true}) {
+    add(LinesEvent.untrackSelectedLines(resetSelection: resetSelection));
+  }
 
   void loadingVehiclesOfLinesFailed(Set<Line> lines) {
     add(LinesEvent.loadingVehiclesOfLinesFailed(lines: lines));
   }
 
-  void addSelectedLinesToFavourites() {
+  void addSelectedLinesToFavourites({bool resetSelection = true}) {
     _linesRepo.insertLines(state.selectedLines.map((entry) => entry.key));
+    if (resetSelection) this.resetSelection();
   }
 
-  void removeSelectedLinesFromFavourites() {
+  void removeSelectedLinesFromFavourites({bool resetSelection = true}) {
     _linesRepo
         .deleteLines(state.selectedLines.map((entry) => entry.key.symbol));
+    if (resetSelection) this.resetSelection();
   }
 }
