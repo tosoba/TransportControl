@@ -1,3 +1,4 @@
+import 'package:connection_status_bar/connection_status_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -25,7 +26,7 @@ class HomePage extends HookWidget {
     );
     final placesPageOffset = useMemoized(
       () => Tween<Offset>(
-        begin: Offset(0.0, 1.0),
+        begin: const Offset(0.0, 1.0),
         end: Offset.zero,
       ).animate(placesPageAnimController),
     );
@@ -36,7 +37,13 @@ class HomePage extends HookWidget {
     final appBarOffset = useMemoized(
       () => Tween<Offset>(
         begin: Offset.zero,
-        end: Offset(0.0, -1.0),
+        end: const Offset(0.0, -1.0),
+      ).animate(mapTapAnimController),
+    );
+    final connectivityStatusBarOffset = useMemoized(
+      () => Tween<Offset>(
+        begin: Offset.zero,
+        end: const Offset(0.0, -0.58),
       ).animate(mapTapAnimController),
     );
     final bottomNavSize = useMemoized(
@@ -89,7 +96,11 @@ class HomePage extends HookWidget {
           SlideTransition(
             child: NearbyPage(),
             position: placesPageOffset,
-          )
+          ),
+          SlideTransition(
+            position: connectivityStatusBarOffset,
+            child: ConnectionStatusBar(),
+          ),
         ]),
         bottomNavigationBar: Visibility(
           visible: currentPage.value == _HomeSubPage.map,
