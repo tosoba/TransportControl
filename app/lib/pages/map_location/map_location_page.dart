@@ -82,7 +82,7 @@ class MapLocationPage extends HookWidget {
               readOnly: readOnly,
               queryData: queryData,
             ),
-            ..._boundsLimiters(queryData)
+            ..._boundsLimiters(queryData),
           ],
         ),
         //TODO: replace these with bottom nav buttons like in HomePage
@@ -104,7 +104,14 @@ class MapLocationPage extends HookWidget {
             ),
           RaisedButton(
             color: Colors.white,
-            onPressed: () {},
+            onPressed: () => Navigator.pop(
+              context,
+              MapLocationPageResult(
+                location: location.value,
+                mode: _mode,
+                action: MapLocationPageResultAction.load(),
+              ),
+            ),
             child: Text(
               'Load',
               style: const TextStyle(fontSize: 18),
@@ -176,6 +183,7 @@ class MapLocationPage extends HookWidget {
       onMapCreated: (controller) {
         _mapController.complete(controller);
         if (location.value.bounds != null) {
+          //TODO: weird crash here... (map size 0)
           controller.moveCamera(CameraUpdate.newLatLngBounds(
             location.value.bounds,
             0,

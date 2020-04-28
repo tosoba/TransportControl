@@ -40,19 +40,15 @@ class _MapPageState extends State<MapPage>
       (signal) => signal.when(
         loading: (loading) {
           Scaffold.of(context).showSnackBar(
-            SnackBar(
-              content: Text(loading.message),
-              duration: Duration(days: 1),
-            ),
+            //TODO: this may disappear before loading completes...
+            SnackBar(content: Text(loading.message))
           );
         },
         loadedSuccessfully: (_) => Scaffold.of(context).hideCurrentSnackBar(),
         loadingError: (loadingError) {
           Scaffold.of(context)
             ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(content: Text(loadingError.message)),
-            );
+            ..showSnackBar(SnackBar(content: Text(loadingError.message)));
         },
         zoomToBoundsAfterLoadedSuccessfully: (signal) {
           Scaffold.of(context).hideCurrentSnackBar();

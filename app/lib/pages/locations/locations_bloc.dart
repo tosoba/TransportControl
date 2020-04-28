@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -13,16 +14,16 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   final void Function(Location) saveLocation;
   final void Function(Location) updateLocation;
   final void Function(Location) deleteLocation;
-  final void Function(LatLngBounds) loadVehiclesInBounds;
+  final void Function(LatLngBounds) _loadVehiclesInBounds;
 
   StreamSubscription<List<Location>> _locationUpdatesSubscription;
 
   LocationsBloc(
-    this._repo, {
+    this._repo,
+    this._loadVehiclesInBounds, {
     @required this.saveLocation,
     @required this.updateLocation,
     @required this.deleteLocation,
-    @required this.loadVehiclesInBounds,
   }) {
     _locationUpdatesSubscription = _repo.favouriteLocationsStream.listen(
       (locations) => add(LocationsEvent.updateLocations(locations: locations)),
@@ -64,6 +65,14 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
 
   void nameFilterChanged(String filter) {
     add(LocationsEvent.nameFilterChanged(filter: filter));
+  }
+
+  Future<bool> loadVehiclesInBounds(LatLngBounds bounds) async {
+    if (await Connectivity().checkConnectivity() == ConnectivityResult.none) {
+      return false;
+    }
+    _loadVehiclesInBounds(bounds);
+    return true;
   }
 }
 

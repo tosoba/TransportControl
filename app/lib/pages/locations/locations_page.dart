@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/map_location/map_location_page.dart';
@@ -92,7 +93,7 @@ class LocationsPage extends HookWidget {
     MapLocationPageResult result, {
     @required BuildContext context,
   }) {
-    result.action.when(
+    result.action.asyncWhen(
       save: (_) => _saveOrUpdateLocation(context, result),
       load: (_) => _loadVehiclesAndPop(context, result),
       saveAndLoad: (_) {
@@ -102,9 +103,20 @@ class LocationsPage extends HookWidget {
     );
   }
 
-  void _loadVehiclesAndPop(BuildContext context, MapLocationPageResult result) {
-    context.bloc<LocationsBloc>().loadVehiclesInBounds(result.location.bounds);
-    Navigator.pop(context);
+  void _loadVehiclesAndPop(
+    BuildContext context,
+    MapLocationPageResult result,
+  ) async {
+    if (await context
+        .bloc<LocationsBloc>()
+        .loadVehiclesInBounds(result.location.bounds)) {
+      Navigator.pop(context);
+    } else {
+      Fluttertoast.showToast(
+        msg: 'Unable to load vehicles - no internet connection.',
+        gravity: ToastGravity.CENTER,
+      );
+    }
   }
 
   void _saveOrUpdateLocation(
