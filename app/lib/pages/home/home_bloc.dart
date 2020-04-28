@@ -25,10 +25,10 @@ class HomeBloc extends Bloc<_HomeEvent, _HomeState> {
   LocationsBloc get locationsBloc {
     return LocationsBloc(
       GetIt.instance<LocationsRepo>(),
+      _mapBloc.loadVehiclesInBounds,
       saveLocation: _saveLocation,
       updateLocation: _updateLocation,
       deleteLocation: _deleteLocation,
-      loadVehiclesInBounds: _mapBloc.loadVehiclesInBounds,
     );
   }
 
