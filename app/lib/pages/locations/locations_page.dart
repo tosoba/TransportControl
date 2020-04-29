@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/map_location/map_location_page.dart';
@@ -95,7 +94,10 @@ class LocationsPage extends HookWidget {
   }) {
     result.action.asyncWhen(
       save: (_) => _saveOrUpdateLocation(context, result),
-      load: (_) => _loadVehiclesAndPop(context, result),
+      load: (_) {
+        _saveOrUpdateLocation(context, result);
+        _loadVehiclesAndPop(context, result);
+      },
       saveAndLoad: (_) {
         _saveOrUpdateLocation(context, result);
         _loadVehiclesAndPop(context, result);
@@ -112,10 +114,9 @@ class LocationsPage extends HookWidget {
         .loadVehiclesInBounds(result.location.bounds)) {
       Navigator.pop(context);
     } else {
-      Fluttertoast.showToast(
-        msg: 'Unable to load vehicles - no internet connection.',
-        gravity: ToastGravity.CENTER,
-      );
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text('Unable to load vehicles - no connection.'),
+      ));
     }
   }
 

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:google_maps_flutter/google_maps_flutter.dart' as Maps;
 import 'package:latlong/latlong.dart';
 
@@ -11,6 +13,25 @@ extension LatLngExt on Maps.LatLngBounds {
         : southwest.longitude <= latLng.longitude ||
             latLng.longitude <= northeast.longitude;
     return containsLat && containsLng;
+  }
+
+  static final Distance _distance = const Distance();
+
+  Maps.CameraPosition get cameraPosition {
+    final center = LatLng(
+      (northeast.latitude + southwest.latitude) / 2,
+      (northeast.longitude + southwest.longitude) / 2,
+    );
+    final distance = _distance(
+      center,
+      LatLng(northeast.latitude, northeast.longitude),
+    );
+    final scale = distance / 1000;
+    final zoom = 16 - log(scale) / log(2);
+    return Maps.CameraPosition(
+      target: Maps.LatLng(center.latitude, center.longitude),
+      zoom: zoom,
+    );
   }
 }
 

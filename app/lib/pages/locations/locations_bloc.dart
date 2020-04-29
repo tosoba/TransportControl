@@ -79,9 +79,15 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
 extension _LocationsListExt on List<Location> {
   void orderBy(LocationsListOrder order) {
     if (order == LocationsListOrder.lastSearched) {
-      sort((loc1, loc2) => loc1.lastSearched.compareTo(loc2.lastSearched));
+      sort((loc1, loc2) {
+        return (loc2.lastSearched ?? DateTime.fromMillisecondsSinceEpoch(0))
+            .compareTo(
+                loc1.lastSearched ?? DateTime.fromMillisecondsSinceEpoch(0));
+      });
     } else {
-      sort((loc1, loc2) => loc1.timesSearched.compareTo(loc2.timesSearched));
+      sort((loc1, loc2) {
+        return (loc1.timesSearched ?? 0).compareTo(loc2.timesSearched ?? 0);
+      });
     }
   }
 }

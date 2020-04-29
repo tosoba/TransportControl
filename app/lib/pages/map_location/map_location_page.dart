@@ -107,7 +107,9 @@ class MapLocationPage extends HookWidget {
             onPressed: () => Navigator.pop(
               context,
               MapLocationPageResult(
-                location: location.value,
+                location: location.value.copyWith(
+                  lastSearched: DateTime.now(),
+                ),
                 mode: _mode,
                 action: MapLocationPageResultAction.load(),
               ),
@@ -125,11 +127,16 @@ class MapLocationPage extends HookWidget {
                   'Save & load',
                   style: const TextStyle(fontSize: 18),
                 ),
-                onPressed: () => _savePressed(
-                  context,
-                  location: location,
-                  action: MapLocationPageResultAction.saveAndLoad(),
-                ),
+                onPressed: () {
+                  location.value = location.value.copyWith(
+                    lastSearched: DateTime.now(),
+                  );
+                  _savePressed(
+                    context,
+                    location: location,
+                    action: MapLocationPageResultAction.saveAndLoad(),
+                  );
+                },
               ),
             )
         ],
@@ -182,13 +189,12 @@ class MapLocationPage extends HookWidget {
       ),
       onMapCreated: (controller) {
         _mapController.complete(controller);
-        if (location.value.bounds != null) {
-          //TODO: weird crash here... (map size 0)
-          controller.moveCamera(CameraUpdate.newLatLngBounds(
-            location.value.bounds,
-            0,
-          ));
-        }
+        // if (location.value.bounds != null) {
+        //   controller.moveCamera(CameraUpdate.newLatLngBounds(
+        //     location.value.bounds,
+        //     0,
+        //   ));
+        // }
       },
       onCameraIdle: () => _updateLocationBounds(
         location,
