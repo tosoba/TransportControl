@@ -189,12 +189,14 @@ class MapLocationPage extends HookWidget {
       ),
       onMapCreated: (controller) {
         _mapController.complete(controller);
-        // if (location.value.bounds != null) {
-        //   controller.moveCamera(CameraUpdate.newLatLngBounds(
-        //     location.value.bounds,
-        //     0,
-        //   ));
-        // }
+        if (location.value.bounds != null) {
+          Future.delayed(
+            const Duration(milliseconds: 200),
+            () => controller.moveCamera(
+              CameraUpdate.newLatLngBounds(location.value.bounds, 0),
+            ),
+          );
+        }
       },
       onCameraIdle: () => _updateLocationBounds(
         location,
