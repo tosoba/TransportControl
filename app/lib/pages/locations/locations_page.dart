@@ -109,13 +109,9 @@ class LocationsPage extends HookWidget {
     MapLocationPageResult result, {
     @required BuildContext context,
   }) {
-    result.action.asyncWhen(
+    result.action.asyncWhenOrElse(
       save: (_) => _saveOrUpdateLocation(context, result),
-      load: (_) {
-        _saveOrUpdateLocation(context, result);
-        _loadVehiclesAndPop(context, result);
-      },
-      saveAndLoad: (_) {
+      orElse: (_) {
         _saveOrUpdateLocation(context, result);
         _loadVehiclesAndPop(context, result);
       },
