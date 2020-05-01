@@ -11,6 +11,7 @@ import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 import 'package:transport_control/util/string_util.dart';
+import 'package:transport_control/widgets/simple_connectivity_status_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/util/collection_util.dart';
 import 'package:transport_control/util/model_util.dart';
@@ -47,6 +48,12 @@ class LinesPage extends HookWidget {
       () => Tween(begin: Offset.zero, end: Offset(0.0, -1.0))
           .animate(scrollAnimController),
     );
+    final connectivityStatusBarOffset = useMemoized(
+      () => Tween<Offset>(
+        begin: Offset.zero,
+        end: const Offset(0.0, -0.58),
+      ).animate(scrollAnimController),
+    );
 
     final appBar = TextFieldAppBar(
       textFieldFocusNode: searchFieldFocusNode,
@@ -66,11 +73,19 @@ class LinesPage extends HookWidget {
         offset: appBarOffset,
         child: appBar,
       ),
-      body: _linesList(
-        topOffset: topOffset,
-        linesStream: context.bloc<LinesBloc>().filteredLinesStream,
-        selectionChanged: context.bloc<LinesBloc>().lineSelectionChanged,
-        scrollAnimationController: scrollAnimController,
+      body: Stack(
+        children: [
+          _linesList(
+            topOffset: topOffset,
+            linesStream: context.bloc<LinesBloc>().filteredLinesStream,
+            selectionChanged: context.bloc<LinesBloc>().lineSelectionChanged,
+            scrollAnimationController: scrollAnimController,
+          ),
+          SlideTransition(
+            position: connectivityStatusBarOffset,
+            child: SimpleConnectionStatusBar(),
+          ),
+        ],
       ),
       bottomNavigationBar: SizeTransition(
         axisAlignment: -1.0,

@@ -10,6 +10,7 @@ import 'package:transport_control/pages/map_location/map_location_page.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
+import 'package:transport_control/widgets/simple_connectivity_status_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
@@ -34,6 +35,12 @@ class LocationsPage extends HookWidget {
       () => Tween(begin: Offset.zero, end: Offset(0.0, -1.0))
           .animate(scrollAnimController),
     );
+    final connectivityStatusBarOffset = useMemoized(
+      () => Tween<Offset>(
+        begin: Offset.zero,
+        end: const Offset(0.0, -0.58),
+      ).animate(scrollAnimController),
+    );
 
     final appBar = TextFieldAppBar(
       textFieldFocusNode: searchFieldFocusNode,
@@ -50,11 +57,18 @@ class LocationsPage extends HookWidget {
         offset: appBarOffset,
         child: appBar,
       ),
-      body: _locationsList(
-        appBarHeight: appBar.size.height,
-        locationsStream: context.bloc<LocationsBloc>().filteredLocationsStream,
-        scrollAnimationController: scrollAnimController,
-      ),
+      body: Stack(children: [
+        _locationsList(
+          appBarHeight: appBar.size.height,
+          locationsStream:
+              context.bloc<LocationsBloc>().filteredLocationsStream,
+          scrollAnimationController: scrollAnimController,
+        ),
+        SlideTransition(
+          position: connectivityStatusBarOffset,
+          child: SimpleConnectionStatusBar(),
+        ),
+      ]),
       floatingActionButton: _floatingActionButton,
     );
   }
