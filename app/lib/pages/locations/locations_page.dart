@@ -35,20 +35,23 @@ class LocationsPage extends HookWidget {
           .animate(scrollAnimController),
     );
 
+    final appBar = TextFieldAppBar(
+      textFieldFocusNode: searchFieldFocusNode,
+      textFieldController: searchFieldController,
+      hint: "Search locations...",
+      leading: TextFieldAppBarBackButton(searchFieldFocusNode),
+      //trailing: _listOrderMenu(context), //TODO:
+    );
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       extendBody: true,
       appBar: SlideTransitionPreferredSizeWidget(
         offset: appBarOffset,
-        child: TextFieldAppBar(
-          textFieldFocusNode: searchFieldFocusNode,
-          textFieldController: searchFieldController,
-          hint: "Search locations...",
-          leading: TextFieldAppBarBackButton(searchFieldFocusNode),
-          //trailing: _listOrderMenu(context), //TODO:
-        ),
+        child: appBar,
       ),
       body: _locationsList(
+        appBarHeight: appBar.size.height,
         locationsStream: context.bloc<LocationsBloc>().filteredLocationsStream,
         scrollAnimationController: scrollAnimController,
       ),
@@ -132,6 +135,7 @@ class LocationsPage extends HookWidget {
   }
 
   Widget _locationsList({
+    @required double appBarHeight,
     @required Stream<FilteredLocationsResult> locationsStream,
     @required AnimationController scrollAnimationController,
   }) {
@@ -140,8 +144,10 @@ class LocationsPage extends HookWidget {
       builder: (context, snapshot) {
         final result = snapshot.data;
         if (result == null || !result.anyLocationsSaved) {
+          scrollAnimationController.reset();
           return Center(child: Text('No saved locations.'));
         } else if (result.locations.isEmpty && result.anyLocationsSaved) {
+          scrollAnimationController.reset();
           return Center(child: Text('No saved locations match entered name.'));
         }
 
@@ -149,6 +155,7 @@ class LocationsPage extends HookWidget {
           child: NotificationListener<ScrollNotification>(
             onNotification: (notification) => _handleScrollNotification(
               notification,
+              appBarHeight: appBarHeight,
               context: context,
               scrollAnimationController: scrollAnimationController,
             ),
@@ -215,19 +222,18 @@ class LocationsPage extends HookWidget {
 
   bool _handleScrollNotification(
     ScrollNotification notification, {
+    @required double appBarHeight,
     @required BuildContext context,
     @required AnimationController scrollAnimationController,
   }) {
-    if (notification.depth == 0 && notification is UserScrollNotification) {
-      switch (notification.direction) {
-        case ScrollDirection.forward:
-          scrollAnimationController.reverse();
-          break;
-        case ScrollDirection.reverse:
-          scrollAnimationController.forward();
-          break;
-        default:
-          break;
+    if (notification.depth == 0 &&
+        notification
+            is UserScrollNotification && //TODO: UserScrollNotification vs ScrollStartNotification
+        notification.metrics.maxScrollExtent > appBarHeight) {
+      if (notification.direction == ScrollDirection.forward) {
+        scrollAnimationController.reverse();
+      } else if (notification.direction == ScrollDirection.reverse) {
+        scrollAnimationController.forward();
       }
     } else if (notification is ScrollStartNotification) {
       FocusScope.of(context).unfocus();
