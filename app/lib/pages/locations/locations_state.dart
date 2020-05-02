@@ -15,7 +15,7 @@ class LocationsState {
   LocationsState.initial()
       : locations = [],
         nameFilter = null,
-        listOrder = LocationsListOrder.lastSearched;
+        listOrder = LocationsListOrder.LAST_SEARCHED;
 
   LocationsState copyWith({
     List<Location> locations,
@@ -30,7 +30,7 @@ class LocationsState {
   }
 }
 
-enum LocationsListOrder { lastSearched, timesSearched }
+enum LocationsListOrder { LAST_SEARCHED, TIMES_SEARCHED }
 
 class FilteredLocationsResult {
   final List<Location> locations;

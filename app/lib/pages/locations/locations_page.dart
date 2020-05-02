@@ -49,7 +49,7 @@ class LocationsPage extends HookWidget {
       textFieldController: searchFieldController,
       hint: "Search locations...",
       leading: TextFieldAppBarBackButton(searchFieldFocusNode),
-      //trailing: _listOrderMenu(context), //TODO:
+      trailing: _listOrderMenu(context),
     );
 
     final statusBarTitleShakeTransition = ShakeTransition(
@@ -104,6 +104,35 @@ class LocationsPage extends HookWidget {
         icon: Icon(Icons.add, color: Colors.black),
         backgroundColor: Colors.white,
       ),
+    );
+  }
+
+  Widget _listOrderMenu(BuildContext context) {
+    return StreamBuilder<List<LocationsListOrder>>(
+      stream: context.bloc<LocationsBloc>().listOrdersStream,
+      builder: (context, snapshot) {
+        if (snapshot.data == null || snapshot.data.isEmpty)
+          return Container(width: 0.0, height: 0.0);
+        return PopupMenuButton<LocationsListOrder>(
+          icon: Icon(Icons.sort),
+          onSelected: context.bloc<LocationsBloc>().listOrderChanged,
+          itemBuilder: (context) => snapshot.data.map(
+            (filter) {
+              final filterString = filter.toString();
+              final filterName = filterString
+                  .substring(filterString.indexOf('.') + 1)
+                  .replaceAll('_', ' ')
+                  .toLowerCase();
+              return PopupMenuItem<LocationsListOrder>(
+                value: filter,
+                child: Text(
+                  '${filterName[0].toUpperCase()}${filterName.substring(1)}',
+                ),
+              );
+            },
+          ).toList(),
+        );
+      },
     );
   }
 
@@ -222,7 +251,7 @@ class LocationsPage extends HookWidget {
   }) {
     return Builder(
       builder: (context) => StreamBuilder<LocationsListOrder>(
-        stream: context.bloc<LocationsBloc>().listOrdersStream,
+        stream: context.bloc<LocationsBloc>().listOrderStream,
         builder: (context, snapshot) {
           if (snapshot.data == null) return Container();
           return Slidable(
@@ -233,7 +262,7 @@ class LocationsPage extends HookWidget {
               child: ListTile(
                 title: Text(location.name),
                 subtitle: Text(
-                  snapshot.data == LocationsListOrder.timesSearched
+                  snapshot.data == LocationsListOrder.TIMES_SEARCHED
                       ? location.timesSearchedInfo
                       : location.lastSearchedInfo,
                 ),

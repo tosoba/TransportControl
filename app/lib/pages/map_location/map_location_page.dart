@@ -109,6 +109,7 @@ class MapLocationPage extends HookWidget {
               MapLocationPageResult(
                 location: location.value.copyWith(
                   lastSearched: DateTime.now(),
+                  timesSearched: location.value.timesSearched + 1,
                 ),
                 mode: _mode,
                 action: MapLocationPageResultAction.load(),
@@ -130,6 +131,7 @@ class MapLocationPage extends HookWidget {
                 onPressed: () {
                   location.value = location.value.copyWith(
                     lastSearched: DateTime.now(),
+                    timesSearched: location.value.timesSearched + 1,
                   );
                   _savePressed(
                     context,
@@ -198,10 +200,11 @@ class MapLocationPage extends HookWidget {
           );
         }
       },
-      onCameraIdle: () => _updateLocationBounds(
-        location,
-        _screenCoordinateBounds(queryData),
-      ),
+      onCameraIdle: () {
+        if (!readOnly.value) {
+          _updateLocationBounds(location, _screenCoordinateBounds(queryData));
+        }
+      },
     );
   }
 

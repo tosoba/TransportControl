@@ -63,12 +63,24 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     });
   }
 
-  Stream<LocationsListOrder> get listOrdersStream {
+  Stream<LocationsListOrder> get listOrderStream {
     return map((state) => state.listOrder);
+  }
+
+  Stream<List<LocationsListOrder>> get listOrdersStream {
+    return map(
+      (state) => LocationsListOrder.values
+          .where((value) => value != state.listOrder)
+          .toList(),
+    );
   }
 
   void nameFilterChanged(String filter) {
     add(LocationsEvent.nameFilterChanged(filter: filter));
+  }
+
+  void listOrderChanged(LocationsListOrder order) {
+    add(LocationsEvent.changeListOrder(order: order));
   }
 
   Future<bool> loadVehiclesInBounds(LatLngBounds bounds) async {
@@ -82,7 +94,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
 
 extension _LocationsListExt on List<Location> {
   void orderBy(LocationsListOrder order) {
-    if (order == LocationsListOrder.lastSearched) {
+    if (order == LocationsListOrder.LAST_SEARCHED) {
       sort((loc1, loc2) {
         return (loc2.lastSearched ?? DateTime.fromMillisecondsSinceEpoch(0))
             .compareTo(

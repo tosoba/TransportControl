@@ -58,7 +58,7 @@ class VehicleType {
 extension LocationExt on Location {
   String get timesSearchedInfo {
     return timesSearched > 0
-        ? 'Searched ${timesSearched} ${timesSearched > 1 ? 'times' : 'time'}.'
+        ? 'Searched ${timesSearched} ${timesSearched > 1 ? 'times' : 'time'}'
         : 'Never searched';
   }
 
