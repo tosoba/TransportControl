@@ -31,7 +31,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   StreamSubscription<dynamic> _vehiclesAnimationSubscription;
 
   StreamController<MapSignal> _signals = StreamController.broadcast();
-  Stream<MapSignal> get signals => _signals.stream.distinct();
+  Stream<MapSignal> get signals {
+    return _signals.stream.distinct((prev, next) => prev == next);
+  }
 
   MapBloc(
     this._vehiclesRepo,

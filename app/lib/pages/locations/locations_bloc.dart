@@ -102,7 +102,7 @@ extension _LocationsListExt on List<Location> {
       });
     } else {
       sort((loc1, loc2) {
-        return (loc1.timesSearched ?? 0).compareTo(loc2.timesSearched ?? 0);
+        return (loc2.timesSearched ?? 0).compareTo(loc1.timesSearched ?? 0);
       });
     }
   }
