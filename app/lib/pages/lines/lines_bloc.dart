@@ -155,6 +155,8 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     );
   }
 
+  Stream<String> get symbolFiltersStream => map((state) => state.symbolFilter);
+
   void lineSelectionChanged(Line line) {
     add(LinesEvent.lineSelectionChanged(line: line));
   }

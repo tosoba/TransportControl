@@ -10,6 +10,7 @@ import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 import 'package:transport_control/util/string_util.dart';
+import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/shake_transition.dart';
 import 'package:transport_control/widgets/simple_connectivity_status_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
@@ -60,8 +61,26 @@ class LinesPage extends HookWidget {
       textFieldController: searchFieldController,
       hint: "Search lines...",
       leading: TextFieldAppBarBackButton(searchFieldFocusNode),
-      trailing: _listFiltersMenu(
-          context), //TODO: X button for clearing search text if not empty
+      trailing: StreamBuilder<String>(
+        stream: context.bloc<LinesBloc>().symbolFiltersStream,
+        builder: (context, snapshot) => Container(
+          child: Row(
+            children: [
+              if (snapshot.data?.isNotEmpty == true)
+                CircularButton(
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.black,
+                  ),
+                  onPressed: () {
+                    searchFieldController.value = TextEditingValue();
+                  },
+                ),
+              _listFiltersMenu(context),
+            ],
+          ),
+        ),
+      ),
     );
     final topOffset =
         appBar.size.height + MediaQuery.of(context).padding.top + 10;
