@@ -39,20 +39,20 @@ class _MapPageState extends State<MapPage>
     _signalsSubscription = bloc.signals.listen(
       (signal) => signal.when(
         loading: (loading) {
-          Scaffold.of(context).hideCurrentSnackBar();
-          Scaffold.of(context).showSnackBar(
-            //TODO: this may disappear before loading completes...
-            SnackBar(
-              content: Text(loading.message),
-              duration: const Duration(days: 1),
-            ),
-          );
+          Scaffold.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(loading.message),
+                duration: const Duration(days: 1),
+              ),
+            );
         },
         loadedSuccessfully: (_) => Scaffold.of(context).hideCurrentSnackBar(),
         loadingError: (loadingError) {
-          Scaffold.of(context).hideCurrentSnackBar();
           Scaffold.of(context)
-              .showSnackBar(SnackBar(content: Text(loadingError.message)));
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(content: Text(loadingError.message)));
         },
         zoomToBoundsAfterLoadedSuccessfully: (signal) {
           Scaffold.of(context).hideCurrentSnackBar();

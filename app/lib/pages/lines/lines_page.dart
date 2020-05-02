@@ -124,7 +124,7 @@ class LinesPage extends HookWidget {
       ),
       bottomSheet: _bottomSheet(
         context,
-        onNotConnected: statusBarTitleShakeTransition.shake,
+        onNotConnected: () => statusBarTitleShakeTransition.shake(),
       ),
     );
   }

@@ -72,7 +72,7 @@ class LocationsPage extends HookWidget {
           locationsStream:
               context.bloc<LocationsBloc>().filteredLocationsStream,
           scrollAnimationController: scrollAnimController,
-          onNotConnected: statusBarTitleShakeTransition.shake,
+          onNotConnected: () => statusBarTitleShakeTransition.shake(),
         ),
         SlideTransition(
           position: connectivityStatusBarOffset,
@@ -82,7 +82,7 @@ class LocationsPage extends HookWidget {
         ),
       ]),
       floatingActionButton: _floatingActionButton(
-        onNotConnected: statusBarTitleShakeTransition.shake,
+        onNotConnected: () => statusBarTitleShakeTransition.shake(),
       ),
     );
   }
