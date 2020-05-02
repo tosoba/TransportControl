@@ -5,12 +5,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 import 'package:transport_control/util/string_util.dart';
+import 'package:transport_control/widgets/shake_transition.dart';
 import 'package:transport_control/widgets/simple_connectivity_status_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/util/collection_util.dart';
@@ -65,6 +65,12 @@ class LinesPage extends HookWidget {
     );
     final topOffset =
         appBar.size.height + MediaQuery.of(context).padding.top + 10;
+    final statusBarTitleShakeTransition = ShakeTransition(
+      child: const Text(
+        'Please check your internet connection',
+        style: TextStyle(color: Colors.white, fontSize: 14),
+      ),
+    );
     return Scaffold(
       extendBodyBehindAppBar: true,
       extendBody: true,
@@ -83,7 +89,9 @@ class LinesPage extends HookWidget {
           ),
           SlideTransition(
             position: connectivityStatusBarOffset,
-            child: SimpleConnectionStatusBar(),
+            child: SimpleConnectionStatusBar(
+              title: statusBarTitleShakeTransition,
+            ),
           ),
         ],
       ),
@@ -95,7 +103,10 @@ class LinesPage extends HookWidget {
           topOffset,
         ),
       ),
-      bottomSheet: _bottomSheet(context),
+      bottomSheet: _bottomSheet(
+        context,
+        onNotConnected: statusBarTitleShakeTransition.shake,
+      ),
     );
   }
 
@@ -127,7 +138,10 @@ class LinesPage extends HookWidget {
     );
   }
 
-  Widget _bottomSheet(BuildContext context) {
+  Widget _bottomSheet(
+    BuildContext context, {
+    @required void Function() onNotConnected,
+  }) {
     return StreamBuilder<Iterable<MapEntry<Line, LineState>>>(
       stream: context.bloc<LinesBloc>().selectedLinesStream,
       builder: (context, snapshot) {
@@ -183,11 +197,7 @@ class LinesPage extends HookWidget {
                     if (await context.bloc<LinesBloc>().trackSelectedLines()) {
                       Navigator.pop(context);
                     } else {
-                      Fluttertoast.showToast(
-                        msg:
-                            'Unable to track selected lines - no internet connection.',
-                        gravity: ToastGravity.CENTER,
-                      );
+                      onNotConnected();
                     }
                   },
                   numberOfLines: numberOfUntracked,

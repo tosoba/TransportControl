@@ -34,8 +34,8 @@ class _SimpleConnectionStatusBarState extends State<SimpleConnectionStatusBar>
     with SingleTickerProviderStateMixin {
   StreamSubscription<bool> _connectionChangeStream;
   bool _hasConnection = true;
-  AnimationController controller;
-  Animation<Offset> offset;
+  AnimationController _controller;
+  Animation<Offset> _offset;
 
   @override
   void initState() {
@@ -49,26 +49,26 @@ class _SimpleConnectionStatusBarState extends State<SimpleConnectionStatusBar>
         .map((result) => result != ConnectivityResult.none)
         .listen(_connectionChanged);
 
-    controller = AnimationController(
+    _controller = AnimationController(
       vsync: this,
       duration: widget.animationDuration,
     );
-    offset = Tween<Offset>(begin: widget.beginOffset, end: widget.endOffset)
-        .animate(controller);
+    _offset = Tween<Offset>(begin: widget.beginOffset, end: widget.endOffset)
+        .animate(_controller);
 
     super.initState();
   }
 
   void _connectionChanged(bool hasConnection) {
     if (_hasConnection == hasConnection) return;
-    hasConnection ? controller.reverse() : controller.forward();
+    hasConnection ? _controller.reverse() : _controller.forward();
     _hasConnection = hasConnection;
   }
 
   @override
   Widget build(BuildContext context) {
     return SlideTransition(
-      position: offset,
+      position: _offset,
       child: Container(
         child: SafeArea(
           bottom: false,
