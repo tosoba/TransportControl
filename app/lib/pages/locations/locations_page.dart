@@ -210,10 +210,8 @@ class LocationsPage extends HookWidget {
       builder: (context, snapshot) {
         final result = snapshot.data;
         if (result == null || !result.anyLocationsSaved) {
-          scrollAnimationController.reset();
           return Center(child: Text('No saved locations.'));
         } else if (result.locations.isEmpty && result.anyLocationsSaved) {
-          scrollAnimationController.reset();
           return Center(child: Text('No saved locations match entered name.'));
         }
 
@@ -305,20 +303,23 @@ class LocationsPage extends HookWidget {
     );
   }
 
+//TODO: try to sync appBar offset with how much the list was scrolled...
   bool _handleScrollNotification(
     ScrollNotification notification, {
     @required double appBarHeight,
     @required BuildContext context,
     @required AnimationController scrollAnimationController,
   }) {
-    if (notification.depth == 0 &&
-        notification
-            is UserScrollNotification && //TODO: try to sync appBar offset with how much the list was scrolled...
-        notification.metrics.maxScrollExtent > appBarHeight) {
-      if (notification.direction == ScrollDirection.forward) {
+    if (notification.depth == 0 && notification is UserScrollNotification) {
+      if (notification.metrics.maxScrollExtent > appBarHeight) {
+        if (notification.direction == ScrollDirection.forward) {
+          scrollAnimationController.reverse();
+        } else if (notification.direction == ScrollDirection.reverse) {
+          scrollAnimationController.forward();
+        }
+      } else if (scrollAnimationController.isAnimating ||
+          scrollAnimationController.isCompleted) {
         scrollAnimationController.reverse();
-      } else if (notification.direction == ScrollDirection.reverse) {
-        scrollAnimationController.forward();
       }
     } else if (notification is ScrollStartNotification) {
       FocusScope.of(context).unfocus();
