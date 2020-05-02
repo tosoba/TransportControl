@@ -63,6 +63,10 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     });
   }
 
+  Stream<LocationsListOrder> get listOrdersStream {
+    return map((state) => state.listOrder);
+  }
+
   void nameFilterChanged(String filter) {
     add(LocationsEvent.nameFilterChanged(filter: filter));
   }

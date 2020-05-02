@@ -10,6 +10,7 @@ import 'package:transport_control/pages/map_location/map_location_page.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
+import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/widgets/shake_transition.dart';
 import 'package:transport_control/widgets/simple_connectivity_status_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
@@ -220,45 +221,57 @@ class LocationsPage extends HookWidget {
     @required void Function() onNotConnected,
   }) {
     return Builder(
-      builder: (context) => Slidable(
-        actionPane: SlidableDrawerActionPane(),
-        actionExtentRatio: 0.25,
-        child: Container(
-          color: Colors.white,
-          child: ListTile(
-            title: Text(location.name),
-            //subtitle: Text('SlidableDrawerDelegate'), TODO: last searched/number of searches depending on current list order
-          ),
-        ),
-        actions: [
-          IconSlideAction(
-            caption: 'Show',
-            color: Colors.blue,
-            icon: Icons.map,
-            onTap: () => _showMapLocationPage(
-              context,
-              mode: MapLocationPageMode.existing(
-                location: location,
-                edit: false,
+      builder: (context) => StreamBuilder<LocationsListOrder>(
+        stream: context.bloc<LocationsBloc>().listOrdersStream,
+        builder: (context, snapshot) {
+          if (snapshot.data == null) return Container();
+          return Slidable(
+            actionPane: SlidableDrawerActionPane(),
+            actionExtentRatio: 0.25,
+            child: Container(
+              color: Colors.white,
+              child: ListTile(
+                title: Text(location.name),
+                subtitle: Text(
+                  snapshot.data == LocationsListOrder.timesSearched
+                      ? location.timesSearchedInfo
+                      : location.lastSearchedInfo,
+                ),
               ),
-              onNotConnected: onNotConnected,
             ),
-          ),
-          IconSlideAction(
-            caption: 'Edit',
-            color: Colors.indigo,
-            icon: Icons.edit,
-            onTap: () {},
-          ),
-        ],
-        secondaryActions: [
-          IconSlideAction(
-            caption: 'Delete',
-            color: Colors.red,
-            icon: Icons.delete,
-            onTap: () => context.bloc<LocationsBloc>().deleteLocation(location),
-          ),
-        ],
+            actions: [
+              IconSlideAction(
+                caption: 'Show',
+                color: Colors.blue,
+                icon: Icons.map,
+                onTap: () => _showMapLocationPage(
+                  context,
+                  mode: MapLocationPageMode.existing(
+                    location: location,
+                    edit: false,
+                  ),
+                  onNotConnected: onNotConnected,
+                ),
+              ),
+              IconSlideAction(
+                caption: 'Edit',
+                color: Colors.indigo,
+                icon: Icons.edit,
+                onTap: () {},
+              ),
+            ],
+            secondaryActions: [
+              IconSlideAction(
+                caption: 'Delete',
+                color: Colors.red,
+                icon: Icons.delete,
+                onTap: () {
+                  context.bloc<LocationsBloc>().deleteLocation(location);
+                },
+              ),
+            ],
+          );
+        },
       ),
     );
   }
