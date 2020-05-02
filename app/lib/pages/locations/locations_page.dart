@@ -313,7 +313,7 @@ class LocationsPage extends HookWidget {
   }) {
     if (notification.depth == 0 &&
         notification
-            is UserScrollNotification && //TODO: UserScrollNotification vs ScrollStartNotification
+            is UserScrollNotification && //TODO: try to sync appBar offset with how much the list was scrolled...
         notification.metrics.maxScrollExtent > appBarHeight) {
       if (notification.direction == ScrollDirection.forward) {
         scrollAnimationController.reverse();

@@ -210,30 +210,27 @@ class MapLocationPage extends HookWidget {
 
   _ScreenCoordinateBounds _screenCoordinateBounds(MediaQueryData queryData) {
     final size = queryData.size;
+    final dpr = queryData.devicePixelRatio;
     if (queryData.orientation == Orientation.portrait) {
-      final southWestY = (size.height + size.width) / 2;
       final southWestScreenCoordinate = ScreenCoordinate(
         x: 0,
-        y: southWestY.toInt(),
+        y: ((size.height + size.width) / 2 * dpr).toInt(),
       );
-      final northEastY = (size.height - size.width) / 2;
       final northEastScreenCoordinate = ScreenCoordinate(
-        x: size.width.toInt(),
-        y: northEastY.toInt(),
+        x: (size.width * dpr).toInt(),
+        y: ((size.height - size.width) / 2 * dpr).toInt(),
       );
       return _ScreenCoordinateBounds(
         northEast: northEastScreenCoordinate,
         southWest: southWestScreenCoordinate,
       );
     } else {
-      final southWestX = (size.width - size.height) / 2;
       final southWestScreenCoordinate = ScreenCoordinate(
-        x: southWestX.toInt(),
-        y: size.height.toInt(),
+        x: ((size.width - size.height) / 2 * dpr).toInt(),
+        y: (size.height * dpr).toInt(),
       );
-      final northEastX = (size.height + size.width) / 2;
       final northEastScreenCoordinate = ScreenCoordinate(
-        x: northEastX.toInt(),
+        x: ((size.height + size.width) / 2 * dpr).toInt(),
         y: 0,
       );
       return _ScreenCoordinateBounds(
