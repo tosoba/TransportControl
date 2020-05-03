@@ -29,6 +29,14 @@ class TextFieldAppBar extends StatefulWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => size;
+
+  double heightWithPadding(BuildContext context) {
+    return size.height + paddingTop(context);
+  }
+
+  double paddingTop(BuildContext context) {
+    return MediaQuery.of(context).padding.top + 10.0;
+  }
 }
 
 class _TextFieldAppBarState extends State<TextFieldAppBar> {
@@ -40,7 +48,7 @@ class _TextFieldAppBarState extends State<TextFieldAppBar> {
         padding: EdgeInsets.only(
           left: 15.0,
           right: 15.0,
-          top: MediaQuery.of(context).padding.top + 10.0,
+          top: widget.paddingTop(context),
         ),
         child: Container(
           child: Row(children: [
@@ -49,12 +57,7 @@ class _TextFieldAppBarState extends State<TextFieldAppBar> {
             if (widget.trailing != null) widget.trailing,
           ]),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.only(
-              bottomRight: const Radius.circular(15.0),
-              topRight: const Radius.circular(15.0),
-              topLeft: const Radius.circular(15.0),
-              bottomLeft: const Radius.circular(15.0),
-            ),
+            borderRadius: BorderRadius.all(const Radius.circular(15.0)),
             boxShadow: [
               const BoxShadow(
                 color: Colors.grey,
@@ -81,10 +84,36 @@ class _TextFieldAppBarState extends State<TextFieldAppBar> {
       decoration: InputDecoration(
         hintText: widget.hint,
         border: InputBorder.none,
-        hintStyle: TextStyle(color: Colors.grey),
+        hintStyle: const TextStyle(color: Colors.grey),
       ),
-      style: TextStyle(color: Colors.black, fontSize: 16.0),
+      style: const TextStyle(color: Colors.black, fontSize: 16.0),
       onChanged: widget.onChanged,
     );
+  }
+}
+
+class SliverTextFieldAppBarDelegate extends SliverPersistentHeaderDelegate {
+  final BuildContext context;
+  final TextFieldAppBar appBar;
+
+  SliverTextFieldAppBarDelegate(this.context, {@required this.appBar});
+
+  @override
+  double get minExtent => appBar.heightWithPadding(context);
+  @override
+  double get maxExtent => appBar.heightWithPadding(context);
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return appBar;
+  }
+
+  @override
+  bool shouldRebuild(SliverTextFieldAppBarDelegate oldDelegate) {
+    return appBar != oldDelegate.appBar;
   }
 }

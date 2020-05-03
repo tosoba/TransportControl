@@ -17,7 +17,6 @@ import 'package:transport_control/widgets/shake_transition.dart';
 import 'package:transport_control/widgets/simple_connectivity_status_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
-import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 
 class LocationsPage extends HookWidget {
   LocationsPage({Key key}) : super(key: key);
@@ -32,28 +31,6 @@ class LocationsPage extends HookWidget {
           .nameFilterChanged(searchFieldController.value.text),
     );
 
-    final scrollAnimController = useAnimationController(
-      duration: kThemeAnimationDuration,
-    );
-    final appBarOffset = useMemoized(
-      () => Tween(begin: Offset.zero, end: Offset(0.0, -1.0))
-          .animate(scrollAnimController),
-    );
-    final connectivityStatusBarOffset = useMemoized(
-      () => Tween<Offset>(
-        begin: Offset.zero,
-        end: const Offset(0.0, -0.58),
-      ).animate(scrollAnimController),
-    );
-
-    final appBar = TextFieldAppBar(
-      textFieldFocusNode: searchFieldFocusNode,
-      textFieldController: searchFieldController,
-      hint: "Search locations...",
-      leading: TextFieldAppBarBackButton(searchFieldFocusNode),
-      trailing: _listOrderMenu(context),
-    );
-
     final statusBarTitleShakeTransition = ShakeTransition(
       child: const Text(
         'Please check your internet connection',
@@ -64,34 +41,66 @@ class LocationsPage extends HookWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       extendBody: true,
-      appBar: SlideTransitionPreferredSizeWidget(
-        offset: appBarOffset,
-        child: appBar,
+      body: StreamBuilder<FilteredLocationsResult>(
+        stream: context.bloc<LocationsBloc>().filteredLocationsStream,
+        builder: (context, snapshot) {
+          final result = snapshot.data;
+
+          final appBar = TextFieldAppBar(
+            textFieldFocusNode: searchFieldFocusNode,
+            textFieldController: searchFieldController,
+            hint: "Search locations...",
+            leading: TextFieldAppBarBackButton(searchFieldFocusNode),
+            trailing: result != null && result.locations.isNotEmpty
+                ? _listOrderMenu(context)
+                : null,
+          );
+
+          if (result == null || !result.anyLocationsSaved) {
+            return Column(children: [
+              appBar,
+              Expanded(child: Center(child: Text('No saved locations.'))),
+            ]);
+          } else if (result.locations.isEmpty && result.anyLocationsSaved) {
+            return Column(children: [
+              appBar,
+              Expanded(
+                child: Center(
+                  child: Text('No saved locations match entered name.'),
+                ),
+              ),
+            ]);
+          }
+          return CustomScrollView(
+            slivers: [
+              SliverPersistentHeader(
+                delegate: SliverTextFieldAppBarDelegate(
+                  context,
+                  appBar: appBar,
+                ),
+                floating: true,
+              ),
+              _locationsList(
+                result: result,
+                onNotConnected: statusBarTitleShakeTransition.shake,
+              ),
+              // SlideTransition(
+              //   position: connectivityStatusBarOffset,
+              //   child: SimpleConnectionStatusBar(
+              //     title: statusBarTitleShakeTransition,
+              //   ),
+              // ),
+            ],
+          );
+        },
       ),
-      body: Stack(children: [
-        _locationsList(
-          appBarHeight: appBar.size.height,
-          locationsStream:
-              context.bloc<LocationsBloc>().filteredLocationsStream,
-          scrollAnimationController: scrollAnimController,
-          onNotConnected: statusBarTitleShakeTransition.shake,
-        ),
-        SlideTransition(
-          position: connectivityStatusBarOffset,
-          child: SimpleConnectionStatusBar(
-            title: statusBarTitleShakeTransition,
-          ),
-        ),
-      ]),
       floatingActionButton: _floatingActionButton(
         onNotConnected: statusBarTitleShakeTransition.shake,
       ),
     );
   }
 
-  Widget _floatingActionButton({
-    @required void Function() onNotConnected,
-  }) {
+  Widget _floatingActionButton({@required void Function() onNotConnected}) {
     const fabDimension = 56.0;
     return Builder(
       builder: (context) => OpenContainer(
@@ -191,46 +200,30 @@ class LocationsPage extends HookWidget {
   }
 
   Widget _locationsList({
-    @required double appBarHeight,
-    @required Stream<FilteredLocationsResult> locationsStream,
-    @required AnimationController scrollAnimationController,
+    @required FilteredLocationsResult result,
     @required void Function() onNotConnected,
   }) {
-    return StreamBuilder<FilteredLocationsResult>(
-      stream: locationsStream,
-      builder: (context, snapshot) {
-        final result = snapshot.data;
-        if (result == null || !result.anyLocationsSaved) {
-          return Center(child: Text('No saved locations.'));
-        } else if (result.locations.isEmpty && result.anyLocationsSaved) {
-          return Center(child: Text('No saved locations match entered name.'));
-        }
-
-        return AnimationLimiter(
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (notification) => _handleScrollNotification(
-              notification,
-              appBarHeight: appBarHeight,
-              context: context,
-              scrollAnimationController: scrollAnimationController,
-            ),
-            child: ListView.builder(
-              itemCount: result.locations.length,
-              itemBuilder: (context, index) {
-                return AnimationConfiguration.staggeredList(
+    return SliverList(
+      delegate: SliverChildListDelegate(
+        result.locations
+            .asMap()
+            .map(
+              (index, location) => MapEntry(
+                index,
+                AnimationConfiguration.staggeredList(
                   position: index,
                   child: FadeInAnimation(
                     child: _locationListItem(
-                      result.locations.elementAt(index),
+                      location,
                       onNotConnected: onNotConnected,
                     ),
                   ),
-                );
-              },
-            ),
-          ),
-        );
-      },
+                ),
+              ),
+            )
+            .values
+            .toList(),
+      ),
     );
   }
 
@@ -318,29 +311,5 @@ class LocationsPage extends HookWidget {
         },
       ),
     );
-  }
-
-//TODO: try to sync appBar offset with how much the list was scrolled...
-  bool _handleScrollNotification(
-    ScrollNotification notification, {
-    @required double appBarHeight,
-    @required BuildContext context,
-    @required AnimationController scrollAnimationController,
-  }) {
-    if (notification.depth == 0 && notification is UserScrollNotification) {
-      if (notification.metrics.maxScrollExtent > appBarHeight) {
-        if (notification.direction == ScrollDirection.forward) {
-          scrollAnimationController.reverse();
-        } else if (notification.direction == ScrollDirection.reverse) {
-          scrollAnimationController.forward();
-        }
-      } else if (scrollAnimationController.isAnimating ||
-          scrollAnimationController.isCompleted) {
-        scrollAnimationController.reverse();
-      }
-    } else if (notification is ScrollStartNotification) {
-      FocusScope.of(context).unfocus();
-    }
-    return false;
   }
 }
