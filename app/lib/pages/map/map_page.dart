@@ -26,6 +26,41 @@ class _MapPageState extends State<MapPage>
   bool get wantKeepAlive => true;
 
   @override
+  void initState() {
+    super.initState();
+
+    _signalsSubscription = context.bloc<MapBloc>().signals.listen(
+          (signal) => signal.when(
+            loading: (loading) {
+              Scaffold.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                    content: Text(loading.message),
+                    duration: const Duration(days: 1),
+                  ),
+                );
+            },
+            loadedSuccessfully: (_) =>
+                Scaffold.of(context).hideCurrentSnackBar(),
+            loadingError: (loadingError) {
+              Scaffold.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(SnackBar(content: Text(loadingError.message)));
+            },
+            zoomToBoundsAfterLoadedSuccessfully: (signal) {
+              Scaffold.of(context).hideCurrentSnackBar();
+              _mapController.future.then(
+                (controller) => controller.animateCamera(
+                  CameraUpdate.newLatLngBounds(signal.bounds, 10.0),
+                ),
+              );
+            },
+          ),
+        );
+  }
+
+  @override
   void dispose() {
     _signalsSubscription?.cancel();
     super.dispose();
@@ -34,39 +69,8 @@ class _MapPageState extends State<MapPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
-    final bloc = context.bloc<MapBloc>();
-    _signalsSubscription = bloc.signals.listen(
-      (signal) => signal.when(
-        loading: (loading) {
-          Scaffold.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text(loading.message),
-                duration: const Duration(days: 1),
-              ),
-            );
-        },
-        loadedSuccessfully: (_) => Scaffold.of(context).hideCurrentSnackBar(),
-        loadingError: (loadingError) {
-          Scaffold.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(content: Text(loadingError.message)));
-        },
-        zoomToBoundsAfterLoadedSuccessfully: (signal) {
-          Scaffold.of(context).hideCurrentSnackBar();
-          _mapController.future.then(
-            (controller) => controller.animateCamera(
-              CameraUpdate.newLatLngBounds(signal.bounds, 10.0),
-            ),
-          );
-        },
-      ),
-    );
-
     return StreamBuilder<List<IconifiedMarker>>(
-      stream: bloc.markers,
+      stream: context.bloc<MapBloc>().markers,
       builder: (context, snapshot) {
         return GoogleMap(
           mapType: MapType.normal,
