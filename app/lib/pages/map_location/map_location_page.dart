@@ -92,11 +92,18 @@ class MapLocationPage extends HookWidget {
             Builder(
               builder: (context) => RaisedButton(
                 color: Colors.white,
-                onPressed: () => _savePressed(
-                  context,
-                  location: location,
-                  action: MapLocationPageResultAction.save(),
-                ),
+                onPressed: () {
+                  if (_mode is Add) {
+                    location.value = location.value.copyWith(
+                      savedAt: DateTime.now(),
+                    );
+                  }
+                  _savePressed(
+                    context,
+                    location: location,
+                    action: MapLocationPageResultAction.save(),
+                  );
+                },
                 child: Text(
                   'Save',
                   style: const TextStyle(fontSize: 18),
@@ -135,6 +142,7 @@ class MapLocationPage extends HookWidget {
                   location.value = location.value.copyWith(
                     lastSearched: DateTime.now(),
                     timesSearched: location.value.timesSearched + 1,
+                    savedAt: _mode is Add ? DateTime.now() : null,
                   );
                   _savePressed(
                     context,

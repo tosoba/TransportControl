@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_event.dart';
+import 'package:transport_control/pages/locations/locations_list_order.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/repo/locations_repo.dart';
 
@@ -69,9 +70,11 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
 
   Stream<List<LocationsListOrder>> get listOrdersStream {
     return map(
-      (state) => LocationsListOrder.values
-          .where((value) => value != state.listOrder)
-          .toList(),
+      (state) => const [
+        const BySavedTimestampWrapper(const BySavedTimestamp()),
+        const ByLastSearchedWrapper(const ByLastSearched()),
+        const ByTimesSearchedWrapper(const ByTimesSearched())
+      ].where((value) => value != state.listOrder).toList(),
     );
   }
 
@@ -94,16 +97,24 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
 
 extension _LocationsListExt on List<Location> {
   void orderBy(LocationsListOrder order) {
-    if (order == LocationsListOrder.LAST_SEARCHED) {
-      sort((loc1, loc2) {
-        return (loc2.lastSearched ?? DateTime.fromMillisecondsSinceEpoch(0))
-            .compareTo(
-                loc1.lastSearched ?? DateTime.fromMillisecondsSinceEpoch(0));
-      });
-    } else {
-      sort((loc1, loc2) {
-        return (loc2.timesSearched ?? 0).compareTo(loc1.timesSearched ?? 0);
-      });
-    }
+    order.when(
+      savedTimestamp: (_) {
+        sort((loc1, loc2) => loc2.savedAt.compareTo(loc1.savedAt));
+      },
+      lastSearched: (_) {
+        sort(
+          (loc1, loc2) {
+            return (loc2.lastSearched ?? DateTime.fromMillisecondsSinceEpoch(0))
+                .compareTo(loc1.lastSearched ??
+                    DateTime.fromMillisecondsSinceEpoch(0));
+          },
+        );
+      },
+      timesSearched: (_) {
+        sort((loc1, loc2) {
+          return (loc2.timesSearched ?? 0).compareTo(loc1.timesSearched ?? 0);
+        });
+      },
+    );
   }
 }

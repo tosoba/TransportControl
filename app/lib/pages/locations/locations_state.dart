@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:transport_control/model/location.dart';
+import 'package:transport_control/pages/locations/locations_list_order.dart';
 
 class LocationsState {
   final List<Location> locations;
@@ -15,7 +16,7 @@ class LocationsState {
   LocationsState.initial()
       : locations = [],
         nameFilter = null,
-        listOrder = LocationsListOrder.LAST_SEARCHED;
+        listOrder = LocationsListOrder.lastSearched(const ByLastSearched());
 
   LocationsState copyWith({
     List<Location> locations,
@@ -29,8 +30,6 @@ class LocationsState {
     );
   }
 }
-
-enum LocationsListOrder { LAST_SEARCHED, TIMES_SEARCHED }
 
 class FilteredLocationsResult {
   final List<Location> locations;

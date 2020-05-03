@@ -16,7 +16,7 @@ abstract class LocationsEvent extends Equatable {
   factory LocationsEvent.nameFilterChanged({@required String filter}) =
       NameFilterChanged;
 
-  factory LocationsEvent.changeListOrder({@required LocationsListOrder order}) =
+  factory LocationsEvent.changeListOrder({@required dynamic order}) =
       ChangeListOrder;
 
   final _LocationsEvent _type;
@@ -178,7 +178,7 @@ class ChangeListOrder extends LocationsEvent {
   const ChangeListOrder({@required this.order})
       : super(_LocationsEvent.ChangeListOrder);
 
-  final LocationsListOrder order;
+  final dynamic order;
 
   @override
   String toString() => 'ChangeListOrder(order:${this.order})';

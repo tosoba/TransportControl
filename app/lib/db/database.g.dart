@@ -263,6 +263,7 @@ class Location extends DataClass implements Insertable<Location> {
   final bool isFavourite;
   final DateTime lastSearched;
   final int timesSearched;
+  final DateTime savedAt;
   Location(
       {@required this.id,
       @required this.name,
@@ -272,7 +273,8 @@ class Location extends DataClass implements Insertable<Location> {
       @required this.northEastLng,
       @required this.isFavourite,
       this.lastSearched,
-      @required this.timesSearched});
+      @required this.timesSearched,
+      @required this.savedAt});
   factory Location.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
@@ -298,6 +300,8 @@ class Location extends DataClass implements Insertable<Location> {
           .mapFromDatabaseResponse(data['${effectivePrefix}last_searched']),
       timesSearched: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}times_searched']),
+      savedAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}saved_at']),
     );
   }
   factory Location.fromJson(Map<String, dynamic> json,
@@ -313,6 +317,7 @@ class Location extends DataClass implements Insertable<Location> {
       isFavourite: serializer.fromJson<bool>(json['isFavourite']),
       lastSearched: serializer.fromJson<DateTime>(json['lastSearched']),
       timesSearched: serializer.fromJson<int>(json['timesSearched']),
+      savedAt: serializer.fromJson<DateTime>(json['savedAt']),
     );
   }
   @override
@@ -328,6 +333,7 @@ class Location extends DataClass implements Insertable<Location> {
       'isFavourite': serializer.toJson<bool>(isFavourite),
       'lastSearched': serializer.toJson<DateTime>(lastSearched),
       'timesSearched': serializer.toJson<int>(timesSearched),
+      'savedAt': serializer.toJson<DateTime>(savedAt),
     };
   }
 
@@ -357,6 +363,9 @@ class Location extends DataClass implements Insertable<Location> {
       timesSearched: timesSearched == null && nullToAbsent
           ? const Value.absent()
           : Value(timesSearched),
+      savedAt: savedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(savedAt),
     );
   }
 
@@ -369,7 +378,8 @@ class Location extends DataClass implements Insertable<Location> {
           double northEastLng,
           bool isFavourite,
           DateTime lastSearched,
-          int timesSearched}) =>
+          int timesSearched,
+          DateTime savedAt}) =>
       Location(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -380,6 +390,7 @@ class Location extends DataClass implements Insertable<Location> {
         isFavourite: isFavourite ?? this.isFavourite,
         lastSearched: lastSearched ?? this.lastSearched,
         timesSearched: timesSearched ?? this.timesSearched,
+        savedAt: savedAt ?? this.savedAt,
       );
   @override
   String toString() {
@@ -392,7 +403,8 @@ class Location extends DataClass implements Insertable<Location> {
           ..write('northEastLng: $northEastLng, ')
           ..write('isFavourite: $isFavourite, ')
           ..write('lastSearched: $lastSearched, ')
-          ..write('timesSearched: $timesSearched')
+          ..write('timesSearched: $timesSearched, ')
+          ..write('savedAt: $savedAt')
           ..write(')'))
         .toString();
   }
@@ -412,8 +424,10 @@ class Location extends DataClass implements Insertable<Location> {
                           northEastLng.hashCode,
                           $mrjc(
                               isFavourite.hashCode,
-                              $mrjc(lastSearched.hashCode,
-                                  timesSearched.hashCode)))))))));
+                              $mrjc(
+                                  lastSearched.hashCode,
+                                  $mrjc(timesSearched.hashCode,
+                                      savedAt.hashCode))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -426,7 +440,8 @@ class Location extends DataClass implements Insertable<Location> {
           other.northEastLng == this.northEastLng &&
           other.isFavourite == this.isFavourite &&
           other.lastSearched == this.lastSearched &&
-          other.timesSearched == this.timesSearched);
+          other.timesSearched == this.timesSearched &&
+          other.savedAt == this.savedAt);
 }
 
 class LocationsCompanion extends UpdateCompanion<Location> {
@@ -439,6 +454,7 @@ class LocationsCompanion extends UpdateCompanion<Location> {
   final Value<bool> isFavourite;
   final Value<DateTime> lastSearched;
   final Value<int> timesSearched;
+  final Value<DateTime> savedAt;
   const LocationsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -449,6 +465,7 @@ class LocationsCompanion extends UpdateCompanion<Location> {
     this.isFavourite = const Value.absent(),
     this.lastSearched = const Value.absent(),
     this.timesSearched = const Value.absent(),
+    this.savedAt = const Value.absent(),
   });
   LocationsCompanion.insert({
     this.id = const Value.absent(),
@@ -460,11 +477,13 @@ class LocationsCompanion extends UpdateCompanion<Location> {
     this.isFavourite = const Value.absent(),
     this.lastSearched = const Value.absent(),
     this.timesSearched = const Value.absent(),
+    @required DateTime savedAt,
   })  : name = Value(name),
         southWestLat = Value(southWestLat),
         southWestLng = Value(southWestLng),
         northEastLat = Value(northEastLat),
-        northEastLng = Value(northEastLng);
+        northEastLng = Value(northEastLng),
+        savedAt = Value(savedAt);
   LocationsCompanion copyWith(
       {Value<int> id,
       Value<String> name,
@@ -474,7 +493,8 @@ class LocationsCompanion extends UpdateCompanion<Location> {
       Value<double> northEastLng,
       Value<bool> isFavourite,
       Value<DateTime> lastSearched,
-      Value<int> timesSearched}) {
+      Value<int> timesSearched,
+      Value<DateTime> savedAt}) {
     return LocationsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -485,6 +505,7 @@ class LocationsCompanion extends UpdateCompanion<Location> {
       isFavourite: isFavourite ?? this.isFavourite,
       lastSearched: lastSearched ?? this.lastSearched,
       timesSearched: timesSearched ?? this.timesSearched,
+      savedAt: savedAt ?? this.savedAt,
     );
   }
 }
@@ -607,6 +628,18 @@ class $LocationsTable extends Locations
         defaultValue: const Constant(1));
   }
 
+  final VerificationMeta _savedAtMeta = const VerificationMeta('savedAt');
+  GeneratedDateTimeColumn _savedAt;
+  @override
+  GeneratedDateTimeColumn get savedAt => _savedAt ??= _constructSavedAt();
+  GeneratedDateTimeColumn _constructSavedAt() {
+    return GeneratedDateTimeColumn(
+      'saved_at',
+      $tableName,
+      false,
+    );
+  }
+
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -617,7 +650,8 @@ class $LocationsTable extends Locations
         northEastLng,
         isFavourite,
         lastSearched,
-        timesSearched
+        timesSearched,
+        savedAt
       ];
   @override
   $LocationsTable get asDslTable => this;
@@ -686,6 +720,12 @@ class $LocationsTable extends Locations
           timesSearched.isAcceptableValue(
               d.timesSearched.value, _timesSearchedMeta));
     }
+    if (d.savedAt.present) {
+      context.handle(_savedAtMeta,
+          savedAt.isAcceptableValue(d.savedAt.value, _savedAtMeta));
+    } else if (isInserting) {
+      context.missing(_savedAtMeta);
+    }
     return context;
   }
 
@@ -727,6 +767,9 @@ class $LocationsTable extends Locations
     }
     if (d.timesSearched.present) {
       map['times_searched'] = Variable<int, IntType>(d.timesSearched.value);
+    }
+    if (d.savedAt.present) {
+      map['saved_at'] = Variable<DateTime, DateTimeType>(d.savedAt.value);
     }
     return map;
   }

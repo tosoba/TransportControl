@@ -1,6 +1,6 @@
 import 'package:super_enum/super_enum.dart';
 import 'package:transport_control/model/location.dart';
-import 'package:transport_control/pages/locations/locations_state.dart';
+import 'package:transport_control/pages/locations/locations_list_order.dart';
 
 part "locations_event.g.dart";
 

@@ -20,4 +20,6 @@ class Locations extends Table {
   DateTimeColumn get lastSearched => dateTime().nullable()();
 
   IntColumn get timesSearched => integer().withDefault(const Constant(1))();
+
+  DateTimeColumn get savedAt => dateTime()();
 }

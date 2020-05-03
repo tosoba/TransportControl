@@ -7,6 +7,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
+import 'package:transport_control/pages/locations/locations_list_order.dart';
 import 'package:transport_control/pages/map_location/map_location_page.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
@@ -133,21 +134,14 @@ class LocationsPage extends HookWidget {
         return PopupMenuButton<LocationsListOrder>(
           icon: Icon(Icons.sort),
           onSelected: context.bloc<LocationsBloc>().listOrderChanged,
-          itemBuilder: (context) => snapshot.data.map(
-            (filter) {
-              final filterString = filter.toString();
-              final filterName = filterString
-                  .substring(filterString.indexOf('.') + 1)
-                  .replaceAll('_', ' ')
-                  .toLowerCase();
-              return PopupMenuItem<LocationsListOrder>(
-                value: filter,
-                child: Text(
-                  '${filterName[0].toUpperCase()}${filterName.substring(1)}',
+          itemBuilder: (context) => snapshot.data
+              .map(
+                (order) => PopupMenuItem<LocationsListOrder>(
+                  value: order,
+                  child: Text(order.props.first.toString()),
                 ),
-              );
-            },
-          ).toList(),
+              )
+              .toList(),
         );
       },
     );
@@ -274,9 +268,11 @@ class LocationsPage extends HookWidget {
                   child: ListTile(
                     title: Text(location.name),
                     subtitle: Text(
-                      snapshot.data == LocationsListOrder.TIMES_SEARCHED
-                          ? location.timesSearchedInfo
-                          : location.lastSearchedInfo,
+                      snapshot.data.when(
+                        savedTimestamp: (_) => location.savedAtInfo,
+                        lastSearched: (_) => location.lastSearchedInfo,
+                        timesSearched: (_) => location.timesSearchedInfo,
+                      ),
                     ),
                   ),
                 ),

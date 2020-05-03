@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
@@ -62,31 +63,62 @@ extension LocationExt on Location {
         : 'Never searched';
   }
 
-  String get lastSearchedInfo {
-    if (lastSearched == null) return 'Never searched';
-    final diffMillis = DateTime.now().millisecondsSinceEpoch -
-        lastSearched.millisecondsSinceEpoch;
+  String _dateTimeDiffInfo({
+    @required int diffMillis,
+    @required String prefix,
+  }) {
     final diffSeconds = diffMillis ~/ 1000;
-    if (diffSeconds < 1) return 'Searched less than a second ago';
+    if (diffSeconds < 1) return '$prefix less than a second ago';
     final diffMinutes = diffMillis ~/ (60 * 1000);
     if (diffMinutes < 1)
-      return diffSeconds > 1 ? 'Searched ${diffSeconds} seconds ago' : 'Searched 1 second ago';
+      return diffSeconds > 1
+          ? '$prefix ${diffSeconds} seconds ago'
+          : '$prefix 1 second ago';
     final diffHours = diffMillis ~/ (60 * 60 * 1000);
     if (diffHours < 1)
-      return diffMinutes > 1 ? 'Searched ${diffMinutes} minutes ago' : 'Searched 1 minute ago';
+      return diffMinutes > 1
+          ? '$prefix ${diffMinutes} minutes ago'
+          : '$prefix 1 minute ago';
     final diffDays = diffMillis ~/ (60 * 60 * 1000 * 24);
     if (diffDays < 1)
-      return diffHours > 1 ? 'Searched ${diffHours} hours ago' : 'Searched 1 hour ago';
+      return diffHours > 1
+          ? '$prefix ${diffHours} hours ago'
+          : '$prefix 1 hour ago';
     final diffWeeks = diffMillis ~/ (60 * 60 * 1000 * 24 * 7);
     if (diffWeeks < 1)
-      return diffDays > 1 ? 'Searched ${diffDays} days ago' : 'Searched 1 day ago';
+      return diffDays > 1
+          ? '$prefix ${diffDays} days ago'
+          : '$prefix 1 day ago';
     final diffMonths =
         diffMillis ~/ (60.0 * 60.0 * 1000.0 * 24.0 * 30.41666666);
     if (diffMonths < 1)
-      return diffWeeks > 1 ? 'Searched ${diffWeeks} weeks ago' : 'Searched 1 week ago';
+      return diffWeeks > 1
+          ? '$prefix ${diffWeeks} weeks ago'
+          : '$prefix 1 week ago';
     final diffYears = diffMillis ~/ (60 * 60 * 1000 * 24 * 365);
     if (diffYears < 1)
-      return diffMonths > 1 ? 'Searched ${diffMonths} months ago' : 'Searched 1 month ago';
-    return diffYears > 1 ? 'Searched ${diffYears} years ago' : 'Searched 1 year ago';
+      return diffMonths > 1
+          ? '$prefix ${diffMonths} months ago'
+          : '$prefix 1 month ago';
+    return diffYears > 1
+        ? '$prefix ${diffYears} years ago'
+        : '$prefix 1 year ago';
+  }
+
+  String get lastSearchedInfo {
+    if (lastSearched == null) return 'Never searched';
+    return _dateTimeDiffInfo(
+      diffMillis: DateTime.now().millisecondsSinceEpoch -
+          lastSearched.millisecondsSinceEpoch,
+      prefix: 'Searched',
+    );
+  }
+
+  String get savedAtInfo {
+    return _dateTimeDiffInfo(
+      diffMillis: DateTime.now().millisecondsSinceEpoch -
+          savedAt.millisecondsSinceEpoch,
+      prefix: 'Saved',
+    );
   }
 }

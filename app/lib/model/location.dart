@@ -8,6 +8,7 @@ class Location {
   final bool isFavourite;
   final DateTime lastSearched;
   final int timesSearched;
+  final DateTime savedAt;
 
   Location._(
     this.id,
@@ -16,6 +17,7 @@ class Location {
     this.isFavourite,
     this.lastSearched,
     this.timesSearched,
+    this.savedAt,
   );
 
   Location copyWith({
@@ -24,6 +26,7 @@ class Location {
     bool isFavourite,
     DateTime lastSearched,
     int timesSearched,
+    DateTime savedAt,
   }) {
     return Location._(
       id,
@@ -32,6 +35,7 @@ class Location {
       isFavourite ?? this.isFavourite,
       lastSearched ?? this.lastSearched,
       timesSearched ?? this.timesSearched,
+      savedAt ?? this.savedAt,
     );
   }
 
@@ -41,24 +45,26 @@ class Location {
         bounds = null,
         isFavourite = true,
         lastSearched = null,
-        timesSearched = 0;
+        timesSearched = 0,
+        savedAt = null;
 
-  Location.fromDb(Db.Location line)
-      : id = line.id,
-        name = line.name,
+  Location.fromDb(Db.Location location)
+      : id = location.id,
+        name = location.name,
         bounds = LatLngBounds(
           southwest: LatLng(
-            line.southWestLat,
-            line.southWestLng,
+            location.southWestLat,
+            location.southWestLng,
           ),
           northeast: LatLng(
-            line.northEastLat,
-            line.northEastLng,
+            location.northEastLat,
+            location.northEastLng,
           ),
         ),
-        isFavourite = line.isFavourite,
-        lastSearched = line.lastSearched,
-        timesSearched = line.timesSearched;
+        isFavourite = location.isFavourite,
+        lastSearched = location.lastSearched,
+        timesSearched = location.timesSearched,
+        savedAt = location.savedAt;
 
   Db.Location get db {
     return Db.Location(
@@ -71,6 +77,7 @@ class Location {
       isFavourite: isFavourite,
       lastSearched: lastSearched,
       timesSearched: timesSearched,
+      savedAt: savedAt,
     );
   }
 }
