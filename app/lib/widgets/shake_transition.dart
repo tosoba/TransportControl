@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -6,11 +5,11 @@ import 'package:vector_math/vector_math_64.dart';
 
 class ShakeTransition extends StatefulWidget {
   final Widget child;
-  final StreamController<dynamic> trigger = StreamController();
+  final ValueNotifier<dynamic> trigger = ValueNotifier(Object());
 
   ShakeTransition({Key key, this.child}) : super(key: key);
 
-  void shake() => trigger.add(Object());
+  void shake() => trigger.value = Object();
 
   @override
   _ShakeTransitionState createState() {
@@ -36,7 +35,7 @@ class _ShakeTransitionState extends State<ShakeTransition>
     });
     _shakeController.addListener(() => setState(() {}));
 
-    widget.trigger.stream.listen((_) => _shake());
+    widget.trigger.addListener(_shake);
   }
 
   void _shake() {
@@ -47,7 +46,6 @@ class _ShakeTransitionState extends State<ShakeTransition>
 
   @override
   void dispose() {
-    widget.trigger.close();
     _shakeController?.dispose();
     super.dispose();
   }

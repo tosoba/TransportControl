@@ -14,7 +14,6 @@ import 'package:transport_control/pages/map_location/map_location_page_result.da
 import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/widgets/shake_transition.dart';
-import 'package:transport_control/widgets/simple_connectivity_status_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
@@ -84,12 +83,6 @@ class LocationsPage extends HookWidget {
                 result: result,
                 onNotConnected: statusBarTitleShakeTransition.shake,
               ),
-              // SlideTransition(
-              //   position: connectivityStatusBarOffset,
-              //   child: SimpleConnectionStatusBar(
-              //     title: statusBarTitleShakeTransition,
-              //   ),
-              // ),
             ],
           );
         },
