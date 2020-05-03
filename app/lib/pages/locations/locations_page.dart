@@ -153,28 +153,6 @@ class LocationsPage extends HookWidget {
     );
   }
 
-  void _showMapLocationPage(
-    BuildContext context, {
-    @required MapLocationPageMode mode,
-    @required void Function() onNotConnected,
-  }) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => MapLocationPage(
-          mode,
-          ({@required MapLocationPageResult result}) {
-            _handleLocationMapPageResult(
-              result,
-              context: context,
-              onNotConnected: onNotConnected,
-            );
-          },
-        ),
-      ),
-    );
-  }
-
   void _handleLocationMapPageResult(
     MapLocationPageResult result, {
     @required BuildContext context,
@@ -271,51 +249,75 @@ class LocationsPage extends HookWidget {
         stream: context.bloc<LocationsBloc>().listOrderStream,
         builder: (context, snapshot) {
           if (snapshot.data == null) return Container();
-          return Slidable(
-            actionPane: SlidableDrawerActionPane(),
-            actionExtentRatio: 0.25,
-            child: Container(
-              color: Colors.white,
-              child: ListTile(
-                title: Text(location.name),
-                subtitle: Text(
-                  snapshot.data == LocationsListOrder.TIMES_SEARCHED
-                      ? location.timesSearchedInfo
-                      : location.lastSearchedInfo,
-                ),
-              ),
-            ),
-            actions: [
-              IconSlideAction(
-                caption: 'Show',
-                color: Colors.blue,
-                icon: Icons.map,
-                onTap: () => _showMapLocationPage(
-                  context,
-                  mode: MapLocationPageMode.existing(
-                    location: location,
-                    edit: false,
-                  ),
+          MapLocationPageMode mode;
+          return OpenContainer(
+            transitionType: ContainerTransitionType.fade,
+            openBuilder: (_, close) => MapLocationPage(
+              mode,
+              ({@required MapLocationPageResult result}) {
+                _handleLocationMapPageResult(
+                  result,
+                  context: context,
                   onNotConnected: onNotConnected,
+                );
+              },
+            ),
+            tappable: false,
+            closedShape: const RoundedRectangleBorder(),
+            closedElevation: 0.0,
+            closedBuilder: (_, showMapLocationPage) {
+              return Slidable(
+                actionPane: SlidableDrawerActionPane(),
+                actionExtentRatio: 0.25,
+                child: Container(
+                  color: Colors.white,
+                  child: ListTile(
+                    title: Text(location.name),
+                    subtitle: Text(
+                      snapshot.data == LocationsListOrder.TIMES_SEARCHED
+                          ? location.timesSearchedInfo
+                          : location.lastSearchedInfo,
+                    ),
+                  ),
                 ),
-              ),
-              IconSlideAction(
-                caption: 'Edit',
-                color: Colors.indigo,
-                icon: Icons.edit,
-                onTap: () {},
-              ),
-            ],
-            secondaryActions: [
-              IconSlideAction(
-                caption: 'Delete',
-                color: Colors.red,
-                icon: Icons.delete,
-                onTap: () {
-                  context.bloc<LocationsBloc>().deleteLocation(location);
-                },
-              ),
-            ],
+                actions: [
+                  IconSlideAction(
+                    caption: 'Show',
+                    color: Colors.blue,
+                    icon: Icons.map,
+                    onTap: () {
+                      mode = MapLocationPageMode.existing(
+                        location: location,
+                        edit: false,
+                      );
+                      showMapLocationPage();
+                    },
+                  ),
+                  IconSlideAction(
+                    caption: 'Edit',
+                    color: Colors.indigo,
+                    icon: Icons.edit,
+                    onTap: () {
+                      mode = MapLocationPageMode.existing(
+                        location: location,
+                        edit: true,
+                      );
+                      showMapLocationPage();
+                    },
+                  ),
+                ],
+                secondaryActions: [
+                  IconSlideAction(
+                    caption: 'Delete',
+                    color: Colors.red,
+                    icon: Icons.delete,
+                    onTap: () {
+                      context.bloc<LocationsBloc>().deleteLocation(location);
+                    },
+                  ),
+                ],
+              );
+            },
           );
         },
       ),
