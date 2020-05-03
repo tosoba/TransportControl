@@ -14,9 +14,10 @@ import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
 class MapLocationPage extends HookWidget {
   final MapLocationPageMode _mode;
+  final void Function({@required MapLocationPageResult result}) _finishWith;
   final Completer<GoogleMapController> _mapController = Completer();
 
-  MapLocationPage(this._mode, {Key key}) : super(key: key);
+  MapLocationPage(this._mode, this._finishWith, {Key key}) : super(key: key);
 
   ValueNotifier<Location> _useLocationState(TextEditingController controller) {
     return useState(
@@ -104,17 +105,19 @@ class MapLocationPage extends HookWidget {
             ),
           RaisedButton(
             color: Colors.white,
-            onPressed: () => Navigator.pop(
-              context,
-              MapLocationPageResult(
-                location: location.value.copyWith(
-                  lastSearched: DateTime.now(),
-                  timesSearched: location.value.timesSearched + 1,
+            onPressed: () {
+              _finishWith(
+                result: MapLocationPageResult(
+                  location: location.value.copyWith(
+                    lastSearched: DateTime.now(),
+                    timesSearched: location.value.timesSearched + 1,
+                  ),
+                  mode: _mode,
+                  action: MapLocationPageResultAction.load(),
                 ),
-                mode: _mode,
-                action: MapLocationPageResultAction.load(),
-              ),
-            ),
+              );
+              Navigator.pop(context);
+            },
             child: Text(
               'Load',
               style: const TextStyle(fontSize: 18),
@@ -157,14 +160,14 @@ class MapLocationPage extends HookWidget {
         SnackBar(content: Text('Enter a name for location to save')),
       );
     } else {
-      Navigator.pop(
-        context,
-        MapLocationPageResult(
+      _finishWith(
+        result: MapLocationPageResult(
           location: location.value,
           mode: _mode,
           action: action,
         ),
       );
+      Navigator.pop(context);
     }
   }
 
@@ -191,14 +194,19 @@ class MapLocationPage extends HookWidget {
       ),
       onMapCreated: (controller) {
         _mapController.complete(controller);
-        if (location.value.bounds != null) {
-          Future.delayed(
-            const Duration(milliseconds: 200),
-            () => controller.moveCamera(
+        Future.delayed(const Duration(milliseconds: 200), () {
+          if (location.value.bounds != null) {
+            controller.moveCamera(
               CameraUpdate.newLatLngBounds(location.value.bounds, 0),
-            ),
-          );
-        }
+            );
+          } else {
+            controller.getVisibleRegion().then(
+              (bounds) {
+                location.value = location.value.copyWith(bounds: bounds);
+              },
+            );
+          }
+        });
       },
       onCameraIdle: () {
         if (!readOnly.value) {

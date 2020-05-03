@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -72,7 +73,7 @@ class LocationsPage extends HookWidget {
           locationsStream:
               context.bloc<LocationsBloc>().filteredLocationsStream,
           scrollAnimationController: scrollAnimController,
-          onNotConnected: () => statusBarTitleShakeTransition.shake(),
+          onNotConnected: statusBarTitleShakeTransition.shake,
         ),
         SlideTransition(
           position: connectivityStatusBarOffset,
@@ -82,7 +83,7 @@ class LocationsPage extends HookWidget {
         ),
       ]),
       floatingActionButton: _floatingActionButton(
-        onNotConnected: () => statusBarTitleShakeTransition.shake(),
+        onNotConnected: statusBarTitleShakeTransition.shake,
       ),
     );
   }
@@ -90,19 +91,35 @@ class LocationsPage extends HookWidget {
   Widget _floatingActionButton({
     @required void Function() onNotConnected,
   }) {
+    const fabDimension = 56.0;
     return Builder(
-      builder: (context) => FloatingActionButton.extended(
-        onPressed: () => _showMapLocationPage(
-          context,
-          mode: MapLocationPageMode.add(),
-          onNotConnected: onNotConnected,
+      builder: (context) => OpenContainer(
+        transitionType: ContainerTransitionType.fade,
+        openBuilder: (ctx, _) => MapLocationPage(
+          MapLocationPageMode.add(),
+          ({@required MapLocationPageResult result}) {
+            _handleLocationMapPageResult(
+              result,
+              context: context,
+              onNotConnected: onNotConnected,
+            );
+          },
         ),
-        label: Text(
-          'New location',
-          style: const TextStyle(color: Colors.black),
+        closedElevation: 6.0,
+        closedShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(fabDimension / 2)),
         ),
-        icon: Icon(Icons.add, color: Colors.black),
-        backgroundColor: Colors.white,
+        closedColor: Theme.of(context).colorScheme.secondary,
+        closedBuilder: (context, _) => SizedBox(
+          height: fabDimension,
+          width: fabDimension,
+          child: Center(
+            child: Icon(
+              Icons.add,
+              color: Theme.of(context).colorScheme.onSecondary,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -140,20 +157,22 @@ class LocationsPage extends HookWidget {
     BuildContext context, {
     @required MapLocationPageMode mode,
     @required void Function() onNotConnected,
-  }) async {
-    final result = await Navigator.push(
+  }) {
+    Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => MapLocationPage(mode),
+        builder: (_) => MapLocationPage(
+          mode,
+          ({@required MapLocationPageResult result}) {
+            _handleLocationMapPageResult(
+              result,
+              context: context,
+              onNotConnected: onNotConnected,
+            );
+          },
+        ),
       ),
     );
-    if (result is MapLocationPageResult) {
-      _handleLocationMapPageResult(
-        result,
-        context: context,
-        onNotConnected: onNotConnected,
-      );
-    }
   }
 
   void _handleLocationMapPageResult(
