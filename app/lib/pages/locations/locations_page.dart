@@ -13,7 +13,6 @@ import 'package:transport_control/pages/map_location/map_location_page_mode.dart
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/util/model_util.dart';
-import 'package:transport_control/widgets/shake_transition.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
@@ -28,13 +27,6 @@ class LocationsPage extends HookWidget {
       () => context
           .bloc<LocationsBloc>()
           .nameFilterChanged(searchFieldController.value.text),
-    );
-
-    final statusBarTitleShakeTransition = ShakeTransition(
-      child: const Text(
-        'Please check your internet connection',
-        style: TextStyle(color: Colors.white, fontSize: 14),
-      ),
     );
 
     return Scaffold(
@@ -79,21 +71,16 @@ class LocationsPage extends HookWidget {
                 ),
                 floating: true,
               ),
-              _locationsList(
-                result: result,
-                onNotConnected: statusBarTitleShakeTransition.shake,
-              ),
+              _locationsList(locations: result.locations),
             ],
           );
         },
       ),
-      floatingActionButton: _floatingActionButton(
-        onNotConnected: statusBarTitleShakeTransition.shake,
-      ),
+      floatingActionButton: _floatingActionButton,
     );
   }
 
-  Widget _floatingActionButton({@required void Function() onNotConnected}) {
+  Widget get _floatingActionButton {
     const fabDimension = 56.0;
     return Builder(
       builder: (context) => OpenContainer(
@@ -101,11 +88,7 @@ class LocationsPage extends HookWidget {
         openBuilder: (ctx, _) => MapLocationPage(
           MapLocationPageMode.add(),
           ({@required MapLocationPageResult result}) {
-            _handleLocationMapPageResult(
-              result,
-              context: context,
-              onNotConnected: onNotConnected,
-            );
+            _handleLocationMapPageResult(result, context: context);
           },
         ),
         closedElevation: 6.0,
@@ -152,32 +135,27 @@ class LocationsPage extends HookWidget {
   void _handleLocationMapPageResult(
     MapLocationPageResult result, {
     @required BuildContext context,
-    @required void Function() onNotConnected,
   }) {
     result.action.asyncWhenOrElse(
       save: (_) => _saveOrUpdateLocation(context, result),
       orElse: (_) {
         _saveOrUpdateLocation(context, result);
-        _loadVehiclesAndPop(
-          context,
-          result,
-          onNotConnected: onNotConnected,
-        );
+        _loadVehiclesAndPop(context, result);
       },
     );
   }
 
   void _loadVehiclesAndPop(
     BuildContext context,
-    MapLocationPageResult result, {
-    @required void Function() onNotConnected,
-  }) async {
+    MapLocationPageResult result,
+  ) async {
     if (await context
         .bloc<LocationsBloc>()
         .loadVehiclesInBounds(result.location.bounds)) {
       Navigator.pop(context);
     } else {
-      onNotConnected();
+      Scaffold.of(context)
+          .showSnackBar(SnackBar(content: Text('No connection.')));
     }
   }
 
@@ -193,12 +171,11 @@ class LocationsPage extends HookWidget {
   }
 
   Widget _locationsList({
-    @required FilteredLocationsResult result,
-    @required void Function() onNotConnected,
+    @required List<Location> locations,
   }) {
     return SliverList(
       delegate: SliverChildListDelegate(
-        result.locations
+        locations
             .asMap()
             .map(
               (index, location) => MapEntry(
@@ -206,10 +183,7 @@ class LocationsPage extends HookWidget {
                 AnimationConfiguration.staggeredList(
                   position: index,
                   child: FadeInAnimation(
-                    child: _locationListItem(
-                      location,
-                      onNotConnected: onNotConnected,
-                    ),
+                    child: _locationListItem(location),
                   ),
                 ),
               ),
@@ -220,10 +194,7 @@ class LocationsPage extends HookWidget {
     );
   }
 
-  Widget _locationListItem(
-    Location location, {
-    @required void Function() onNotConnected,
-  }) {
+  Widget _locationListItem(Location location) {
     return Builder(
       builder: (context) => StreamBuilder<LocationsListOrder>(
         stream: context.bloc<LocationsBloc>().listOrderStream,
@@ -235,11 +206,7 @@ class LocationsPage extends HookWidget {
             openBuilder: (_, close) => MapLocationPage(
               mode,
               ({@required MapLocationPageResult result}) {
-                _handleLocationMapPageResult(
-                  result,
-                  context: context,
-                  onNotConnected: onNotConnected,
-                );
+                _handleLocationMapPageResult(result, context: context);
               },
             ),
             tappable: false,
