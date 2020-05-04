@@ -92,7 +92,10 @@ class HomePage extends HookWidget {
           ),
         ),
         body: Stack(children: [
-          MapPage(mapTapped: () => _mapTapped(mapTapAnimController)),
+          MapPage(
+            mapTapped: () => _mapTapped(mapTapAnimController),
+            animatedToBounds: () => _hideControls(mapTapAnimController),
+          ),
           SlideTransition(
             child: NearbyPage(),
             position: placesPageOffset,
@@ -360,5 +363,9 @@ class HomePage extends HookWidget {
     } else {
       mapTapAnimController.forward();
     }
+  }
+
+  void _hideControls(AnimationController mapTapAnimController) {
+    mapTapAnimController.forward();
   }
 }

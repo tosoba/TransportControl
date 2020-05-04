@@ -30,8 +30,13 @@ class ClusterableMarker extends Clusterable {
 class IconifiedMarker {
   final BitmapDescriptor icon;
   final ClusterableMarker _marker;
+  final List<LatLng> childrenPositions;
 
-  IconifiedMarker(this._marker, {@required this.icon});
+  IconifiedMarker(
+    this._marker, {
+    @required this.icon,
+    this.childrenPositions,
+  });
 
   String get number => _marker.number;
   LatLng get position => LatLng(_marker.latitude, _marker.longitude);
