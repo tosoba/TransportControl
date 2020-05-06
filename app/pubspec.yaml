@@ -35,7 +35,6 @@ dependencies:
   latlong: ^0.6.1
   fluster: ^1.1.2
   flutter_cache_manager: ^1.1.1
-  scrollable_positioned_list: ^0.1.2
   moor_flutter: ^2.1.1
   path_provider: ^1.6.5
   flutter_slidable: ^0.5.4
@@ -46,6 +45,7 @@ dependencies:
   connection_status_bar: ^1.1.2
   vector_math: ^2.0.8
   animations: ^1.0.0+5
+  scroll_to_index: ^1.0.6
 
 dev_dependencies:
   flutter_test:

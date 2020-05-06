@@ -5,7 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
@@ -19,8 +19,7 @@ import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 class LinesPage extends HookWidget {
   LinesPage({Key key}) : super(key: key);
 
-  final ItemScrollController _linesListScrollController =
-      ItemScrollController();
+  final AutoScrollController _autoScrollController = AutoScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +79,7 @@ class LinesPage extends HookWidget {
             ]);
           }
           return CustomScrollView(
+            controller: _autoScrollController,
             slivers: [
               SliverPersistentHeader(
                 delegate: SliverTextFieldAppBarDelegate(
@@ -303,9 +303,9 @@ class LinesPage extends HookWidget {
             padding: const EdgeInsets.all(8.0),
             child: RaisedButton(
               color: Colors.white,
-              onPressed: () => _linesListScrollController.jumpTo(
-                index: index,
-                alignment: topOffset / MediaQuery.of(context).size.height,
+              onPressed: () => _autoScrollController.scrollToIndex(
+               index,
+                preferPosition: AutoScrollPosition.begin,
               ),
               child: Text(
                 lineGroups.elementAt(index).key,
@@ -361,16 +361,17 @@ class LinesPage extends HookWidget {
   }) {
     final lineGroups = lines.groupBy((entry) => entry.key.group).entries;
     return SliverList(
-      delegate: SliverChildListDelegate(
-        lineGroups
-            .map(
-              (group) => _linesGroup(
-                group,
-                columnsCount,
-                selectionChanged,
-              ),
-            )
-            .toList(),
+      delegate: SliverChildBuilderDelegate(
+        (context, index) => AutoScrollTag(
+          key: ValueKey(index),
+          controller: _autoScrollController,
+          index: index,
+          child: _linesGroup(
+            lineGroups.elementAt(index),
+            columnsCount,
+            selectionChanged,
+          ),
+        ),
       ),
     );
   }
@@ -398,7 +399,7 @@ class LinesPage extends HookWidget {
         ),
         Container(
           child: GridView.count(
-            padding: EdgeInsets.only(top: 15),
+            padding: const EdgeInsets.only(top: 15),
             physics: NeverScrollableScrollPhysics(),
             crossAxisCount: columnsCount,
             shrinkWrap: true,
