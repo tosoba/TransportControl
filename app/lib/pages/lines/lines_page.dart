@@ -17,7 +17,6 @@ import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/util/collection_util.dart';
 import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
-import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 
 class LinesPage extends HookWidget {
   LinesPage({Key key}) : super(key: key);
@@ -38,23 +37,6 @@ class LinesPage extends HookWidget {
     if (filter != null) {
       searchFieldController.value = TextEditingValue(text: filter);
     }
-
-    final scrollAnimController = useAnimationController(
-      duration: kThemeAnimationDuration,
-    );
-    final bottomNavSize = useMemoized(
-      () => Tween(begin: 1.0, end: 0.0).animate(scrollAnimController),
-    );
-    final appBarOffset = useMemoized(
-      () => Tween(begin: Offset.zero, end: Offset(0.0, -1.0))
-          .animate(scrollAnimController),
-    );
-    final connectivityStatusBarOffset = useMemoized(
-      () => Tween<Offset>(
-        begin: Offset.zero,
-        end: const Offset(0.0, -0.58),
-      ).animate(scrollAnimController),
-    );
 
     final appBar = TextFieldAppBar(
       textFieldFocusNode: searchFieldFocusNode,
@@ -94,33 +76,22 @@ class LinesPage extends HookWidget {
       extendBodyBehindAppBar: true,
       extendBody: true,
       resizeToAvoidBottomPadding: false,
-      appBar: SlideTransitionPreferredSizeWidget(
-        offset: appBarOffset,
-        child: appBar,
-      ),
+      appBar: appBar,
       body: Stack(
         children: [
           _linesList(
             topOffset: topOffset,
             linesStream: context.bloc<LinesBloc>().filteredLinesStream,
             selectionChanged: context.bloc<LinesBloc>().lineSelectionChanged,
-            scrollAnimationController: scrollAnimController,
           ),
-          SlideTransition(
-            position: connectivityStatusBarOffset,
-            child: SimpleConnectionStatusBar(
-              title: statusBarTitleShakeTransition,
-            ),
+          SimpleConnectionStatusBar(
+            title: statusBarTitleShakeTransition,
           ),
         ],
       ),
-      bottomNavigationBar: SizeTransition(
-        axisAlignment: -1.0,
-        sizeFactor: bottomNavSize,
-        child: _listGroupNavigationButtons(
-          context.bloc<LinesBloc>().filteredLinesStream,
-          topOffset,
-        ),
+      bottomNavigationBar: _listGroupNavigationButtons(
+        context.bloc<LinesBloc>().filteredLinesStream,
+        topOffset,
       ),
       bottomSheet: _bottomSheet(
         context,
@@ -373,7 +344,6 @@ class LinesPage extends HookWidget {
     @required double topOffset,
     @required Stream<List<MapEntry<Line, LineState>>> linesStream,
     @required void Function(Line) selectionChanged,
-    @required AnimationController scrollAnimationController,
   }) {
     return StreamBuilder<List<MapEntry<Line, LineState>>>(
       stream: linesStream,
@@ -385,53 +355,24 @@ class LinesPage extends HookWidget {
         final lineGroups =
             snapshot.data.groupBy((entry) => entry.key.group).entries;
         return AnimationLimiter(
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (notification) => _handleScrollNotification(
-              notification,
-              context: context,
-              scrollAnimationController: scrollAnimationController,
-            ),
-            child: ScrollablePositionedList.builder(
-              padding: EdgeInsets.only(top: topOffset),
-              itemScrollController: _linesListScrollController,
-              itemCount: lineGroups.length,
-              itemBuilder: (context, index) {
-                if (index < 0 || index >= lineGroups.length) {
-                  return null;
-                }
-                return _linesGroup(
-                  lineGroups.elementAt(index),
-                  columnsCount,
-                  selectionChanged,
-                );
-              },
-            ),
+          child: ScrollablePositionedList.builder(
+            padding: EdgeInsets.only(top: topOffset),
+            itemScrollController: _linesListScrollController,
+            itemCount: lineGroups.length,
+            itemBuilder: (context, index) {
+              if (index < 0 || index >= lineGroups.length) {
+                return null;
+              }
+              return _linesGroup(
+                lineGroups.elementAt(index),
+                columnsCount,
+                selectionChanged,
+              );
+            },
           ),
         );
       },
     );
-  }
-
-  bool _handleScrollNotification(
-    ScrollNotification notification, {
-    @required BuildContext context,
-    @required AnimationController scrollAnimationController,
-  }) {
-    if (notification.depth == 0 && notification is UserScrollNotification) {
-      switch (notification.direction) {
-        case ScrollDirection.forward:
-          scrollAnimationController.reverse();
-          break;
-        case ScrollDirection.reverse:
-          scrollAnimationController.forward();
-          break;
-        default:
-          break;
-      }
-    } else if (notification is ScrollStartNotification) {
-      FocusScope.of(context).unfocus();
-    }
-    return false;
   }
 
   Widget _linesGroup(
