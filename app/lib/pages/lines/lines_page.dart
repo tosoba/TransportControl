@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:scroll_bottom_navigation_bar/scroll_bottom_navigation_bar.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
@@ -65,6 +66,13 @@ class LinesPage extends HookWidget {
     final topOffset =
         appBar.size.height + MediaQuery.of(context).padding.top + 10;
 
+    _autoScrollController.bottomNavigationBar.tabListener((index) {
+      _autoScrollController.scrollToIndex(
+        index,
+        preferPosition: AutoScrollPosition.begin,
+      );
+    });
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       extendBody: true,
@@ -108,7 +116,7 @@ class LinesPage extends HookWidget {
       ),
       bottomSheet: _bottomSheet(
         context,
-        onNotConnected: () {},
+        onNotConnected: () {}, //TODO:
       ),
     );
   }
@@ -174,7 +182,7 @@ class LinesPage extends HookWidget {
               BoxShadow(
                 blurRadius: 5.0,
                 color: Colors.grey.shade300,
-                offset: Offset(0.0, -5.0),
+                offset: const Offset(0.0, -5.0),
               )
             ],
           ),
@@ -294,61 +302,26 @@ class LinesPage extends HookWidget {
         if (snapshot.data == null) return Container();
 
         final lineGroups =
-            snapshot.data.groupBy((entry) => entry.key.group).entries;
+            snapshot.data.groupBy((entry) => entry.key.group,).entries;
 
-        final listView = ListView.builder(
-          itemCount: lineGroups.length,
-          scrollDirection: Axis.horizontal,
-          itemBuilder: (context, index) => Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: RaisedButton(
-              color: Colors.white,
-              onPressed: () => _autoScrollController.scrollToIndex(
-                index,
-                preferPosition: AutoScrollPosition.begin,
-              ),
-              child: Text(
+        return ScrollBottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          controller: _autoScrollController,
+          items: List.generate(
+            lineGroups.length,
+            (index) => BottomNavigationBarItem(
+              icon: Text(
                 lineGroups.elementAt(index).key,
-                style: const TextStyle(fontSize: 18),
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+              title: Container(),
             ),
           ),
         );
-
-        if (snapshot.data.any((entry) => entry.value.selected)) {
-          return Container(
-            height: kBottomNavigationBarHeight,
-            color: Colors.white,
-            child: listView,
-          );
-        } else {
-          const shadowSize = 5.0;
-          return Container(
-            height: kBottomNavigationBarHeight + shadowSize,
-            child: Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  height: shadowSize,
-                  color: Colors.transparent,
-                ),
-                Container(
-                  height: kBottomNavigationBarHeight,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      const BoxShadow(
-                        blurRadius: shadowSize,
-                        color: Colors.grey,
-                      )
-                    ],
-                  ),
-                  child: listView,
-                ),
-              ],
-            ),
-          );
-        }
       },
     );
   }
@@ -362,16 +335,19 @@ class LinesPage extends HookWidget {
     final lineGroups = lines.groupBy((entry) => entry.key.group).entries;
     return SliverList(
       delegate: SliverChildBuilderDelegate(
-        (context, index) => AutoScrollTag(
-          key: ValueKey(index),
-          controller: _autoScrollController,
-          index: index,
-          child: _linesGroup(
-            lineGroups.elementAt(index),
-            columnsCount,
-            selectionChanged,
-          ),
-        ),
+        (context, index) {
+          if (index < 0 || index >= lineGroups.length) return null;
+          return AutoScrollTag(
+            key: ValueKey(index),
+            controller: _autoScrollController,
+            index: index,
+            child: _linesGroup(
+              lineGroups.elementAt(index),
+              columnsCount,
+              selectionChanged,
+            ),
+          );
+        },
       ),
     );
   }

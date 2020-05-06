@@ -46,6 +46,7 @@ dependencies:
   vector_math: ^2.0.8
   animations: ^1.0.0+5
   scroll_to_index: ^1.0.6
+  scroll_bottom_navigation_bar: ^3.0.0
 
 dev_dependencies:
   flutter_test:
