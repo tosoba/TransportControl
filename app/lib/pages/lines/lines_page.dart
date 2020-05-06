@@ -87,7 +87,7 @@ class LinesPage extends HookWidget {
     final statusBarTitleShakeTransition = ShakeTransition(
       child: const Text(
         'Please check your internet connection',
-        style: TextStyle(color: Colors.white, fontSize: 14),
+        style: const TextStyle(color: Colors.white, fontSize: 14),
       ),
     );
     return Scaffold(
@@ -136,7 +136,7 @@ class LinesPage extends HookWidget {
         if (snapshot.data == null || snapshot.data.isEmpty)
           return Container(width: 0.0, height: 0.0);
         return PopupMenuButton<LineListFilter>(
-          icon: Icon(Icons.filter_list),
+          icon: const Icon(Icons.filter_list),
           onSelected: context.bloc<LinesBloc>().listFilterChanged,
           itemBuilder: (context) => snapshot.data.map(
             (filter) {

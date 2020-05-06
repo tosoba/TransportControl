@@ -22,7 +22,7 @@ class SimpleConnectionStatusBar extends StatefulWidget {
     this.animationDuration = const Duration(milliseconds: 200),
     this.title = const Text(
       'Please check your internet connection',
-      style: TextStyle(color: Colors.white, fontSize: 14),
+      style: const TextStyle(color: Colors.white, fontSize: 14),
     ),
   }) : super(key: key);
 

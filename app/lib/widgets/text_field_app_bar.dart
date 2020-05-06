@@ -56,8 +56,8 @@ class _TextFieldAppBarState extends State<TextFieldAppBar> {
             Flexible(child: _textField),
             if (widget.trailing != null) widget.trailing,
           ]),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(const Radius.circular(15.0)),
+          decoration: const BoxDecoration(
+            borderRadius: const BorderRadius.all(const Radius.circular(15.0)),
             boxShadow: [
               const BoxShadow(
                 color: Colors.grey,

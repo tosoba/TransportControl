@@ -117,7 +117,7 @@ class LocationsPage extends HookWidget {
         if (snapshot.data == null || snapshot.data.isEmpty)
           return Container(width: 0.0, height: 0.0);
         return PopupMenuButton<LocationsListOrder>(
-          icon: Icon(Icons.sort),
+          icon: const Icon(Icons.sort),
           onSelected: context.bloc<LocationsBloc>().listOrderChanged,
           itemBuilder: (context) => snapshot.data
               .map(

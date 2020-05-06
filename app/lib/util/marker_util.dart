@@ -99,7 +99,7 @@ Future<BitmapDescriptor> markerBitmap({
 
   textPainter.text = TextSpan(
     text: symbol,
-    style: TextStyle(
+    style: const TextStyle(
       fontSize: MapConstants.markerHeight / 2,
       fontWeight: FontWeight.bold,
       color: Colors.white,
