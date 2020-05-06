@@ -304,7 +304,7 @@ class LinesPage extends HookWidget {
             child: RaisedButton(
               color: Colors.white,
               onPressed: () => _autoScrollController.scrollToIndex(
-               index,
+                index,
                 preferPosition: AutoScrollPosition.begin,
               ),
               child: Text(
@@ -398,26 +398,30 @@ class LinesPage extends HookWidget {
           ),
         ),
         Container(
-          child: GridView.count(
-            padding: const EdgeInsets.only(top: 15),
-            physics: NeverScrollableScrollPhysics(),
-            crossAxisCount: columnsCount,
-            shrinkWrap: true,
-            children: List.generate(
-              groupLines.length,
-              (index) => AnimationConfiguration.staggeredGrid(
-                position: index,
-                columnCount: columnsCount,
-                child: ScaleAnimation(
-                  child: FadeInAnimation(
-                    child: _lineListItem(
-                      groupLines[index],
-                      index,
-                      selectionChanged,
+          child: AnimationLimiter(
+            child: GridView.builder(
+              padding: const EdgeInsets.only(top: 15),
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columnsCount,
+              ),
+              shrinkWrap: true,
+              itemCount: groupLines.length,
+              itemBuilder: (context, index) {
+                return AnimationConfiguration.staggeredGrid(
+                  position: index,
+                  columnCount: columnsCount,
+                  child: ScaleAnimation(
+                    child: FadeInAnimation(
+                      child: _lineListItem(
+                        groupLines[index],
+                        index,
+                        selectionChanged,
+                      ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ),
