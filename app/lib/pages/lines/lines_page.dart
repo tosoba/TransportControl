@@ -11,8 +11,6 @@ import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
-import 'package:transport_control/widgets/shake_transition.dart';
-import 'package:transport_control/widgets/simple_connectivity_status_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/util/collection_util.dart';
 import 'package:transport_control/util/model_util.dart';
@@ -64,30 +62,19 @@ class LinesPage extends HookWidget {
         ),
       ),
     );
+
     final topOffset =
         appBar.size.height + MediaQuery.of(context).padding.top + 10;
-    final statusBarTitleShakeTransition = ShakeTransition(
-      child: const Text(
-        'Please check your internet connection',
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-      ),
-    );
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       extendBody: true,
       resizeToAvoidBottomPadding: false,
       appBar: appBar,
-      body: Stack(
-        children: [
-          _linesList(
-            topOffset: topOffset,
-            linesStream: context.bloc<LinesBloc>().filteredLinesStream,
-            selectionChanged: context.bloc<LinesBloc>().lineSelectionChanged,
-          ),
-          SimpleConnectionStatusBar(
-            title: statusBarTitleShakeTransition,
-          ),
-        ],
+      body: _linesList(
+        topOffset: topOffset,
+        linesStream: context.bloc<LinesBloc>().filteredLinesStream,
+        selectionChanged: context.bloc<LinesBloc>().lineSelectionChanged,
       ),
       bottomNavigationBar: _listGroupNavigationButtons(
         context.bloc<LinesBloc>().filteredLinesStream,
@@ -95,7 +82,7 @@ class LinesPage extends HookWidget {
       ),
       bottomSheet: _bottomSheet(
         context,
-        onNotConnected: () => statusBarTitleShakeTransition.shake(),
+        onNotConnected: () {},
       ),
     );
   }
