@@ -70,11 +70,37 @@ class LinesPage extends HookWidget {
       extendBodyBehindAppBar: true,
       extendBody: true,
       resizeToAvoidBottomPadding: false,
-      appBar: appBar,
-      body: _linesList(
-        topOffset: topOffset,
-        linesStream: context.bloc<LinesBloc>().filteredLinesStream,
-        selectionChanged: context.bloc<LinesBloc>().lineSelectionChanged,
+      body: StreamBuilder<List<MapEntry<Line, LineState>>>(
+        stream: context.bloc<LinesBloc>().filteredLinesStream,
+        builder: (context, snapshot) {
+          if (snapshot.data == null) {
+            return Column(children: [
+              appBar,
+              Expanded(child: Center(child: CircularProgressIndicator())),
+            ]);
+          }
+          return CustomScrollView(
+            slivers: [
+              SliverPersistentHeader(
+                delegate: SliverTextFieldAppBarDelegate(
+                  context,
+                  appBar: appBar,
+                ),
+                floating: true,
+              ),
+              _linesList(
+                topOffset: topOffset,
+                selectionChanged:
+                    context.bloc<LinesBloc>().lineSelectionChanged,
+                columnsCount:
+                    MediaQuery.of(context).orientation == Orientation.portrait
+                        ? 4
+                        : 8,
+                lines: snapshot.data,
+              ),
+            ],
+          );
+        },
       ),
       bottomNavigationBar: _listGroupNavigationButtons(
         context.bloc<LinesBloc>().filteredLinesStream,
@@ -329,36 +355,23 @@ class LinesPage extends HookWidget {
 
   Widget _linesList({
     @required double topOffset,
-    @required Stream<List<MapEntry<Line, LineState>>> linesStream,
     @required void Function(Line) selectionChanged,
+    @required List<MapEntry<Line, LineState>> lines,
+    @required int columnsCount,
   }) {
-    return StreamBuilder<List<MapEntry<Line, LineState>>>(
-      stream: linesStream,
-      builder: (context, snapshot) {
-        if (snapshot.data == null) return Container();
-
-        final columnsCount =
-            MediaQuery.of(context).orientation == Orientation.portrait ? 4 : 8;
-        final lineGroups =
-            snapshot.data.groupBy((entry) => entry.key.group).entries;
-        return AnimationLimiter(
-          child: ScrollablePositionedList.builder(
-            padding: EdgeInsets.only(top: topOffset),
-            itemScrollController: _linesListScrollController,
-            itemCount: lineGroups.length,
-            itemBuilder: (context, index) {
-              if (index < 0 || index >= lineGroups.length) {
-                return null;
-              }
-              return _linesGroup(
-                lineGroups.elementAt(index),
+    final lineGroups = lines.groupBy((entry) => entry.key.group).entries;
+    return SliverList(
+      delegate: SliverChildListDelegate(
+        lineGroups
+            .map(
+              (group) => _linesGroup(
+                group,
                 columnsCount,
                 selectionChanged,
-              );
-            },
-          ),
-        );
-      },
+              ),
+            )
+            .toList(),
+      ),
     );
   }
 
