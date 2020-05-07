@@ -14,6 +14,7 @@ import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
+import 'package:transport_control/widgets/circular_text_icon_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/util/collection_util.dart';
 import 'package:transport_control/util/model_util.dart';
@@ -207,37 +208,37 @@ class LinesPage extends HookWidget {
         if (numberOfUntracked > 0)
           Badge(
             badgeContent: Text(numberOfUntracked.toString()),
-            child: FlatButton.icon(
-              icon: Icon(Icons.location_on),
-              label: Text('Track'),
-              onPressed: () {},
+            child: CircularTextIconButton(
+              icon: Icons.location_on,
+              text: 'Track',
+              onTap: () {},
             ),
           ),
         if (numberOfTracked > 0)
           Badge(
             badgeContent: Text(numberOfTracked.toString()),
-            child: FlatButton.icon(
-              icon: Icon(Icons.location_off),
-              label: Text('Untrack'),
-              onPressed: () {},
+            child: CircularTextIconButton(
+              icon: Icons.location_off,
+              text: 'Untrack',
+              onTap: () {},
             ),
           ),
         if (numberOfNonFav > 0)
           Badge(
             badgeContent: Text(numberOfNonFav.toString()),
-            child: FlatButton.icon(
-              icon: Icon(Icons.save),
-              label: Text('Save'),
-              onPressed: () {},
+            child: CircularTextIconButton(
+              icon: Icons.save,
+              text: 'Save',
+              onTap: () {},
             ),
           ),
         if (numberOfFav > 0)
           Badge(
             badgeContent: Text(numberOfFav.toString()),
-            child: FlatButton.icon(
-              icon: Icon(Icons.delete_forever),
-              label: Text('Delete'),
-              onPressed: () {},
+            child: CircularTextIconButton(
+              icon: Icons.delete_forever,
+              text: 'Delete',
+              onTap: () {},
             ),
           ),
       ],
