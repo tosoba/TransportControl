@@ -132,6 +132,10 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     );
   }
 
+  Stream<Iterable<MapEntry<Line, LineState>>> get selectedLinesStream {
+    return map((state) => state.selectedLines);
+  }
+
   Stream<List<LineListFilter>> get listFiltersStream {
     return map(
       (state) {

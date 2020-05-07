@@ -267,9 +267,12 @@ class LinesPage extends HookWidget {
     return SliverPersistentHeader(
       pinned: true,
       delegate: _SliverBadgeBarDelegate(
-        minHeight: 60,
-        maxHeight: 60,
-        child: _badgeRow(context, selectedLines: selectedLines),
+        minHeight: 90,
+        maxHeight: 90,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 30.0),
+          child: _badgeRow(context, selectedLines: selectedLines),
+        ),
       ),
     );
   }
