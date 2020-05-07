@@ -47,6 +47,7 @@ dependencies:
   animations: ^1.0.0+5
   scroll_to_index: ^1.0.6
   scroll_bottom_navigation_bar: ^3.0.0
+  badges: ^1.1.1
 
 dev_dependencies:
   flutter_test:

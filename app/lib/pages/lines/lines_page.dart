@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:math';
 
+import 'package:badges/badges.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +13,6 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
-import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/util/collection_util.dart';
@@ -49,12 +51,14 @@ class LinesPage extends HookWidget {
       );
     });
 
+    final bloc = context.bloc<LinesBloc>();
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       extendBody: true,
       resizeToAvoidBottomPadding: false,
-      body: StreamBuilder<List<MapEntry<Line, LineState>>>(
-        stream: context.bloc<LinesBloc>().filteredLinesStream,
+      body: StreamBuilder<LinesState>(
+        stream: bloc,
         builder: (context, snapshot) {
           if (snapshot.data == null) {
             return Column(children: [
@@ -62,6 +66,31 @@ class LinesPage extends HookWidget {
               Expanded(child: Center(child: CircularProgressIndicator())),
             ]);
           }
+
+          final selectedLines = snapshot.data.lines.entries
+              .where((entry) => entry.value.selected)
+              .toList();
+          final symbolFilterPred = snapshot.data.symbolFilterPredicate;
+          final listFilterPred = snapshot.data.listFilterPredicate;
+          final filteredLines = snapshot.data.lines.entries
+              .where(
+                (entry) => symbolFilterPred(entry) && listFilterPred(entry),
+              )
+              .toList();
+
+          if (filteredLines.isEmpty) {
+            return Column(children: [
+              appBar,
+              if (selectedLines.isNotEmpty)
+                _badgeRow(context, selectedLines: selectedLines),
+              Expanded(
+                child: Center(
+                  child: Text('No lines match entered filter.'),
+                ),
+              ),
+            ]);
+          }
+
           return CustomScrollView(
             controller: _autoScrollController,
             slivers: [
@@ -72,23 +101,23 @@ class LinesPage extends HookWidget {
                 ),
                 floating: true,
               ),
+              if (selectedLines.isNotEmpty)
+                _badgeBar(context, selectedLines: selectedLines),
               _linesList(
-                selectionChanged:
-                    context.bloc<LinesBloc>().lineSelectionChanged,
+                selectionChanged: bloc.lineSelectionChanged,
                 columnsCount:
                     MediaQuery.of(context).orientation == Orientation.portrait
                         ? 4
                         : 8,
-                lines: snapshot.data,
+                lines: filteredLines,
               ),
             ],
           );
         },
       ),
       bottomNavigationBar: _listGroupNavigationButtons(
-        context.bloc<LinesBloc>().filteredLinesStream,
+        bloc.filteredLinesStream,
       ),
-      bottomSheet: _bottomSheet(context),
     );
   }
 
@@ -153,142 +182,78 @@ class LinesPage extends HookWidget {
     );
   }
 
-  Widget _bottomSheet(BuildContext context) {
-    return StreamBuilder<Iterable<MapEntry<Line, LineState>>>(
-      stream: context.bloc<LinesBloc>().selectedLinesStream,
-      builder: (context, snapshot) {
-        final selectedLines = snapshot.data;
-        if (selectedLines == null || selectedLines.isEmpty) {
-          return Container(width: 0, height: 0);
-        }
+  Widget _badgeRow(
+    BuildContext context, {
+    @required Iterable<MapEntry<Line, LineState>> selectedLines,
+  }) {
+    int numberOfTracked = 0,
+        numberOfUntracked = 0,
+        numberOfFav = 0,
+        numberOfNonFav = 0;
+    selectedLines.forEach((entry) {
+      if (entry.value.tracked)
+        ++numberOfTracked;
+      else
+        ++numberOfUntracked;
+      if (entry.value.favourite)
+        ++numberOfFav;
+      else
+        ++numberOfNonFav;
+    });
 
-        int numberOfTracked = 0,
-            numberOfUntracked = 0,
-            numberOfFav = 0,
-            numberOfNonFav = 0;
-        selectedLines.forEach((entry) {
-          if (entry.value.tracked)
-            ++numberOfTracked;
-          else
-            ++numberOfUntracked;
-          if (entry.value.favourite)
-            ++numberOfFav;
-          else
-            ++numberOfNonFav;
-        });
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 5.0,
-                color: Colors.grey.shade300,
-                offset: const Offset(0.0, -5.0),
-              )
-            ],
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        if (numberOfUntracked > 0)
+          Badge(
+            badgeContent: Text(numberOfUntracked.toString()),
+            child: FlatButton.icon(
+              icon: Icon(Icons.location_on),
+              label: Text('Track'),
+              onPressed: () {},
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                selectedLines.length > 1
-                    ? 'Out ${selectedLines.length} selected lines:'
-                    : 'Out of ${selectedLines.length} selected line:',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.black, fontSize: 20),
-              ),
-              if (numberOfUntracked > 0)
-                _selectedLinesGroupBottomSheetRow(
-                  actionLabel: Strings.trackAll,
-                  singularDescription:
-                      '$numberOfUntracked line is not tracked.',
-                  pluralDescription:
-                      '$numberOfUntracked lines are not tracked.',
-                  actionPressed: () async {
-                    if (await context.bloc<LinesBloc>().trackSelectedLines()) {
-                      Navigator.pop(context);
-                    } else {
-                      //TODO:
-                    }
-                  },
-                  numberOfLines: numberOfUntracked,
-                ),
-              if (numberOfTracked > 0)
-                _selectedLinesGroupBottomSheetRow(
-                  actionLabel: Strings.untrackAll,
-                  singularDescription: '$numberOfTracked line is tracked.',
-                  pluralDescription: '$numberOfTracked lines are tracked.',
-                  actionPressed: () {
-                    context.bloc<LinesBloc>().untrackSelectedLines();
-                  },
-                  numberOfLines: numberOfTracked,
-                ),
-              if (numberOfNonFav > 0)
-                _selectedLinesGroupBottomSheetRow(
-                  actionLabel: Strings.saveAll,
-                  singularDescription:
-                      '$numberOfNonFav line is not saved as favourite.',
-                  pluralDescription:
-                      '$numberOfNonFav lines are not saved as favourite.',
-                  actionPressed: () {
-                    context.bloc<LinesBloc>().addSelectedLinesToFavourites();
-                  },
-                  numberOfLines: numberOfNonFav,
-                ),
-              if (numberOfFav > 0)
-                _selectedLinesGroupBottomSheetRow(
-                  actionLabel: Strings.removeAll,
-                  singularDescription:
-                      '$numberOfFav line is saved as favourite.',
-                  pluralDescription:
-                      '$numberOfFav lines are saved as favourite.',
-                  actionPressed: () {
-                    context
-                        .bloc<LinesBloc>()
-                        .removeSelectedLinesFromFavourites();
-                  },
-                  numberOfLines: numberOfFav,
-                ),
-            ],
+        if (numberOfTracked > 0)
+          Badge(
+            badgeContent: Text(numberOfTracked.toString()),
+            child: FlatButton.icon(
+              icon: Icon(Icons.location_off),
+              label: Text('Untrack'),
+              onPressed: () {},
+            ),
           ),
-        );
-      },
+        if (numberOfNonFav > 0)
+          Badge(
+            badgeContent: Text(numberOfNonFav.toString()),
+            child: FlatButton.icon(
+              icon: Icon(Icons.save),
+              label: Text('Save'),
+              onPressed: () {},
+            ),
+          ),
+        if (numberOfFav > 0)
+          Badge(
+            badgeContent: Text(numberOfFav.toString()),
+            child: FlatButton.icon(
+              icon: Icon(Icons.delete_forever),
+              label: Text('Delete'),
+              onPressed: () {},
+            ),
+          ),
+      ],
     );
   }
 
-  Widget _selectedLinesGroupBottomSheetRow({
-    @required int numberOfLines,
-    @required String singularDescription,
-    @required String pluralDescription,
-    @required FutureOr<void> Function() actionPressed,
-    @required String actionLabel,
+  Widget _badgeBar(
+    BuildContext context, {
+    @required Iterable<MapEntry<Line, LineState>> selectedLines,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              child: Text(
-                numberOfLines > 1 ? pluralDescription : singularDescription,
-                textAlign: TextAlign.left,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.black, fontSize: 16),
-              ),
-            ),
-          ),
-          RaisedButton(
-            color: Colors.white,
-            padding: EdgeInsets.zero,
-            onPressed: () => actionPressed(),
-            child: Text(
-              actionLabel,
-              style: const TextStyle(color: Colors.black, fontSize: 16),
-            ),
-          )
-        ],
+    return SliverPersistentHeader(
+      pinned: true,
+      delegate: _SliverBadgeBarDelegate(
+        minHeight: 60,
+        maxHeight: 60,
+        child: _badgeRow(context, selectedLines: selectedLines),
       ),
     );
   }
@@ -299,7 +264,8 @@ class LinesPage extends HookWidget {
     return StreamBuilder<List<MapEntry<Line, LineState>>>(
       stream: linesStream,
       builder: (context, snapshot) {
-        if (snapshot.data == null) return Container();
+        if (snapshot.data == null || snapshot.data.length < 2)
+          return Container();
 
         final lineGroups =
             snapshot.data.groupBy((entry) => entry.key.group).entries;
@@ -441,5 +407,38 @@ class LinesPage extends HookWidget {
       ),
     );
     return Card(child: inkWell, elevation: line.value.selected ? 0.0 : 5.0);
+  }
+}
+
+class _SliverBadgeBarDelegate extends SliverPersistentHeaderDelegate {
+  final double minHeight;
+  final double maxHeight;
+  final Widget child;
+
+  _SliverBadgeBarDelegate({
+    @required this.minHeight,
+    @required this.maxHeight,
+    @required this.child,
+  });
+
+  @override
+  double get minExtent => minHeight;
+  @override
+  double get maxExtent => max(maxHeight, minHeight);
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return SizedBox.expand(child: child);
+  }
+
+  @override
+  bool shouldRebuild(_SliverBadgeBarDelegate oldDelegate) {
+    return maxHeight != oldDelegate.maxHeight ||
+        minHeight != oldDelegate.minHeight ||
+        child != oldDelegate.child;
   }
 }

@@ -48,7 +48,7 @@ class LinesState {
   }
 
   bool Function(MapEntry<Line, LineState>) get symbolFilterPredicate {
-    return symbolFilter == null
+    return symbolFilter == null || symbolFilter.isEmpty
         ? (MapEntry<Line, LineState> entry) => true
         : (MapEntry<Line, LineState> entry) => entry.key.symbol
             .toLowerCase()
