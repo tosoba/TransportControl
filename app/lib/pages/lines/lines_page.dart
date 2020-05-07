@@ -36,35 +36,11 @@ class LinesPage extends HookWidget {
       searchFieldController.value = TextEditingValue(text: filter);
     }
 
-    final appBar = TextFieldAppBar(
-      textFieldFocusNode: searchFieldFocusNode,
-      textFieldController: searchFieldController,
-      hint: "Search lines...",
-      leading: TextFieldAppBarBackButton(searchFieldFocusNode),
-      trailing: StreamBuilder<String>(
-        stream: context.bloc<LinesBloc>().symbolFiltersStream,
-        builder: (context, snapshot) => Container(
-          child: Row(
-            children: [
-              if (snapshot.data?.isNotEmpty == true)
-                CircularButton(
-                  child: const Icon(
-                    Icons.close,
-                    color: Colors.black,
-                  ),
-                  onPressed: () {
-                    searchFieldController.value = TextEditingValue();
-                  },
-                ),
-              _listFiltersMenu(context),
-            ],
-          ),
-        ),
-      ),
+    final appBar = _appBar(
+      context,
+      searchFieldFocusNode: searchFieldFocusNode,
+      searchFieldController: searchFieldController,
     );
-
-    final topOffset =
-        appBar.size.height + MediaQuery.of(context).padding.top + 10;
 
     _autoScrollController.bottomNavigationBar.tabListener((index) {
       _autoScrollController.scrollToIndex(
@@ -97,7 +73,6 @@ class LinesPage extends HookWidget {
                 floating: true,
               ),
               _linesList(
-                topOffset: topOffset,
                 selectionChanged:
                     context.bloc<LinesBloc>().lineSelectionChanged,
                 columnsCount:
@@ -112,11 +87,40 @@ class LinesPage extends HookWidget {
       ),
       bottomNavigationBar: _listGroupNavigationButtons(
         context.bloc<LinesBloc>().filteredLinesStream,
-        topOffset,
       ),
-      bottomSheet: _bottomSheet(
-        context,
-        onNotConnected: () {}, //TODO:
+      bottomSheet: _bottomSheet(context),
+    );
+  }
+
+  Widget _appBar(
+    BuildContext context, {
+    @required FocusNode searchFieldFocusNode,
+    @required TextEditingController searchFieldController,
+  }) {
+    return TextFieldAppBar(
+      textFieldFocusNode: searchFieldFocusNode,
+      textFieldController: searchFieldController,
+      hint: "Search lines...",
+      leading: TextFieldAppBarBackButton(searchFieldFocusNode),
+      trailing: StreamBuilder<String>(
+        stream: context.bloc<LinesBloc>().symbolFiltersStream,
+        builder: (context, snapshot) => Container(
+          child: Row(
+            children: [
+              if (snapshot.data?.isNotEmpty == true)
+                CircularButton(
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.black,
+                  ),
+                  onPressed: () {
+                    searchFieldController.value = TextEditingValue();
+                  },
+                ),
+              _listFiltersMenu(context),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -149,10 +153,7 @@ class LinesPage extends HookWidget {
     );
   }
 
-  Widget _bottomSheet(
-    BuildContext context, {
-    @required void Function() onNotConnected,
-  }) {
+  Widget _bottomSheet(BuildContext context) {
     return StreamBuilder<Iterable<MapEntry<Line, LineState>>>(
       stream: context.bloc<LinesBloc>().selectedLinesStream,
       builder: (context, snapshot) {
@@ -208,7 +209,7 @@ class LinesPage extends HookWidget {
                     if (await context.bloc<LinesBloc>().trackSelectedLines()) {
                       Navigator.pop(context);
                     } else {
-                      onNotConnected();
+                      //TODO:
                     }
                   },
                   numberOfLines: numberOfUntracked,
@@ -294,7 +295,6 @@ class LinesPage extends HookWidget {
 
   Widget _listGroupNavigationButtons(
     Stream<List<MapEntry<Line, LineState>>> linesStream,
-    double topOffset,
   ) {
     return StreamBuilder<List<MapEntry<Line, LineState>>>(
       stream: linesStream,
@@ -302,7 +302,7 @@ class LinesPage extends HookWidget {
         if (snapshot.data == null) return Container();
 
         final lineGroups =
-            snapshot.data.groupBy((entry) => entry.key.group,).entries;
+            snapshot.data.groupBy((entry) => entry.key.group).entries;
 
         return ScrollBottomNavigationBar(
           type: BottomNavigationBarType.fixed,
@@ -327,7 +327,6 @@ class LinesPage extends HookWidget {
   }
 
   Widget _linesList({
-    @required double topOffset,
     @required void Function(Line) selectionChanged,
     @required List<MapEntry<Line, LineState>> lines,
     @required int columnsCount,
