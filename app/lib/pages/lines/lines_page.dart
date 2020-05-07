@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:badges/badges.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -83,7 +82,10 @@ class LinesPage extends HookWidget {
             return Column(children: [
               appBar,
               if (selectedLines.isNotEmpty)
-                _badgeRow(context, selectedLines: selectedLines),
+                Padding(
+                  padding: const EdgeInsets.only(top: 15.0),
+                  child: _badgeRow(context, selectedLines: selectedLines),
+                ),
               Expanded(
                 child: Center(
                   child: Text('No lines match entered filter.'),
@@ -211,7 +213,14 @@ class LinesPage extends HookWidget {
             child: CircularTextIconButton(
               icon: Icons.location_on,
               text: 'Track',
-              onTap: () {},
+              onTap: () async {
+                if (await context.bloc<LinesBloc>().trackSelectedLines()) {
+                  Navigator.pop(context);
+                } else {
+                  Scaffold.of(context)
+                      .showSnackBar(SnackBar(content: Text('No connection.')));
+                }
+              },
             ),
           ),
         if (numberOfTracked > 0)
@@ -220,7 +229,9 @@ class LinesPage extends HookWidget {
             child: CircularTextIconButton(
               icon: Icons.location_off,
               text: 'Untrack',
-              onTap: () {},
+              onTap: () {
+                context.bloc<LinesBloc>().untrackSelectedLines();
+              },
             ),
           ),
         if (numberOfNonFav > 0)
@@ -229,7 +240,9 @@ class LinesPage extends HookWidget {
             child: CircularTextIconButton(
               icon: Icons.save,
               text: 'Save',
-              onTap: () {},
+              onTap: () {
+                context.bloc<LinesBloc>().addSelectedLinesToFavourites();
+              },
             ),
           ),
         if (numberOfFav > 0)
@@ -238,7 +251,9 @@ class LinesPage extends HookWidget {
             child: CircularTextIconButton(
               icon: Icons.delete_forever,
               text: 'Delete',
-              onTap: () {},
+              onTap: () {
+                context.bloc<LinesBloc>().removeSelectedLinesFromFavourites();
+              },
             ),
           ),
       ],
