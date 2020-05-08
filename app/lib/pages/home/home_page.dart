@@ -145,7 +145,6 @@ class HomePage extends HookWidget {
   }) {
     return Container(
       padding: EdgeInsets.zero,
-      color: Colors.white,
       height: kBottomNavigationBarHeight,
       child: Row(
         mainAxisSize: MainAxisSize.max,
@@ -175,16 +174,21 @@ class HomePage extends HookWidget {
     @required IconData icon,
   }) {
     return Expanded(
-      child: FadeTransition(
-        opacity: bottomNavButtonsOpacity,
-        child: FlatButton.icon(
-          padding: EdgeInsets.zero,
-          icon: Icon(icon),
-          color: Colors.white,
-          onPressed: onPressed,
-          label: Text(
-            labelText,
-            style: const TextStyle(fontSize: 18),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: FadeTransition(
+          opacity: bottomNavButtonsOpacity,
+          child: RaisedButton.icon(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            icon: Icon(icon),
+            color: Colors.white,
+            onPressed: onPressed,
+            label: Text(
+              labelText,
+              style: const TextStyle(fontSize: 18),
+            ),
           ),
         ),
       ),
