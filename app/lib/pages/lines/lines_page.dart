@@ -54,7 +54,8 @@ class LinesPage extends HookWidget {
           searchFieldFocusNode: searchFieldFocusNode,
           searchFieldController: searchFieldController,
         ),
-        persistentFooterButtons: _footerButtons(
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: _floatingActionButtons(
           context,
           stateSnapshot: snapshot,
         ),
@@ -186,7 +187,7 @@ class LinesPage extends HookWidget {
     );
   }
 
-  List<Widget> _footerButtons(
+  Widget _floatingActionButtons(
     BuildContext context, {
     @required AsyncSnapshot<LinesState> stateSnapshot,
   }) {
@@ -211,57 +212,84 @@ class LinesPage extends HookWidget {
       else
         ++numberOfNonFav;
     });
-    return [
-      if (numberOfUntracked > 0)
-        Badge(
-          badgeContent: Text(numberOfUntracked.toString()),
-          child: CircularTextIconButton(
-            icon: Icons.location_on,
-            text: 'Track',
-            onTap: () async {
-              if (await context.bloc<LinesBloc>().trackSelectedLines()) {
-                Navigator.pop(context);
-              } else {
-                Scaffold.of(context)
-                    .showSnackBar(SnackBar(content: Text('No connection.')));
-              }
-            },
-          ),
-        ),
-      if (numberOfTracked > 0)
-        Badge(
-          badgeContent: Text(numberOfTracked.toString()),
-          child: CircularTextIconButton(
-            icon: Icons.location_off,
-            text: 'Untrack',
-            onTap: () {
-              context.bloc<LinesBloc>().untrackSelectedLines();
-            },
-          ),
-        ),
-      if (numberOfNonFav > 0)
-        Badge(
-          badgeContent: Text(numberOfNonFav.toString()),
-          child: CircularTextIconButton(
-            icon: Icons.save,
-            text: 'Save',
-            onTap: () {
-              context.bloc<LinesBloc>().addSelectedLinesToFavourites();
-            },
-          ),
-        ),
-      if (numberOfFav > 0)
-        Badge(
-          badgeContent: Text(numberOfFav.toString()),
-          child: CircularTextIconButton(
-            icon: Icons.delete_forever,
-            text: 'Delete',
-            onTap: () {
-              context.bloc<LinesBloc>().removeSelectedLinesFromFavourites();
-            },
-          ),
-        ),
-    ];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          if (numberOfUntracked > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Badge(
+                padding: const EdgeInsets.all(8.0),
+                badgeContent: Text(numberOfUntracked.toString()),
+                child: CircularTextIconButton(
+                  icon: Icons.location_on,
+                  text: 'Track',
+                  onTap: () async {
+                    if (await context.bloc<LinesBloc>().trackSelectedLines()) {
+                      Navigator.pop(context);
+                    } else {
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('No connection.'),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ),
+          if (numberOfTracked > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Badge(
+                padding: const EdgeInsets.all(8.0),
+                badgeContent: Text(numberOfTracked.toString()),
+                child: CircularTextIconButton(
+                  icon: Icons.location_off,
+                  text: 'Untrack',
+                  onTap: () {
+                    context.bloc<LinesBloc>().untrackSelectedLines();
+                  },
+                ),
+              ),
+            ),
+          if (numberOfNonFav > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Badge(
+                padding: const EdgeInsets.all(8.0),
+                badgeContent: Text(numberOfNonFav.toString()),
+                child: CircularTextIconButton(
+                  icon: Icons.save,
+                  text: 'Save',
+                  onTap: () {
+                    context.bloc<LinesBloc>().addSelectedLinesToFavourites();
+                  },
+                ),
+              ),
+            ),
+          if (numberOfFav > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Badge(
+                padding: const EdgeInsets.all(8.0),
+                badgeContent: Text(numberOfFav.toString()),
+                child: CircularTextIconButton(
+                  icon: Icons.delete_forever,
+                  text: 'Delete',
+                  onTap: () {
+                    context
+                        .bloc<LinesBloc>()
+                        .removeSelectedLinesFromFavourites();
+                  },
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   Widget _listGroupNavigationButtons({
