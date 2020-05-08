@@ -85,13 +85,7 @@ class LinesPage extends HookWidget {
       ]);
     }
 
-    final symbolFilterPred = stateSnapshot.data.symbolFilterPredicate;
-    final listFilterPred = stateSnapshot.data.listFilterPredicate;
-    final filteredLines = stateSnapshot.data.lines.entries
-        .where(
-          (entry) => symbolFilterPred(entry) && listFilterPred(entry),
-        )
-        .toList();
+    final filteredLines = stateSnapshot.data.filteredLines;
 
     if (filteredLines.isEmpty) {
       return Column(children: [
@@ -269,17 +263,8 @@ class LinesPage extends HookWidget {
   }) {
     if (stateSnapshot.data == null) return Container();
 
-    final symbolFilterPred = stateSnapshot.data.symbolFilterPredicate;
-    final listFilterPred = stateSnapshot.data.listFilterPredicate;
-    final filteredLines = stateSnapshot.data.lines.entries
-        .where(
-          (entry) => symbolFilterPred(entry) && listFilterPred(entry),
-        )
-        .toList();
-    final lineGroups = filteredLines
-        .groupBy(
-          (entry) => entry.key.group,
-        )
+    final lineGroups = stateSnapshot.data.filteredLines
+        .groupBy((entry) => entry.key.group)
         .entries;
     if (lineGroups.length < 2) return Container();
 

@@ -41,6 +41,16 @@ class LinesState {
     return _filteredLines((entry) => entry.value.tracked);
   }
 
+  List<MapEntry<Line, LineState>> get filteredLines {
+    final symbolFilterPred = symbolFilterPredicate;
+    final listFilterPred = listFilterPredicate;
+    return lines.entries
+        .where(
+          (entry) => symbolFilterPred(entry) && listFilterPred(entry),
+        )
+        .toList();
+  }
+
   Iterable<MapEntry<Line, LineState>> _filteredLines(
     bool Function(MapEntry<Line, LineState>) filter,
   ) {
