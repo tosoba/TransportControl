@@ -218,75 +218,47 @@ class LinesPage extends HookWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           if (numberOfUntracked > 0)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Badge(
-                padding: const EdgeInsets.all(8.0),
-                badgeContent: Text(numberOfUntracked.toString()),
-                child: CircularTextIconButton(
-                  icon: Icons.location_on,
-                  text: 'Track',
-                  onTap: () async {
-                    if (await context.bloc<LinesBloc>().trackSelectedLines()) {
-                      Navigator.pop(context);
-                    } else {
-                      Scaffold.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('No connection.'),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ),
+            _LinesFloatingActionButton(
+              numberOfLines: numberOfUntracked,
+              icon: Icons.location_on,
+              label: 'Track',
+              onTap: () async {
+                if (await context.bloc<LinesBloc>().trackSelectedLines()) {
+                  Navigator.pop(context);
+                } else {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('No connection.'),
+                    ),
+                  );
+                }
+              },
             ),
           if (numberOfTracked > 0)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Badge(
-                padding: const EdgeInsets.all(8.0),
-                badgeContent: Text(numberOfTracked.toString()),
-                child: CircularTextIconButton(
-                  icon: Icons.location_off,
-                  text: 'Untrack',
-                  onTap: () {
-                    context.bloc<LinesBloc>().untrackSelectedLines();
-                  },
-                ),
-              ),
+            _LinesFloatingActionButton(
+              numberOfLines: numberOfTracked,
+              icon: Icons.location_off,
+              label: 'Untrack',
+              onTap: () => context.bloc<LinesBloc>().untrackSelectedLines(),
             ),
           if (numberOfNonFav > 0)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Badge(
-                padding: const EdgeInsets.all(8.0),
-                badgeContent: Text(numberOfNonFav.toString()),
-                child: CircularTextIconButton(
-                  icon: Icons.save,
-                  text: 'Save',
-                  onTap: () {
-                    context.bloc<LinesBloc>().addSelectedLinesToFavourites();
-                  },
-                ),
-              ),
+            _LinesFloatingActionButton(
+              numberOfLines: numberOfNonFav,
+              icon: Icons.save,
+              label: 'Save',
+              onTap: () {
+                context.bloc<LinesBloc>().addSelectedLinesToFavourites();
+              },
             ),
           if (numberOfFav > 0)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Badge(
-                padding: const EdgeInsets.all(8.0),
-                badgeContent: Text(numberOfFav.toString()),
-                child: CircularTextIconButton(
-                  icon: Icons.delete_forever,
-                  text: 'Delete',
-                  onTap: () {
-                    context
-                        .bloc<LinesBloc>()
-                        .removeSelectedLinesFromFavourites();
-                  },
-                ),
-              ),
-            ),
+            _LinesFloatingActionButton(
+              numberOfLines: numberOfFav,
+              icon: Icons.delete_forever,
+              label: 'Delete',
+              onTap: () {
+                context.bloc<LinesBloc>().removeSelectedLinesFromFavourites();
+              },
+            )
         ],
       ),
     );
@@ -446,5 +418,32 @@ class LinesPage extends HookWidget {
       ),
     );
     return Card(child: inkWell, elevation: line.value.selected ? 0.0 : 5.0);
+  }
+}
+
+class _LinesFloatingActionButton extends StatelessWidget {
+  final int numberOfLines;
+  final IconData icon;
+  final String label;
+  final void Function() onTap;
+
+  const _LinesFloatingActionButton({
+    Key key,
+    @required this.numberOfLines,
+    @required this.icon,
+    @required this.label,
+    @required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Badge(
+        padding: const EdgeInsets.all(8.0),
+        badgeContent: Text(numberOfLines.toString()),
+        child: CircularTextIconButton(icon: icon, text: label, onTap: onTap),
+      ),
+    );
   }
 }
