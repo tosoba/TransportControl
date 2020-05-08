@@ -144,25 +144,27 @@ class HomePage extends HookWidget {
     @required Animation<double> bottomNavButtonsOpacity,
   }) {
     return Container(
-      padding: EdgeInsets.zero,
       height: kBottomNavigationBarHeight,
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _bottomNavBarButton(
-            labelText: Strings.lines,
-            onPressed: () => _showLinesPage(context),
-            bottomNavButtonsOpacity: bottomNavButtonsOpacity,
-            icon: Icons.grid_on,
-          ),
-          _bottomNavBarButton(
-            labelText: Strings.locations,
-            onPressed: () => _showLocationsPage(context),
-            bottomNavButtonsOpacity: bottomNavButtonsOpacity,
-            icon: Icons.location_on,
-          ),
-        ],
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          shrinkWrap: true,
+          children: [
+            _bottomNavBarButton(
+              labelText: Strings.lines,
+              onPressed: () => _showLinesPage(context),
+              bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+              icon: Icons.grid_on,
+            ),
+            _bottomNavBarButton(
+              labelText: Strings.locations,
+              onPressed: () => _showLocationsPage(context),
+              bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+              icon: Icons.location_on,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -173,22 +175,22 @@ class HomePage extends HookWidget {
     @required Animation<double> bottomNavButtonsOpacity,
     @required IconData icon,
   }) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: FadeTransition(
-          opacity: bottomNavButtonsOpacity,
-          child: RaisedButton.icon(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            icon: Icon(icon),
-            color: Colors.white,
-            onPressed: onPressed,
-            label: Text(
-              labelText,
-              style: const TextStyle(fontSize: 18),
-            ),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: FadeTransition(
+        opacity: bottomNavButtonsOpacity,
+        child: RaisedButton.icon(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          icon: Icon(icon),
+          color: Colors.white,
+          onPressed: onPressed,
+          label: Text(
+            labelText,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 18),
           ),
         ),
       ),
