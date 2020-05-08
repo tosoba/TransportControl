@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:math';
-
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -38,12 +35,6 @@ class LinesPage extends HookWidget {
       searchFieldController.value = TextEditingValue(text: filter);
     }
 
-    final appBar = _appBar(
-      context,
-      searchFieldFocusNode: searchFieldFocusNode,
-      searchFieldController: searchFieldController,
-    );
-
     _autoScrollController.bottomNavigationBar.tabListener((index) {
       _autoScrollController.scrollToIndex(
         index,
@@ -51,76 +42,86 @@ class LinesPage extends HookWidget {
       );
     });
 
-    final bloc = context.bloc<LinesBloc>();
-
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      extendBody: true,
-      resizeToAvoidBottomPadding: false,
-      body: StreamBuilder<LinesState>(
-        stream: bloc,
-        builder: (context, snapshot) {
-          if (snapshot.data == null) {
-            return Column(children: [
-              appBar,
-              Expanded(child: Center(child: CircularProgressIndicator())),
-            ]);
-          }
-
-          final selectedLines = snapshot.data.lines.entries
-              .where((entry) => entry.value.selected)
-              .toList();
-          final symbolFilterPred = snapshot.data.symbolFilterPredicate;
-          final listFilterPred = snapshot.data.listFilterPredicate;
-          final filteredLines = snapshot.data.lines.entries
-              .where(
-                (entry) => symbolFilterPred(entry) && listFilterPred(entry),
-              )
-              .toList();
-
-          if (filteredLines.isEmpty) {
-            return Column(children: [
-              appBar,
-              if (selectedLines.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 15.0),
-                  child: _badgeRow(context, selectedLines: selectedLines),
-                ),
-              Expanded(
-                child: Center(
-                  child: Text('No lines match entered filter.'),
-                ),
-              ),
-            ]);
-          }
-
-          return CustomScrollView(
-            controller: _autoScrollController,
-            slivers: [
-              SliverPersistentHeader(
-                delegate: SliverTextFieldAppBarDelegate(
-                  context,
-                  appBar: appBar,
-                ),
-                floating: true,
-              ),
-              if (selectedLines.isNotEmpty)
-                _badgeBar(context, selectedLines: selectedLines),
-              _linesList(
-                selectionChanged: bloc.lineSelectionChanged,
-                columnsCount:
-                    MediaQuery.of(context).orientation == Orientation.portrait
-                        ? 4
-                        : 8,
-                lines: filteredLines,
-              ),
-            ],
-          );
-        },
+    return StreamBuilder<LinesState>(
+      stream: context.bloc<LinesBloc>(),
+      builder: (context, snapshot) => Scaffold(
+        extendBodyBehindAppBar: true,
+        extendBody: true,
+        resizeToAvoidBottomPadding: false,
+        body: _scaffoldBody(
+          context,
+          stateSnapshot: snapshot,
+          searchFieldFocusNode: searchFieldFocusNode,
+          searchFieldController: searchFieldController,
+        ),
+        persistentFooterButtons: _footerButtons(
+          context,
+          stateSnapshot: snapshot,
+        ),
+        bottomNavigationBar: _listGroupNavigationButtons(
+          stateSnapshot: snapshot,
+        ),
       ),
-      bottomNavigationBar: _listGroupNavigationButtons(
-        bloc.filteredLinesStream,
-      ),
+    );
+  }
+
+  Widget _scaffoldBody(
+    BuildContext context, {
+    @required AsyncSnapshot<LinesState> stateSnapshot,
+    @required FocusNode searchFieldFocusNode,
+    @required TextEditingController searchFieldController,
+  }) {
+    final appBar = _appBar(
+      context,
+      searchFieldFocusNode: searchFieldFocusNode,
+      searchFieldController: searchFieldController,
+    );
+
+    if (stateSnapshot.data == null) {
+      return Column(children: [
+        appBar,
+        Expanded(child: Center(child: CircularProgressIndicator())),
+      ]);
+    }
+
+    final symbolFilterPred = stateSnapshot.data.symbolFilterPredicate;
+    final listFilterPred = stateSnapshot.data.listFilterPredicate;
+    final filteredLines = stateSnapshot.data.lines.entries
+        .where(
+          (entry) => symbolFilterPred(entry) && listFilterPred(entry),
+        )
+        .toList();
+
+    if (filteredLines.isEmpty) {
+      return Column(children: [
+        appBar,
+        Expanded(
+          child: Center(
+            child: Text('No lines match entered filter.'),
+          ),
+        ),
+      ]);
+    }
+
+    return CustomScrollView(
+      controller: _autoScrollController,
+      slivers: [
+        SliverPersistentHeader(
+          delegate: SliverTextFieldAppBarDelegate(
+            context,
+            appBar: appBar,
+          ),
+          floating: true,
+        ),
+        _linesList(
+          selectionChanged: context.bloc<LinesBloc>().lineSelectionChanged,
+          columnsCount:
+              MediaQuery.of(context).orientation == Orientation.portrait
+                  ? 4
+                  : 8,
+          lines: filteredLines,
+        ),
+      ],
     );
   }
 
@@ -139,7 +140,7 @@ class LinesPage extends HookWidget {
         builder: (context, snapshot) => Container(
           child: Row(
             children: [
-              if (snapshot.data?.isNotEmpty == true)
+              if (snapshot.data != null && snapshot.data.isNotEmpty)
                 CircularButton(
                   child: const Icon(
                     Icons.close,
@@ -185,10 +186,17 @@ class LinesPage extends HookWidget {
     );
   }
 
-  Widget _badgeRow(
+  List<Widget> _footerButtons(
     BuildContext context, {
-    @required Iterable<MapEntry<Line, LineState>> selectedLines,
+    @required AsyncSnapshot<LinesState> stateSnapshot,
   }) {
+    if (stateSnapshot.data == null) return null;
+
+    final selectedLines = stateSnapshot.data.lines.entries.where(
+      (entry) => entry.value.selected,
+    );
+    if (selectedLines.isEmpty) return null;
+
     int numberOfTracked = 0,
         numberOfUntracked = 0,
         numberOfFav = 0,
@@ -203,111 +211,95 @@ class LinesPage extends HookWidget {
       else
         ++numberOfNonFav;
     });
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        if (numberOfUntracked > 0)
-          Badge(
-            badgeContent: Text(numberOfUntracked.toString()),
-            child: CircularTextIconButton(
-              icon: Icons.location_on,
-              text: 'Track',
-              onTap: () async {
-                if (await context.bloc<LinesBloc>().trackSelectedLines()) {
-                  Navigator.pop(context);
-                } else {
-                  Scaffold.of(context)
-                      .showSnackBar(SnackBar(content: Text('No connection.')));
-                }
-              },
-            ),
+    return [
+      if (numberOfUntracked > 0)
+        Badge(
+          badgeContent: Text(numberOfUntracked.toString()),
+          child: CircularTextIconButton(
+            icon: Icons.location_on,
+            text: 'Track',
+            onTap: () async {
+              if (await context.bloc<LinesBloc>().trackSelectedLines()) {
+                Navigator.pop(context);
+              } else {
+                Scaffold.of(context)
+                    .showSnackBar(SnackBar(content: Text('No connection.')));
+              }
+            },
           ),
-        if (numberOfTracked > 0)
-          Badge(
-            badgeContent: Text(numberOfTracked.toString()),
-            child: CircularTextIconButton(
-              icon: Icons.location_off,
-              text: 'Untrack',
-              onTap: () {
-                context.bloc<LinesBloc>().untrackSelectedLines();
-              },
-            ),
+        ),
+      if (numberOfTracked > 0)
+        Badge(
+          badgeContent: Text(numberOfTracked.toString()),
+          child: CircularTextIconButton(
+            icon: Icons.location_off,
+            text: 'Untrack',
+            onTap: () {
+              context.bloc<LinesBloc>().untrackSelectedLines();
+            },
           ),
-        if (numberOfNonFav > 0)
-          Badge(
-            badgeContent: Text(numberOfNonFav.toString()),
-            child: CircularTextIconButton(
-              icon: Icons.save,
-              text: 'Save',
-              onTap: () {
-                context.bloc<LinesBloc>().addSelectedLinesToFavourites();
-              },
-            ),
+        ),
+      if (numberOfNonFav > 0)
+        Badge(
+          badgeContent: Text(numberOfNonFav.toString()),
+          child: CircularTextIconButton(
+            icon: Icons.save,
+            text: 'Save',
+            onTap: () {
+              context.bloc<LinesBloc>().addSelectedLinesToFavourites();
+            },
           ),
-        if (numberOfFav > 0)
-          Badge(
-            badgeContent: Text(numberOfFav.toString()),
-            child: CircularTextIconButton(
-              icon: Icons.delete_forever,
-              text: 'Delete',
-              onTap: () {
-                context.bloc<LinesBloc>().removeSelectedLinesFromFavourites();
-              },
-            ),
+        ),
+      if (numberOfFav > 0)
+        Badge(
+          badgeContent: Text(numberOfFav.toString()),
+          child: CircularTextIconButton(
+            icon: Icons.delete_forever,
+            text: 'Delete',
+            onTap: () {
+              context.bloc<LinesBloc>().removeSelectedLinesFromFavourites();
+            },
           ),
-      ],
-    );
+        ),
+    ];
   }
 
-  Widget _badgeBar(
-    BuildContext context, {
-    @required Iterable<MapEntry<Line, LineState>> selectedLines,
+  Widget _listGroupNavigationButtons({
+    @required AsyncSnapshot<LinesState> stateSnapshot,
   }) {
-    return SliverPersistentHeader(
-      pinned: true,
-      delegate: _SliverBadgeBarDelegate(
-        minHeight: 90,
-        maxHeight: 90,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 30.0),
-          child: _badgeRow(context, selectedLines: selectedLines),
+    if (stateSnapshot.data == null) return Container();
+
+    final symbolFilterPred = stateSnapshot.data.symbolFilterPredicate;
+    final listFilterPred = stateSnapshot.data.listFilterPredicate;
+    final filteredLines = stateSnapshot.data.lines.entries
+        .where(
+          (entry) => symbolFilterPred(entry) && listFilterPred(entry),
+        )
+        .toList();
+    final lineGroups = filteredLines
+        .groupBy(
+          (entry) => entry.key.group,
+        )
+        .entries;
+    if (lineGroups.length < 2) return Container();
+
+    return ScrollBottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      controller: _autoScrollController,
+      items: List.generate(
+        lineGroups.length,
+        (index) => BottomNavigationBarItem(
+          icon: Text(
+            lineGroups.elementAt(index).key,
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          title: Container(),
         ),
       ),
-    );
-  }
-
-  Widget _listGroupNavigationButtons(
-    Stream<List<MapEntry<Line, LineState>>> linesStream,
-  ) {
-    return StreamBuilder<List<MapEntry<Line, LineState>>>(
-      stream: linesStream,
-      builder: (context, snapshot) {
-        if (snapshot.data == null || snapshot.data.length < 2)
-          return Container();
-
-        final lineGroups =
-            snapshot.data.groupBy((entry) => entry.key.group).entries;
-
-        return ScrollBottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          controller: _autoScrollController,
-          items: List.generate(
-            lineGroups.length,
-            (index) => BottomNavigationBarItem(
-              icon: Text(
-                lineGroups.elementAt(index).key,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              title: Container(),
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -426,38 +418,5 @@ class LinesPage extends HookWidget {
       ),
     );
     return Card(child: inkWell, elevation: line.value.selected ? 0.0 : 5.0);
-  }
-}
-
-class _SliverBadgeBarDelegate extends SliverPersistentHeaderDelegate {
-  final double minHeight;
-  final double maxHeight;
-  final Widget child;
-
-  _SliverBadgeBarDelegate({
-    @required this.minHeight,
-    @required this.maxHeight,
-    @required this.child,
-  });
-
-  @override
-  double get minExtent => minHeight;
-  @override
-  double get maxExtent => max(maxHeight, minHeight);
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return SizedBox.expand(child: child);
-  }
-
-  @override
-  bool shouldRebuild(_SliverBadgeBarDelegate oldDelegate) {
-    return maxHeight != oldDelegate.maxHeight ||
-        minHeight != oldDelegate.minHeight ||
-        child != oldDelegate.child;
   }
 }
