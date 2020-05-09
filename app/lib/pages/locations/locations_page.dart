@@ -13,6 +13,7 @@ import 'package:transport_control/pages/map_location/map_location_page_mode.dart
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/util/model_util.dart';
+import 'package:transport_control/widgets/floating_action_button_with_transition.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
@@ -81,33 +82,16 @@ class LocationsPage extends HookWidget {
   }
 
   Widget get _floatingActionButton {
-    const fabDimension = 56.0;
-    return Builder(
-      builder: (context) => OpenContainer(
-        transitionType: ContainerTransitionType.fade,
-        openBuilder: (ctx, _) => MapLocationPage(
+    return Builder(builder: (context) {
+      return FloatingActionButtonWithTransition(
+        buildPage: () => MapLocationPage(
           MapLocationPageMode.add(),
           ({@required MapLocationPageResult result}) {
             _handleLocationMapPageResult(result, context: context);
           },
         ),
-        closedElevation: 6.0,
-        closedShape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(fabDimension / 2)),
-        ),
-        closedColor: Theme.of(context).colorScheme.secondary,
-        closedBuilder: (context, _) => SizedBox(
-          height: fabDimension,
-          width: fabDimension,
-          child: Center(
-            child: Icon(
-              Icons.add,
-              color: Theme.of(context).colorScheme.onSecondary,
-            ),
-          ),
-        ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _listOrderMenu(BuildContext context) {
