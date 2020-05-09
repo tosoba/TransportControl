@@ -13,39 +13,51 @@ import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
 class MapLocationPage extends HookWidget {
-  final MapLocationPageMode _mode;
-  final void Function({@required MapLocationPageResult result}) _finishWith;
+  final MapLocationPageMode mode;
+  final void Function({@required MapLocationPageResult result}) finishWith;
   final Completer<GoogleMapController> _mapController = Completer();
 
-  MapLocationPage(this._mode, this._finishWith, {Key key}) : super(key: key);
+  MapLocationPage({
+    Key key,
+    @required this.mode,
+    @required this.finishWith,
+  }) : super(key: key);
 
-  ValueNotifier<Location> _useLocationState(TextEditingController controller) {
+  ValueNotifier<Location> _useLocationState() {
     return useState(
-      _mode.when(
+      mode.when(
         add: (mode) => Location.initial(),
-        existing: (mode) {
-          controller.value = TextEditingValue(text: mode.location.name);
-          return mode.location;
-        },
+        existing: (mode) => mode.location,
       ),
     );
   }
 
-  LatLng _targetFor(Location location) {
-    final bounds = location.bounds;
-    return bounds != null
-        ? LatLng(
-            (bounds.northeast.latitude + bounds.southwest.latitude) / 2,
-            (bounds.northeast.longitude + bounds.southwest.longitude) / 2,
-          )
-        : MapConstants.initialTarget;
+  TextEditingController _useLocationNameEditingController() {
+    return mode.when(
+      add: (_) => useTextEditingController(),
+      existing: (mode) => useTextEditingController
+          .fromValue(TextEditingValue(text: mode.location.name)),
+    );
+  }
+
+  LatLng get _initialMapTarget {
+    return mode.when(
+      add: (_) => MapConstants.initialTarget,
+      existing: (mode) {
+        final bounds = mode.location.bounds;
+        return LatLng(
+          (bounds.northeast.latitude + bounds.southwest.latitude) / 2,
+          (bounds.northeast.longitude + bounds.southwest.longitude) / 2,
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final textFieldFocusNode = useFocusNode();
-    final textFieldController = useTextEditingController();
-    final location = _useLocationState(textFieldController);
+    final textFieldController = _useLocationNameEditingController();
+    final location = _useLocationState();
     textFieldController.addListener(() {
       location.value = location.value.copyWith(
         name: textFieldController.value.text?.trim(),
@@ -61,7 +73,6 @@ class MapLocationPage extends HookWidget {
         extendBody: true,
         resizeToAvoidBottomPadding: false,
         //TODO: trailing reset name button for existing mode
-        //TODO: there is a bug when editing location name
         appBar: TextFieldAppBar(
           textFieldController: textFieldController,
           textFieldFocusNode: textFieldFocusNode,
@@ -72,10 +83,7 @@ class MapLocationPage extends HookWidget {
         ),
         body: Stack(
           children: [
-            _googleMap(
-              location: location,
-              queryData: queryData,
-            ),
+            _googleMap(location: location, queryData: queryData),
             ..._boundsLimiters(
                 queryData), //TODO: maybe red bottom border for limiters?
           ],
@@ -96,16 +104,17 @@ class MapLocationPage extends HookWidget {
     @required ValueNotifier<Location> location,
     @required TextEditingController textFieldController,
   }) {
-    return _mode.when(
+    return mode.when(
       add: (_) => null,
       existing: (mode) => FloatingActionButton.extended(
         onPressed: () async {
           final preEditLocation = mode.location;
           location.value = preEditLocation;
-          // if (textFieldController.value.text != preEditLocation.name) {
-          //   textFieldController.value =
-          //       TextEditingValue(text: preEditLocation.name);
-          // }
+          if (textFieldController.value.text != preEditLocation.name) {
+            textFieldController.value = TextEditingValue(
+              text: preEditLocation.name,
+            );
+          }
           final controller = await _mapController.future;
           controller.animateCamera(
             CameraUpdate.newLatLngBounds(preEditLocation.bounds, 0),
@@ -132,7 +141,7 @@ class MapLocationPage extends HookWidget {
             _bottomNavBarButton(
               labelText: 'Save',
               onPressed: () {
-                if (_mode is Add) {
+                if (mode is Add) {
                   location.value = location.value.copyWith(
                     savedAt: DateTime.now(),
                   );
@@ -147,13 +156,13 @@ class MapLocationPage extends HookWidget {
             _bottomNavBarButton(
               labelText: 'Load',
               onPressed: () {
-                _finishWith(
+                finishWith(
                   result: MapLocationPageResult(
                     location: location.value.copyWith(
                       lastSearched: DateTime.now(),
                       timesSearched: location.value.timesSearched + 1,
                     ),
-                    mode: _mode,
+                    mode: mode,
                     action: MapLocationPageResultAction.load(),
                   ),
                 );
@@ -166,7 +175,7 @@ class MapLocationPage extends HookWidget {
                 location.value = location.value.copyWith(
                   lastSearched: DateTime.now(),
                   timesSearched: location.value.timesSearched + 1,
-                  savedAt: _mode is Add ? DateTime.now() : null,
+                  savedAt: mode is Add ? DateTime.now() : null,
                 );
                 _savePressed(
                   context,
@@ -214,10 +223,10 @@ class MapLocationPage extends HookWidget {
         SnackBar(content: Text('Enter a name for location to save')),
       );
     } else {
-      _finishWith(
+      finishWith(
         result: MapLocationPageResult(
           location: location.value,
-          mode: _mode,
+          mode: mode,
           action: action,
         ),
       );
@@ -237,23 +246,19 @@ class MapLocationPage extends HookWidget {
       //   MapConstants.maxLocationPageMapZoom,
       // ),
       initialCameraPosition: CameraPosition(
-        target: _targetFor(location.value),
+        target: _initialMapTarget,
         zoom: MapConstants.initialZoom,
       ),
       onMapCreated: (controller) {
         _mapController.complete(controller);
-        int a = 5;
-        Future.delayed(const Duration(milliseconds: 200), () {
+        Future.delayed(const Duration(milliseconds: 200), () async {
           if (location.value.bounds != null) {
             controller.moveCamera(
               CameraUpdate.newLatLngBounds(location.value.bounds, 0),
             );
           } else {
-            controller.getVisibleRegion().then(
-              (bounds) {
-                location.value = location.value.copyWith(bounds: bounds);
-              },
-            );
+            final bounds = await controller.getVisibleRegion();
+            location.value = location.value.copyWith(bounds: bounds);
           }
         });
       },
@@ -299,22 +304,18 @@ class MapLocationPage extends HookWidget {
   void _updateLocationBounds(
     ValueNotifier<Location> location,
     _ScreenCoordinateBounds bounds,
-  ) {
-    _mapController.future
-        .then(
-          (controller) => Future.wait([
-            controller.getLatLng(bounds.southWest),
-            controller.getLatLng(bounds.northEast)
-          ]),
-        )
-        .then(
-          (boundsLatLngs) => location.value = location.value.copyWith(
-            bounds: LatLngBounds(
-              southwest: boundsLatLngs[0],
-              northeast: boundsLatLngs[1],
-            ),
-          ),
-        );
+  ) async {
+    final controller = await _mapController.future;
+    final boundsLatLngs = await Future.wait([
+      controller.getLatLng(bounds.southWest),
+      controller.getLatLng(bounds.northEast)
+    ]);
+    location.value = location.value.copyWith(
+      bounds: LatLngBounds(
+        southwest: boundsLatLngs[0],
+        northeast: boundsLatLngs[1],
+      ),
+    );
   }
 
   List<Widget> _boundsLimiters(MediaQueryData queryData) {

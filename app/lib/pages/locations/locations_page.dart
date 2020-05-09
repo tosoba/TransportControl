@@ -75,20 +75,18 @@ class LocationsPage extends HookWidget {
           );
         },
       ),
-      floatingActionButton: _floatingActionButton,
+      floatingActionButton: _floatingActionButton(context),
     );
   }
 
-  Widget get _floatingActionButton {
-    return Builder(builder: (context) {
-      return FloatingActionButtonWithTransition(
-        icon: Icons.add,
-        buildPage: () => _mapLocationPage(
-          context,
-          mode: MapLocationPageMode.add(),
-        ),
-      );
-    });
+  Widget _floatingActionButton(BuildContext context) {
+    return FloatingActionButtonWithTransition(
+      icon: Icons.add,
+      buildPage: () => _mapLocationPage(
+        context,
+        mode: MapLocationPageMode.add(),
+      ),
+    );
   }
 
   Widget _listOrderMenu(BuildContext context) {
@@ -215,8 +213,8 @@ class LocationsPage extends HookWidget {
     @required MapLocationPageMode mode,
   }) {
     return MapLocationPage(
-      mode,
-      ({@required MapLocationPageResult result}) {
+      mode: mode,
+      finishWith: ({@required MapLocationPageResult result}) {
         _handleLocationMapPageResult(result, context: context);
       },
     );
