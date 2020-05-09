@@ -91,7 +91,7 @@ class MapLocationPage extends HookWidget {
     final queryData = MediaQuery.of(context);
 
     return WillPopScope(
-      onWillPop: _onWillPop,
+      onWillPop: () => _onWillPop(context, location: location),
       child: Scaffold(
         extendBodyBehindAppBar: true,
         extendBody: true,
@@ -454,9 +454,29 @@ class MapLocationPage extends HookWidget {
     );
   }
 
-  Future<bool> _onWillPop() {
-    //TODO: show dialog if in edit/add mode asking for save/cancel confirmation
-    return Future.value(true);
+  Future<bool> _onWillPop(
+    BuildContext context, {
+    @required ValueNotifier<Location> location,
+  }) {
+    return mode.when(
+      add: (_) => Future.value(true),
+      existing: (mode) => showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          content: Text("Discard changes?"),
+          actions: [
+            FlatButton(
+              child: const Text('Yes'),
+              onPressed: () => Navigator.pop(context, true),
+            ),
+            FlatButton(
+              child: const Text('No'),
+              onPressed: () => Navigator.pop(context, false),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
