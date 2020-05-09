@@ -1,6 +1,4 @@
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -85,11 +83,9 @@ class LocationsPage extends HookWidget {
     return Builder(builder: (context) {
       return FloatingActionButtonWithTransition(
         icon: Icons.add,
-        buildPage: () => MapLocationPage(
-          MapLocationPageMode.add(),
-          ({@required MapLocationPageResult result}) {
-            _handleLocationMapPageResult(result, context: context);
-          },
+        buildPage: () => _mapLocationPage(
+          context,
+          mode: MapLocationPageMode.add(),
         ),
       );
     });
@@ -113,6 +109,130 @@ class LocationsPage extends HookWidget {
               )
               .toList(),
         );
+      },
+    );
+  }
+
+  Widget _locationsList({@required List<Location> locations}) {
+    return SliverList(
+      delegate: SliverChildListDelegate(
+        locations
+            .asMap()
+            .map(
+              (index, location) => MapEntry(
+                index,
+                AnimationConfiguration.staggeredList(
+                  position: index,
+                  child: FadeInAnimation(
+                    child: _locationListItem(location),
+                  ),
+                ),
+              ),
+            )
+            .values
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _locationListItem(Location location) {
+    return Builder(
+      builder: (context) => StreamBuilder<LocationsListOrder>(
+        stream: context.bloc<LocationsBloc>().listOrderStream,
+        builder: (context, snapshot) {
+          if (snapshot.data == null) return Container();
+
+          return Slidable(
+            actionPane: SlidableDrawerActionPane(),
+            actionExtentRatio: 0.25,
+            child: Container(
+              color: Colors.white,
+              child: ListTile(
+                title: Text(location.name),
+                subtitle: Text(
+                  snapshot.data.when(
+                    savedTimestamp: (_) => location.savedAtInfo,
+                    lastSearched: (_) => location.lastSearchedInfo,
+                    timesSearched: (_) => location.timesSearchedInfo,
+                  ),
+                ),
+              ),
+            ),
+            actions: [
+              IconSlideAction(
+                caption: 'Show',
+                color: Colors.blue,
+                icon: Icons.map,
+                onTap: () {
+                  final mode = MapLocationPageMode.existing(
+                    location: location,
+                    edit: false,
+                  );
+                  _showMapLocationPageWithSizeTransition(context, mode: mode);
+                },
+              ),
+              IconSlideAction(
+                caption: 'Edit',
+                color: Colors.indigo,
+                icon: Icons.edit,
+                onTap: () {
+                  final mode = MapLocationPageMode.existing(
+                    location: location,
+                    edit: true,
+                  );
+                  _showMapLocationPageWithSizeTransition(context, mode: mode);
+                },
+              ),
+            ],
+            secondaryActions: [
+              IconSlideAction(
+                caption: 'Delete',
+                color: Colors.red,
+                icon: Icons.delete,
+                onTap: () {
+                  context.bloc<LocationsBloc>().deleteLocation(location);
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showMapLocationPageWithSizeTransition(
+    BuildContext context, {
+    @required MapLocationPageMode mode,
+  }) {
+    Navigator.of(context).push(PageRouteBuilder(
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) {
+        return _mapLocationPage(context, mode: mode);
+      },
+      transitionsBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+        Widget child,
+      ) {
+        return Align(
+          child: SizeTransition(sizeFactor: animation, child: child),
+        );
+      },
+    ));
+  }
+
+  Widget _mapLocationPage(
+    BuildContext context, {
+    @required MapLocationPageMode mode,
+  }) {
+    return MapLocationPage(
+      mode,
+      ({@required MapLocationPageResult result}) {
+        _handleLocationMapPageResult(result, context: context);
       },
     );
   }
@@ -152,109 +272,6 @@ class LocationsPage extends HookWidget {
       add: (_) => context.bloc<LocationsBloc>().saveLocation(result.location),
       existing: (_) =>
           context.bloc<LocationsBloc>().updateLocation(result.location),
-    );
-  }
-
-  Widget _locationsList({
-    @required List<Location> locations,
-  }) {
-    return SliverList(
-      delegate: SliverChildListDelegate(
-        locations
-            .asMap()
-            .map(
-              (index, location) => MapEntry(
-                index,
-                AnimationConfiguration.staggeredList(
-                  position: index,
-                  child: FadeInAnimation(
-                    child: _locationListItem(location),
-                  ),
-                ),
-              ),
-            )
-            .values
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _locationListItem(Location location) {
-    return Builder(
-      builder: (context) => StreamBuilder<LocationsListOrder>(
-        stream: context.bloc<LocationsBloc>().listOrderStream,
-        builder: (context, snapshot) {
-          if (snapshot.data == null) return Container();
-          MapLocationPageMode mode;
-          return OpenContainer(
-            transitionType: ContainerTransitionType.fade,
-            openBuilder: (_, close) => MapLocationPage(
-              mode,
-              ({@required MapLocationPageResult result}) {
-                _handleLocationMapPageResult(result, context: context);
-              },
-            ),
-            tappable: false,
-            closedShape: const RoundedRectangleBorder(),
-            closedElevation: 0.0,
-            closedBuilder: (_, showMapLocationPage) {
-              return Slidable(
-                actionPane: SlidableDrawerActionPane(),
-                actionExtentRatio: 0.25,
-                child: Container(
-                  color: Colors.white,
-                  child: ListTile(
-                    title: Text(location.name),
-                    subtitle: Text(
-                      snapshot.data.when(
-                        savedTimestamp: (_) => location.savedAtInfo,
-                        lastSearched: (_) => location.lastSearchedInfo,
-                        timesSearched: (_) => location.timesSearchedInfo,
-                      ),
-                    ),
-                  ),
-                ),
-                actions: [
-                  IconSlideAction(
-                    caption: 'Show',
-                    color: Colors.blue,
-                    icon: Icons.map,
-                    onTap: () {
-                      mode = MapLocationPageMode.existing(
-                        location: location,
-                        edit: false,
-                      );
-                      showMapLocationPage();
-                    },
-                  ),
-                  IconSlideAction(
-                    caption: 'Edit',
-                    color: Colors.indigo,
-                    icon: Icons.edit,
-                    onTap: () {
-                      mode = MapLocationPageMode.existing(
-                        location: location,
-                        edit: true,
-                      );
-                      showMapLocationPage();
-                    },
-                  ),
-                ],
-                secondaryActions: [
-                  IconSlideAction(
-                    caption: 'Delete',
-                    color: Colors.red,
-                    icon: Icons.delete,
-                    onTap: () {
-                      context.bloc<LocationsBloc>().deleteLocation(location);
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-        },
-      ),
     );
   }
 }

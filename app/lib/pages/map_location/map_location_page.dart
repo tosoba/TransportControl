@@ -57,7 +57,6 @@ class MapLocationPage extends HookWidget {
 
     final queryData = MediaQuery.of(context);
 
-    //TODO: reset bounds button for existing mode
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -65,6 +64,7 @@ class MapLocationPage extends HookWidget {
         extendBody: true,
         resizeToAvoidBottomPadding: false,
         //TODO: trailing reset name button for existing mode
+        //TODO: there is a bug when editing location name
         appBar: TextFieldAppBar(
           textFieldController: textFieldController,
           textFieldFocusNode: textFieldFocusNode,
@@ -83,8 +83,13 @@ class MapLocationPage extends HookWidget {
               readOnly: readOnly,
               queryData: queryData,
             ),
-            ..._boundsLimiters(queryData),
+            ..._boundsLimiters(
+                queryData), //TODO: maybe red bottom border for limiters?
           ],
+        ),
+        floatingActionButton: _floatingActionButton(
+          location: location,
+          textFieldController: textFieldController,
         ),
         bottomNavigationBar: _bottomNavBar(
           context,
@@ -92,6 +97,33 @@ class MapLocationPage extends HookWidget {
           location: location,
         ),
       ),
+    );
+  }
+
+  Widget _floatingActionButton({
+    @required ValueNotifier<Location> location,
+    @required TextEditingController textFieldController,
+  }) {
+    return _mode.when(
+      add: (_) => null,
+      existing: (mode) => mode.edit
+          ? FloatingActionButton.extended(
+              onPressed: () async {
+                final preEditLocation = (_mode as Existing).location;
+                location.value = preEditLocation;
+                // if (textFieldController.value.text != preEditLocation.name) {
+                //   textFieldController.value =
+                //       TextEditingValue(text: preEditLocation.name);
+                // }
+                final controller = await _mapController.future;
+                controller.animateCamera(
+                  CameraUpdate.newLatLngBounds(preEditLocation.bounds, 0),
+                );
+              },
+              icon: Icon(Icons.restore),
+              label: Text('Reset'),
+            )
+          : null,
     );
   }
 
@@ -229,6 +261,7 @@ class MapLocationPage extends HookWidget {
       ),
       onMapCreated: (controller) {
         _mapController.complete(controller);
+        int a = 5;
         Future.delayed(const Duration(milliseconds: 200), () {
           if (location.value.bounds != null) {
             controller.moveCamera(
