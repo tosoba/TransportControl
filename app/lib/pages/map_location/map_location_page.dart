@@ -86,12 +86,31 @@ class MapLocationPage extends HookWidget {
             ..._boundsLimiters(queryData),
           ],
         ),
-        //TODO: replace these with bottom nav buttons like in HomePage
-        persistentFooterButtons: [
-          if (!readOnly.value)
-            Builder(
-              builder: (context) => RaisedButton(
-                color: Colors.white,
+        bottomNavigationBar: _bottomNavBar(
+          context,
+          readOnly: readOnly,
+          location: location,
+        ),
+      ),
+    );
+  }
+
+  Widget _bottomNavBar(
+    BuildContext context, {
+    @required ValueNotifier<bool> readOnly,
+    @required ValueNotifier<Location> location,
+  }) {
+    return Container(
+      height: kBottomNavigationBarHeight,
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          shrinkWrap: true,
+          children: [
+            if (!readOnly.value)
+              _bottomNavBarButton(
+                labelText: 'Save',
                 onPressed: () {
                   if (_mode is Add) {
                     location.value = location.value.copyWith(
@@ -104,40 +123,26 @@ class MapLocationPage extends HookWidget {
                     action: MapLocationPageResultAction.save(),
                   );
                 },
-                child: Text(
-                  'Save',
-                  style: const TextStyle(fontSize: 18),
-                ),
               ),
-            ),
-          RaisedButton(
-            color: Colors.white,
-            onPressed: () {
-              _finishWith(
-                result: MapLocationPageResult(
-                  location: location.value.copyWith(
-                    lastSearched: DateTime.now(),
-                    timesSearched: location.value.timesSearched + 1,
+            _bottomNavBarButton(
+              labelText: 'Load',
+              onPressed: () {
+                _finishWith(
+                  result: MapLocationPageResult(
+                    location: location.value.copyWith(
+                      lastSearched: DateTime.now(),
+                      timesSearched: location.value.timesSearched + 1,
+                    ),
+                    mode: _mode,
+                    action: MapLocationPageResultAction.load(),
                   ),
-                  mode: _mode,
-                  action: MapLocationPageResultAction.load(),
-                ),
-              );
-              Navigator.pop(context);
-            },
-            child: Text(
-              'Load',
-              style: const TextStyle(fontSize: 18),
+                );
+                Navigator.pop(context);
+              },
             ),
-          ),
-          if (!readOnly.value)
-            Builder(
-              builder: (context) => RaisedButton(
-                color: Colors.white,
-                child: Text(
-                  'Save & load',
-                  style: const TextStyle(fontSize: 18),
-                ),
+            if (!readOnly.value)
+              _bottomNavBarButton(
+                labelText: 'Save & load',
                 onPressed: () {
                   location.value = location.value.copyWith(
                     lastSearched: DateTime.now(),
@@ -151,8 +156,30 @@ class MapLocationPage extends HookWidget {
                   );
                 },
               ),
-            )
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _bottomNavBarButton({
+    @required String labelText,
+    @required void Function() onPressed,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: RaisedButton(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        color: Colors.white,
+        onPressed: onPressed,
+        child: Text(
+          labelText,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 18),
+        ),
       ),
     );
   }
