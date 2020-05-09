@@ -18,6 +18,8 @@ class MapLocationPage extends HookWidget {
   final void Function({@required MapLocationPageResult result}) finishWith;
   final Completer<GoogleMapController> _mapController = Completer();
 
+  //TODO: mapTapAnimController like in HomePage
+
   MapLocationPage({
     Key key,
     @required this.mode,
@@ -87,8 +89,7 @@ class MapLocationPage extends HookWidget {
         body: Stack(
           children: [
             _googleMap(location: location, queryData: queryData),
-            ..._boundsLimiters(
-                queryData), //TODO: maybe red bottom border for limiters?
+            ..._boundsLimiters(queryData),
           ],
         ),
         floatingActionButton: _floatingActionButton(
@@ -340,22 +341,51 @@ class MapLocationPage extends HookWidget {
     final size = queryData.size;
     if (queryData.orientation == Orientation.portrait) {
       final boundsLimiterHeight = (size.height - size.width) / 2;
-      final limiter = _boundsLimiter(height: boundsLimiterHeight);
       return [
-        limiter,
-        Align(alignment: Alignment.bottomCenter, child: limiter),
+        _boundsLimiter(
+          height: boundsLimiterHeight,
+          border: const Border(
+            top: const BorderSide(width: 1, color: Colors.transparent),
+            bottom: const BorderSide(width: 1, color: Colors.redAccent),
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: _boundsLimiter(
+            height: boundsLimiterHeight,
+            border: const Border(
+              top: const BorderSide(width: 1, color: Colors.redAccent),
+              bottom: const BorderSide(width: 1, color: Colors.transparent),
+            ),
+          ),
+        ),
       ];
     } else {
       final boundsLimiterWidth = (size.width - size.height) / 2;
-      final limiter = _boundsLimiter(width: boundsLimiterWidth);
       return [
-        limiter,
-        Align(alignment: Alignment.centerRight, child: limiter),
+        _boundsLimiter(
+          width: boundsLimiterWidth,
+          border: const Border(
+            right: const BorderSide(width: 1, color: Colors.redAccent),
+            left: const BorderSide(width: 1, color: Colors.transparent),
+          ),
+        ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: _boundsLimiter(
+            width: boundsLimiterWidth,
+            border: const Border(
+              right: const BorderSide(width: 1, color: Colors.transparent),
+              left: const BorderSide(width: 1, color: Colors.redAccent),
+            ),
+          ),
+        ),
       ];
     }
   }
 
   Widget _boundsLimiter({
+    @required Border border,
     double width = double.infinity,
     double height = double.infinity,
   }) {
@@ -365,7 +395,10 @@ class MapLocationPage extends HookWidget {
         child: Container(
           width: width,
           height: height,
-          color: Colors.black.withOpacity(0),
+          decoration: BoxDecoration(
+            border: border,
+            color: Colors.black.withOpacity(0),
+          ),
         ),
       ),
     );
