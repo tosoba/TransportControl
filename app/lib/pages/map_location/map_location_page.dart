@@ -9,6 +9,7 @@ import 'package:transport_control/pages/map_location/map_location_page_mode.dart
 import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result_action.dart';
+import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
@@ -72,7 +73,6 @@ class MapLocationPage extends HookWidget {
         extendBodyBehindAppBar: true,
         extendBody: true,
         resizeToAvoidBottomPadding: false,
-        //TODO: trailing reset name button for existing mode
         appBar: TextFieldAppBar(
           textFieldController: textFieldController,
           textFieldFocusNode: textFieldFocusNode,
@@ -80,6 +80,9 @@ class MapLocationPage extends HookWidget {
             textFieldFocusNode,
           ),
           hint: 'Location name',
+          trailing: _trailingResetNameButton(
+            textFieldController: textFieldController,
+          ),
         ),
         body: Stack(
           children: [
@@ -98,6 +101,21 @@ class MapLocationPage extends HookWidget {
         ),
       ),
     );
+  }
+
+  Widget _trailingResetNameButton({
+    @required TextEditingController textFieldController,
+  }) {
+    if (textFieldController.value == null ||
+        textFieldController.value.text.isEmpty) return null;
+    return Row(children: [
+      CircularButton(
+        child: const Icon(Icons.close, color: Colors.black),
+        onPressed: () {
+          textFieldController.value = TextEditingValue();
+        },
+      ),
+    ]);
   }
 
   Widget _floatingActionButton({

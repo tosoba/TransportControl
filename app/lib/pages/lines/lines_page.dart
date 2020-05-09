@@ -137,10 +137,7 @@ class LinesPage extends HookWidget {
             children: [
               if (snapshot.data != null && snapshot.data.isNotEmpty)
                 CircularButton(
-                  child: const Icon(
-                    Icons.close,
-                    color: Colors.black,
-                  ),
+                  child: const Icon(Icons.close, color: Colors.black),
                   onPressed: () {
                     searchFieldController.value = TextEditingValue();
                   },
