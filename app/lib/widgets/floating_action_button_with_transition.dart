@@ -1,35 +1,27 @@
 import 'package:flutter/material.dart';
 
-class FloatingActionButtonWithTransition extends StatefulWidget {
+class FloatingActionButtonWithTransition extends StatelessWidget {
   final Widget Function() buildPage;
+  final Color backgroundColor;
+  final IconData icon;
+  final GlobalKey _fabKey = GlobalKey();
 
-  const FloatingActionButtonWithTransition({
+  FloatingActionButtonWithTransition({
     Key key,
     @required this.buildPage,
+    @required this.icon,
+    this.backgroundColor,
   }) : super(key: key);
 
   @override
-  _FloatingActionButtonWithTransitionState createState() {
-    return _FloatingActionButtonWithTransitionState();
-  }
-}
-
-class _FloatingActionButtonWithTransitionState
-    extends State<FloatingActionButtonWithTransition> {
-  final GlobalKey _fabKey = GlobalKey();
-
-  @override
-  Widget build(BuildContext context) {
-    return _buildFab(context, key: _fabKey);
-  }
+  Widget build(BuildContext context) => _buildFab(context, key: _fabKey);
 
   Widget _buildFab(BuildContext context, {Key key}) {
     return FloatingActionButton(
-      elevation: 0,
-      backgroundColor: Colors.pink,
       key: key,
+      backgroundColor: backgroundColor,
       onPressed: () => _onPressed(context),
-      child: Icon(Icons.search),
+      child: Icon(icon),
     );
   }
 
@@ -46,7 +38,7 @@ class _FloatingActionButtonWithTransitionState
           Animation<double> animation,
           Animation<double> secondaryAnimation,
         ) {
-          return widget.buildPage();
+          return buildPage();
         },
         transitionsBuilder: (
           BuildContext context,
@@ -54,13 +46,20 @@ class _FloatingActionButtonWithTransitionState
           Animation<double> secondaryAnimation,
           Widget child,
         ) {
-          return _buildTransition(child, animation, fabSize, fabOffset);
+          return _buildTransition(
+            context,
+            child,
+            animation,
+            fabSize,
+            fabOffset,
+          );
         },
       ),
     );
   }
 
   Widget _buildTransition(
+    BuildContext context,
     Widget page,
     Animation<double> animation,
     Size fabSize,

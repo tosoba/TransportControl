@@ -84,6 +84,7 @@ class LocationsPage extends HookWidget {
   Widget get _floatingActionButton {
     return Builder(builder: (context) {
       return FloatingActionButtonWithTransition(
+        icon: Icons.add,
         buildPage: () => MapLocationPage(
           MapLocationPageMode.add(),
           ({@required MapLocationPageResult result}) {
