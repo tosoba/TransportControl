@@ -51,9 +51,6 @@ class MapLocationPage extends HookWidget {
         name: textFieldController.value.text?.trim(),
       );
     });
-    final readOnly = useState(
-      _mode.when(add: (_) => false, existing: (mode) => !mode.edit),
-    );
 
     final queryData = MediaQuery.of(context);
 
@@ -70,17 +67,13 @@ class MapLocationPage extends HookWidget {
           textFieldFocusNode: textFieldFocusNode,
           leading: TextFieldAppBarBackButton(
             textFieldFocusNode,
-            textFieldDisabled: readOnly.value,
           ),
           hint: 'Location name',
-          enabled: !readOnly.value,
-          readOnly: readOnly.value,
         ),
         body: Stack(
           children: [
             _googleMap(
               location: location,
-              readOnly: readOnly,
               queryData: queryData,
             ),
             ..._boundsLimiters(
@@ -93,7 +86,6 @@ class MapLocationPage extends HookWidget {
         ),
         bottomNavigationBar: _bottomNavBar(
           context,
-          readOnly: readOnly,
           location: location,
         ),
       ),
@@ -106,30 +98,27 @@ class MapLocationPage extends HookWidget {
   }) {
     return _mode.when(
       add: (_) => null,
-      existing: (mode) => mode.edit
-          ? FloatingActionButton.extended(
-              onPressed: () async {
-                final preEditLocation = (_mode as Existing).location;
-                location.value = preEditLocation;
-                // if (textFieldController.value.text != preEditLocation.name) {
-                //   textFieldController.value =
-                //       TextEditingValue(text: preEditLocation.name);
-                // }
-                final controller = await _mapController.future;
-                controller.animateCamera(
-                  CameraUpdate.newLatLngBounds(preEditLocation.bounds, 0),
-                );
-              },
-              icon: Icon(Icons.restore),
-              label: Text('Reset'),
-            )
-          : null,
+      existing: (mode) => FloatingActionButton.extended(
+        onPressed: () async {
+          final preEditLocation = mode.location;
+          location.value = preEditLocation;
+          // if (textFieldController.value.text != preEditLocation.name) {
+          //   textFieldController.value =
+          //       TextEditingValue(text: preEditLocation.name);
+          // }
+          final controller = await _mapController.future;
+          controller.animateCamera(
+            CameraUpdate.newLatLngBounds(preEditLocation.bounds, 0),
+          );
+        },
+        icon: Icon(Icons.restore),
+        label: Text('Reset'),
+      ),
     );
   }
 
   Widget _bottomNavBar(
     BuildContext context, {
-    @required ValueNotifier<bool> readOnly,
     @required ValueNotifier<Location> location,
   }) {
     return Container(
@@ -140,22 +129,21 @@ class MapLocationPage extends HookWidget {
           scrollDirection: Axis.horizontal,
           shrinkWrap: true,
           children: [
-            if (!readOnly.value)
-              _bottomNavBarButton(
-                labelText: 'Save',
-                onPressed: () {
-                  if (_mode is Add) {
-                    location.value = location.value.copyWith(
-                      savedAt: DateTime.now(),
-                    );
-                  }
-                  _savePressed(
-                    context,
-                    location: location,
-                    action: MapLocationPageResultAction.save(),
+            _bottomNavBarButton(
+              labelText: 'Save',
+              onPressed: () {
+                if (_mode is Add) {
+                  location.value = location.value.copyWith(
+                    savedAt: DateTime.now(),
                   );
-                },
-              ),
+                }
+                _savePressed(
+                  context,
+                  location: location,
+                  action: MapLocationPageResultAction.save(),
+                );
+              },
+            ),
             _bottomNavBarButton(
               labelText: 'Load',
               onPressed: () {
@@ -172,22 +160,21 @@ class MapLocationPage extends HookWidget {
                 Navigator.pop(context);
               },
             ),
-            if (!readOnly.value)
-              _bottomNavBarButton(
-                labelText: 'Save & load',
-                onPressed: () {
-                  location.value = location.value.copyWith(
-                    lastSearched: DateTime.now(),
-                    timesSearched: location.value.timesSearched + 1,
-                    savedAt: _mode is Add ? DateTime.now() : null,
-                  );
-                  _savePressed(
-                    context,
-                    location: location,
-                    action: MapLocationPageResultAction.saveAndLoad(),
-                  );
-                },
-              ),
+            _bottomNavBarButton(
+              labelText: 'Save & load',
+              onPressed: () {
+                location.value = location.value.copyWith(
+                  lastSearched: DateTime.now(),
+                  timesSearched: location.value.timesSearched + 1,
+                  savedAt: _mode is Add ? DateTime.now() : null,
+                );
+                _savePressed(
+                  context,
+                  location: location,
+                  action: MapLocationPageResultAction.saveAndLoad(),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -240,16 +227,10 @@ class MapLocationPage extends HookWidget {
 
   GoogleMap _googleMap({
     @required ValueNotifier<Location> location,
-    @required ValueNotifier<bool> readOnly,
     @required MediaQueryData queryData,
   }) {
-    final interactionEnabled = !readOnly.value;
     return GoogleMap(
       mapType: MapType.normal,
-      rotateGesturesEnabled: interactionEnabled,
-      scrollGesturesEnabled: interactionEnabled,
-      zoomGesturesEnabled: interactionEnabled,
-      tiltGesturesEnabled: interactionEnabled,
       //TODO:
       // minMaxZoomPreference: MinMaxZoomPreference(
       //   MapConstants.minLocationPageMapZoom,
@@ -276,11 +257,10 @@ class MapLocationPage extends HookWidget {
           }
         });
       },
-      onCameraIdle: () {
-        if (!readOnly.value) {
-          _updateLocationBounds(location, _screenCoordinateBounds(queryData));
-        }
-      },
+      onCameraIdle: () => _updateLocationBounds(
+        location,
+        _screenCoordinateBounds(queryData),
+      ),
     );
   }
 

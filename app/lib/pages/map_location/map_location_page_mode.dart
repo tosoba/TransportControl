@@ -8,6 +8,6 @@ enum _MapLocationPageMode {
   @object
   Add,
 
-  @Data(fields: [DataField<Location>('location'), DataField<bool>('edit')])
+  @Data(fields: [DataField<Location>('location')])
   Existing,
 }

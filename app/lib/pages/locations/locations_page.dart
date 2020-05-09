@@ -160,27 +160,14 @@ class LocationsPage extends HookWidget {
             ),
             actions: [
               IconSlideAction(
-                caption: 'Show',
-                color: Colors.blue,
-                icon: Icons.map,
-                onTap: () {
-                  final mode = MapLocationPageMode.existing(
-                    location: location,
-                    edit: false,
-                  );
-                  _showMapLocationPageWithTransition(context, mode: mode);
-                },
-              ),
-              IconSlideAction(
                 caption: 'Edit',
                 color: Colors.indigo,
                 icon: Icons.edit,
                 onTap: () {
-                  final mode = MapLocationPageMode.existing(
-                    location: location,
-                    edit: true,
+                  _showMapLocationPageWithTransition(
+                    context,
+                    mode: MapLocationPageMode.existing(location: location),
                   );
-                  _showMapLocationPageWithTransition(context, mode: mode);
                 },
               ),
             ],

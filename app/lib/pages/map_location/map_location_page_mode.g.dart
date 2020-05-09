@@ -12,8 +12,8 @@ abstract class MapLocationPageMode extends Equatable {
 
   factory MapLocationPageMode.add() = Add;
 
-  factory MapLocationPageMode.existing(
-      {@required Location location, @required bool edit}) = Existing;
+  factory MapLocationPageMode.existing({@required Location location}) =
+      Existing;
 
   final _MapLocationPageMode _type;
 
@@ -133,15 +133,13 @@ class Add extends MapLocationPageMode {
 
 @immutable
 class Existing extends MapLocationPageMode {
-  const Existing({@required this.location, @required this.edit})
+  const Existing({@required this.location})
       : super(_MapLocationPageMode.Existing);
 
   final Location location;
 
-  final bool edit;
-
   @override
-  String toString() => 'Existing(location:${this.location},edit:${this.edit})';
+  String toString() => 'Existing(location:${this.location})';
   @override
-  List get props => [location, edit];
+  List get props => [location];
 }
