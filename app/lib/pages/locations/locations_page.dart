@@ -168,7 +168,7 @@ class LocationsPage extends HookWidget {
                     location: location,
                     edit: false,
                   );
-                  _showMapLocationPageWithSizeTransition(context, mode: mode);
+                  _showMapLocationPageWithTransition(context, mode: mode);
                 },
               ),
               IconSlideAction(
@@ -180,7 +180,7 @@ class LocationsPage extends HookWidget {
                     location: location,
                     edit: true,
                   );
-                  _showMapLocationPageWithSizeTransition(context, mode: mode);
+                  _showMapLocationPageWithTransition(context, mode: mode);
                 },
               ),
             ],
@@ -200,7 +200,7 @@ class LocationsPage extends HookWidget {
     );
   }
 
-  void _showMapLocationPageWithSizeTransition(
+  void _showMapLocationPageWithTransition(
     BuildContext context, {
     @required MapLocationPageMode mode,
   }) {
@@ -218,9 +218,7 @@ class LocationsPage extends HookWidget {
         Animation<double> secondaryAnimation,
         Widget child,
       ) {
-        return Align(
-          child: SizeTransition(sizeFactor: animation, child: child),
-        );
+        return FadeTransition(opacity: animation, child: child);
       },
     ));
   }
