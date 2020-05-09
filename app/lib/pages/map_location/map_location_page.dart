@@ -10,6 +10,7 @@ import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result_action.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
+import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
@@ -17,8 +18,6 @@ class MapLocationPage extends HookWidget {
   final MapLocationPageMode mode;
   final void Function({@required MapLocationPageResult result}) finishWith;
   final Completer<GoogleMapController> _mapController = Completer();
-
-  //TODO: mapTapAnimController like in HomePage
 
   MapLocationPage({
     Key key,
@@ -67,6 +66,28 @@ class MapLocationPage extends HookWidget {
       );
     });
 
+    final mapTapAnimController = useAnimationController(
+      duration: kThemeAnimationDuration,
+    );
+    final appBarOffset = useMemoized(
+      () => Tween<Offset>(
+        begin: Offset.zero,
+        end: const Offset(0.0, -1.0),
+      ).animate(mapTapAnimController),
+    );
+    final bottomNavSize = useMemoized(
+      () => Tween(
+        begin: 1.0,
+        end: 0.0,
+      ).animate(mapTapAnimController),
+    );
+    final bottomNavButtonsOpacity = useMemoized(
+      () => Tween<double>(
+        begin: 1.0,
+        end: 0.0,
+      ).animate(mapTapAnimController),
+    );
+
     final queryData = MediaQuery.of(context);
 
     return WillPopScope(
@@ -75,20 +96,27 @@ class MapLocationPage extends HookWidget {
         extendBodyBehindAppBar: true,
         extendBody: true,
         resizeToAvoidBottomPadding: false,
-        appBar: TextFieldAppBar(
-          textFieldController: textFieldController,
-          textFieldFocusNode: textFieldFocusNode,
-          leading: TextFieldAppBarBackButton(
-            textFieldFocusNode,
-          ),
-          hint: 'Location name',
-          trailing: _trailingResetNameButton(
+        appBar: SlideTransitionPreferredSizeWidget(
+          offset: appBarOffset,
+          child: TextFieldAppBar(
             textFieldController: textFieldController,
+            textFieldFocusNode: textFieldFocusNode,
+            leading: TextFieldAppBarBackButton(
+              textFieldFocusNode,
+            ),
+            hint: 'Location name',
+            trailing: _trailingResetNameButton(
+              textFieldController: textFieldController,
+            ),
           ),
         ),
         body: Stack(
           children: [
-            _googleMap(location: location, queryData: queryData),
+            _googleMap(
+              location: location,
+              queryData: queryData,
+              mapTapAnimController: mapTapAnimController,
+            ),
             ..._boundsLimiters(queryData),
           ],
         ),
@@ -96,9 +124,13 @@ class MapLocationPage extends HookWidget {
           location: location,
           textFieldController: textFieldController,
         ),
-        bottomNavigationBar: _bottomNavBar(
-          context,
-          location: location,
+        bottomNavigationBar: SizeTransition(
+          child: _bottomNavBar(
+            context,
+            location: location,
+            bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+          ),
+          sizeFactor: bottomNavSize,
         ),
       ),
     );
@@ -148,6 +180,7 @@ class MapLocationPage extends HookWidget {
   Widget _bottomNavBar(
     BuildContext context, {
     @required ValueNotifier<Location> location,
+    @required Animation<double> bottomNavButtonsOpacity,
   }) {
     return Container(
       height: kBottomNavigationBarHeight,
@@ -159,6 +192,7 @@ class MapLocationPage extends HookWidget {
           children: [
             _bottomNavBarButton(
               labelText: 'Save',
+              bottomNavButtonsOpacity: bottomNavButtonsOpacity,
               onPressed: () {
                 if (mode is Add) {
                   location.value = location.value.copyWith(
@@ -174,6 +208,7 @@ class MapLocationPage extends HookWidget {
             ),
             _bottomNavBarButton(
               labelText: 'Load',
+              bottomNavButtonsOpacity: bottomNavButtonsOpacity,
               onPressed: () {
                 finishWith(
                   result: MapLocationPageResult(
@@ -190,6 +225,7 @@ class MapLocationPage extends HookWidget {
             ),
             _bottomNavBarButton(
               labelText: 'Save & load',
+              bottomNavButtonsOpacity: bottomNavButtonsOpacity,
               onPressed: () {
                 location.value = location.value.copyWith(
                   lastSearched: DateTime.now(),
@@ -212,20 +248,24 @@ class MapLocationPage extends HookWidget {
   Widget _bottomNavBarButton({
     @required String labelText,
     @required void Function() onPressed,
+    @required Animation<double> bottomNavButtonsOpacity,
   }) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: RaisedButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        color: Colors.white,
-        onPressed: onPressed,
-        child: Text(
-          labelText,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 18),
+      child: FadeTransition(
+        opacity: bottomNavButtonsOpacity,
+        child: RaisedButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          color: Colors.white,
+          onPressed: onPressed,
+          child: Text(
+            labelText,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 18),
+          ),
         ),
       ),
     );
@@ -256,6 +296,7 @@ class MapLocationPage extends HookWidget {
   GoogleMap _googleMap({
     @required ValueNotifier<Location> location,
     @required MediaQueryData queryData,
+    @required AnimationController mapTapAnimController,
   }) {
     return GoogleMap(
       mapType: MapType.normal,
@@ -285,7 +326,16 @@ class MapLocationPage extends HookWidget {
         location,
         _screenCoordinateBounds(queryData),
       ),
+      onTap: (_) => _mapTapped(mapTapAnimController),
     );
+  }
+
+  void _mapTapped(AnimationController mapTapAnimController) {
+    if (mapTapAnimController.isCompleted) {
+      mapTapAnimController.reverse();
+    } else {
+      mapTapAnimController.forward();
+    }
   }
 
   _ScreenCoordinateBounds _screenCoordinateBounds(MediaQueryData queryData) {
