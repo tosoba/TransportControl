@@ -90,11 +90,7 @@ class LinesPage extends HookWidget {
     if (filteredLines.isEmpty) {
       return Column(children: [
         appBar,
-        Expanded(
-          child: Center(
-            child: Text('No lines match entered filter.'),
-          ),
-        ),
+        Expanded(child: Center(child: Text('No lines match entered filter.'))),
       ]);
     }
 
@@ -102,20 +98,10 @@ class LinesPage extends HookWidget {
       controller: _autoScrollController,
       slivers: [
         SliverPersistentHeader(
-          delegate: SliverTextFieldAppBarDelegate(
-            context,
-            appBar: appBar,
-          ),
+          delegate: SliverTextFieldAppBarDelegate(context, appBar: appBar),
           floating: true,
         ),
-        _linesList(
-          selectionChanged: context.bloc<LinesBloc>().lineSelectionChanged,
-          columnsCount:
-              MediaQuery.of(context).orientation == Orientation.portrait
-                  ? 4
-                  : 8,
-          lines: filteredLines,
-        ),
+        _linesList(context, lines: filteredLines),
       ],
     );
   }
@@ -290,10 +276,9 @@ class LinesPage extends HookWidget {
     );
   }
 
-  Widget _linesList({
-    @required void Function(Line) selectionChanged,
+  Widget _linesList(
+    BuildContext context, {
     @required List<MapEntry<Line, LineState>> lines,
-    @required int columnsCount,
   }) {
     final lineGroups = lines.groupBy((entry) => entry.key.group).entries;
     return SliverList(
@@ -304,11 +289,7 @@ class LinesPage extends HookWidget {
             key: ValueKey(index),
             controller: _autoScrollController,
             index: index,
-            child: _linesGroup(
-              lineGroups.elementAt(index),
-              columnsCount,
-              selectionChanged,
-            ),
+            child: _linesGroup(context, group: lineGroups.elementAt(index)),
           );
         },
       ),
@@ -316,11 +297,12 @@ class LinesPage extends HookWidget {
   }
 
   Widget _linesGroup(
+    BuildContext context, {
     MapEntry<String, List<MapEntry<Line, LineState>>> group,
-    int columnsCount,
-    void Function(Line) selectionChanged,
-  ) {
+  }) {
     final groupLines = group.value;
+    final columnsCount =
+        MediaQuery.of(context).orientation == Orientation.portrait ? 4 : 8;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -330,10 +312,7 @@ class LinesPage extends HookWidget {
           child: Text(
             group.key,
             textAlign: TextAlign.left,
-            style: const TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
           ),
         ),
         Container(
@@ -352,11 +331,7 @@ class LinesPage extends HookWidget {
                   columnCount: columnsCount,
                   child: ScaleAnimation(
                     child: FadeInAnimation(
-                      child: _lineListItem(
-                        groupLines[index],
-                        index,
-                        selectionChanged,
-                      ),
+                      child: _lineListItem(context, line: groupLines[index]),
                     ),
                   ),
                 );
@@ -369,12 +344,13 @@ class LinesPage extends HookWidget {
   }
 
   Widget _lineListItem(
-    MapEntry<Line, LineState> line,
-    int index,
-    void Function(Line) selectionChanged,
-  ) {
+    BuildContext context, {
+    @required MapEntry<Line, LineState> line,
+  }) {
     final inkWell = InkWell(
-      onTap: () => selectionChanged(line.key),
+      onLongPress: () {
+        context.bloc<LinesBloc>().lineSelectionChanged(line.key);
+      },
       child: Padding(
         padding: const EdgeInsets.all(4.0),
         child: Stack(
