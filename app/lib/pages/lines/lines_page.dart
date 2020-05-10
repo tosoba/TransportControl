@@ -249,7 +249,12 @@ class LinesPage extends HookWidget {
               onTap: () {
                 context.bloc<LinesBloc>().removeSelectedLinesFromFavourites();
               },
-            )
+            ),
+          CircularTextIconButton(
+            icon: Icons.cancel,
+            text: 'Cancel',
+            onTap: () => context.bloc<LinesBloc>().resetSelection(),
+          ),
         ],
       ),
     );
