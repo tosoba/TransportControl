@@ -200,17 +200,11 @@ class LinesPage extends HookWidget {
               numberOfLines: numberOfUntracked,
               icon: Icons.location_on,
               label: 'Track',
-              onTap: () async {
-                if (await context.bloc<LinesBloc>().trackSelectedLines()) {
-                  Navigator.pop(context);
-                } else {
-                  Scaffold.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('No connection.'),
-                    ),
-                  );
-                }
-              },
+              onTap: () async => _popIfTrueOrShowSnackbarWithText(
+                context,
+                condition: await context.bloc<LinesBloc>().trackSelectedLines(),
+                text: 'No connection.',
+              ),
             ),
           if (numberOfTracked > 0)
             _LinesFloatingActionButton(
@@ -348,46 +342,87 @@ class LinesPage extends HookWidget {
     BuildContext context, {
     @required MapEntry<Line, LineState> line,
   }) {
-    final inkWell = InkWell(
-      onLongPress: () {
-        context.bloc<LinesBloc>().lineSelectionChanged(line.key);
-      },
-      onTap: () {
-        showDialog(
-          context: context,
-          child: _LineActionsDialog(line: line.key, state: line.value),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                line.key.symbol,
-                style: const TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+    return Card(
+      child: InkWell(
+        onLongPress: () => context.bloc<LinesBloc>().toggleSelected(line.key),
+        onTap: () async => _handleLineActionsDialogResult(
+          context,
+          result: await showDialog<_LineActionsDialogResult>(
+            context: context,
+            builder: (context) => _LineActionsDialog(
+              line: line.key,
+              state: line.value,
+            ),
+          ),
+          line: line,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Stack(
+            children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  line.key.symbol,
+                  style: const TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-            if (line.value.tracked || line.value.favourite)
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (line.value.tracked) Icon(Icons.location_on),
-                    if (line.value.favourite) Icon(Icons.favorite),
-                  ],
-                ),
-              )
-          ],
+              if (line.value.tracked || line.value.favourite)
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (line.value.tracked) Icon(Icons.location_on),
+                      if (line.value.favourite) Icon(Icons.favorite),
+                    ],
+                  ),
+                )
+            ],
+          ),
         ),
       ),
+      elevation: line.value.selected ? 0.0 : 5.0,
     );
-    return Card(child: inkWell, elevation: line.value.selected ? 0.0 : 5.0);
+  }
+
+  void _handleLineActionsDialogResult(
+    BuildContext context, {
+    @required _LineActionsDialogResult result,
+    @required MapEntry<Line, LineState> line,
+  }) async {
+    if (result == null) return;
+    final bloc = context.bloc<LinesBloc>();
+    switch (result) {
+      case _LineActionsDialogResult.TOGGLE_SELECTED:
+        bloc.toggleSelected(line.key);
+        break;
+      case _LineActionsDialogResult.TOGGLE_FAVOURITE:
+        bloc.toggleFavourite(line.key);
+        break;
+      case _LineActionsDialogResult.TOGGLE_TRACKED:
+        _popIfTrueOrShowSnackbarWithText(
+          context,
+          condition: await bloc.toggleTracked(line),
+          text: 'No connection',
+        );
+        break;
+    }
+  }
+
+  void _popIfTrueOrShowSnackbarWithText(
+    BuildContext context, {
+    @required bool condition,
+    @required String text,
+  }) {
+    if (condition) {
+      Navigator.pop(context);
+    } else {
+      Scaffold.of(context).showSnackBar(SnackBar(content: Text(text)));
+    }
   }
 }
 
@@ -455,9 +490,9 @@ class _LineActionsDialog extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _lineDestText(line.dest1),
+                    _destText(line.dest1),
                     const Divider(color: Colors.grey),
-                    _lineDestText(line.dest2),
+                    _destText(line.dest2),
                   ],
                 ),
               )
@@ -467,17 +502,17 @@ class _LineActionsDialog extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _lineActionButton(
+                  _popWithResultButton(
                     state.selected ? 'Deselect' : 'Select',
-                    onPressed: () {},
+                    result: _LineActionsDialogResult.TOGGLE_SELECTED,
                   ),
-                  _lineActionButton(
+                  _popWithResultButton(
                     state.favourite ? 'Unfavourite' : 'Favourite',
-                    onPressed: () {},
+                    result: _LineActionsDialogResult.TOGGLE_FAVOURITE,
                   ),
-                  _lineActionButton(
+                  _popWithResultButton(
                     state.tracked ? 'Untrack' : 'Track',
-                    onPressed: () {},
+                    result: _LineActionsDialogResult.TOGGLE_TRACKED,
                   ),
                 ],
               ),
@@ -488,19 +523,24 @@ class _LineActionsDialog extends StatelessWidget {
     );
   }
 
-  Widget _lineActionButton(String text, {void Function() onPressed}) {
-    return FlatButton(
-      child: AutoSizeText(
-        text,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 16),
+  Widget _popWithResultButton(
+    String text, {
+    @required _LineActionsDialogResult result,
+  }) {
+    return Builder(
+      builder: (context) => FlatButton(
+        child: AutoSizeText(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 16),
+        ),
+        onPressed: () => Navigator.pop(context, result),
       ),
-      onPressed: onPressed,
     );
   }
 
-  Widget _lineDestText(String text) {
+  Widget _destText(String text) {
     return AutoSizeText(
       text,
       maxLines: 2,
@@ -508,4 +548,10 @@ class _LineActionsDialog extends StatelessWidget {
       style: const TextStyle(fontSize: 14),
     );
   }
+}
+
+enum _LineActionsDialogResult {
+  TOGGLE_SELECTED,
+  TOGGLE_FAVOURITE,
+  TOGGLE_TRACKED,
 }

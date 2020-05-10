@@ -16,7 +16,13 @@ enum _LinesEvent {
   ListFilterChanged,
 
   @Data(fields: [DataField<Line>('line')])
-  LineSelectionChanged,
+  ToggleLineSelection,
+
+  @Data(fields: [DataField<Line>('line')])
+  ToggleLineFavourite,
+
+  @Data(fields: [DataField<Line>('line')])
+  ToggleLineTracking,
 
   @object
   ResetSelection,

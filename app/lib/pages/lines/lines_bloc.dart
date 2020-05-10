@@ -67,7 +67,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
       updateLines: (evt) => state.copyWith(lines: evt.lines),
       symbolFilterChanged: (evt) => state.copyWith(symbolFilter: evt.filter),
       listFilterChanged: (evt) => state.copyWith(listFilter: evt.filter),
-      lineSelectionChanged: (evt) {
+      toggleLineSelection: (evt) {
         final oldLineState = state.lines[evt.line];
         final updatedLines = Map.of(state.lines);
         updatedLines[evt.line] = oldLineState.toggleSelection;
@@ -117,6 +117,27 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
               : MapEntry(line, lineState),
         ),
       ),
+      toggleLineFavourite: (evt) => state.copyWith(
+        lines: state.lines.map(
+          (line, lineState) => evt.line == line
+              ? MapEntry(line, lineState.toggleFavourite)
+              : MapEntry(line, lineState),
+        ),
+      ),
+      toggleLineTracking: (evt) {
+        if (state.lines[evt.line].tracked) {
+          _trackedLinesRemoved(Set<Line>()..add(evt.line));
+        } else {
+          _trackedLinesAdded(Set<Line>()..add(evt.line));
+        }
+        return state.copyWith(
+          lines: state.lines.map(
+            (line, lineState) => evt.line == line
+                ? MapEntry(line, lineState.toggleTracked)
+                : MapEntry(line, lineState),
+          ),
+        );
+      },
     );
   }
 
@@ -157,8 +178,21 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
 
   Stream<String> get symbolFiltersStream => map((state) => state.symbolFilter);
 
-  void lineSelectionChanged(Line line) {
-    add(LinesEvent.lineSelectionChanged(line: line));
+  void toggleSelected(Line line) {
+    add(LinesEvent.toggleLineSelection(line: line));
+  }
+
+  void toggleFavourite(Line line) {
+    add(LinesEvent.toggleLineFavourite(line: line));
+  }
+
+  Future<bool> toggleTracked(MapEntry<Line, LineState> line) async {
+    if (!line.value.tracked &&
+        await Connectivity().checkConnectivity() == ConnectivityResult.none) {
+      return false;
+    }
+    add(LinesEvent.toggleLineTracking(line: line.key));
+    return true;
   }
 
   void resetSelection() => add(LinesEvent.resetSelection());
