@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -351,6 +352,12 @@ class LinesPage extends HookWidget {
       onLongPress: () {
         context.bloc<LinesBloc>().lineSelectionChanged(line.key);
       },
+      onTap: () {
+        showDialog(
+          context: context,
+          child: _LineActionsDialog(line: line.key, state: line.value),
+        );
+      },
       child: Padding(
         padding: const EdgeInsets.all(4.0),
         child: Stack(
@@ -407,6 +414,98 @@ class _LinesFloatingActionButton extends StatelessWidget {
         badgeContent: Text(numberOfLines.toString()),
         child: CircularTextIconButton(icon: icon, text: label, onTap: onTap),
       ),
+    );
+  }
+}
+
+class _LineActionsDialog extends StatelessWidget {
+  final Line line;
+  final LineState state;
+
+  const _LineActionsDialog({
+    Key key,
+    @required this.line,
+    @required this.state,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: Text(
+                  line.symbol,
+                  style: const TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _lineDestText(line.dest1),
+                    const Divider(color: Colors.grey),
+                    _lineDestText(line.dest2),
+                  ],
+                ),
+              )
+            ]),
+            Padding(
+              padding: const EdgeInsets.only(top: 10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _lineActionButton(
+                    state.selected ? 'Deselect' : 'Select',
+                    onPressed: () {},
+                  ),
+                  _lineActionButton(
+                    state.favourite ? 'Unfavourite' : 'Favourite',
+                    onPressed: () {},
+                  ),
+                  _lineActionButton(
+                    state.tracked ? 'Untrack' : 'Track',
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _lineActionButton(String text, {void Function() onPressed}) {
+    return FlatButton(
+      child: AutoSizeText(
+        text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(fontSize: 16),
+      ),
+      onPressed: onPressed,
+    );
+  }
+
+  Widget _lineDestText(String text) {
+    return AutoSizeText(
+      text,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: const TextStyle(fontSize: 14),
     );
   }
 }
