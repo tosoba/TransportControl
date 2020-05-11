@@ -6,9 +6,11 @@ import 'package:transport_control/pages/home/home_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
+import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/nearby/nearby_page.dart';
 import 'package:transport_control/pages/settings/settings_page.dart';
+import 'package:transport_control/pages/tracked/tracked_page.dart';
 import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
@@ -143,30 +145,44 @@ class HomePage extends HookWidget {
     BuildContext context, {
     @required Animation<double> bottomNavButtonsOpacity,
   }) {
-    return Container(
-      height: kBottomNavigationBarHeight,
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          shrinkWrap: true,
-          children: [
-            _bottomNavBarButton(
-              labelText: Strings.lines,
-              onPressed: () => _showLinesPage(context),
-              bottomNavButtonsOpacity: bottomNavButtonsOpacity,
-              icon: Icons.grid_on,
+    return StreamBuilder<bool>(
+        stream: context
+            .bloc<HomeBloc>()
+            .mapBloc
+            .map((state) => state.trackedVehicles.isNotEmpty),
+        builder: (context, snapshot) {
+          return Container(
+            height: kBottomNavigationBarHeight,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                shrinkWrap: true,
+                children: [
+                  _bottomNavBarButton(
+                    labelText: Strings.lines,
+                    onPressed: () => _showLinesPage(context),
+                    bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+                    icon: Icons.grid_on,
+                  ),
+                  _bottomNavBarButton(
+                    labelText: Strings.locations,
+                    onPressed: () => _showLocationsPage(context),
+                    bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+                    icon: Icons.location_on,
+                  ),
+                  if (snapshot.data ?? false)
+                    _bottomNavBarButton(
+                      labelText: 'Tracked',
+                      onPressed: () => _showTrackedPage(context),
+                      bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+                      icon: Icons.track_changes,
+                    ),
+                ],
+              ),
             ),
-            _bottomNavBarButton(
-              labelText: Strings.locations,
-              onPressed: () => _showLocationsPage(context),
-              bottomNavButtonsOpacity: bottomNavButtonsOpacity,
-              icon: Icons.location_on,
-            ),
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
 
   Widget _bottomNavBarButton({
@@ -276,7 +292,7 @@ class HomePage extends HookWidget {
     );
   }
 
-  Future _showLinesPage(BuildContext context) async {
+  void _showLinesPage(BuildContext context) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -288,13 +304,25 @@ class HomePage extends HookWidget {
     );
   }
 
-  Future _showLocationsPage(BuildContext context) async {
+  void _showLocationsPage(BuildContext context) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => BlocProvider<LocationsBloc>(
           create: (_) => context.bloc<HomeBloc>().locationsBloc,
           child: LocationsPage(),
+        ),
+      ),
+    );
+  }
+
+  void _showTrackedPage(BuildContext context) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider<MapBloc>(
+          create: (_) => context.bloc<HomeBloc>().mapBloc,
+          child: TrackedPage(),
         ),
       ),
     );

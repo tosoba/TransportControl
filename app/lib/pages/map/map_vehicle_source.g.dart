@@ -10,10 +10,12 @@ part of 'map_vehicle_source.dart';
 abstract class MapVehicleSource extends Equatable {
   const MapVehicleSource(this._type);
 
-  factory MapVehicleSource.allOfLine({@required Line line}) = AllOfLine;
+  factory MapVehicleSource.allOfLine(
+      {@required Line line, @required DateTime loadedAt}) = AllOfLine;
 
-  factory MapVehicleSource.allInBounds({@required LatLngBounds bounds}) =
-      AllInBounds;
+  factory MapVehicleSource.allInBounds(
+      {@required LatLngBounds bounds,
+      @required DateTime loadedAt}) = AllInBounds;
 
   final _MapVehicleSource _type;
 
@@ -121,25 +123,31 @@ abstract class MapVehicleSource extends Equatable {
 
 @immutable
 class AllOfLine extends MapVehicleSource {
-  const AllOfLine({@required this.line}) : super(_MapVehicleSource.AllOfLine);
+  const AllOfLine({@required this.line, @required this.loadedAt})
+      : super(_MapVehicleSource.AllOfLine);
 
   final Line line;
 
+  final DateTime loadedAt;
+
   @override
-  String toString() => 'AllOfLine(line:${this.line})';
+  String toString() => 'AllOfLine(line:${this.line},loadedAt:${this.loadedAt})';
   @override
-  List get props => [line];
+  List get props => [line, loadedAt];
 }
 
 @immutable
 class AllInBounds extends MapVehicleSource {
-  const AllInBounds({@required this.bounds})
+  const AllInBounds({@required this.bounds, @required this.loadedAt})
       : super(_MapVehicleSource.AllInBounds);
 
   final LatLngBounds bounds;
 
+  final DateTime loadedAt;
+
   @override
-  String toString() => 'AllInBounds(bounds:${this.bounds})';
+  String toString() =>
+      'AllInBounds(bounds:${this.bounds},loadedAt:${this.loadedAt})';
   @override
-  List get props => [bounds];
+  List get props => [bounds, loadedAt];
 }

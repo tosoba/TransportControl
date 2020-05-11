@@ -102,13 +102,16 @@ class MapBloc extends Bloc<MapEvent, MapState> {
                     sources: tracked.sources
                       ..add(
                         MapVehicleSource.allOfLine(
-                            line: lineSymbols[vehicle.symbol]),
+                            line: lineSymbols[vehicle.symbol],
+                            loadedAt: DateTime.now()),
                       ));
           } else {
             updatedVehicles[vehicle.number] = MapVehicle.fromNewlyLoadedVehicle(
               vehicle,
-              source:
-                  MapVehicleSource.allOfLine(line: lineSymbols[vehicle.symbol]),
+              source: MapVehicleSource.allOfLine(
+                line: lineSymbols[vehicle.symbol],
+                loadedAt: DateTime.now(),
+              ),
             );
           }
         });
@@ -124,12 +127,20 @@ class MapBloc extends Bloc<MapEvent, MapState> {
               bounds: state.bounds,
               zoom: state.zoom,
               sources: tracked.sources
-                ..add(MapVehicleSource.allInBounds(bounds: evt.bounds)),
+                ..add(
+                  MapVehicleSource.allInBounds(
+                    bounds: evt.bounds,
+                    loadedAt: DateTime.now(),
+                  ),
+                ),
             );
           } else {
             updatedVehicles[vehicle.number] = MapVehicle.fromNewlyLoadedVehicle(
               vehicle,
-              source: MapVehicleSource.allInBounds(bounds: evt.bounds),
+              source: MapVehicleSource.allInBounds(
+                bounds: evt.bounds,
+                loadedAt: DateTime.now(),
+              ),
             );
           }
         });
@@ -268,9 +279,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     add(MapEvent.selectVehicle(number: number));
   }
 
-  void mapTapped() {
-    add(MapEvent.deselectVehicle());
-  }
+  void mapTapped() => add(MapEvent.deselectVehicle());
+
+  void clearMap() => add(MapEvent.clearMap());
 }
 
 extension _MapStateExt on MapState {
