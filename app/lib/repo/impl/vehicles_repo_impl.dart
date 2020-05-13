@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:injectable/injectable.dart';
+import 'package:latlong/latlong.dart' as LL;
 import 'package:transport_control/api/vehicles_api.dart';
 import 'package:transport_control/di/injection.dart';
 import 'package:transport_control/model/line.dart';
@@ -53,7 +55,8 @@ class VehiclesRepoImpl extends VehiclesRepo {
   }
 
   @override
-  Future<Result<List<Vehicle>>> loadVehicles(Iterable<Vehicle> vehicles) {
+  Future<Result<List<Vehicle>>> loadUpdatedVehicles(
+      Iterable<Vehicle> vehicles) {
     final vehicleNumbers = vehicles.map((vehicle) => vehicle.number).toSet();
     return _loadVehiclesOfTypesUsing<Vehicle>(
             vehicles, (vehicle) => vehicle.type)
@@ -75,12 +78,43 @@ class VehiclesRepoImpl extends VehiclesRepo {
   }) async {
     try {
       final responses = await _loadVehiclesOfTypesUsing<int>(
-          type != null ? [type] : _vehicleTypes, (type) => type);
+        type != null ? [type] : _vehicleTypes,
+        (type) => type,
+      );
       return Result.success(
         data: responses.filterVehicles(
-          (vehicle) =>
-              vehicle.isValid &&
-              bounds.contains(LatLng(vehicle.lat, vehicle.lon)),
+          (vehicle) {
+            return vehicle.isValid &&
+                bounds.contains(LatLng(vehicle.lat, vehicle.lon));
+          },
+        ),
+      );
+    } catch (error) {
+      return Result<List<Vehicle>>.failure(error: error);
+    }
+  }
+
+  @override
+  Future<Result<List<Vehicle>>> loadVehiclesNear(
+    LatLng position, {
+    @required double radiusInMeters,
+    int type,
+  }) async {
+    try {
+      const distance = LL.Distance();
+      final responses = await _loadVehiclesOfTypesUsing<int>(
+        type != null ? [type] : _vehicleTypes,
+        (type) => type,
+      );
+      return Result.success(
+        data: responses.filterVehicles(
+          (vehicle) {
+            final distanceFromPosition = distance.distance(
+              LL.LatLng(position.latitude, position.longitude),
+              LL.LatLng(vehicle.lat, vehicle.lon),
+            );
+            return vehicle.isValid && distanceFromPosition <= radiusInMeters;
+          },
         ),
       );
     } catch (error) {
@@ -93,8 +127,14 @@ class VehiclesRepoImpl extends VehiclesRepo {
     int Function(T) typeGetter,
   ) {
     return Future.wait(
-      list.map(typeGetter).toSet().map(
-          (type) => _api.fetchVehicles(type: type).timeout(_timeoutDuration)),
+      list
+          .map(
+            typeGetter,
+          )
+          .toSet()
+          .map(
+            (type) => _api.fetchVehicles(type: type).timeout(_timeoutDuration),
+          ),
       eagerError: true,
     );
   }

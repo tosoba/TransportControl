@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/result.dart';
@@ -9,7 +10,13 @@ abstract class VehiclesRepo {
     int type,
   });
 
+  Future<Result<List<Vehicle>>> loadVehiclesNear(
+    LatLng position, {
+    @required double radiusInMeters,
+    int type,
+  });
+
   Future<Result<List<Vehicle>>> loadVehiclesOfLines(Iterable<Line> lines);
 
-  Future<Result<List<Vehicle>>> loadVehicles(Iterable<Vehicle> vehicles);
+  Future<Result<List<Vehicle>>> loadUpdatedVehicles(Iterable<Vehicle> vehicles);
 }

@@ -49,6 +49,7 @@ dependencies:
   scroll_bottom_navigation_bar: ^3.0.0
   badges: ^1.1.1
   auto_size_text: ^2.1.0
+  location: ^3.0.0
 
 dev_dependencies:
   flutter_test:

@@ -43,7 +43,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     _vehicleUpdatesSubscription = Stream.periodic(const Duration(seconds: 15))
         .where((_) => state.trackedVehicles.isNotEmpty)
         .asyncMap(
-          (_) => _vehiclesRepo.loadVehicles(
+          (_) => _vehiclesRepo.loadUpdatedVehicles(
             state.trackedVehicles.values.map((tracked) => tracked.vehicle),
           ),
         )

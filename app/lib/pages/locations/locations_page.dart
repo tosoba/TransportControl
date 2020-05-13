@@ -79,11 +79,23 @@ class LocationsPage extends HookWidget {
   }
 
   Widget _floatingActionButtons(BuildContext context) {
-    return FloatingActionButton(
-      child: Icon(Icons.add),
-      onPressed: () => _showMapLocationPageWithTransition(
-        context,
-        mode: MapLocationPageMode.add(),
+    return Container(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            child: const Icon(Icons.my_location),
+            onPressed: () {},
+          ),
+          SizedBox(height: 10),
+          FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () => _showMapLocationPageWithTransition(
+              context,
+              mode: MapLocationPageMode.add(),
+            ),
+          ),
+        ],
       ),
     );
   }
