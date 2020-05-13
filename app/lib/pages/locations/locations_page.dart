@@ -11,7 +11,6 @@ import 'package:transport_control/pages/map_location/map_location_page_mode.dart
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/util/model_util.dart';
-import 'package:transport_control/widgets/floating_action_button_with_transition.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
@@ -75,14 +74,14 @@ class LocationsPage extends HookWidget {
           );
         },
       ),
-      floatingActionButton: _floatingActionButton(context),
+      floatingActionButton: _floatingActionButtons(context),
     );
   }
 
-  Widget _floatingActionButton(BuildContext context) {
-    return FloatingActionButtonWithTransition(
-      icon: Icons.add,
-      buildPage: () => _mapLocationPage(
+  Widget _floatingActionButtons(BuildContext context) {
+    return FloatingActionButton(
+      child: Icon(Icons.add),
+      onPressed: () => _showMapLocationPageWithTransition(
         context,
         mode: MapLocationPageMode.add(),
       ),
