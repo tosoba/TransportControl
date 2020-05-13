@@ -192,51 +192,61 @@ class LinesPage extends HookWidget {
     });
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          if (numberOfUntracked > 0)
-            _LinesFloatingActionButton(
-              numberOfLines: numberOfUntracked,
-              icon: Icons.location_on,
-              label: 'Track',
-              onTap: () async => _popIfTrueOrShowSnackbarWithText(
-                context,
-                condition: await context.bloc<LinesBloc>().trackSelectedLines(),
-                text: 'No connection.',
+      child: Container(
+        height: kBottomNavigationBarHeight,
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: ListView(
+            shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+            children: [
+              if (numberOfUntracked > 0)
+                _LinesFloatingActionButton(
+                  numberOfLines: numberOfUntracked,
+                  icon: Icons.location_on,
+                  label: 'Track',
+                  onTap: () async => _popIfTrueOrShowSnackbarWithText(
+                    context,
+                    condition:
+                        await context.bloc<LinesBloc>().trackSelectedLines(),
+                    text: 'No connection.',
+                  ),
+                ),
+              if (numberOfTracked > 0)
+                _LinesFloatingActionButton(
+                  numberOfLines: numberOfTracked,
+                  icon: Icons.location_off,
+                  label: 'Untrack',
+                  onTap: () => context.bloc<LinesBloc>().untrackSelectedLines(),
+                ),
+              if (numberOfNonFav > 0)
+                _LinesFloatingActionButton(
+                  numberOfLines: numberOfNonFav,
+                  icon: Icons.save,
+                  label: 'Save',
+                  onTap: () {
+                    context.bloc<LinesBloc>().addSelectedLinesToFavourites();
+                  },
+                ),
+              if (numberOfFav > 0)
+                _LinesFloatingActionButton(
+                  numberOfLines: numberOfFav,
+                  icon: Icons.delete_forever,
+                  label: 'Delete',
+                  onTap: () {
+                    context
+                        .bloc<LinesBloc>()
+                        .removeSelectedLinesFromFavourites();
+                  },
+                ),
+              CircularTextIconButton(
+                icon: Icons.cancel,
+                text: 'Cancel',
+                onTap: () => context.bloc<LinesBloc>().resetSelection(),
               ),
-            ),
-          if (numberOfTracked > 0)
-            _LinesFloatingActionButton(
-              numberOfLines: numberOfTracked,
-              icon: Icons.location_off,
-              label: 'Untrack',
-              onTap: () => context.bloc<LinesBloc>().untrackSelectedLines(),
-            ),
-          if (numberOfNonFav > 0)
-            _LinesFloatingActionButton(
-              numberOfLines: numberOfNonFav,
-              icon: Icons.save,
-              label: 'Save',
-              onTap: () {
-                context.bloc<LinesBloc>().addSelectedLinesToFavourites();
-              },
-            ),
-          if (numberOfFav > 0)
-            _LinesFloatingActionButton(
-              numberOfLines: numberOfFav,
-              icon: Icons.delete_forever,
-              label: 'Delete',
-              onTap: () {
-                context.bloc<LinesBloc>().removeSelectedLinesFromFavourites();
-              },
-            ),
-          CircularTextIconButton(
-            icon: Icons.cancel,
-            text: 'Cancel',
-            onTap: () => context.bloc<LinesBloc>().resetSelection(),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
