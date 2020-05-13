@@ -190,61 +190,69 @@ class LinesPage extends HookWidget {
       else
         ++numberOfNonFav;
     });
+
+    final buttons = [
+      if (numberOfUntracked > 0)
+        _LinesFloatingActionButton(
+          numberOfLines: numberOfUntracked,
+          icon: Icons.location_on,
+          label: 'Track',
+          onTap: () async => _popIfTrueOrShowSnackbarWithText(
+            context,
+            condition: await context.bloc<LinesBloc>().trackSelectedLines(),
+            text: 'No connection.',
+          ),
+        ),
+      if (numberOfTracked > 0)
+        _LinesFloatingActionButton(
+          numberOfLines: numberOfTracked,
+          icon: Icons.location_off,
+          label: 'Untrack',
+          onTap: () => context.bloc<LinesBloc>().untrackSelectedLines(),
+        ),
+      if (numberOfNonFav > 0)
+        _LinesFloatingActionButton(
+          numberOfLines: numberOfNonFav,
+          icon: Icons.save,
+          label: 'Save',
+          onTap: () {
+            context.bloc<LinesBloc>().addSelectedLinesToFavourites();
+          },
+        ),
+      if (numberOfFav > 0)
+        _LinesFloatingActionButton(
+          numberOfLines: numberOfFav,
+          icon: Icons.delete_forever,
+          label: 'Delete',
+          onTap: () {
+            context.bloc<LinesBloc>().removeSelectedLinesFromFavourites();
+          },
+        ),
+      CircularTextIconButton(
+        icon: Icons.cancel,
+        text: 'Cancel',
+        onTap: () => context.bloc<LinesBloc>().resetSelection(),
+      ),
+    ];
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Container(
         height: kBottomNavigationBarHeight,
         child: Align(
           alignment: Alignment.centerRight,
-          child: ListView(
+          child: ListView.builder(
             shrinkWrap: true,
+            itemCount: buttons.length,
             scrollDirection: Axis.horizontal,
-            children: [
-              if (numberOfUntracked > 0)
-                _LinesFloatingActionButton(
-                  numberOfLines: numberOfUntracked,
-                  icon: Icons.location_on,
-                  label: 'Track',
-                  onTap: () async => _popIfTrueOrShowSnackbarWithText(
-                    context,
-                    condition:
-                        await context.bloc<LinesBloc>().trackSelectedLines(),
-                    text: 'No connection.',
-                  ),
+            itemBuilder: (context, index) {
+              return AnimationConfiguration.staggeredList(
+                position: index,
+                child: ScaleAnimation(
+                  child: FadeInAnimation(child: buttons.elementAt(index)),
                 ),
-              if (numberOfTracked > 0)
-                _LinesFloatingActionButton(
-                  numberOfLines: numberOfTracked,
-                  icon: Icons.location_off,
-                  label: 'Untrack',
-                  onTap: () => context.bloc<LinesBloc>().untrackSelectedLines(),
-                ),
-              if (numberOfNonFav > 0)
-                _LinesFloatingActionButton(
-                  numberOfLines: numberOfNonFav,
-                  icon: Icons.save,
-                  label: 'Save',
-                  onTap: () {
-                    context.bloc<LinesBloc>().addSelectedLinesToFavourites();
-                  },
-                ),
-              if (numberOfFav > 0)
-                _LinesFloatingActionButton(
-                  numberOfLines: numberOfFav,
-                  icon: Icons.delete_forever,
-                  label: 'Delete',
-                  onTap: () {
-                    context
-                        .bloc<LinesBloc>()
-                        .removeSelectedLinesFromFavourites();
-                  },
-                ),
-              CircularTextIconButton(
-                icon: Icons.cancel,
-                text: 'Cancel',
-                onTap: () => context.bloc<LinesBloc>().resetSelection(),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
