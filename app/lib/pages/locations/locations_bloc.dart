@@ -103,7 +103,9 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
 
   //TODO: return a result enum instead of bool for showing info to user
   Future<bool> loadVehiclesNearbyUserLocation() async {
+    //TODO: Signal loading location with snackbar
     final locationResult = await UserLocation.Location().tryGet();
+    //TODO: hide snackbar
     return locationResult.asyncWhenOrElse(
       success: (result) async {
         final locationData = result.data;

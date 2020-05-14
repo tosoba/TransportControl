@@ -2,7 +2,7 @@ import 'package:location/location.dart';
 import 'package:transport_control/model/location_result.dart';
 
 extension LocationExt on Location {
-  Future<LocationResult> tryGetLocation({
+  Future<LocationResult> tryGet({
     Duration timeLimit = const Duration(seconds: 15),
   }) async {
     final permissionStatus = await hasPermission();

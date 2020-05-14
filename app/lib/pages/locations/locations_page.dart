@@ -84,6 +84,7 @@ class LocationsPage extends HookWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           FloatingActionButton(
+            heroTag: 'tag1',
             child: const Icon(Icons.my_location),
             onPressed: () async {
               if (!await context
@@ -98,6 +99,7 @@ class LocationsPage extends HookWidget {
           ),
           SizedBox(height: 10),
           FloatingActionButton(
+            heroTag: 'tag2',
             child: const Icon(Icons.add),
             onPressed: () => _showMapLocationPageWithTransition(
               context,
