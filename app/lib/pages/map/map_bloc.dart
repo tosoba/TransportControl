@@ -87,107 +87,39 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         return state.copyWith(trackedVehicles: updatedVehicles);
       },
       addVehiclesOfLines: (evt) {
-        final updatedVehicles = Map.of(state.trackedVehicles);
         final lineSymbols = Map.fromIterables(
           evt.lines.map((line) => line.symbol),
           evt.lines,
         );
-        evt.vehicles.forEach((vehicle) {
-          final tracked = updatedVehicles[vehicle.number];
-          if (tracked != null) {
-            updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
-              vehicle,
-              bounds: state.bounds,
-              zoom: state.zoom,
-              sources: tracked.sources
-                ..add(
-                  MapVehicleSource.ofLine(
-                    line: lineSymbols[vehicle.symbol],
-                    loadedAt: DateTime.now(),
-                  ),
-                ),
-            );
-          } else {
-            updatedVehicles[vehicle.number] = MapVehicle.fromNewlyLoadedVehicle(
-              vehicle,
-              source: MapVehicleSource.ofLine(
-                line: lineSymbols[vehicle.symbol],
-                loadedAt: DateTime.now(),
-              ),
-            );
-          }
-        });
-        return state.copyWith(trackedVehicles: updatedVehicles);
+        return state.withNewVehicles(
+          evt.vehicles,
+          sourceForVehicle: (vehicle) => MapVehicleSource.ofLine(
+            line: lineSymbols[vehicle.symbol],
+            loadedAt: DateTime.now(),
+          ),
+        );
       },
-      addVehiclesInBounds: (evt) {
-        final updatedVehicles = Map.of(state.trackedVehicles);
-        evt.vehicles.forEach((vehicle) {
-          final tracked = updatedVehicles[vehicle.number];
-          if (tracked != null) {
-            updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
-              vehicle,
-              bounds: state.bounds,
-              zoom: state.zoom,
-              sources: tracked.sources
-                ..add(
-                  MapVehicleSource.inBounds(
-                    bounds: evt.bounds,
-                    loadedAt: DateTime.now(),
-                  ),
-                ),
-            );
-          } else {
-            updatedVehicles[vehicle.number] = MapVehicle.fromNewlyLoadedVehicle(
-              vehicle,
-              source: MapVehicleSource.inBounds(
-                bounds: evt.bounds,
-                loadedAt: DateTime.now(),
-              ),
-            );
-          }
-        });
-        return state.copyWith(trackedVehicles: updatedVehicles);
-      },
-      addVehiclesNearby: (evt) {
-        final updatedVehicles = Map.of(state.trackedVehicles);
-        evt.vehicles.forEach((vehicle) {
-          final tracked = updatedVehicles[vehicle.number];
-          if (tracked != null) {
-            updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
-              vehicle,
-              bounds: state.bounds,
-              zoom: state.zoom,
-              sources: tracked.sources
-                ..add(
-                  MapVehicleSource.nearby(
-                    position: evt.position,
-                    radius: evt.radius,
-                    loadedAt: DateTime.now(),
-                  ),
-                ),
-            );
-          } else {
-            updatedVehicles[vehicle.number] = MapVehicle.fromNewlyLoadedVehicle(
-              vehicle,
-              source: MapVehicleSource.nearby(
-                position: evt.position,
-                radius: evt.radius,
-                loadedAt: DateTime.now(),
-              ),
-            );
-          }
-        });
-        return state.copyWith(trackedVehicles: updatedVehicles);
-      },
+      addVehiclesInBounds: (evt) => state.withNewVehicles(
+        evt.vehicles,
+        sourceForVehicle: (_) => MapVehicleSource.inBounds(
+          bounds: evt.bounds,
+          loadedAt: DateTime.now(),
+        ),
+      ),
+      addVehiclesNearby: (evt) => state.withNewVehicles(
+        evt.vehicles,
+        sourceForVehicle: (_) => MapVehicleSource.nearby(
+          position: evt.position,
+          radius: evt.radius,
+          loadedAt: DateTime.now(),
+        ),
+      ),
       animateVehicles: (_) => state.copyWith(
         trackedVehicles: state.trackedVehicles.map(
           (number, tracked) => tracked.animation.stage.isAnimating
               ? MapEntry(
                   number,
-                  tracked.toNextStage(
-                    bounds: state.bounds,
-                    zoom: state.zoom,
-                  ),
+                  tracked.toNextStage(bounds: state.bounds, zoom: state.zoom),
                 )
               : MapEntry(number, tracked),
         ),
@@ -197,10 +129,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         final updatedVehicles = Map<String, MapVehicle>();
         state.trackedVehicles.forEach((number, tracked) {
           final sources = tracked.sources;
-          final loadedByTrackingofLine = sources.any(
+          final containsOfLineSource = sources.any(
             (source) => source is OfLine && evt.lines.contains(source.line),
           );
-          if (!loadedByTrackingofLine) {
+          if (!containsOfLineSource) {
             updatedVehicles[number] = tracked;
           } else if (sources.length == 1) {
             return;
@@ -379,5 +311,29 @@ extension _MapStateExt on MapState {
     );
     if (selectedVehicleNumber != null) markers.remove(selectedVehicleNumber);
     return markers;
+  }
+
+  MapState withNewVehicles(
+    Iterable<Vehicle> vehicles, {
+    @required MapVehicleSource Function(Vehicle) sourceForVehicle,
+  }) {
+    final updatedVehicles = Map.of(trackedVehicles);
+    vehicles.forEach((vehicle) {
+      final tracked = updatedVehicles[vehicle.number];
+      if (tracked != null) {
+        updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
+          vehicle,
+          bounds: bounds,
+          zoom: zoom,
+          sources: tracked.sources..add(sourceForVehicle(vehicle)),
+        );
+      } else {
+        updatedVehicles[vehicle.number] = MapVehicle.fromNewlyLoadedVehicle(
+          vehicle,
+          source: sourceForVehicle(vehicle),
+        );
+      }
+    });
+    return copyWith(trackedVehicles: updatedVehicles);
   }
 }
