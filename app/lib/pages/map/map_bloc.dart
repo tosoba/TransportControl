@@ -148,6 +148,37 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         });
         return state.copyWith(trackedVehicles: updatedVehicles);
       },
+      addVehiclesNearby: (evt) {
+        final updatedVehicles = Map.of(state.trackedVehicles);
+        evt.vehicles.forEach((vehicle) {
+          final tracked = updatedVehicles[vehicle.number];
+          if (tracked != null) {
+            updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
+              vehicle,
+              bounds: state.bounds,
+              zoom: state.zoom,
+              sources: tracked.sources
+                ..add(
+                  MapVehicleSource.nearby(
+                    position: evt.position,
+                    radius: evt.radius,
+                    loadedAt: DateTime.now(),
+                  ),
+                ),
+            );
+          } else {
+            updatedVehicles[vehicle.number] = MapVehicle.fromNewlyLoadedVehicle(
+              vehicle,
+              source: MapVehicleSource.nearby(
+                position: evt.position,
+                radius: evt.radius,
+                loadedAt: DateTime.now(),
+              ),
+            );
+          }
+        });
+        return state.copyWith(trackedVehicles: updatedVehicles);
+      },
       animateVehicles: (_) => state.copyWith(
         trackedVehicles: state.trackedVehicles.map(
           (number, tracked) => tracked.animation.stage.isAnimating

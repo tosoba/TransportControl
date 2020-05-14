@@ -25,6 +25,13 @@ enum _MapEvent {
   ])
   AddVehiclesInBounds,
 
+  @Data(fields: [
+    DataField<Iterable<Vehicle>>('vehicles'),
+    DataField<LatLng>('position'),
+    DataField<double>('radius'),
+  ])
+  AddVehiclesNearby,
+
   @object
   AnimateVehicles,
 

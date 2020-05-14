@@ -23,6 +23,11 @@ abstract class MapEvent extends Equatable {
       {@required Iterable<Vehicle> vehicles,
       @required LatLngBounds bounds}) = AddVehiclesInBounds;
 
+  factory MapEvent.addVehiclesNearby(
+      {@required Iterable<Vehicle> vehicles,
+      @required LatLng position,
+      @required double radius}) = AddVehiclesNearby;
+
   factory MapEvent.animateVehicles() = AnimateVehicles;
 
   factory MapEvent.cameraMoved(
@@ -43,6 +48,7 @@ abstract class MapEvent extends Equatable {
       @required R Function(UpdateVehicles) updateVehicles,
       @required R Function(AddVehiclesOfLines) addVehiclesOfLines,
       @required R Function(AddVehiclesInBounds) addVehiclesInBounds,
+      @required R Function(AddVehiclesNearby) addVehiclesNearby,
       @required R Function(AnimateVehicles) animateVehicles,
       @required R Function(CameraMoved) cameraMoved,
       @required R Function(TrackedLinesRemoved) trackedLinesRemoved,
@@ -53,6 +59,7 @@ abstract class MapEvent extends Equatable {
           updateVehicles == null ||
           addVehiclesOfLines == null ||
           addVehiclesInBounds == null ||
+          addVehiclesNearby == null ||
           animateVehicles == null ||
           cameraMoved == null ||
           trackedLinesRemoved == null ||
@@ -71,6 +78,8 @@ abstract class MapEvent extends Equatable {
         return addVehiclesOfLines(this as AddVehiclesOfLines);
       case _MapEvent.AddVehiclesInBounds:
         return addVehiclesInBounds(this as AddVehiclesInBounds);
+      case _MapEvent.AddVehiclesNearby:
+        return addVehiclesNearby(this as AddVehiclesNearby);
       case _MapEvent.AnimateVehicles:
         return animateVehicles(this as AnimateVehicles);
       case _MapEvent.CameraMoved:
@@ -90,6 +99,7 @@ abstract class MapEvent extends Equatable {
       @required FutureOr<R> Function(UpdateVehicles) updateVehicles,
       @required FutureOr<R> Function(AddVehiclesOfLines) addVehiclesOfLines,
       @required FutureOr<R> Function(AddVehiclesInBounds) addVehiclesInBounds,
+      @required FutureOr<R> Function(AddVehiclesNearby) addVehiclesNearby,
       @required FutureOr<R> Function(AnimateVehicles) animateVehicles,
       @required FutureOr<R> Function(CameraMoved) cameraMoved,
       @required FutureOr<R> Function(TrackedLinesRemoved) trackedLinesRemoved,
@@ -100,6 +110,7 @@ abstract class MapEvent extends Equatable {
           updateVehicles == null ||
           addVehiclesOfLines == null ||
           addVehiclesInBounds == null ||
+          addVehiclesNearby == null ||
           animateVehicles == null ||
           cameraMoved == null ||
           trackedLinesRemoved == null ||
@@ -118,6 +129,8 @@ abstract class MapEvent extends Equatable {
         return addVehiclesOfLines(this as AddVehiclesOfLines);
       case _MapEvent.AddVehiclesInBounds:
         return addVehiclesInBounds(this as AddVehiclesInBounds);
+      case _MapEvent.AddVehiclesNearby:
+        return addVehiclesNearby(this as AddVehiclesNearby);
       case _MapEvent.AnimateVehicles:
         return animateVehicles(this as AnimateVehicles);
       case _MapEvent.CameraMoved:
@@ -136,6 +149,7 @@ abstract class MapEvent extends Equatable {
       R Function(UpdateVehicles) updateVehicles,
       R Function(AddVehiclesOfLines) addVehiclesOfLines,
       R Function(AddVehiclesInBounds) addVehiclesInBounds,
+      R Function(AddVehiclesNearby) addVehiclesNearby,
       R Function(AnimateVehicles) animateVehicles,
       R Function(CameraMoved) cameraMoved,
       R Function(TrackedLinesRemoved) trackedLinesRemoved,
@@ -161,6 +175,9 @@ abstract class MapEvent extends Equatable {
       case _MapEvent.AddVehiclesInBounds:
         if (addVehiclesInBounds == null) break;
         return addVehiclesInBounds(this as AddVehiclesInBounds);
+      case _MapEvent.AddVehiclesNearby:
+        if (addVehiclesNearby == null) break;
+        return addVehiclesNearby(this as AddVehiclesNearby);
       case _MapEvent.AnimateVehicles:
         if (animateVehicles == null) break;
         return animateVehicles(this as AnimateVehicles);
@@ -185,6 +202,7 @@ abstract class MapEvent extends Equatable {
       FutureOr<R> Function(UpdateVehicles) updateVehicles,
       FutureOr<R> Function(AddVehiclesOfLines) addVehiclesOfLines,
       FutureOr<R> Function(AddVehiclesInBounds) addVehiclesInBounds,
+      FutureOr<R> Function(AddVehiclesNearby) addVehiclesNearby,
       FutureOr<R> Function(AnimateVehicles) animateVehicles,
       FutureOr<R> Function(CameraMoved) cameraMoved,
       FutureOr<R> Function(TrackedLinesRemoved) trackedLinesRemoved,
@@ -210,6 +228,9 @@ abstract class MapEvent extends Equatable {
       case _MapEvent.AddVehiclesInBounds:
         if (addVehiclesInBounds == null) break;
         return addVehiclesInBounds(this as AddVehiclesInBounds);
+      case _MapEvent.AddVehiclesNearby:
+        if (addVehiclesNearby == null) break;
+        return addVehiclesNearby(this as AddVehiclesNearby);
       case _MapEvent.AnimateVehicles:
         if (animateVehicles == null) break;
         return animateVehicles(this as AnimateVehicles);
@@ -235,6 +256,7 @@ abstract class MapEvent extends Equatable {
       FutureOr<void> Function(UpdateVehicles) updateVehicles,
       FutureOr<void> Function(AddVehiclesOfLines) addVehiclesOfLines,
       FutureOr<void> Function(AddVehiclesInBounds) addVehiclesInBounds,
+      FutureOr<void> Function(AddVehiclesNearby) addVehiclesNearby,
       FutureOr<void> Function(AnimateVehicles) animateVehicles,
       FutureOr<void> Function(CameraMoved) cameraMoved,
       FutureOr<void> Function(TrackedLinesRemoved) trackedLinesRemoved,
@@ -245,6 +267,7 @@ abstract class MapEvent extends Equatable {
           updateVehicles == null &&
           addVehiclesOfLines == null &&
           addVehiclesInBounds == null &&
+          addVehiclesNearby == null &&
           animateVehicles == null &&
           cameraMoved == null &&
           trackedLinesRemoved == null &&
@@ -267,6 +290,9 @@ abstract class MapEvent extends Equatable {
       case _MapEvent.AddVehiclesInBounds:
         if (addVehiclesInBounds == null) break;
         return addVehiclesInBounds(this as AddVehiclesInBounds);
+      case _MapEvent.AddVehiclesNearby:
+        if (addVehiclesNearby == null) break;
+        return addVehiclesNearby(this as AddVehiclesNearby);
       case _MapEvent.AnimateVehicles:
         if (animateVehicles == null) break;
         return animateVehicles(this as AnimateVehicles);
@@ -344,6 +370,25 @@ class AddVehiclesInBounds extends MapEvent {
       'AddVehiclesInBounds(vehicles:${this.vehicles},bounds:${this.bounds})';
   @override
   List get props => [vehicles, bounds];
+}
+
+@immutable
+class AddVehiclesNearby extends MapEvent {
+  const AddVehiclesNearby(
+      {@required this.vehicles, @required this.position, @required this.radius})
+      : super(_MapEvent.AddVehiclesNearby);
+
+  final Iterable<Vehicle> vehicles;
+
+  final LatLng position;
+
+  final double radius;
+
+  @override
+  String toString() =>
+      'AddVehiclesNearby(vehicles:${this.vehicles},position:${this.position},radius:${this.radius})';
+  @override
+  List get props => [vehicles, position, radius];
 }
 
 @immutable
