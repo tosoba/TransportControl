@@ -2,7 +2,9 @@ import 'package:connection_status_bar/connection_status_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:transport_control/pages/home/home_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:transport_control/di/module/controllers_module.dart';
+import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
@@ -11,6 +13,7 @@ import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/nearby/nearby_page.dart';
 import 'package:transport_control/pages/settings/settings_page.dart';
 import 'package:transport_control/pages/tracked/tracked_page.dart';
+import 'package:transport_control/repo/locations_repo.dart';
 import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
@@ -146,43 +149,41 @@ class HomePage extends HookWidget {
     @required Animation<double> bottomNavButtonsOpacity,
   }) {
     return StreamBuilder<bool>(
-        stream: context
-            .bloc<HomeBloc>()
-            .mapBloc
-            .map((state) => state.trackedVehicles.isNotEmpty),
-        builder: (context, snapshot) {
-          return Container(
-            height: kBottomNavigationBarHeight,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                shrinkWrap: true,
-                children: [
-                  _bottomNavBarButton(
-                    labelText: Strings.lines,
-                    onPressed: () => _showLinesPage(context),
-                    bottomNavButtonsOpacity: bottomNavButtonsOpacity,
-                    icon: Icons.grid_on,
-                  ),
-                  _bottomNavBarButton(
-                    labelText: Strings.locations,
-                    onPressed: () => _showLocationsPage(context),
-                    bottomNavButtonsOpacity: bottomNavButtonsOpacity,
-                    icon: Icons.location_on,
-                  ),
-                  if (snapshot.data ?? false)
-                    _bottomNavBarButton(
-                      labelText: 'Tracked',
-                      onPressed: () => _showTrackedPage(context),
-                      bottomNavButtonsOpacity: bottomNavButtonsOpacity,
-                      icon: Icons.track_changes,
-                    ),
-                ],
+      stream: context
+          .bloc<MapBloc>()
+          .map((state) => state.trackedVehicles.isNotEmpty),
+      builder: (context, snapshot) => Container(
+        height: kBottomNavigationBarHeight,
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            children: [
+              _bottomNavBarButton(
+                labelText: Strings.lines,
+                onPressed: () => _showLinesPage(context),
+                bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+                icon: Icons.grid_on,
               ),
-            ),
-          );
-        });
+              _bottomNavBarButton(
+                labelText: Strings.locations,
+                onPressed: () => _showLocationsPage(context),
+                bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+                icon: Icons.location_on,
+              ),
+              if (snapshot.data ?? false)
+                _bottomNavBarButton(
+                  labelText: 'Tracked',
+                  onPressed: () => _showTrackedPage(context),
+                  bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+                  icon: Icons.track_changes,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _bottomNavBarButton({
@@ -297,7 +298,7 @@ class HomePage extends HookWidget {
       context,
       MaterialPageRoute(
         builder: (_) => BlocProvider.value(
-          value: context.bloc<HomeBloc>().linesBloc,
+          value: context.bloc<LinesBloc>(),
           child: LinesPage(),
         ),
       ),
@@ -305,11 +306,16 @@ class HomePage extends HookWidget {
   }
 
   void _showLocationsPage(BuildContext context) async {
+    final getIt = GetIt.instance;
     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => BlocProvider<LocationsBloc>(
-          create: (_) => context.bloc<HomeBloc>().locationsBloc,
+          create: (_) => LocationsBloc(
+            getIt<LocationsRepo>(),
+            getIt<LoadVehiclesInBounds>().injected.sink,
+            getIt<LoadVehiclesNearby>().injected.sink,
+          ),
           child: LocationsPage(),
         ),
       ),
@@ -320,8 +326,8 @@ class HomePage extends HookWidget {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BlocProvider<MapBloc>(
-          create: (_) => context.bloc<HomeBloc>().mapBloc,
+        builder: (_) => BlocProvider.value(
+          value: context.bloc<MapBloc>(),
           child: TrackedPage(),
         ),
       ),
@@ -340,10 +346,7 @@ class HomePage extends HookWidget {
             padding: const EdgeInsets.only(right: 15.0),
             child: Icon(icon),
           ),
-          Text(
-            labelText,
-            style: const TextStyle(fontSize: 16),
-          ),
+          Text(labelText, style: const TextStyle(fontSize: 16)),
         ],
       ),
       onTap: onTap,

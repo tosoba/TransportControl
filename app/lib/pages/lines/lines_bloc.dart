@@ -10,51 +10,56 @@ import 'package:transport_control/repo/lines_repo.dart';
 import 'package:transport_control/util/asset_util.dart';
 
 class LinesBloc extends Bloc<LinesEvent, LinesState> {
-  final void Function(Set<Line>) _trackedLinesAdded;
-  final void Function(Set<Line>) _trackedLinesRemoved;
   final LinesRepo _linesRepo;
+  final Sink<Set<Line>> _trackedLinesAddedSink;
+  final Sink<Set<Line>> _trackedLinesRemovedSink;
 
-  StreamSubscription<Set<Line>> _trackedLinesSubscription;
-  StreamSubscription<Map<Line, LineState>> _linesSubscription;
+  final List<StreamSubscription> _subscriptions = [];
 
   LinesBloc(
-    this._trackedLinesAdded,
-    this._trackedLinesRemoved,
     this._linesRepo,
+    this._trackedLinesAddedSink,
+    this._trackedLinesRemovedSink,
+    Stream<Set<Line>> loadingVehiclesOfLinesFailedStream,
   ) {
-    _linesSubscription = _linesRepo.favouriteLinesStream
-        .asyncMap(
-          (favouriteLines) => state.lines.isEmpty
-              ? rootBundle.loadString(JsonAssets.lines).then(
-                    (jsonString) => Map.fromIterable(
-                      jsonDecode(jsonString) as Iterable,
-                      key: (lineJson) => Line.fromJson(lineJson),
-                      value: (line) => favouriteLines.contains(line)
-                          ? LineState.initialFavourite()
-                          : LineState.initial(),
+    _subscriptions
+      ..add(
+        _linesRepo.favouriteLinesStream
+            .asyncMap(
+              (favouriteLines) => state.lines.isEmpty
+                  ? rootBundle.loadString(JsonAssets.lines).then(
+                        (jsonString) => Map.fromIterable(
+                          jsonDecode(jsonString) as Iterable,
+                          key: (lineJson) => Line.fromJson(lineJson),
+                          value: (line) => favouriteLines.contains(line)
+                              ? LineState.initialFavourite()
+                              : LineState.initial(),
+                        ),
+                      )
+                  : Future.value(
+                      state.lines.map((line, state) {
+                        final isFavourite = favouriteLines.contains(line);
+                        if ((state.favourite && !isFavourite) ||
+                            (!state.favourite && isFavourite)) {
+                          return MapEntry(line, state.toggleFavourite);
+                        } else {
+                          return MapEntry(line, state);
+                        }
+                      }),
                     ),
-                  )
-              : Future.value(
-                  state.lines.map((line, state) {
-                    final isFavourite = favouriteLines.contains(line);
-                    if ((state.favourite && !isFavourite) ||
-                        (!state.favourite && isFavourite)) {
-                      return MapEntry(line, state.toggleFavourite);
-                    } else {
-                      return MapEntry(line, state);
-                    }
-                  }),
-                ),
-        )
-        .listen((lines) => add(LinesEvent.updateLines(lines: lines)));
+            )
+            .listen((lines) => add(LinesEvent.updateLines(lines: lines))),
+      )
+      ..add(
+        loadingVehiclesOfLinesFailedStream.listen(loadingVehiclesOfLinesFailed),
+      );
   }
 
   @override
   Future<void> close() async {
-    await Future.wait([
-      _trackedLinesSubscription.cancel(),
-      _linesSubscription.cancel(),
-    ]);
+    await Future.wait(
+      _subscriptions.map((subscription) => subscription.cancel()),
+    );
     return super.close();
   }
 
@@ -92,7 +97,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
             updatedLines[line] = toggle(lineState);
           }
         });
-        _trackedLinesAdded(newlyTrackedLines);
+        _trackedLinesAddedSink.add(newlyTrackedLines);
         return state.copyWith(lines: updatedLines);
       },
       untrackSelectedLines: (evt) {
@@ -107,7 +112,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
             updatedLines[line] = toggle(lineState);
           }
         });
-        _trackedLinesRemoved(linesRemovedFromTracking);
+        _trackedLinesRemovedSink.add(linesRemovedFromTracking);
         return state.copyWith(lines: updatedLines);
       },
       loadingVehiclesOfLinesFailed: (evt) => state.copyWith(
@@ -126,9 +131,9 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
       ),
       toggleLineTracking: (evt) {
         if (state.lines[evt.line].tracked) {
-          _trackedLinesRemoved(Set<Line>()..add(evt.line));
+          _trackedLinesRemovedSink.add(Set<Line>()..add(evt.line));
         } else {
-          _trackedLinesAdded(Set<Line>()..add(evt.line));
+          _trackedLinesAddedSink.add(Set<Line>()..add(evt.line));
         }
         return state.copyWith(
           lines: state.lines.map(

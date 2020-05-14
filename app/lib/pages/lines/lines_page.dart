@@ -79,14 +79,15 @@ class LinesPage extends HookWidget {
       searchFieldController: searchFieldController,
     );
 
-    if (stateSnapshot.data == null) {
+    final state = stateSnapshot.data;
+    if (state == null || state.lines.isEmpty) {
       return Column(children: [
         appBar,
         Expanded(child: Center(child: CircularProgressIndicator())),
       ]);
     }
 
-    final filteredLines = stateSnapshot.data.filteredLines;
+    final filteredLines = state.filteredLines;
 
     if (filteredLines.isEmpty) {
       return Column(children: [

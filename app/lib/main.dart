@@ -3,12 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:transport_control/di/injection.dart';
-import 'package:transport_control/pages/home/home_bloc.dart';
+import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/pages/home/home_page.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/repo/lines_repo.dart';
-import 'package:transport_control/repo/locations_repo.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
 import 'package:transport_control/util/preferences_util.dart';
 
@@ -37,34 +36,53 @@ class TransportControlApp extends StatefulWidget {
 }
 
 class _TransportControlAppState extends State<TransportControlApp> {
-  
   @override
   void dispose() {
-    GetIt.instance<RxSharedPreferences>().dispose();
+    final getIt = GetIt.instance;
+    getIt<RxSharedPreferences>().dispose();
+    getIt<LoadVehiclesInBounds>().injected.close();
+    getIt<LoadVehiclesNearby>().injected.close();
+    getIt<TrackedLinesAdded>().injected.close();
+    getIt<TrackedLinesRemoved>().injected.close();
+    getIt<LoadingVehiclesOfLinesFailed>().injected.close();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final getIt = GetIt.instance;
+    final loadVehiclesInBounds = getIt<LoadVehiclesInBounds>().injected;
+    final loadVehiclesNearby = getIt<LoadVehiclesNearby>().injected;
+    final trackedLinesAdded = getIt<TrackedLinesAdded>().injected;
+    final trackedLinesRemoved = getIt<TrackedLinesRemoved>().injected;
+    final loadingVehiclesOfLinesFailed =
+        getIt<LoadingVehiclesOfLinesFailed>().injected;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Transport Control',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: MultiBlocProvider(
         providers: [
-          BlocProvider<HomeBloc>(
-            create: (context) => HomeBloc(
-              GetIt.instance<VehiclesRepo>(),
-              GetIt.instance<LinesRepo>(),
-              GetIt.instance<LocationsRepo>(),
-              GetIt.instance<RxSharedPreferences>(),
+          BlocProvider<MapBloc>(
+            create: (context) => MapBloc(
+              getIt<VehiclesRepo>(),
+              getIt<RxSharedPreferences>(),
+              loadingVehiclesOfLinesFailed.sink,
+              loadVehiclesInBounds.stream,
+              loadVehiclesNearby.stream,
+              trackedLinesAdded.stream,
+              trackedLinesRemoved.stream,
             ),
           ),
-          BlocProvider<MapBloc>(
-            create: (context) => context.bloc<HomeBloc>().mapBloc,
-          ),
           BlocProvider<LinesBloc>(
-            create: (context) => context.bloc<HomeBloc>().linesBloc,
+            create: (context) => LinesBloc(
+              getIt<LinesRepo>(),
+              trackedLinesAdded.sink,
+              trackedLinesRemoved.sink,
+              loadingVehiclesOfLinesFailed.stream,
+            ),
           ),
         ],
         child: HomePage(),

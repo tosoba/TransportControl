@@ -25,44 +25,59 @@ import 'package:transport_control/util/preferences_util.dart';
 class MapBloc extends Bloc<MapEvent, MapState> {
   final RxSharedPreferences _preferences;
   final VehiclesRepo _vehiclesRepo;
-  final void Function(Set<Line>) _loadingVehiclesOfLinesFailed;
+  final Sink<Set<Line>> _loadingVehiclesOfLinesFailedSink;
 
-  StreamSubscription<Result<List<Vehicle>>> _vehicleUpdatesSubscription;
-  StreamSubscription<dynamic> _vehiclesAnimationSubscription;
+  final List<StreamSubscription> _subscriptions = [];
 
-  StreamController<MapSignal> _signals = StreamController();
-  Stream<MapSignal> get signals {
-    return _signals.stream.distinct((prev, next) => prev == next);
-  }
+  final _signals = StreamController<MapSignal>();
+  Stream<MapSignal> get signals => _signals.stream;
 
   MapBloc(
     this._vehiclesRepo,
-    this._loadingVehiclesOfLinesFailed,
     this._preferences,
+    this._loadingVehiclesOfLinesFailedSink,
+    Stream<LatLngBounds> loadVehiclesInBoundsStream,
+    Stream<LatLng> loadVehiclesNearbyStream,
+    Stream<Set<Line>> trackedLinesAddedStream,
+    Stream<Set<Line>> trackedLinesRemovedStream,
   ) {
-    _vehicleUpdatesSubscription = Stream.periodic(const Duration(seconds: 15))
-        .where((_) => state.trackedVehicles.isNotEmpty)
-        .asyncMap(
-          (_) => _vehiclesRepo.loadUpdatedVehicles(
-            state.trackedVehicles.values.map((tracked) => tracked.vehicle),
-          ),
-        )
-        .listen(
-          (result) => result.when(
-            success: (success) => add(
-              MapEvent.updateVehicles(vehicles: success.data),
+    _subscriptions
+      ..add(
+        Stream.periodic(const Duration(seconds: 15))
+            .where((_) => state.trackedVehicles.isNotEmpty)
+            .asyncMap(
+              (_) => _vehiclesRepo.loadUpdatedVehicles(
+                state.trackedVehicles.values.map((tracked) => tracked.vehicle),
+              ),
+            )
+            .listen(
+              (result) => result.when(
+                success: (success) => add(
+                  MapEvent.updateVehicles(vehicles: success.data),
+                ),
+                failure: (failure) => failure.logError(),
+              ),
             ),
-            failure: (failure) => failure.logError(),
-          ),
-        );
-
-    _vehiclesAnimationSubscription =
+      )
+      ..add(
         Stream.periodic(const Duration(milliseconds: 16))
             .where(
               (_) => state.trackedVehicles.values
                   .any((tracked) => tracked.animation.stage.isAnimating),
             )
-            .listen((_) => add(MapEvent.animateVehicles()));
+            .listen((_) => add(MapEvent.animateVehicles())),
+      )
+      ..add(loadVehiclesInBoundsStream.listen(loadVehiclesInBounds))
+      ..add(
+        loadVehiclesNearbyStream.listen(
+          (position) => loadVehiclesNearby(position, radiusInMeters: 1000),
+        ),
+      )
+      ..add(trackedLinesAddedStream.listen(trackedLinesAdded))
+      ..add(
+        trackedLinesRemovedStream
+            .listen((lines) => add(MapEvent.trackedLinesRemoved(lines: lines))),
+      );
   }
 
   @override
@@ -152,8 +167,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   @override
   Future<void> close() async {
     await Future.wait([
-      _vehicleUpdatesSubscription.cancel(),
-      _vehiclesAnimationSubscription.cancel(),
+      ..._subscriptions.map((subscription) => subscription.cancel()),
       _signals.close(),
     ]);
     return super.close();
@@ -173,7 +187,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         vehicles: vehicles,
         lines: lines,
       ),
-      onFailure: (_) => _loadingVehiclesOfLinesFailed(lines),
+      onFailure: (_) => _loadingVehiclesOfLinesFailedSink.add(lines),
     );
   }
 
@@ -243,10 +257,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         onFailure?.call(failure);
       },
     );
-  }
-
-  void trackedLinesRemoved(Set<Line> lines) {
-    add(MapEvent.trackedLinesRemoved(lines: lines));
   }
 
   void cameraMoved({

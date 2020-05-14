@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:connectivity/connectivity.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as UserLocation;
@@ -14,33 +13,30 @@ import 'package:transport_control/util/location_util.dart';
 
 class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   final LocationsRepo _repo;
-  final void Function(Location) saveLocation;
-  final void Function(Location) updateLocation;
-  final void Function(Location) deleteLocation;
-  final void Function(LatLngBounds) _loadVehiclesInBounds;
-  final void Function(
-    LatLng position, {
-    @required double radiusInMeters,
-  }) _loadVehiclesNearby;
+  final Sink<LatLngBounds> _loadVehiclesInBoundsSink;
+  final Sink<LatLng> _loadVehiclesNearbySink;
 
-  StreamSubscription<List<Location>> _locationUpdatesSubscription;
+  final List<StreamSubscription> _subscriptions = [];
 
   LocationsBloc(
     this._repo,
-    this._loadVehiclesInBounds,
-    this._loadVehiclesNearby, {
-    @required this.saveLocation,
-    @required this.updateLocation,
-    @required this.deleteLocation,
-  }) {
-    _locationUpdatesSubscription = _repo.favouriteLocationsStream.listen(
-      (locations) => add(LocationsEvent.updateLocations(locations: locations)),
-    );
+    this._loadVehiclesInBoundsSink,
+    this._loadVehiclesNearbySink,
+  ) {
+    _subscriptions
+      ..add(
+        _repo.favouriteLocationsStream.listen(
+          (locations) =>
+              add(LocationsEvent.updateLocations(locations: locations)),
+        ),
+      );
   }
 
   @override
   Future<void> close() async {
-    await _locationUpdatesSubscription.cancel();
+    await Future.wait(
+      _subscriptions.map((subscription) => subscription.cancel()),
+    );
     return super.close();
   }
 
@@ -97,7 +93,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     if (await Connectivity().checkConnectivity() == ConnectivityResult.none) {
       return false;
     }
-    _loadVehiclesInBounds(bounds);
+    _loadVehiclesInBoundsSink.add(bounds);
     return true;
   }
 
@@ -116,14 +112,25 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
             ConnectivityResult.none) {
           return false;
         }
-        _loadVehiclesNearby(
+        _loadVehiclesNearbySink.add(
           LatLng(result.data.latitude, result.data.longitude),
-          radiusInMeters: 1000, //TODO: move this to settings
         );
         return true;
       },
       orElse: (_) => false,
     );
+  }
+
+  void saveLocation(Location location) {
+    _repo.insertLocation(location);
+  }
+
+  void updateLocation(Location location) {
+    _repo.updateLocation(location);
+  }
+
+  void deleteLocation(Location location) {
+    _repo.deleteLocation(location);
   }
 }
 
