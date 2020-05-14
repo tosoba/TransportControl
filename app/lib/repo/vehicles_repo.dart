@@ -10,7 +10,7 @@ abstract class VehiclesRepo {
     int type,
   });
 
-  Future<Result<List<Vehicle>>> loadVehiclesNear(
+  Future<Result<List<Vehicle>>> loadVehiclesNearby(
     LatLng position, {
     @required double radiusInMeters,
     int type,

@@ -56,7 +56,8 @@ class VehiclesRepoImpl extends VehiclesRepo {
 
   @override
   Future<Result<List<Vehicle>>> loadUpdatedVehicles(
-      Iterable<Vehicle> vehicles) {
+    Iterable<Vehicle> vehicles,
+  ) {
     final vehicleNumbers = vehicles.map((vehicle) => vehicle.number).toSet();
     return _loadVehiclesOfTypesUsing<Vehicle>(
             vehicles, (vehicle) => vehicle.type)
@@ -95,7 +96,7 @@ class VehiclesRepoImpl extends VehiclesRepo {
   }
 
   @override
-  Future<Result<List<Vehicle>>> loadVehiclesNear(
+  Future<Result<List<Vehicle>>> loadVehiclesNearby(
     LatLng position, {
     @required double radiusInMeters,
     int type,

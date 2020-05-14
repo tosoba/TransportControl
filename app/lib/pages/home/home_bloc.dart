@@ -26,6 +26,7 @@ class HomeBloc extends Bloc<_HomeEvent, _HomeState> {
     return LocationsBloc(
       GetIt.instance<LocationsRepo>(),
       _mapBloc.loadVehiclesInBounds,
+      _mapBloc.loadVehiclesNearby,
       saveLocation: _saveLocation,
       updateLocation: _updateLocation,
       deleteLocation: _deleteLocation,

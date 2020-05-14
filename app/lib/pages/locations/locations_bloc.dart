@@ -4,11 +4,13 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart' as UserLocation;
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_event.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/repo/locations_repo.dart';
+import 'package:transport_control/util/location_util.dart';
 
 class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   final LocationsRepo _repo;
@@ -16,12 +18,17 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   final void Function(Location) updateLocation;
   final void Function(Location) deleteLocation;
   final void Function(LatLngBounds) _loadVehiclesInBounds;
+  final void Function(
+    LatLng position, {
+    @required double radiusInMeters,
+  }) _loadVehiclesNearby;
 
   StreamSubscription<List<Location>> _locationUpdatesSubscription;
 
   LocationsBloc(
     this._repo,
-    this._loadVehiclesInBounds, {
+    this._loadVehiclesInBounds,
+    this._loadVehiclesNearby, {
     @required this.saveLocation,
     @required this.updateLocation,
     @required this.deleteLocation,
@@ -92,6 +99,29 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     }
     _loadVehiclesInBounds(bounds);
     return true;
+  }
+
+  //TODO: return a result enum instead of bool for showing info to user
+  Future<bool> loadVehiclesNearbyUserLocation() async {
+    final locationResult = await UserLocation.Location().tryGet();
+    return locationResult.asyncWhenOrElse(
+      success: (result) async {
+        final locationData = result.data;
+        if (locationData.latitude == null || locationData.longitude == null) {
+          return false;
+        }
+        if (await Connectivity().checkConnectivity() ==
+            ConnectivityResult.none) {
+          return false;
+        }
+        _loadVehiclesNearby(
+          LatLng(result.data.latitude, result.data.longitude),
+          radiusInMeters: 1000, //TODO: move this to settings
+        );
+        return true;
+      },
+      orElse: (_) => false,
+    );
   }
 }
 

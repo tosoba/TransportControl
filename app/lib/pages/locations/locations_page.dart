@@ -85,7 +85,16 @@ class LocationsPage extends HookWidget {
         children: [
           FloatingActionButton(
             child: const Icon(Icons.my_location),
-            onPressed: () {},
+            onPressed: () async {
+              if (!await context
+                  .bloc<LocationsBloc>()
+                  .loadVehiclesNearbyUserLocation()) {
+                Scaffold.of(context).showSnackBar(
+                    SnackBar(content: Text('Error loading nearby vehicles.')));
+              } else {
+                Navigator.pop(context);
+              }
+            },
           ),
           SizedBox(height: 10),
           FloatingActionButton(

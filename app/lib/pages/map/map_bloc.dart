@@ -163,7 +163,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     return asyncMap((state) => state.markers);
   }
 
-  void trackedLinesAdded(Set<Line> lines) async {
+  void trackedLinesAdded(Set<Line> lines) {
     _loadVehicles(
       loadingMsg:
           'Loading vehicles of ${lines.length} ${lines.length > 1 ? 'lines' : 'line'}...',
@@ -177,7 +177,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
   }
 
-  void loadVehiclesInBounds(LatLngBounds bounds) async {
+  void loadVehiclesInBounds(LatLngBounds bounds) {
     _loadVehicles(
       loadingMsg: 'Loading vehicles in bounds...',
       emptyResultErrorMsg: 'No vehicles were found in bounds.',
@@ -185,6 +185,22 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       successEvent: (vehicles) => MapEvent.addVehiclesInBounds(
         vehicles: vehicles,
         bounds: bounds,
+      ),
+    );
+  }
+
+  void loadVehiclesNearby(LatLng position, {@required double radiusInMeters}) {
+    _loadVehicles(
+      loadingMsg: 'Loading nearby vehicles...',
+      emptyResultErrorMsg: 'No vehicles were found nearby given location.',
+      loadVehicles: () => _vehiclesRepo.loadVehiclesNearby(
+        position,
+        radiusInMeters: radiusInMeters,
+      ),
+      successEvent: (vehicles) => MapEvent.addVehiclesNearby(
+        vehicles: vehicles,
+        position: position,
+        radius: radiusInMeters,
       ),
     );
   }
