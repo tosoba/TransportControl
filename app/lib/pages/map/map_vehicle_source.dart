@@ -7,11 +7,18 @@ part "map_vehicle_source.g.dart";
 @superEnum
 enum _MapVehicleSource {
   @Data(fields: [DataField<Line>('line'), DataField<DateTime>('loadedAt')])
-  AllOfLine,
+  OfLine,
 
   @Data(fields: [
     DataField<LatLngBounds>('bounds'),
     DataField<DateTime>('loadedAt')
   ])
-  AllInBounds,
+  InBounds,
+
+  @Data(fields: [
+    DataField<LatLng>('position'),
+    DataField<double>('radius'),
+    DataField<DateTime>('loadedAt')
+  ])
+  Nearby,
 }

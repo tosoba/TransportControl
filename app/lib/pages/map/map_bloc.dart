@@ -95,20 +95,22 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         evt.vehicles.forEach((vehicle) {
           final tracked = updatedVehicles[vehicle.number];
           if (tracked != null) {
-            updatedVehicles[vehicle.number] =
-                tracked.withUpdatedVehicle(vehicle,
-                    bounds: state.bounds,
-                    zoom: state.zoom,
-                    sources: tracked.sources
-                      ..add(
-                        MapVehicleSource.allOfLine(
-                            line: lineSymbols[vehicle.symbol],
-                            loadedAt: DateTime.now()),
-                      ));
+            updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
+              vehicle,
+              bounds: state.bounds,
+              zoom: state.zoom,
+              sources: tracked.sources
+                ..add(
+                  MapVehicleSource.ofLine(
+                    line: lineSymbols[vehicle.symbol],
+                    loadedAt: DateTime.now(),
+                  ),
+                ),
+            );
           } else {
             updatedVehicles[vehicle.number] = MapVehicle.fromNewlyLoadedVehicle(
               vehicle,
-              source: MapVehicleSource.allOfLine(
+              source: MapVehicleSource.ofLine(
                 line: lineSymbols[vehicle.symbol],
                 loadedAt: DateTime.now(),
               ),
@@ -128,7 +130,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
               zoom: state.zoom,
               sources: tracked.sources
                 ..add(
-                  MapVehicleSource.allInBounds(
+                  MapVehicleSource.inBounds(
                     bounds: evt.bounds,
                     loadedAt: DateTime.now(),
                   ),
@@ -137,7 +139,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           } else {
             updatedVehicles[vehicle.number] = MapVehicle.fromNewlyLoadedVehicle(
               vehicle,
-              source: MapVehicleSource.allInBounds(
+              source: MapVehicleSource.inBounds(
                 bounds: evt.bounds,
                 loadedAt: DateTime.now(),
               ),
@@ -164,10 +166,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         final updatedVehicles = Map<String, MapVehicle>();
         state.trackedVehicles.forEach((number, tracked) {
           final sources = tracked.sources;
-          final loadedByTrackingAllOfLine = sources.any(
-            (source) => source is AllOfLine && evt.lines.contains(source.line),
+          final loadedByTrackingofLine = sources.any(
+            (source) => source is OfLine && evt.lines.contains(source.line),
           );
-          if (!loadedByTrackingAllOfLine) {
+          if (!loadedByTrackingofLine) {
             updatedVehicles[number] = tracked;
           } else if (sources.length == 1) {
             return;
