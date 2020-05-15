@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:transport_control/model/location.dart';
+import 'package:transport_control/pages/locations/load_nearby_vehicles_result.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
 import 'package:transport_control/pages/map_location/map_location_page.dart';
@@ -87,9 +88,10 @@ class LocationsPage extends HookWidget {
             heroTag: 'tag1',
             child: const Icon(Icons.my_location),
             onPressed: () async {
-              if (!await context
+              final result = await context
                   .bloc<LocationsBloc>()
-                  .loadVehiclesNearbyUserLocation()) {
+                  .loadVehiclesNearbyUserLocation();
+              if (!(result is Success)) {
                 Scaffold.of(context).showSnackBar(
                     SnackBar(content: Text('Error loading nearby vehicles.')));
               } else {

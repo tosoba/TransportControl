@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as UserLocation;
 import 'package:transport_control/model/location.dart';
+import 'package:transport_control/pages/locations/load_nearby_vehicles_result.dart';
 import 'package:transport_control/pages/locations/locations_event.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
@@ -97,8 +98,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     return true;
   }
 
-  //TODO: return a result enum instead of bool for showing info to user
-  Future<bool> loadVehiclesNearbyUserLocation() async {
+  Future<LoadNearbyVehiclesResult> loadVehiclesNearbyUserLocation() async {
     //TODO: Signal loading location with snackbar
     final locationResult = await UserLocation.Location().tryGet();
     //TODO: hide snackbar
@@ -106,18 +106,22 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
       success: (result) async {
         final locationData = result.data;
         if (locationData.latitude == null || locationData.longitude == null) {
-          return false;
+          return LoadNearbyVehiclesResult.failedToGetUserLocation(
+            locationResult: result,
+          );
         }
         if (await Connectivity().checkConnectivity() ==
             ConnectivityResult.none) {
-          return false;
+          return LoadNearbyVehiclesResult.noConnection();
         }
         _loadVehiclesNearbySink.add(
           LatLng(result.data.latitude, result.data.longitude),
         );
-        return true;
+        return LoadNearbyVehiclesResult.success();
       },
-      orElse: (_) => false,
+      orElse: (result) => LoadNearbyVehiclesResult.failedToGetUserLocation(
+        locationResult: result,
+      ),
     );
   }
 
