@@ -472,7 +472,7 @@ class _LinesFloatingActionButton extends StatelessWidget {
   }
 }
 
-class _LineActionsDialog extends StatelessWidget {
+class _LineActionsDialog extends HookWidget {
   final Line line;
   final LineState state;
 
@@ -484,10 +484,11 @@ class _LineActionsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final buttonsTextAutoSizeGroup = useMemoized(() => AutoSizeGroup());
+    final lineDestTextAutoSizeGroup = useMemoized(() => AutoSizeGroup());
+
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -509,9 +510,9 @@ class _LineActionsDialog extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _destText(line.dest1),
+                    _destText(line.dest1, group: lineDestTextAutoSizeGroup),
                     const Divider(color: Colors.grey),
-                    _destText(line.dest2),
+                    _destText(line.dest2, group: lineDestTextAutoSizeGroup),
                   ],
                 ),
               )
@@ -524,14 +525,17 @@ class _LineActionsDialog extends StatelessWidget {
                   _popWithResultButton(
                     state.selected ? 'Deselect' : 'Select',
                     result: _LineActionsDialogResult.TOGGLE_SELECTED,
+                    group: buttonsTextAutoSizeGroup,
                   ),
                   _popWithResultButton(
                     state.favourite ? 'Unfavourite' : 'Favourite',
                     result: _LineActionsDialogResult.TOGGLE_FAVOURITE,
+                    group: buttonsTextAutoSizeGroup,
                   ),
                   _popWithResultButton(
                     state.tracked ? 'Untrack' : 'Track',
                     result: _LineActionsDialogResult.TOGGLE_TRACKED,
+                    group: buttonsTextAutoSizeGroup,
                   ),
                 ],
               ),
@@ -545,26 +549,33 @@ class _LineActionsDialog extends StatelessWidget {
   Widget _popWithResultButton(
     String text, {
     @required _LineActionsDialogResult result,
+    @required AutoSizeGroup group,
   }) {
     return Builder(
-      builder: (context) => FlatButton(
-        child: AutoSizeText(
-          text,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 16),
+      builder: (context) => Expanded(
+        child: FlatButton(
+          padding: EdgeInsets.zero,
+          child: AutoSizeText(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 16),
+            textAlign: TextAlign.center,
+            group: group,
+          ),
+          onPressed: () => Navigator.pop(context, result),
         ),
-        onPressed: () => Navigator.pop(context, result),
       ),
     );
   }
 
-  Widget _destText(String text) {
+  Widget _destText(String text, {@required AutoSizeGroup group}) {
     return AutoSizeText(
       text,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
       style: const TextStyle(fontSize: 14),
+      group: group,
     );
   }
 }
