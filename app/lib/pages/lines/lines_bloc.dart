@@ -21,6 +21,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     this._trackedLinesAddedSink,
     this._trackedLinesRemovedSink,
     Stream<Set<Line>> loadingVehiclesOfLinesFailedStream,
+    Stream<Object> untrackAllLinesStream,
   ) {
     _subscriptions
       ..add(
@@ -52,6 +53,9 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
       )
       ..add(
         loadingVehiclesOfLinesFailedStream.listen(loadingVehiclesOfLinesFailed),
+      )
+      ..add(
+        untrackAllLinesStream.listen((_) => add(LinesEvent.untrackAllLines())),
       );
   }
 
@@ -115,6 +119,11 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
         _trackedLinesRemovedSink.add(linesRemovedFromTracking);
         return state.copyWith(lines: updatedLines);
       },
+      untrackAllLines: (_) => state.copyWith(
+        lines: state.lines.map(
+          (line, lineState) => MapEntry(line, lineState.untracked),
+        ),
+      ),
       loadingVehiclesOfLinesFailed: (evt) => state.copyWith(
         lines: state.lines.map(
           (line, lineState) => evt.lines.contains(line)

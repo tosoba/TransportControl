@@ -44,6 +44,7 @@ void $initGetIt(GetIt g, {String environment}) {
       controllersModule.trackedLinesRemoved);
   g.registerSingleton<LoadingVehiclesOfLinesFailed>(
       controllersModule.loadingVehiclesOfLinesFailed);
+  g.registerSingleton<UntrackAllLines>(controllersModule.mapCleared);
   g.registerSingleton<VehiclesApi>(VehiclesApi.create(
     g<Dio>(),
   ));

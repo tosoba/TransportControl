@@ -30,6 +30,9 @@ abstract class ControllersModule {
   LoadingVehiclesOfLinesFailed get loadingVehiclesOfLinesFailed {
     return LoadingVehiclesOfLinesFailed(StreamController<Set<Line>>());
   }
+
+  @singleton
+  UntrackAllLines get mapCleared => UntrackAllLines(StreamController<Object>());
 }
 
 class Injectable<T> {
@@ -60,4 +63,8 @@ class LoadingVehiclesOfLinesFailed
     extends Injectable<StreamController<Set<Line>>> {
   LoadingVehiclesOfLinesFailed(StreamController<Set<Line>> controller)
       : super(controller);
+}
+
+class UntrackAllLines extends Injectable<StreamController<Object>> {
+  UntrackAllLines(StreamController<Object> controller) : super(controller);
 }

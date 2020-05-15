@@ -5,7 +5,6 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
-import 'package:super_enum/super_enum.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/result.dart';
 import 'package:transport_control/model/vehicle.dart';
@@ -26,6 +25,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   final RxSharedPreferences _preferences;
   final VehiclesRepo _vehiclesRepo;
   final Sink<Set<Line>> _loadingVehiclesOfLinesFailedSink;
+  final Sink<Object> _untrackAllLinesSink;
 
   final List<StreamSubscription> _subscriptions = [];
 
@@ -36,6 +36,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     this._vehiclesRepo,
     this._preferences,
     this._loadingVehiclesOfLinesFailedSink,
+    this._untrackAllLinesSink,
     Stream<LatLngBounds> loadVehiclesInBoundsStream,
     Stream<LatLng> loadVehiclesNearbyStream,
     Stream<Set<Line>> trackedLinesAddedStream,
@@ -272,7 +273,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   void mapTapped() => add(MapEvent.deselectVehicle());
 
-  void clearMap() => add(MapEvent.clearMap());
+  void clearMap() {
+    _untrackAllLinesSink.add(Object());
+    add(MapEvent.clearMap());
+  }
 }
 
 extension _MapStateExt on MapState {

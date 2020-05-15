@@ -33,6 +33,9 @@ enum _LinesEvent {
   @Data(fields: [DataField<bool>('resetSelection')])
   UntrackSelectedLines,
 
+  @object
+  UntrackAllLines,
+
   @Data(fields: [DataField<Set<Line>>('lines')])
   LoadingVehiclesOfLinesFailed,
 }

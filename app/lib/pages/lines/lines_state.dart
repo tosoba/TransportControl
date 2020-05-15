@@ -103,6 +103,10 @@ class LineState {
         tracked = false,
         selected = false;
 
+  LineState get untracked {
+    return LineState(favourite: favourite, tracked: false, selected: selected);
+  }
+
   LineState get toggleSelection {
     return LineState(
       favourite: favourite,

@@ -45,6 +45,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
     getIt<TrackedLinesAdded>().injected.close();
     getIt<TrackedLinesRemoved>().injected.close();
     getIt<LoadingVehiclesOfLinesFailed>().injected.close();
+    getIt<UntrackAllLines>().injected.close();
 
     super.dispose();
   }
@@ -58,6 +59,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
     final trackedLinesRemoved = getIt<TrackedLinesRemoved>().injected;
     final loadingVehiclesOfLinesFailed =
         getIt<LoadingVehiclesOfLinesFailed>().injected;
+    final untrackAllLines = getIt<UntrackAllLines>().injected;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -70,6 +72,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
               getIt<VehiclesRepo>(),
               getIt<RxSharedPreferences>(),
               loadingVehiclesOfLinesFailed.sink,
+              untrackAllLines.sink,
               loadVehiclesInBounds.stream,
               loadVehiclesNearby.stream,
               trackedLinesAdded.stream,
@@ -81,6 +84,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
               getIt<LinesRepo>(),
               trackedLinesAdded.sink,
               trackedLinesRemoved.sink,
+              untrackAllLines.stream,
               loadingVehiclesOfLinesFailed.stream,
             ),
           ),
