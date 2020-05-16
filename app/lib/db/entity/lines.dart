@@ -10,4 +10,7 @@ class Lines extends Table {
   TextColumn get dest2 => text()();
 
   IntColumn get type => integer()();
+
+  @override
+  Set<Column> get primaryKey => {symbol};
 }

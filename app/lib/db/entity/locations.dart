@@ -4,7 +4,7 @@ import 'package:transport_control/db/tables.dart';
 @DataClassName(Tables.locations)
 class Locations extends Table {
   IntColumn get id => integer().autoIncrement()();
-
+  
   TextColumn get name => text()();
 
   RealColumn get southWestLat => real().nullable()();

@@ -11,6 +11,7 @@ import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:transport_control/di/module/settings_module.dart';
 import 'package:transport_control/api/places_api.dart';
+import 'package:transport_control/db/dao/place_suggestions_dao.dart';
 import 'package:transport_control/api/vehicles_api.dart';
 import 'package:transport_control/db/dao/lines_dao.dart';
 import 'package:transport_control/db/dao/locations_dao.dart';
@@ -26,6 +27,9 @@ void $initGetIt(GetIt g, {String environment}) {
   final apiModule = _$ApiModule();
   final controllersModule = _$ControllersModule();
   final settingsModule = _$SettingsModule();
+  g.registerFactory<PlaceSuggestionsDao>(() => PlaceSuggestionsDao.of(
+        g<Database>(),
+      ));
   g.registerFactory<LinesDao>(() => LinesDao.of(
         g<Database>(),
       ));
