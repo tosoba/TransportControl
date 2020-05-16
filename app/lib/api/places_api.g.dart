@@ -1,15 +1,15 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'vehicles_api.dart';
+part of 'places_api.dart';
 
 // **************************************************************************
 // RetrofitGenerator
 // **************************************************************************
 
-class _VehiclesApi implements VehiclesApi {
-  _VehiclesApi(this._dio, {this.baseUrl}) {
+class _PlacesApi implements PlacesApi {
+  _PlacesApi(this._dio, {this.baseUrl}) {
     ArgumentError.checkNotNull(_dio, '_dio');
-    this.baseUrl ??= 'https://api.um.warszawa.pl/api/action';
+    this.baseUrl ??= 'https://autocomplete.geocoder.api.here.com/6.2';
   }
 
   final Dio _dio;
@@ -17,22 +17,29 @@ class _VehiclesApi implements VehiclesApi {
   String baseUrl;
 
   @override
-  fetchVehicles(
-      {type,
-      line,
-      resourceId = "f2e5503e-927d-4ad3-9500-4ab9e55deb59",
-      apiKey = VehiclesApiData.key}) async {
+  fetchSuggestions(
+      {query,
+      maxResults = 20,
+      bounds = '52.237049,21.017532,20000',
+      country = 'POL',
+      language = 'PL',
+      appId = PlacesApiData.appId,
+      appCode = PlacesApiData.appCode}) async {
+    ArgumentError.checkNotNull(query, 'query');
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
-      'type': type,
-      'line': line,
-      'resource_id': resourceId,
-      'apikey': apiKey
+      'query': query,
+      'maxresults': maxResults,
+      'prox': bounds,
+      'country': country,
+      'language': language,
+      'app_id': appId,
+      'app_code': appCode
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     final Response<Map<String, dynamic>> _result = await _dio.request(
-        '/busestrams_get',
+        '/suggest.json',
         queryParameters: queryParameters,
         options: RequestOptions(
             method: 'GET',
@@ -40,7 +47,7 @@ class _VehiclesApi implements VehiclesApi {
             extra: _extra,
             baseUrl: baseUrl),
         data: _data);
-    final value = VehiclesResponse.fromJson(_result.data);
+    final value = PlaceSuggestionsResponse.fromJson(_result.data);
     return Future.value(value);
   }
 }

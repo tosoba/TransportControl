@@ -7,9 +7,10 @@
 import 'package:transport_control/db/database.dart';
 import 'package:dio/dio.dart';
 import 'package:transport_control/di/module/api_module.dart';
+import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:transport_control/di/module/settings_module.dart';
-import 'package:transport_control/di/module/controllers_module.dart';
+import 'package:transport_control/api/places_api.dart';
 import 'package:transport_control/api/vehicles_api.dart';
 import 'package:transport_control/db/dao/lines_dao.dart';
 import 'package:transport_control/db/dao/locations_dao.dart';
@@ -23,8 +24,8 @@ import 'package:get_it/get_it.dart';
 
 void $initGetIt(GetIt g, {String environment}) {
   final apiModule = _$ApiModule();
-  final settingsModule = _$SettingsModule();
   final controllersModule = _$ControllersModule();
+  final settingsModule = _$SettingsModule();
   g.registerFactory<LinesDao>(() => LinesDao.of(
         g<Database>(),
       ));
@@ -35,7 +36,6 @@ void $initGetIt(GetIt g, {String environment}) {
   //Eager singletons must be registered in the right order
   g.registerSingleton<Database>(Database());
   g.registerSingleton<Dio>(apiModule.client);
-  g.registerSingleton<RxSharedPreferences>(settingsModule.client);
   g.registerSingleton<LoadVehiclesInBounds>(
       controllersModule.loadVehiclesInBounds);
   g.registerSingleton<LoadVehiclesNearby>(controllersModule.loadVehiclesNearby);
@@ -45,6 +45,10 @@ void $initGetIt(GetIt g, {String environment}) {
   g.registerSingleton<LoadingVehiclesOfLinesFailed>(
       controllersModule.loadingVehiclesOfLinesFailed);
   g.registerSingleton<UntrackAllLines>(controllersModule.mapCleared);
+  g.registerSingleton<RxSharedPreferences>(settingsModule.client);
+  g.registerSingleton<PlacesApi>(PlacesApi.create(
+    g<Dio>(),
+  ));
   g.registerSingleton<VehiclesApi>(VehiclesApi.create(
     g<Dio>(),
   ));
@@ -63,6 +67,6 @@ void $initGetIt(GetIt g, {String environment}) {
 
 class _$ApiModule extends ApiModule {}
 
-class _$SettingsModule extends SettingsModule {}
-
 class _$ControllersModule extends ControllersModule {}
+
+class _$SettingsModule extends SettingsModule {}

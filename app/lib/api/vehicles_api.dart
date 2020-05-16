@@ -1,7 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:dio/dio.dart';
-import 'package:transport_control/api/vehicles_api_key.dart';
 import 'package:transport_control/model/vehicles_response.dart';
 
 part 'vehicles_api.g.dart';
@@ -17,9 +16,13 @@ abstract class VehiclesApi {
     @Query("line") String line,
     @Query("resource_id")
         String resourceId = "f2e5503e-927d-4ad3-9500-4ab9e55deb59",
-    @Query("apikey") String apiKey = vehiclesApiKey,
+    @Query("apikey") String apiKey = VehiclesApiData.key,
   });
 
   @factoryMethod
   static VehiclesApi create(Dio client) => VehiclesApi(client);
+}
+
+class VehiclesApiData {
+  static const key = '';
 }
