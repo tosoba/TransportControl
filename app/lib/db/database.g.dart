@@ -222,7 +222,7 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => <GeneratedColumn>{};
+  Set<GeneratedColumn> get $primaryKey => {symbol};
   @override
   Line map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
@@ -260,9 +260,6 @@ class Location extends DataClass implements Insertable<Location> {
   final double southWestLng;
   final double northEastLat;
   final double northEastLng;
-  final double positionLat;
-  final double positionLng;
-  final double radiusInMeters;
   final bool isFavourite;
   final DateTime lastSearched;
   final int timesSearched;
@@ -270,13 +267,10 @@ class Location extends DataClass implements Insertable<Location> {
   Location(
       {@required this.id,
       @required this.name,
-      this.southWestLat,
-      this.southWestLng,
-      this.northEastLat,
-      this.northEastLng,
-      this.positionLat,
-      this.positionLng,
-      this.radiusInMeters,
+      @required this.southWestLat,
+      @required this.southWestLng,
+      @required this.northEastLat,
+      @required this.northEastLng,
       @required this.isFavourite,
       this.lastSearched,
       @required this.timesSearched,
@@ -300,12 +294,6 @@ class Location extends DataClass implements Insertable<Location> {
           .mapFromDatabaseResponse(data['${effectivePrefix}north_east_lat']),
       northEastLng: doubleType
           .mapFromDatabaseResponse(data['${effectivePrefix}north_east_lng']),
-      positionLat: doubleType
-          .mapFromDatabaseResponse(data['${effectivePrefix}position_lat']),
-      positionLng: doubleType
-          .mapFromDatabaseResponse(data['${effectivePrefix}position_lng']),
-      radiusInMeters: doubleType
-          .mapFromDatabaseResponse(data['${effectivePrefix}radius_in_meters']),
       isFavourite: boolType
           .mapFromDatabaseResponse(data['${effectivePrefix}is_favourite']),
       lastSearched: dateTimeType
@@ -326,9 +314,6 @@ class Location extends DataClass implements Insertable<Location> {
       southWestLng: serializer.fromJson<double>(json['southWestLng']),
       northEastLat: serializer.fromJson<double>(json['northEastLat']),
       northEastLng: serializer.fromJson<double>(json['northEastLng']),
-      positionLat: serializer.fromJson<double>(json['positionLat']),
-      positionLng: serializer.fromJson<double>(json['positionLng']),
-      radiusInMeters: serializer.fromJson<double>(json['radiusInMeters']),
       isFavourite: serializer.fromJson<bool>(json['isFavourite']),
       lastSearched: serializer.fromJson<DateTime>(json['lastSearched']),
       timesSearched: serializer.fromJson<int>(json['timesSearched']),
@@ -345,9 +330,6 @@ class Location extends DataClass implements Insertable<Location> {
       'southWestLng': serializer.toJson<double>(southWestLng),
       'northEastLat': serializer.toJson<double>(northEastLat),
       'northEastLng': serializer.toJson<double>(northEastLng),
-      'positionLat': serializer.toJson<double>(positionLat),
-      'positionLng': serializer.toJson<double>(positionLng),
-      'radiusInMeters': serializer.toJson<double>(radiusInMeters),
       'isFavourite': serializer.toJson<bool>(isFavourite),
       'lastSearched': serializer.toJson<DateTime>(lastSearched),
       'timesSearched': serializer.toJson<int>(timesSearched),
@@ -372,15 +354,6 @@ class Location extends DataClass implements Insertable<Location> {
       northEastLng: northEastLng == null && nullToAbsent
           ? const Value.absent()
           : Value(northEastLng),
-      positionLat: positionLat == null && nullToAbsent
-          ? const Value.absent()
-          : Value(positionLat),
-      positionLng: positionLng == null && nullToAbsent
-          ? const Value.absent()
-          : Value(positionLng),
-      radiusInMeters: radiusInMeters == null && nullToAbsent
-          ? const Value.absent()
-          : Value(radiusInMeters),
       isFavourite: isFavourite == null && nullToAbsent
           ? const Value.absent()
           : Value(isFavourite),
@@ -403,9 +376,6 @@ class Location extends DataClass implements Insertable<Location> {
           double southWestLng,
           double northEastLat,
           double northEastLng,
-          double positionLat,
-          double positionLng,
-          double radiusInMeters,
           bool isFavourite,
           DateTime lastSearched,
           int timesSearched,
@@ -417,9 +387,6 @@ class Location extends DataClass implements Insertable<Location> {
         southWestLng: southWestLng ?? this.southWestLng,
         northEastLat: northEastLat ?? this.northEastLat,
         northEastLng: northEastLng ?? this.northEastLng,
-        positionLat: positionLat ?? this.positionLat,
-        positionLng: positionLng ?? this.positionLng,
-        radiusInMeters: radiusInMeters ?? this.radiusInMeters,
         isFavourite: isFavourite ?? this.isFavourite,
         lastSearched: lastSearched ?? this.lastSearched,
         timesSearched: timesSearched ?? this.timesSearched,
@@ -434,9 +401,6 @@ class Location extends DataClass implements Insertable<Location> {
           ..write('southWestLng: $southWestLng, ')
           ..write('northEastLat: $northEastLat, ')
           ..write('northEastLng: $northEastLng, ')
-          ..write('positionLat: $positionLat, ')
-          ..write('positionLng: $positionLng, ')
-          ..write('radiusInMeters: $radiusInMeters, ')
           ..write('isFavourite: $isFavourite, ')
           ..write('lastSearched: $lastSearched, ')
           ..write('timesSearched: $timesSearched, ')
@@ -459,17 +423,11 @@ class Location extends DataClass implements Insertable<Location> {
                       $mrjc(
                           northEastLng.hashCode,
                           $mrjc(
-                              positionLat.hashCode,
+                              isFavourite.hashCode,
                               $mrjc(
-                                  positionLng.hashCode,
-                                  $mrjc(
-                                      radiusInMeters.hashCode,
-                                      $mrjc(
-                                          isFavourite.hashCode,
-                                          $mrjc(
-                                              lastSearched.hashCode,
-                                              $mrjc(timesSearched.hashCode,
-                                                  savedAt.hashCode)))))))))))));
+                                  lastSearched.hashCode,
+                                  $mrjc(timesSearched.hashCode,
+                                      savedAt.hashCode))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -480,9 +438,6 @@ class Location extends DataClass implements Insertable<Location> {
           other.southWestLng == this.southWestLng &&
           other.northEastLat == this.northEastLat &&
           other.northEastLng == this.northEastLng &&
-          other.positionLat == this.positionLat &&
-          other.positionLng == this.positionLng &&
-          other.radiusInMeters == this.radiusInMeters &&
           other.isFavourite == this.isFavourite &&
           other.lastSearched == this.lastSearched &&
           other.timesSearched == this.timesSearched &&
@@ -496,9 +451,6 @@ class LocationsCompanion extends UpdateCompanion<Location> {
   final Value<double> southWestLng;
   final Value<double> northEastLat;
   final Value<double> northEastLng;
-  final Value<double> positionLat;
-  final Value<double> positionLng;
-  final Value<double> radiusInMeters;
   final Value<bool> isFavourite;
   final Value<DateTime> lastSearched;
   final Value<int> timesSearched;
@@ -510,9 +462,6 @@ class LocationsCompanion extends UpdateCompanion<Location> {
     this.southWestLng = const Value.absent(),
     this.northEastLat = const Value.absent(),
     this.northEastLng = const Value.absent(),
-    this.positionLat = const Value.absent(),
-    this.positionLng = const Value.absent(),
-    this.radiusInMeters = const Value.absent(),
     this.isFavourite = const Value.absent(),
     this.lastSearched = const Value.absent(),
     this.timesSearched = const Value.absent(),
@@ -521,18 +470,19 @@ class LocationsCompanion extends UpdateCompanion<Location> {
   LocationsCompanion.insert({
     this.id = const Value.absent(),
     @required String name,
-    this.southWestLat = const Value.absent(),
-    this.southWestLng = const Value.absent(),
-    this.northEastLat = const Value.absent(),
-    this.northEastLng = const Value.absent(),
-    this.positionLat = const Value.absent(),
-    this.positionLng = const Value.absent(),
-    this.radiusInMeters = const Value.absent(),
+    @required double southWestLat,
+    @required double southWestLng,
+    @required double northEastLat,
+    @required double northEastLng,
     this.isFavourite = const Value.absent(),
     this.lastSearched = const Value.absent(),
     this.timesSearched = const Value.absent(),
     @required DateTime savedAt,
   })  : name = Value(name),
+        southWestLat = Value(southWestLat),
+        southWestLng = Value(southWestLng),
+        northEastLat = Value(northEastLat),
+        northEastLng = Value(northEastLng),
         savedAt = Value(savedAt);
   LocationsCompanion copyWith(
       {Value<int> id,
@@ -541,9 +491,6 @@ class LocationsCompanion extends UpdateCompanion<Location> {
       Value<double> southWestLng,
       Value<double> northEastLat,
       Value<double> northEastLng,
-      Value<double> positionLat,
-      Value<double> positionLng,
-      Value<double> radiusInMeters,
       Value<bool> isFavourite,
       Value<DateTime> lastSearched,
       Value<int> timesSearched,
@@ -555,9 +502,6 @@ class LocationsCompanion extends UpdateCompanion<Location> {
       southWestLng: southWestLng ?? this.southWestLng,
       northEastLat: northEastLat ?? this.northEastLat,
       northEastLng: northEastLng ?? this.northEastLng,
-      positionLat: positionLat ?? this.positionLat,
-      positionLng: positionLng ?? this.positionLng,
-      radiusInMeters: radiusInMeters ?? this.radiusInMeters,
       isFavourite: isFavourite ?? this.isFavourite,
       lastSearched: lastSearched ?? this.lastSearched,
       timesSearched: timesSearched ?? this.timesSearched,
@@ -602,7 +546,7 @@ class $LocationsTable extends Locations
     return GeneratedRealColumn(
       'south_west_lat',
       $tableName,
-      true,
+      false,
     );
   }
 
@@ -616,7 +560,7 @@ class $LocationsTable extends Locations
     return GeneratedRealColumn(
       'south_west_lng',
       $tableName,
-      true,
+      false,
     );
   }
 
@@ -630,7 +574,7 @@ class $LocationsTable extends Locations
     return GeneratedRealColumn(
       'north_east_lat',
       $tableName,
-      true,
+      false,
     );
   }
 
@@ -644,49 +588,7 @@ class $LocationsTable extends Locations
     return GeneratedRealColumn(
       'north_east_lng',
       $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _positionLatMeta =
-      const VerificationMeta('positionLat');
-  GeneratedRealColumn _positionLat;
-  @override
-  GeneratedRealColumn get positionLat =>
-      _positionLat ??= _constructPositionLat();
-  GeneratedRealColumn _constructPositionLat() {
-    return GeneratedRealColumn(
-      'position_lat',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _positionLngMeta =
-      const VerificationMeta('positionLng');
-  GeneratedRealColumn _positionLng;
-  @override
-  GeneratedRealColumn get positionLng =>
-      _positionLng ??= _constructPositionLng();
-  GeneratedRealColumn _constructPositionLng() {
-    return GeneratedRealColumn(
-      'position_lng',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _radiusInMetersMeta =
-      const VerificationMeta('radiusInMeters');
-  GeneratedRealColumn _radiusInMeters;
-  @override
-  GeneratedRealColumn get radiusInMeters =>
-      _radiusInMeters ??= _constructRadiusInMeters();
-  GeneratedRealColumn _constructRadiusInMeters() {
-    return GeneratedRealColumn(
-      'radius_in_meters',
-      $tableName,
-      true,
+      false,
     );
   }
 
@@ -746,9 +648,6 @@ class $LocationsTable extends Locations
         southWestLng,
         northEastLat,
         northEastLng,
-        positionLat,
-        positionLng,
-        radiusInMeters,
         isFavourite,
         lastSearched,
         timesSearched,
@@ -778,38 +677,32 @@ class $LocationsTable extends Locations
           _southWestLatMeta,
           southWestLat.isAcceptableValue(
               d.southWestLat.value, _southWestLatMeta));
+    } else if (isInserting) {
+      context.missing(_southWestLatMeta);
     }
     if (d.southWestLng.present) {
       context.handle(
           _southWestLngMeta,
           southWestLng.isAcceptableValue(
               d.southWestLng.value, _southWestLngMeta));
+    } else if (isInserting) {
+      context.missing(_southWestLngMeta);
     }
     if (d.northEastLat.present) {
       context.handle(
           _northEastLatMeta,
           northEastLat.isAcceptableValue(
               d.northEastLat.value, _northEastLatMeta));
+    } else if (isInserting) {
+      context.missing(_northEastLatMeta);
     }
     if (d.northEastLng.present) {
       context.handle(
           _northEastLngMeta,
           northEastLng.isAcceptableValue(
               d.northEastLng.value, _northEastLngMeta));
-    }
-    if (d.positionLat.present) {
-      context.handle(_positionLatMeta,
-          positionLat.isAcceptableValue(d.positionLat.value, _positionLatMeta));
-    }
-    if (d.positionLng.present) {
-      context.handle(_positionLngMeta,
-          positionLng.isAcceptableValue(d.positionLng.value, _positionLngMeta));
-    }
-    if (d.radiusInMeters.present) {
-      context.handle(
-          _radiusInMetersMeta,
-          radiusInMeters.isAcceptableValue(
-              d.radiusInMeters.value, _radiusInMetersMeta));
+    } else if (isInserting) {
+      context.missing(_northEastLngMeta);
     }
     if (d.isFavourite.present) {
       context.handle(_isFavouriteMeta,
@@ -864,16 +757,6 @@ class $LocationsTable extends Locations
     }
     if (d.northEastLng.present) {
       map['north_east_lng'] = Variable<double, RealType>(d.northEastLng.value);
-    }
-    if (d.positionLat.present) {
-      map['position_lat'] = Variable<double, RealType>(d.positionLat.value);
-    }
-    if (d.positionLng.present) {
-      map['position_lng'] = Variable<double, RealType>(d.positionLng.value);
-    }
-    if (d.radiusInMeters.present) {
-      map['radius_in_meters'] =
-          Variable<double, RealType>(d.radiusInMeters.value);
     }
     if (d.isFavourite.present) {
       map['is_favourite'] = Variable<bool, BoolType>(d.isFavourite.value);
@@ -1084,7 +967,7 @@ class $PlaceSuggestionsTable extends PlaceSuggestions
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => <GeneratedColumn>{};
+  Set<GeneratedColumn> get $primaryKey => {query};
   @override
   PlaceSuggestion map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
