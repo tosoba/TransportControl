@@ -1,13 +1,17 @@
 import 'dart:convert';
 
+import 'package:injectable/injectable.dart';
 import 'package:transport_control/api/places_api.dart';
 import 'package:transport_control/db/dao/place_suggestions_responses_dao.dart';
 import 'package:transport_control/db/database.dart' as db;
+import 'package:transport_control/di/injection.dart';
 import 'package:transport_control/model/place_suggestion.dart';
 import 'package:transport_control/model/place_suggestions_response.dart';
 import 'package:transport_control/model/result.dart';
 import 'package:transport_control/repo/place_suggestions_repo.dart';
 
+@RegisterAs(PlaceSuggestionsRepo, env: Env.dev)
+@singleton
 class PlaceSuggestionsRepoImpl implements PlaceSuggestionsRepo {
   final PlaceSuggestionsResponsesDao _dao;
   final PlacesApi _api;

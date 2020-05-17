@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:transport_control/model/loadable.dart';
 import 'package:transport_control/pages/nearby/nearby_event.dart';
 import 'package:transport_control/pages/nearby/nearby_state.dart';
 import 'package:transport_control/repo/place_suggestions_repo.dart';
@@ -25,6 +26,11 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
       ..add(
         queries
             .distinct()
+            .tap(
+              (_) => add(
+                NearbyEvent.updateSuggestions(suggestions: Loadable.loading()),
+              ),
+            )
             .switchMap(
               (query) => Stream.fromFuture(_repo.getSuggestions(query: query)),
             )
@@ -34,6 +40,11 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
                   add(NearbyEvent.updateSuggestions(suggestions: success.data));
                 },
                 failure: (failure) {
+                  add(
+                    NearbyEvent.updateSuggestions(
+                      suggestions: Loadable.error(error: failure.error),
+                    ),
+                  );
                   log(failure.error?.toString() ?? 'Unknown error');
                 },
               ),

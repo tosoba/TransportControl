@@ -12,6 +12,8 @@ import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:transport_control/di/module/settings_module.dart';
 import 'package:transport_control/api/places_api.dart';
 import 'package:transport_control/db/dao/place_suggestions_responses_dao.dart';
+import 'package:transport_control/repo/impl/place_suggestions_repo_impl.dart';
+import 'package:transport_control/repo/place_suggestions_repo.dart';
 import 'package:transport_control/api/vehicles_api.dart';
 import 'package:transport_control/db/dao/lines_dao.dart';
 import 'package:transport_control/db/dao/locations_dao.dart';
@@ -54,6 +56,12 @@ void $initGetIt(GetIt g, {String environment}) {
   g.registerSingleton<PlacesApi>(PlacesApi.create(
     g<Dio>(),
   ));
+  if (environment == 'dev') {
+    g.registerSingleton<PlaceSuggestionsRepo>(PlaceSuggestionsRepoImpl(
+      g<PlaceSuggestionsResponsesDao>(),
+      g<PlacesApi>(),
+    ));
+  }
   g.registerSingleton<VehiclesApi>(VehiclesApi.create(
     g<Dio>(),
   ));

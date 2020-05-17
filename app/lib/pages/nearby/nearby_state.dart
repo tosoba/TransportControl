@@ -1,9 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:transport_control/model/loadable.dart';
 import 'package:transport_control/model/place_suggestion.dart';
 
 class NearbyState {
   final String query;
-  final List<PlaceSuggestion> suggestions;
+  final Value<List<PlaceSuggestion>> suggestions;
   final List<String> latestQueries;
 
   NearbyState._({
@@ -14,12 +15,12 @@ class NearbyState {
 
   NearbyState.initial()
       : query = null,
-        suggestions = [],
+        suggestions = Loadable.value(value: []),
         latestQueries = [];
 
   NearbyState copyWith({
     String query,
-    List<PlaceSuggestion> suggestions,
+    Value<List<PlaceSuggestion>> suggestions,
     List<String> latestQueries,
   }) {
     return NearbyState._(

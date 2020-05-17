@@ -21,18 +21,18 @@ class NearbyPage extends StatelessWidget {
               itemBuilder: (context, index) => Text(state.latestQueries[index]),
             );
           }
-        } else {
-          if (state.suggestions.isEmpty) {
-            return Center(child: Text('No results found.'));
-          } else {
-            return ListView.builder(
-              itemCount: state.suggestions.length,
-              itemBuilder: (context, index) => Text(
-                state.suggestions[index].address.street,
-              ),
-            );
-          }
         }
+        
+        return state.suggestions.when(
+          loading: (_) => Center(child: CircularProgressIndicator()),
+          value: (suggestions) => ListView.builder(
+            itemCount: state.suggestions.value.length,
+            itemBuilder: (context, index) => Text(
+              state.suggestions.value[index].address.street,
+            ),
+          ),
+          error: (_) => Center(child: Text('Error loading places.')),
+        );
       },
     );
   }
