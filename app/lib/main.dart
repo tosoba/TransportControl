@@ -7,7 +7,9 @@ import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/pages/home/home_page.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
+import 'package:transport_control/pages/nearby/nearby_bloc.dart';
 import 'package:transport_control/repo/lines_repo.dart';
+import 'package:transport_control/repo/place_suggestions_repo.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
 import 'package:transport_control/util/preferences_util.dart';
 
@@ -88,6 +90,9 @@ class _TransportControlAppState extends State<TransportControlApp> {
               untrackAllLines.stream,
             ),
           ),
+          BlocProvider<NearbyBloc>(
+            create: (context) => NearbyBloc(getIt<PlaceSuggestionsRepo>()),
+          )
         ],
         child: HomePage(),
       ),

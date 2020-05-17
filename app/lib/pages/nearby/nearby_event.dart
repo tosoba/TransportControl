@@ -5,6 +5,9 @@ part "nearby_event.g.dart";
 
 @superEnum
 enum _NearbyEvent {
+  @Data(fields: [DataField<String>('query')])
+  UpdateQuery,
+
   @Data(fields: [DataField<List<PlaceSuggestion>>('suggestions')])
   UpdateSuggestions,
 

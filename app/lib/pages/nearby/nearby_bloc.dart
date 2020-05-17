@@ -61,6 +61,7 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
   @override
   Stream<NearbyState> mapEventToState(NearbyEvent event) async* {
     yield event.when(
+      updateQuery: (evt) => state.copyWith(query: evt.query),
       updateSuggestions: (evt) => state.copyWith(suggestions: evt.suggestions),
       updateLatestQueries: (evt) => state.copyWith(latestQueries: evt.queries),
     );
@@ -70,6 +71,8 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
     if (query == null) return;
     final processedQuery = query.trim().toLowerCase();
     if (processedQuery.isEmpty) return;
+
+    add(NearbyEvent.updateQuery(query: query));
 
     if (submitted) {
       _submittedQueries.add(processedQuery.toLowerCase());
