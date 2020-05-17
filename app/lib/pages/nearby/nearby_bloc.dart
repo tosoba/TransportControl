@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transport_control/model/loadable.dart';
+import 'package:transport_control/model/place_suggestion.dart';
 import 'package:transport_control/pages/nearby/nearby_event.dart';
 import 'package:transport_control/pages/nearby/nearby_state.dart';
 import 'package:transport_control/repo/place_suggestions_repo.dart';
@@ -18,17 +18,16 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
   final List<StreamSubscription> subscriptions = [];
 
   NearbyBloc(this._repo) {
-    final queries = StreamGroup.merge([
-      _submittedQueries.stream,
-      _queries.stream.debounce(const Duration(milliseconds: 1000))
-    ]);
     subscriptions
       ..add(
-        queries
+        _submittedQueries.stream
+            .merge(_queries.stream.debounce(const Duration(milliseconds: 1000)))
             .distinct()
             .tap(
               (_) => add(
-                NearbyEvent.updateSuggestions(suggestions: Loadable.loading()),
+                NearbyEvent.updateSuggestions(
+                  suggestions: Loadable<List<PlaceSuggestion>>.loading(),
+                ),
               ),
             )
             .switchMap(
@@ -37,12 +36,20 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
             .listen(
               (result) => result.when(
                 success: (success) {
-                  add(NearbyEvent.updateSuggestions(suggestions: success.data));
+                  add(
+                    NearbyEvent.updateSuggestions(
+                      suggestions: Loadable<List<PlaceSuggestion>>.value(
+                        value: success.data,
+                      ),
+                    ),
+                  );
                 },
                 failure: (failure) {
                   add(
                     NearbyEvent.updateSuggestions(
-                      suggestions: Loadable.error(error: failure.error),
+                      suggestions: Loadable<List<PlaceSuggestion>>.error(
+                        error: failure.error,
+                      ),
                     ),
                   );
                   log(failure.error?.toString() ?? 'Unknown error');

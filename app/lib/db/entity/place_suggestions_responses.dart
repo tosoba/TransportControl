@@ -1,7 +1,7 @@
 import 'package:moor_flutter/moor_flutter.dart';
 import 'package:transport_control/db/tables.dart';
 
-@DataClassName(Tables.placeSuggestionsResponse)
+@DataClassName(Tables.placeSuggestionsResponses)
 class PlaceSuggestionsResponses extends Table {
   TextColumn get query => text()();
 

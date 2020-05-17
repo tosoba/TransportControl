@@ -15,7 +15,7 @@ class NearbyState {
 
   NearbyState.initial()
       : query = null,
-        suggestions = Loadable.value(value: []),
+        suggestions = Loadable.value(value: <PlaceSuggestion>[]),
         latestQueries = [];
 
   NearbyState copyWith({
