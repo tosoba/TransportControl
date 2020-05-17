@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:connection_status_bar/connection_status_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +11,7 @@ import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_page.dart';
+import 'package:transport_control/pages/nearby/nearby_bloc.dart';
 import 'package:transport_control/pages/nearby/nearby_page.dart';
 import 'package:transport_control/pages/settings/settings_page.dart';
 import 'package:transport_control/pages/tracked/tracked_page.dart';
@@ -75,6 +77,14 @@ class HomePage extends HookWidget {
           mapTapAnimController: mapTapAnimController,
         );
     });
+    final searchFieldController = useTextEditingController();
+    searchFieldController.addListener(
+      () => context
+          .bloc<NearbyBloc>()
+          .queryUpdated(searchFieldController.value.text, submitted: false),
+    );
+
+    final drawerItemTextGroup = useMemoized(() => AutoSizeGroup());
 
     return WillPopScope(
       onWillPop: () => _onWillPop(
@@ -92,6 +102,7 @@ class HomePage extends HookWidget {
           child: _appBar(
             currentPage: currentPage,
             searchFieldFocusNode: searchFieldFocusNode,
+            searchFieldController: searchFieldController,
             placesPageAnimController: placesPageAnimController,
             mapTapAnimController: mapTapAnimController,
           ),
@@ -120,7 +131,10 @@ class HomePage extends HookWidget {
             sizeFactor: bottomNavSize,
           ),
         ),
-        drawer: _navigationDrawer(context),
+        drawer: _navigationDrawer(
+          context,
+          drawerItemTextGroup: drawerItemTextGroup,
+        ),
       ),
     );
   }
@@ -216,12 +230,14 @@ class HomePage extends HookWidget {
 
   TextFieldAppBar _appBar({
     @required FocusNode searchFieldFocusNode,
+    @required TextEditingController searchFieldController,
     @required ValueNotifier<_HomeSubPage> currentPage,
     @required AnimationController placesPageAnimController,
     @required AnimationController mapTapAnimController,
   }) {
     return TextFieldAppBar(
       textFieldFocusNode: searchFieldFocusNode,
+      textFieldController: searchFieldController,
       leading: _drawerButton(
         currentPage: currentPage,
         searchFieldFocusNode: searchFieldFocusNode,
@@ -336,6 +352,7 @@ class HomePage extends HookWidget {
 
   Widget _drawerListTile({
     @required String labelText,
+    @required AutoSizeGroup group,
     @required IconData icon,
     @required void Function() onTap,
   }) {
@@ -346,14 +363,23 @@ class HomePage extends HookWidget {
             padding: const EdgeInsets.only(right: 15.0),
             child: Icon(icon),
           ),
-          Text(labelText, style: const TextStyle(fontSize: 16)),
+          Expanded(
+            child: AutoSizeText(
+              labelText,
+              style: const TextStyle(fontSize: 16),
+              group: group,
+            ),
+          ),
         ],
       ),
       onTap: onTap,
     );
   }
 
-  Widget _navigationDrawer(BuildContext context) {
+  Widget _navigationDrawer(
+    BuildContext context, {
+    @required AutoSizeGroup drawerItemTextGroup,
+  }) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -365,6 +391,7 @@ class HomePage extends HookWidget {
           _drawerListTile(
             labelText: Strings.lines,
             icon: Icons.grid_on,
+            group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
               _showLinesPage(context);
@@ -373,6 +400,7 @@ class HomePage extends HookWidget {
           _drawerListTile(
             labelText: Strings.locations,
             icon: Icons.location_on,
+            group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
               _showLocationsPage(context);
@@ -381,6 +409,7 @@ class HomePage extends HookWidget {
           _drawerListTile(
             labelText: 'Settings',
             icon: Icons.settings,
+            group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
