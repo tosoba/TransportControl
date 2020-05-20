@@ -120,7 +120,7 @@ class HomePage extends HookWidget {
               mapTapped: () => _mapTapped(mapTapAnimController),
               animatedToBounds: () => _hideControls(mapTapAnimController),
               markerTapped: (id) => _markerTapped(
-                id: id,
+                markerId: id,
                 bottomSheetController: bottomSheetController,
                 context: context,
               ),
@@ -198,7 +198,7 @@ class HomePage extends HookWidget {
               _bottomNavBarButton(
                 labelText: Strings.lines,
                 onPressed: () {
-                  bottomSheetController.value?.close();
+                  bottomSheetController.closeAndNullify();
                   _showLinesPage(context);
                 },
                 bottomNavButtonsOpacity: bottomNavButtonsOpacity,
@@ -207,7 +207,7 @@ class HomePage extends HookWidget {
               _bottomNavBarButton(
                 labelText: Strings.locations,
                 onPressed: () {
-                  bottomSheetController.value?.close();
+                  bottomSheetController.closeAndNullify();
                   _showLocationsPage(context);
                 },
                 bottomNavButtonsOpacity: bottomNavButtonsOpacity,
@@ -217,7 +217,7 @@ class HomePage extends HookWidget {
                 _bottomNavBarButton(
                   labelText: 'Tracked',
                   onPressed: () {
-                    bottomSheetController.value?.close();
+                    bottomSheetController.closeAndNullify();
                     _showTrackedPage(context);
                   },
                   bottomNavButtonsOpacity: bottomNavButtonsOpacity,
@@ -294,7 +294,7 @@ class HomePage extends HookWidget {
     if (page == _HomeSubPage.map) {
       placesPageAnimController.reverse();
     } else if (page == _HomeSubPage.places) {
-      bottomSheetController.value?.close();
+      bottomSheetController.closeAndNullify();
       placesPageAnimController.forward();
       mapTapAnimController.reverse();
     }
@@ -438,7 +438,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
-              bottomSheetController.value?.close();
+              bottomSheetController.closeAndNullify();
               _showLinesPage(context);
             },
           ),
@@ -448,7 +448,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
-              bottomSheetController.value?.close();
+              bottomSheetController.closeAndNullify();
               _showLocationsPage(context);
             },
           ),
@@ -458,7 +458,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
-              bottomSheetController.value?.close();
+              bottomSheetController.closeAndNullify();
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => SettingsPage()),
@@ -483,12 +483,12 @@ class HomePage extends HookWidget {
   }
 
   void _markerTapped({
-    @required String id,
+    @required String markerId,
     @required BuildContext context,
     @required
         ValueNotifier<PersistentBottomSheetController> bottomSheetController,
   }) {
-    bottomSheetController.value = showBottomSheet(
+    bottomSheetController.showIfClosed(
       context: context,
       builder: (context) => CarouselSlider(
         options: CarouselOptions(
@@ -510,5 +510,24 @@ class HomePage extends HookWidget {
             .toList(),
       ),
     );
+  }
+}
+
+extension PersistantBottomSheetExt
+    on ValueNotifier<PersistentBottomSheetController> {
+  void closeAndNullify() {
+    if (value != null) {
+      value.close();
+      value = null;
+    }
+  }
+
+  void showIfClosed({
+    @required BuildContext context,
+    @required Widget Function(BuildContext) builder,
+  }) {
+    if (value == null) {
+      value = showBottomSheet(context: context, builder: builder);
+    }
   }
 }
