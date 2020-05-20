@@ -12,7 +12,7 @@ import 'package:transport_control/util/lat_lng_util.dart';
 class MapPage extends StatefulWidget {
   final void Function() mapTapped;
   final void Function() animatedToBounds;
-  final void Function(String) markerTapped;
+  final void Function(IconifiedMarker) markerTapped;
 
   const MapPage({
     Key key,
@@ -96,7 +96,7 @@ class _MapPageState extends State<MapPage>
                         ? () => _animateToClusterChildrenBounds(
                               marker.childrenPositions,
                             )
-                        : () => _markerTapped(marker.number),
+                        : () => _markerTapped(marker),
                   ),
                 )
                 .toSet(),
@@ -128,8 +128,8 @@ class _MapPageState extends State<MapPage>
     widget.animatedToBounds();
   }
 
-  void _markerTapped(String id) {
-    context.bloc<MapBloc>().markerTapped(id);
-    widget.markerTapped(id);
+  void _markerTapped(IconifiedMarker marker) {
+    context.bloc<MapBloc>().markerTapped(marker.number);
+    widget.markerTapped(marker);
   }
 }

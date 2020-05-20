@@ -11,6 +11,7 @@ import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
+import 'package:transport_control/pages/map/map_markers.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/nearby/nearby_bloc.dart';
 import 'package:transport_control/pages/nearby/nearby_page.dart';
@@ -119,8 +120,8 @@ class HomePage extends HookWidget {
             MapPage(
               mapTapped: () => _mapTapped(mapTapAnimController),
               animatedToBounds: () => _hideControls(mapTapAnimController),
-              markerTapped: (id) => _markerTapped(
-                markerId: id,
+              markerTapped: (marker) => _markerTapped(
+                marker: marker,
                 bottomSheetController: bottomSheetController,
                 context: context,
               ),
@@ -198,7 +199,7 @@ class HomePage extends HookWidget {
               _bottomNavBarButton(
                 labelText: Strings.lines,
                 onPressed: () {
-                  bottomSheetController.closeAndNullify();
+                  bottomSheetController.value?.close();
                   _showLinesPage(context);
                 },
                 bottomNavButtonsOpacity: bottomNavButtonsOpacity,
@@ -207,7 +208,7 @@ class HomePage extends HookWidget {
               _bottomNavBarButton(
                 labelText: Strings.locations,
                 onPressed: () {
-                  bottomSheetController.closeAndNullify();
+                  bottomSheetController.value?.close();
                   _showLocationsPage(context);
                 },
                 bottomNavButtonsOpacity: bottomNavButtonsOpacity,
@@ -217,7 +218,7 @@ class HomePage extends HookWidget {
                 _bottomNavBarButton(
                   labelText: 'Tracked',
                   onPressed: () {
-                    bottomSheetController.closeAndNullify();
+                    bottomSheetController.value?.close();
                     _showTrackedPage(context);
                   },
                   bottomNavButtonsOpacity: bottomNavButtonsOpacity,
@@ -294,7 +295,7 @@ class HomePage extends HookWidget {
     if (page == _HomeSubPage.map) {
       placesPageAnimController.reverse();
     } else if (page == _HomeSubPage.places) {
-      bottomSheetController.closeAndNullify();
+      bottomSheetController.value?.close();
       placesPageAnimController.forward();
       mapTapAnimController.reverse();
     }
@@ -438,7 +439,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
-              bottomSheetController.closeAndNullify();
+              bottomSheetController.value?.close();
               _showLinesPage(context);
             },
           ),
@@ -448,7 +449,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
-              bottomSheetController.closeAndNullify();
+              bottomSheetController.value?.close();
               _showLocationsPage(context);
             },
           ),
@@ -458,7 +459,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
-              bottomSheetController.closeAndNullify();
+              bottomSheetController.value?.close();
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => SettingsPage()),
@@ -483,31 +484,41 @@ class HomePage extends HookWidget {
   }
 
   void _markerTapped({
-    @required String markerId,
+    @required IconifiedMarker marker,
     @required BuildContext context,
     @required
         ValueNotifier<PersistentBottomSheetController> bottomSheetController,
   }) {
+    final vehicles =
+        context.bloc<MapBloc>().state.trackedVehicles.entries.toList();
     bottomSheetController.showIfClosed(
       context: context,
-      builder: (context) => CarouselSlider(
-        options: CarouselOptions(
-          autoPlay: false,
-          enlargeCenterPage: true,
-          viewportFraction: 0.9,
-          aspectRatio: 2.0,
-          initialPage: 2,
-        ),
-        items: [1, 2, 3, 4, 5]
-            .map(
-              (i) => Container(
-                width: MediaQuery.of(context).size.width,
-                margin: EdgeInsets.symmetric(horizontal: 5.0),
-                decoration: BoxDecoration(color: Colors.amber),
-                child: Text('text $i', style: TextStyle(fontSize: 16.0)),
+      builder: (context) => Container(
+        color: Colors.transparent,
+        child: CarouselSlider.builder(
+          options: CarouselOptions(
+            autoPlay: false,
+            enlargeCenterPage: true,
+            viewportFraction: 0.9,
+            aspectRatio: 2.0,
+            initialPage:
+                vehicles.indexWhere((entry) => entry.key == marker.number),
+            onPageChanged: (index, reason) {},
+          ),
+          itemCount: vehicles.length,
+          itemBuilder: (context, index) {
+            final tracked = vehicles.elementAt(index).value;
+            return Container(
+              width: MediaQuery.of(context).size.width,
+              margin: EdgeInsets.symmetric(horizontal: 5.0),
+              decoration: BoxDecoration(color: Colors.red),
+              child: Text(
+                'Last updated ${tracked.vehicle.lastUpdate}',
+                style: const TextStyle(fontSize: 16.0),
               ),
-            )
-            .toList(),
+            );
+          },
+        ),
       ),
     );
   }
@@ -515,19 +526,14 @@ class HomePage extends HookWidget {
 
 extension PersistantBottomSheetExt
     on ValueNotifier<PersistentBottomSheetController> {
-  void closeAndNullify() {
-    if (value != null) {
-      value.close();
-      value = null;
-    }
-  }
-
   void showIfClosed({
     @required BuildContext context,
     @required Widget Function(BuildContext) builder,
   }) {
     if (value == null) {
-      value = showBottomSheet(context: context, builder: builder);
+      final controller = showBottomSheet(context: context, builder: builder);
+      value = controller;
+      controller.closed.then((_) => value = null);
     }
   }
 }

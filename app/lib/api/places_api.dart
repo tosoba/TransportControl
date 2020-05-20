@@ -27,6 +27,6 @@ abstract class PlacesApi {
 }
 
 class PlacesApiData {
-  static const appId = '';
-  static const appCode = '';
+  static const appId = 'UojlDRBl2upvHhSYJEF1';
+  static const appCode = '4QvUQmYhVJLYXd95Ng5iBg';
 }
