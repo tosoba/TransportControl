@@ -52,6 +52,7 @@ dependencies:
   location: ^3.0.0
   async: ^2.4.1
   stream_transform: ^1.2.0
+  carousel_slider: ^2.1.0
 
 dev_dependencies:
   flutter_test:

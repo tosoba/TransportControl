@@ -12,11 +12,13 @@ import 'package:transport_control/util/lat_lng_util.dart';
 class MapPage extends StatefulWidget {
   final void Function() mapTapped;
   final void Function() animatedToBounds;
+  final void Function(String) markerTapped;
 
   const MapPage({
     Key key,
     @required this.mapTapped,
     @required this.animatedToBounds,
+    @required this.markerTapped,
   }) : super(key: key);
 
   @override
@@ -128,5 +130,6 @@ class _MapPageState extends State<MapPage>
 
   void _markerTapped(String id) {
     context.bloc<MapBloc>().markerTapped(id);
+    widget.markerTapped(id);
   }
 }

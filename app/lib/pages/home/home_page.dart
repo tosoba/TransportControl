@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:connection_status_bar/connection_status_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -66,6 +67,9 @@ class HomePage extends HookWidget {
       ).animate(mapTapAnimController),
     );
 
+    final bottomSheetController =
+        useState<PersistentBottomSheetController>(null);
+
     final searchFieldFocusNode = useFocusNode();
     searchFieldFocusNode.addListener(() {
       if (searchFieldFocusNode.hasFocus &&
@@ -75,6 +79,7 @@ class HomePage extends HookWidget {
           currentPage: currentPage,
           placesPageAnimController: placesPageAnimController,
           mapTapAnimController: mapTapAnimController,
+          bottomSheetController: bottomSheetController,
         );
     });
     final searchFieldController = useTextEditingController();
@@ -92,6 +97,7 @@ class HomePage extends HookWidget {
         searchFieldFocusNode: searchFieldFocusNode,
         mapTapAnimController: mapTapAnimController,
         placesPageAnimController: placesPageAnimController,
+        bottomSheetController: bottomSheetController,
       ),
       child: Scaffold(
         extendBodyBehindAppBar: true,
@@ -105,28 +111,37 @@ class HomePage extends HookWidget {
             searchFieldController: searchFieldController,
             placesPageAnimController: placesPageAnimController,
             mapTapAnimController: mapTapAnimController,
+            bottomSheetController: bottomSheetController,
           ),
         ),
-        body: Stack(children: [
-          MapPage(
-            mapTapped: () => _mapTapped(mapTapAnimController),
-            animatedToBounds: () => _hideControls(mapTapAnimController),
-          ),
-          SlideTransition(
-            child: NearbyPage(),
-            position: placesPageOffset,
-          ),
-          SlideTransition(
-            position: connectivityStatusBarOffset,
-            child: ConnectionStatusBar(),
-          ),
-        ]),
+        body: Builder(
+          builder: (context) => Stack(children: [
+            MapPage(
+              mapTapped: () => _mapTapped(mapTapAnimController),
+              animatedToBounds: () => _hideControls(mapTapAnimController),
+              markerTapped: (id) => _markerTapped(
+                id: id,
+                bottomSheetController: bottomSheetController,
+                context: context,
+              ),
+            ),
+            SlideTransition(
+              child: NearbyPage(),
+              position: placesPageOffset,
+            ),
+            SlideTransition(
+              position: connectivityStatusBarOffset,
+              child: ConnectionStatusBar(),
+            ),
+          ]),
+        ),
         bottomNavigationBar: Visibility(
           visible: currentPage.value == _HomeSubPage.map,
           child: SizeTransition(
             child: _bottomNavBar(
               context,
               bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+              bottomSheetController: bottomSheetController,
             ),
             sizeFactor: bottomNavSize,
           ),
@@ -134,6 +149,7 @@ class HomePage extends HookWidget {
         drawer: _navigationDrawer(
           context,
           drawerItemTextGroup: drawerItemTextGroup,
+          bottomSheetController: bottomSheetController,
         ),
       ),
     );
@@ -144,6 +160,8 @@ class HomePage extends HookWidget {
     @required FocusNode searchFieldFocusNode,
     @required AnimationController placesPageAnimController,
     @required AnimationController mapTapAnimController,
+    @required
+        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
   }) {
     if (currentPage.value == _HomeSubPage.places) {
       _showMapPage(
@@ -151,6 +169,7 @@ class HomePage extends HookWidget {
         searchFieldFocusNode: searchFieldFocusNode,
         placesPageAnimController: placesPageAnimController,
         mapTapAnimController: mapTapAnimController,
+        bottomSheetController: bottomSheetController,
       );
       return Future.value(false);
     } else {
@@ -161,6 +180,8 @@ class HomePage extends HookWidget {
   Widget _bottomNavBar(
     BuildContext context, {
     @required Animation<double> bottomNavButtonsOpacity,
+    @required
+        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
   }) {
     return StreamBuilder<bool>(
       stream: context
@@ -176,20 +197,29 @@ class HomePage extends HookWidget {
             children: [
               _bottomNavBarButton(
                 labelText: Strings.lines,
-                onPressed: () => _showLinesPage(context),
+                onPressed: () {
+                  bottomSheetController.value?.close();
+                  _showLinesPage(context);
+                },
                 bottomNavButtonsOpacity: bottomNavButtonsOpacity,
                 icon: Icons.grid_on,
               ),
               _bottomNavBarButton(
                 labelText: Strings.locations,
-                onPressed: () => _showLocationsPage(context),
+                onPressed: () {
+                  bottomSheetController.value?.close();
+                  _showLocationsPage(context);
+                },
                 bottomNavButtonsOpacity: bottomNavButtonsOpacity,
                 icon: Icons.location_on,
               ),
               if (snapshot.data ?? false)
                 _bottomNavBarButton(
                   labelText: 'Tracked',
-                  onPressed: () => _showTrackedPage(context),
+                  onPressed: () {
+                    bottomSheetController.value?.close();
+                    _showTrackedPage(context);
+                  },
                   bottomNavButtonsOpacity: bottomNavButtonsOpacity,
                   icon: Icons.track_changes,
                 ),
@@ -234,15 +264,18 @@ class HomePage extends HookWidget {
     @required ValueNotifier<_HomeSubPage> currentPage,
     @required AnimationController placesPageAnimController,
     @required AnimationController mapTapAnimController,
+    @required
+        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
   }) {
     return TextFieldAppBar(
       textFieldFocusNode: searchFieldFocusNode,
       textFieldController: searchFieldController,
-      leading: _drawerButton(
+      leading: _leadingAppBarButton(
         currentPage: currentPage,
         searchFieldFocusNode: searchFieldFocusNode,
         placesPageAnimController: placesPageAnimController,
         mapTapAnimController: mapTapAnimController,
+        bottomSheetController: bottomSheetController,
       ),
       hint: Strings.transportNearby,
       onChanged: (query) {},
@@ -254,11 +287,14 @@ class HomePage extends HookWidget {
     @required ValueNotifier<_HomeSubPage> currentPage,
     @required AnimationController placesPageAnimController,
     @required AnimationController mapTapAnimController,
+    @required
+        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
   }) {
     currentPage.value = page;
     if (page == _HomeSubPage.map) {
       placesPageAnimController.reverse();
     } else if (page == _HomeSubPage.places) {
+      bottomSheetController.value?.close();
       placesPageAnimController.forward();
       mapTapAnimController.reverse();
     }
@@ -269,6 +305,8 @@ class HomePage extends HookWidget {
     @required ValueNotifier<_HomeSubPage> currentPage,
     @required AnimationController placesPageAnimController,
     @required AnimationController mapTapAnimController,
+    @required
+        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
   }) {
     searchFieldFocusNode.unfocus();
     _changeSubPage(
@@ -276,14 +314,17 @@ class HomePage extends HookWidget {
       currentPage: currentPage,
       placesPageAnimController: placesPageAnimController,
       mapTapAnimController: mapTapAnimController,
+      bottomSheetController: bottomSheetController,
     );
   }
 
-  Widget _drawerButton({
+  Widget _leadingAppBarButton({
     @required ValueNotifier<_HomeSubPage> currentPage,
     @required FocusNode searchFieldFocusNode,
     @required AnimationController placesPageAnimController,
     @required AnimationController mapTapAnimController,
+    @required
+        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
   }) {
     return Builder(
       builder: (context) => CircularButton(
@@ -300,6 +341,7 @@ class HomePage extends HookWidget {
               currentPage: currentPage,
               placesPageAnimController: placesPageAnimController,
               mapTapAnimController: mapTapAnimController,
+              bottomSheetController: bottomSheetController,
             );
           } else {
             Scaffold.of(context).openDrawer();
@@ -379,6 +421,8 @@ class HomePage extends HookWidget {
   Widget _navigationDrawer(
     BuildContext context, {
     @required AutoSizeGroup drawerItemTextGroup,
+    @required
+        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
   }) {
     return Drawer(
       child: ListView(
@@ -394,6 +438,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
+              bottomSheetController.value?.close();
               _showLinesPage(context);
             },
           ),
@@ -403,6 +448,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
+              bottomSheetController.value?.close();
               _showLocationsPage(context);
             },
           ),
@@ -412,6 +458,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
+              bottomSheetController.value?.close();
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => SettingsPage()),
@@ -433,5 +480,35 @@ class HomePage extends HookWidget {
 
   void _hideControls(AnimationController mapTapAnimController) {
     mapTapAnimController.forward();
+  }
+
+  void _markerTapped({
+    @required String id,
+    @required BuildContext context,
+    @required
+        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
+  }) {
+    bottomSheetController.value = showBottomSheet(
+      context: context,
+      builder: (context) => CarouselSlider(
+        options: CarouselOptions(
+          autoPlay: false,
+          enlargeCenterPage: true,
+          viewportFraction: 0.9,
+          aspectRatio: 2.0,
+          initialPage: 2,
+        ),
+        items: [1, 2, 3, 4, 5]
+            .map(
+              (i) => Container(
+                width: MediaQuery.of(context).size.width,
+                margin: EdgeInsets.symmetric(horizontal: 5.0),
+                decoration: BoxDecoration(color: Colors.amber),
+                child: Text('text $i', style: TextStyle(fontSize: 16.0)),
+              ),
+            )
+            .toList(),
+      ),
+    );
   }
 }
