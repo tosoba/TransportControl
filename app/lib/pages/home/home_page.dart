@@ -492,13 +492,13 @@ class HomePage extends HookWidget {
     final vehicles =
         context.bloc<MapBloc>().state.trackedVehicles.entries.toList();
     bottomSheetController.showIfClosed(
+      //TODO: use StreamBuilder here so last updated text will update
       context: context,
       builder: (context) => Container(
         color: Colors.transparent,
         child: CarouselSlider.builder(
           options: CarouselOptions(
-            autoPlay: false,
-            aspectRatio: 2.0,
+            aspectRatio: 2.0, // change this to alter height?
             enlargeCenterPage: true,
             initialPage:
                 vehicles.indexWhere((entry) => entry.key == marker.number),
@@ -507,13 +507,21 @@ class HomePage extends HookWidget {
           itemCount: vehicles.length,
           itemBuilder: (context, index) {
             final tracked = vehicles.elementAt(index).value;
-            return Container(
-              width: MediaQuery.of(context).size.width,
-              margin: EdgeInsets.symmetric(horizontal: 5.0),
-              decoration: BoxDecoration(color: Colors.red),
-              child: Text(
-                'Last updated ${tracked.vehicle.lastUpdate}',
-                style: const TextStyle(fontSize: 16.0),
+            return Card(
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                child: Column(
+                  children: [
+                    Text(
+                      tracked.vehicle.symbol,
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text('Last updated ${tracked.vehicle.lastUpdate}')
+                  ],
+                ),
               ),
             );
           },
