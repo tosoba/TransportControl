@@ -1,10 +1,10 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:connection_status_bar/connection_status_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:get_it/get_it.dart';
+import 'package:snaplist/snaplist.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
@@ -493,33 +493,35 @@ class HomePage extends HookWidget {
         context.bloc<MapBloc>().state.trackedVehicles.entries.toList();
     bottomSheetController.showIfClosed(
       context: context,
-      builder: (context) => Container(
-        color: Colors.transparent,
-        child: CarouselSlider.builder(
-          options: CarouselOptions(
-            autoPlay: false,
-            enlargeCenterPage: true,
-            viewportFraction: 0.9,
-            aspectRatio: 2.0,
-            initialPage:
+      builder: (context) {
+        final Size cardSize = const Size(300.0, 460.0);
+        return SnapList(
+          padding: EdgeInsets.only(
+              left: (MediaQuery.of(context).size.width - cardSize.width) / 2),
+          sizeProvider: (index, data) => cardSize,
+          separatorProvider: (index, data) => const Size(10.0, 10.0),
+          snaplistController: SnaplistController(
+            initialPosition:
                 vehicles.indexWhere((entry) => entry.key == marker.number),
-            onPageChanged: (index, reason) {},
           ),
-          itemCount: vehicles.length,
-          itemBuilder: (context, index) {
+          builder: (context, index, data) {
             final tracked = vehicles.elementAt(index).value;
-            return Container(
-              width: MediaQuery.of(context).size.width,
-              margin: EdgeInsets.symmetric(horizontal: 5.0),
-              decoration: BoxDecoration(color: Colors.red),
-              child: Text(
-                'Last updated ${tracked.vehicle.lastUpdate}',
-                style: const TextStyle(fontSize: 16.0),
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(16.0),
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                margin: EdgeInsets.symmetric(horizontal: 5.0),
+                decoration: BoxDecoration(color: Colors.red),
+                child: Text(
+                  'Last updated ${tracked.vehicle.lastUpdate}',
+                  style: const TextStyle(fontSize: 16.0),
+                ),
               ),
             );
           },
-        ),
-      ),
+          count: vehicles.length,
+        );
+      },
     );
   }
 }
@@ -531,7 +533,11 @@ extension PersistantBottomSheetExt
     @required Widget Function(BuildContext) builder,
   }) {
     if (value == null) {
-      final controller = showBottomSheet(context: context, builder: builder);
+      final controller = showBottomSheet(
+        context: context,
+        builder: builder,
+        backgroundColor: Colors.transparent,
+      );
       value = controller;
       controller.closed.then((_) => value = null);
     }
