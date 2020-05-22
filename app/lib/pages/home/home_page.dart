@@ -120,10 +120,9 @@ class HomePage extends HookWidget {
             MapPage(
               mapTapped: () => _mapTapped(mapTapAnimController),
               animatedToBounds: () => _hideControls(mapTapAnimController),
-              markerTapped: (marker) => _markerTapped(
+              markerTapped: (marker) => bottomSheetController.showIfClosed(
+                context,
                 marker: marker,
-                bottomSheetController: bottomSheetController,
-                context: context,
               ),
             ),
             SlideTransition(
@@ -482,21 +481,18 @@ class HomePage extends HookWidget {
   void _hideControls(AnimationController mapTapAnimController) {
     mapTapAnimController.forward();
   }
+}
 
-  void _markerTapped({
-    @required IconifiedMarker marker,
-    @required BuildContext context,
-    @required
-        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
-  }) {
-    final vehicles =
-        context.bloc<MapBloc>().state.trackedVehicles.entries.toList();
-    bottomSheetController.showIfClosed(
-      //TODO: use StreamBuilder here so last updated text will update
-      context: context,
-      builder: (context) => Container(
-        color: Colors.transparent,
-        child: CarouselSlider.builder(
+extension PersistantBottomSheetExt
+    on ValueNotifier<PersistentBottomSheetController> {
+  void showIfClosed(BuildContext context, {@required IconifiedMarker marker}) {
+    if (value == null) {
+      final vehicles =
+          context.bloc<MapBloc>().state.trackedVehicles.entries.toList();
+      final sheetController = showBottomSheet(
+        context: context,
+        //TODO: use StreamBuilder here so last updated text will update
+        builder: (context) => CarouselSlider.builder(
           options: CarouselOptions(
             aspectRatio: 2.0, // change this to alter height?
             enlargeCenterPage: true,
@@ -526,25 +522,22 @@ class HomePage extends HookWidget {
             );
           },
         ),
-      ),
-    );
-  }
-}
-
-extension PersistantBottomSheetExt
-    on ValueNotifier<PersistentBottomSheetController> {
-  void showIfClosed({
-    @required BuildContext context,
-    @required Widget Function(BuildContext) builder,
-  }) {
-    if (value == null) {
-      final sheetController = showBottomSheet(
-        context: context,
-        builder: builder,
         backgroundColor: Colors.transparent,
       );
       value = sheetController;
       sheetController.closed.then((_) => value = null);
+    } else {
+      //TODO: scroll to page with selected vehicle
     }
   }
+}
+
+class VehiclesBottomSheetCarouselControllers {
+  final PersistentBottomSheetController bottomSheetController;
+  final CarouselController carouselController;
+
+  VehiclesBottomSheetCarouselControllers(
+    this.bottomSheetController,
+    this.carouselController,
+  );
 }
