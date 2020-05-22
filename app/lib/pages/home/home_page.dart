@@ -69,8 +69,8 @@ class HomePage extends HookWidget {
       ).animate(mapTapAnimController),
     );
 
-    final bottomSheetController =
-        useState<PersistentBottomSheetController>(null);
+    final bottomSheetControllers =
+        useState<_VehiclesBottomSheetCarouselControllers>(null);
 
     final searchFieldFocusNode = useFocusNode();
     searchFieldFocusNode.addListener(() {
@@ -81,7 +81,7 @@ class HomePage extends HookWidget {
           currentPage: currentPage,
           placesPageAnimController: placesPageAnimController,
           mapTapAnimController: mapTapAnimController,
-          bottomSheetController: bottomSheetController,
+          bottomSheetControllers: bottomSheetControllers,
         );
     });
     final searchFieldController = useTextEditingController();
@@ -99,7 +99,7 @@ class HomePage extends HookWidget {
         searchFieldFocusNode: searchFieldFocusNode,
         mapTapAnimController: mapTapAnimController,
         placesPageAnimController: placesPageAnimController,
-        bottomSheetController: bottomSheetController,
+        bottomSheetControllers: bottomSheetControllers,
       ),
       child: Scaffold(
         extendBodyBehindAppBar: true,
@@ -113,7 +113,7 @@ class HomePage extends HookWidget {
             searchFieldController: searchFieldController,
             placesPageAnimController: placesPageAnimController,
             mapTapAnimController: mapTapAnimController,
-            bottomSheetController: bottomSheetController,
+            bottomSheetControllers: bottomSheetControllers,
           ),
         ),
         body: Builder(
@@ -121,7 +121,7 @@ class HomePage extends HookWidget {
             MapPage(
               mapTapped: () => _mapTapped(mapTapAnimController),
               animatedToBounds: () => _hideControls(mapTapAnimController),
-              markerTapped: (marker) => bottomSheetController.showIfClosed(
+              markerTapped: (marker) => bottomSheetControllers.showIfClosed(
                 context,
                 marker: marker,
               ),
@@ -142,7 +142,7 @@ class HomePage extends HookWidget {
             child: _bottomNavBar(
               context,
               bottomNavButtonsOpacity: bottomNavButtonsOpacity,
-              bottomSheetController: bottomSheetController,
+              bottomSheetControllers: bottomSheetControllers,
             ),
             sizeFactor: bottomNavSize,
           ),
@@ -150,7 +150,7 @@ class HomePage extends HookWidget {
         drawer: _navigationDrawer(
           context,
           drawerItemTextGroup: drawerItemTextGroup,
-          bottomSheetController: bottomSheetController,
+          bottomSheetControllers: bottomSheetControllers,
         ),
       ),
     );
@@ -162,7 +162,8 @@ class HomePage extends HookWidget {
     @required AnimationController placesPageAnimController,
     @required AnimationController mapTapAnimController,
     @required
-        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
+        ValueNotifier<_VehiclesBottomSheetCarouselControllers>
+            bottomSheetControllers,
   }) {
     if (currentPage.value == _HomeSubPage.places) {
       _showMapPage(
@@ -170,7 +171,7 @@ class HomePage extends HookWidget {
         searchFieldFocusNode: searchFieldFocusNode,
         placesPageAnimController: placesPageAnimController,
         mapTapAnimController: mapTapAnimController,
-        bottomSheetController: bottomSheetController,
+        bottomSheetControllers: bottomSheetControllers,
       );
       return Future.value(false);
     } else {
@@ -182,7 +183,8 @@ class HomePage extends HookWidget {
     BuildContext context, {
     @required Animation<double> bottomNavButtonsOpacity,
     @required
-        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
+        ValueNotifier<_VehiclesBottomSheetCarouselControllers>
+            bottomSheetControllers,
   }) {
     return StreamBuilder<bool>(
       stream: context
@@ -199,7 +201,7 @@ class HomePage extends HookWidget {
               _bottomNavBarButton(
                 labelText: Strings.lines,
                 onPressed: () {
-                  bottomSheetController.value?.close();
+                  bottomSheetControllers.close();
                   _showLinesPage(context);
                 },
                 bottomNavButtonsOpacity: bottomNavButtonsOpacity,
@@ -208,7 +210,7 @@ class HomePage extends HookWidget {
               _bottomNavBarButton(
                 labelText: Strings.locations,
                 onPressed: () {
-                  bottomSheetController.value?.close();
+                  bottomSheetControllers.close();
                   _showLocationsPage(context);
                 },
                 bottomNavButtonsOpacity: bottomNavButtonsOpacity,
@@ -218,7 +220,7 @@ class HomePage extends HookWidget {
                 _bottomNavBarButton(
                   labelText: 'Tracked',
                   onPressed: () {
-                    bottomSheetController.value?.close();
+                    bottomSheetControllers.close();
                     _showTrackedPage(context);
                   },
                   bottomNavButtonsOpacity: bottomNavButtonsOpacity,
@@ -266,7 +268,8 @@ class HomePage extends HookWidget {
     @required AnimationController placesPageAnimController,
     @required AnimationController mapTapAnimController,
     @required
-        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
+        ValueNotifier<_VehiclesBottomSheetCarouselControllers>
+            bottomSheetControllers,
   }) {
     return TextFieldAppBar(
       textFieldFocusNode: searchFieldFocusNode,
@@ -276,7 +279,7 @@ class HomePage extends HookWidget {
         searchFieldFocusNode: searchFieldFocusNode,
         placesPageAnimController: placesPageAnimController,
         mapTapAnimController: mapTapAnimController,
-        bottomSheetController: bottomSheetController,
+        bottomSheetControllers: bottomSheetControllers,
       ),
       hint: Strings.transportNearby,
       onChanged: (query) {},
@@ -289,13 +292,14 @@ class HomePage extends HookWidget {
     @required AnimationController placesPageAnimController,
     @required AnimationController mapTapAnimController,
     @required
-        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
+        ValueNotifier<_VehiclesBottomSheetCarouselControllers>
+            bottomSheetControllers,
   }) {
     currentPage.value = page;
     if (page == _HomeSubPage.map) {
       placesPageAnimController.reverse();
     } else if (page == _HomeSubPage.places) {
-      bottomSheetController.value?.close();
+      bottomSheetControllers.close();
       placesPageAnimController.forward();
       mapTapAnimController.reverse();
     }
@@ -307,7 +311,8 @@ class HomePage extends HookWidget {
     @required AnimationController placesPageAnimController,
     @required AnimationController mapTapAnimController,
     @required
-        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
+        ValueNotifier<_VehiclesBottomSheetCarouselControllers>
+            bottomSheetControllers,
   }) {
     searchFieldFocusNode.unfocus();
     _changeSubPage(
@@ -315,7 +320,7 @@ class HomePage extends HookWidget {
       currentPage: currentPage,
       placesPageAnimController: placesPageAnimController,
       mapTapAnimController: mapTapAnimController,
-      bottomSheetController: bottomSheetController,
+      bottomSheetControllers: bottomSheetControllers,
     );
   }
 
@@ -325,7 +330,8 @@ class HomePage extends HookWidget {
     @required AnimationController placesPageAnimController,
     @required AnimationController mapTapAnimController,
     @required
-        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
+        ValueNotifier<_VehiclesBottomSheetCarouselControllers>
+            bottomSheetControllers,
   }) {
     return Builder(
       builder: (context) => CircularButton(
@@ -342,7 +348,7 @@ class HomePage extends HookWidget {
               currentPage: currentPage,
               placesPageAnimController: placesPageAnimController,
               mapTapAnimController: mapTapAnimController,
-              bottomSheetController: bottomSheetController,
+              bottomSheetControllers: bottomSheetControllers,
             );
           } else {
             Scaffold.of(context).openDrawer();
@@ -423,7 +429,8 @@ class HomePage extends HookWidget {
     BuildContext context, {
     @required AutoSizeGroup drawerItemTextGroup,
     @required
-        ValueNotifier<PersistentBottomSheetController> bottomSheetController,
+        ValueNotifier<_VehiclesBottomSheetCarouselControllers>
+            bottomSheetControllers,
   }) {
     return Drawer(
       child: ListView(
@@ -439,7 +446,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
-              bottomSheetController.value?.close();
+              bottomSheetControllers.close();
               _showLinesPage(context);
             },
           ),
@@ -449,7 +456,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
-              bottomSheetController.value?.close();
+              bottomSheetControllers.close();
               _showLocationsPage(context);
             },
           ),
@@ -459,7 +466,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
-              bottomSheetController.value?.close();
+              bottomSheetControllers.close();
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => SettingsPage()),
@@ -485,21 +492,27 @@ class HomePage extends HookWidget {
 }
 
 extension PersistantBottomSheetExt
-    on ValueNotifier<PersistentBottomSheetController> {
+    on ValueNotifier<_VehiclesBottomSheetCarouselControllers> {
+  void close() {
+    value?.sheetController?.close();
+  }
+
   void showIfClosed(BuildContext context, {@required IconifiedMarker marker}) {
+    final bloc = context.bloc<MapBloc>();
     if (value == null) {
+      final carouselController = CarouselControllerImpl();
       final sheetController = showBottomSheet(
         context: context,
         builder: (context) => StreamBuilder<List<MapEntry<String, MapVehicle>>>(
-          stream: context
-              .bloc<MapBloc>()
-              .map((state) => state.trackedVehicles.entries.toList()),
+          stream: bloc.map((state) => state.trackedVehicles.entries.toList()),
           builder: (context, snapshot) {
             final vehicles = snapshot.data;
             if (vehicles == null) return Container();
             return CarouselSlider.builder(
+              carouselController: carouselController,
               options: CarouselOptions(
-                aspectRatio: 2.0, // change this to alter height?
+                viewportFraction: .5,
+                aspectRatio: 3.0,
                 enlargeCenterPage: true,
                 initialPage:
                     vehicles.indexWhere((entry) => entry.key == marker.number),
@@ -531,20 +544,28 @@ extension PersistantBottomSheetExt
         ),
         backgroundColor: Colors.transparent,
       );
-      value = sheetController;
+      value = _VehiclesBottomSheetCarouselControllers(
+        sheetController,
+        carouselController,
+      );
       sheetController.closed.then((_) => value = null);
     } else {
-      //TODO: scroll to page with selected vehicle
+      final selectedVehicleIndex = bloc.state.trackedVehicles.entries
+          .toList()
+          .indexWhere((entry) => entry.key == marker.number);
+      if (selectedVehicleIndex != -1) {
+        value.carouselController.animateToPage(selectedVehicleIndex);
+      }
     }
   }
 }
 
-class VehiclesBottomSheetCarouselControllers {
-  final PersistentBottomSheetController bottomSheetController;
+class _VehiclesBottomSheetCarouselControllers {
+  final PersistentBottomSheetController sheetController;
   final CarouselController carouselController;
 
-  VehiclesBottomSheetCarouselControllers(
-    this.bottomSheetController,
+  _VehiclesBottomSheetCarouselControllers(
+    this.sheetController,
     this.carouselController,
   );
 }
