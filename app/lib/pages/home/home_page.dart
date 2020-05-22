@@ -524,17 +524,24 @@ extension PersistantBottomSheetExt
                 final tracked = vehicles.elementAt(index).value;
                 return Card(
                   child: Container(
+                    padding: EdgeInsets.all(5),
                     width: MediaQuery.of(context).size.width,
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           tracked.vehicle.symbol,
+                          textAlign: TextAlign.start,
                           style: const TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(tracked.vehicle.updatedAgoLabel)
+                        AutoSizeText(
+                          tracked.vehicle.updatedAgoLabel,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
                   ),
