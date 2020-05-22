@@ -19,6 +19,7 @@ import 'package:transport_control/pages/nearby/nearby_page.dart';
 import 'package:transport_control/pages/settings/settings_page.dart';
 import 'package:transport_control/pages/tracked/tracked_page.dart';
 import 'package:transport_control/repo/locations_repo.dart';
+import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
@@ -533,7 +534,7 @@ extension PersistantBottomSheetExt
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text('Last updated ${tracked.vehicle.lastUpdate}')
+                        Text(tracked.vehicle.updatedAgoLabel)
                       ],
                     ),
                   ),

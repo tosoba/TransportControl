@@ -12,7 +12,8 @@ Vehicle _$VehicleFromJson(Map<String, dynamic> json) {
     lon: (json['Lon'] as num)?.toDouble(),
     symbol: json['Lines'] as String,
     brigade: json['Brigade'] as String,
-    lastUpdate: json['Time'] as String,
+    lastUpdate:
+        json['Time'] == null ? null : DateTime.parse(json['Time'] as String),
     number: json['VehicleNumber'] as String,
   );
 }
@@ -22,6 +23,6 @@ Map<String, dynamic> _$VehicleToJson(Vehicle instance) => <String, dynamic>{
       'Lon': instance.lon,
       'Lines': instance.symbol,
       'Brigade': instance.brigade,
-      'Time': instance.lastUpdate,
+      'Time': instance.lastUpdate?.toIso8601String(),
       'VehicleNumber': instance.number,
     };

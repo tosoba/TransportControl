@@ -13,7 +13,7 @@ class Vehicle {
   @JsonKey(name: 'Brigade')
   final String brigade;
   @JsonKey(name: 'Time')
-  final String lastUpdate;
+  final DateTime lastUpdate;
   @JsonKey(name: 'VehicleNumber')
   final String number;
 

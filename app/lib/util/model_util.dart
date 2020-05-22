@@ -16,6 +16,12 @@ extension VehicleExt on Vehicle {
   int get type => _typeFrom(symbol);
 
   LatLng get position => LatLng(lat, lon);
+
+  String get updatedAgoLabel {
+    if (lastUpdate == null) return 'Unknown update time.';
+    final diff = DateTime.now().difference(lastUpdate).inMilliseconds;
+    return _dateTimeDiffInfo(diffMillis: diff, prefix: 'Updated');
+  }
 }
 
 extension LineExt on Line {
@@ -28,7 +34,7 @@ extension LineExt on Line {
       if (symbol.firstCharIsLetter) return symbol[0];
       int parsedSymbol = int.tryParse(symbol);
       if (parsedSymbol == null) {
-        return "OTHER";
+        return 'OTHER';
       } else {
         return ((parsedSymbol / 100).floor() * 100).toString();
       }
@@ -56,53 +62,50 @@ class VehicleType {
   VehicleType._();
 }
 
+String _dateTimeDiffInfo({
+  @required int diffMillis,
+  @required String prefix,
+}) {
+  final diffSeconds = diffMillis ~/ 1000;
+  if (diffSeconds < 1) return '$prefix less than a second ago';
+  final diffMinutes = diffMillis ~/ (60 * 1000);
+  if (diffMinutes < 1)
+    return diffSeconds > 1
+        ? '$prefix ${diffSeconds} seconds ago'
+        : '$prefix 1 second ago';
+  final diffHours = diffMillis ~/ (60 * 60 * 1000);
+  if (diffHours < 1)
+    return diffMinutes > 1
+        ? '$prefix ${diffMinutes} minutes ago'
+        : '$prefix 1 minute ago';
+  final diffDays = diffMillis ~/ (60 * 60 * 1000 * 24);
+  if (diffDays < 1)
+    return diffHours > 1
+        ? '$prefix ${diffHours} hours ago'
+        : '$prefix 1 hour ago';
+  final diffWeeks = diffMillis ~/ (60 * 60 * 1000 * 24 * 7);
+  if (diffWeeks < 1)
+    return diffDays > 1 ? '$prefix ${diffDays} days ago' : '$prefix 1 day ago';
+  final diffMonths = diffMillis ~/ (60.0 * 60.0 * 1000.0 * 24.0 * 30.41666666);
+  if (diffMonths < 1)
+    return diffWeeks > 1
+        ? '$prefix ${diffWeeks} weeks ago'
+        : '$prefix 1 week ago';
+  final diffYears = diffMillis ~/ (60 * 60 * 1000 * 24 * 365);
+  if (diffYears < 1)
+    return diffMonths > 1
+        ? '$prefix ${diffMonths} months ago'
+        : '$prefix 1 month ago';
+  return diffYears > 1
+      ? '$prefix ${diffYears} years ago'
+      : '$prefix 1 year ago';
+}
+
 extension LocationExt on Location {
   String get timesSearchedInfo {
     return timesSearched > 0
         ? 'Searched ${timesSearched} ${timesSearched > 1 ? 'times' : 'time'}'
         : 'Never searched';
-  }
-
-  String _dateTimeDiffInfo({
-    @required int diffMillis,
-    @required String prefix,
-  }) {
-    final diffSeconds = diffMillis ~/ 1000;
-    if (diffSeconds < 1) return '$prefix less than a second ago';
-    final diffMinutes = diffMillis ~/ (60 * 1000);
-    if (diffMinutes < 1)
-      return diffSeconds > 1
-          ? '$prefix ${diffSeconds} seconds ago'
-          : '$prefix 1 second ago';
-    final diffHours = diffMillis ~/ (60 * 60 * 1000);
-    if (diffHours < 1)
-      return diffMinutes > 1
-          ? '$prefix ${diffMinutes} minutes ago'
-          : '$prefix 1 minute ago';
-    final diffDays = diffMillis ~/ (60 * 60 * 1000 * 24);
-    if (diffDays < 1)
-      return diffHours > 1
-          ? '$prefix ${diffHours} hours ago'
-          : '$prefix 1 hour ago';
-    final diffWeeks = diffMillis ~/ (60 * 60 * 1000 * 24 * 7);
-    if (diffWeeks < 1)
-      return diffDays > 1
-          ? '$prefix ${diffDays} days ago'
-          : '$prefix 1 day ago';
-    final diffMonths =
-        diffMillis ~/ (60.0 * 60.0 * 1000.0 * 24.0 * 30.41666666);
-    if (diffMonths < 1)
-      return diffWeeks > 1
-          ? '$prefix ${diffWeeks} weeks ago'
-          : '$prefix 1 week ago';
-    final diffYears = diffMillis ~/ (60 * 60 * 1000 * 24 * 365);
-    if (diffYears < 1)
-      return diffMonths > 1
-          ? '$prefix ${diffMonths} months ago'
-          : '$prefix 1 month ago';
-    return diffYears > 1
-        ? '$prefix ${diffYears} years ago'
-        : '$prefix 1 year ago';
   }
 
   String get lastSearchedInfo {
