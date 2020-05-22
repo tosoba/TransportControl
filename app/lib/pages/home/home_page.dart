@@ -13,6 +13,7 @@ import 'package:transport_control/pages/locations/locations_page.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_markers.dart';
 import 'package:transport_control/pages/map/map_page.dart';
+import 'package:transport_control/pages/map/map_vehicle.dart';
 import 'package:transport_control/pages/nearby/nearby_bloc.dart';
 import 'package:transport_control/pages/nearby/nearby_page.dart';
 import 'package:transport_control/pages/settings/settings_page.dart';
@@ -487,38 +488,44 @@ extension PersistantBottomSheetExt
     on ValueNotifier<PersistentBottomSheetController> {
   void showIfClosed(BuildContext context, {@required IconifiedMarker marker}) {
     if (value == null) {
-      final vehicles =
-          context.bloc<MapBloc>().state.trackedVehicles.entries.toList();
       final sheetController = showBottomSheet(
         context: context,
-        //TODO: use StreamBuilder here so last updated text will update
-        builder: (context) => CarouselSlider.builder(
-          options: CarouselOptions(
-            aspectRatio: 2.0, // change this to alter height?
-            enlargeCenterPage: true,
-            initialPage:
-                vehicles.indexWhere((entry) => entry.key == marker.number),
-            onPageChanged: (index, reason) {},
-          ),
-          itemCount: vehicles.length,
-          itemBuilder: (context, index) {
-            final tracked = vehicles.elementAt(index).value;
-            return Card(
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                child: Column(
-                  children: [
-                    Text(
-                      tracked.vehicle.symbol,
-                      style: const TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text('Last updated ${tracked.vehicle.lastUpdate}')
-                  ],
-                ),
+        builder: (context) => StreamBuilder<List<MapEntry<String, MapVehicle>>>(
+          stream: context
+              .bloc<MapBloc>()
+              .map((state) => state.trackedVehicles.entries.toList()),
+          builder: (context, snapshot) {
+            final vehicles = snapshot.data;
+            if (vehicles == null) return Container();
+            return CarouselSlider.builder(
+              options: CarouselOptions(
+                aspectRatio: 2.0, // change this to alter height?
+                enlargeCenterPage: true,
+                initialPage:
+                    vehicles.indexWhere((entry) => entry.key == marker.number),
+                onPageChanged: (index, reason) {},
               ),
+              itemCount: vehicles.length,
+              itemBuilder: (context, index) {
+                final tracked = vehicles.elementAt(index).value;
+                return Card(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    child: Column(
+                      children: [
+                        Text(
+                          tracked.vehicle.symbol,
+                          style: const TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text('Last updated ${tracked.vehicle.lastUpdate}')
+                      ],
+                    ),
+                  ),
+                );
+              },
             );
           },
         ),
