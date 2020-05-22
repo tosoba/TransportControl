@@ -159,7 +159,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         return state.copyWith(trackedVehicles: updatedVehicles);
       },
       selectVehicle: (evt) => evt.number == state.selectedVehicleNumber
-          ? state.withNoSelectedVehicle
+          ? state
           : state.copyWith(selectedVehicleNumber: evt.number),
       deselectVehicle: (_) => state.withNoSelectedVehicle,
     );
@@ -267,7 +267,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     add(MapEvent.cameraMoved(bounds: bounds, zoom: zoom));
   }
 
-  void markerTapped(String number) {
+  void selectVehicle(String number) {
     add(MapEvent.selectVehicle(number: number));
   }
 

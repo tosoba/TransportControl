@@ -96,7 +96,7 @@ class _MapPageState extends State<MapPage>
                         ? () => _animateToClusterChildrenBounds(
                               marker.childrenPositions,
                             )
-                        : () => _markerTapped(marker),
+                        : () => widget.markerTapped(marker),
                   ),
                 )
                 .toSet(),
@@ -126,10 +126,5 @@ class _MapPageState extends State<MapPage>
       CameraUpdate.newLatLngBounds(childrenPositions.bounds, 50),
     );
     widget.animatedToBounds();
-  }
-
-  void _markerTapped(IconifiedMarker marker) {
-    context.bloc<MapBloc>().markerTapped(marker.number);
-    widget.markerTapped(marker);
   }
 }

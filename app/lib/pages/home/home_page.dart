@@ -122,7 +122,8 @@ class HomePage extends HookWidget {
             MapPage(
               mapTapped: () => _mapTapped(mapTapAnimController),
               animatedToBounds: () => _hideControls(mapTapAnimController),
-              markerTapped: (marker) => bottomSheetControllers.showIfClosed(
+              markerTapped: (marker) =>
+                  bottomSheetControllers.showOrUpdateBottomSheet(
                 context,
                 marker: marker,
               ),
@@ -202,7 +203,7 @@ class HomePage extends HookWidget {
               _bottomNavBarButton(
                 labelText: Strings.lines,
                 onPressed: () {
-                  bottomSheetControllers.close();
+                  bottomSheetControllers.closeBottomSheet();
                   _showLinesPage(context);
                 },
                 bottomNavButtonsOpacity: bottomNavButtonsOpacity,
@@ -211,7 +212,7 @@ class HomePage extends HookWidget {
               _bottomNavBarButton(
                 labelText: Strings.locations,
                 onPressed: () {
-                  bottomSheetControllers.close();
+                  bottomSheetControllers.closeBottomSheet();
                   _showLocationsPage(context);
                 },
                 bottomNavButtonsOpacity: bottomNavButtonsOpacity,
@@ -221,7 +222,7 @@ class HomePage extends HookWidget {
                 _bottomNavBarButton(
                   labelText: 'Tracked',
                   onPressed: () {
-                    bottomSheetControllers.close();
+                    bottomSheetControllers.closeBottomSheet();
                     _showTrackedPage(context);
                   },
                   bottomNavButtonsOpacity: bottomNavButtonsOpacity,
@@ -300,7 +301,7 @@ class HomePage extends HookWidget {
     if (page == _HomeSubPage.map) {
       placesPageAnimController.reverse();
     } else if (page == _HomeSubPage.places) {
-      bottomSheetControllers.close();
+      bottomSheetControllers.closeBottomSheet();
       placesPageAnimController.forward();
       mapTapAnimController.reverse();
     }
@@ -447,7 +448,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
-              bottomSheetControllers.close();
+              bottomSheetControllers.closeBottomSheet();
               _showLinesPage(context);
             },
           ),
@@ -457,7 +458,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
-              bottomSheetControllers.close();
+              bottomSheetControllers.closeBottomSheet();
               _showLocationsPage(context);
             },
           ),
@@ -467,7 +468,7 @@ class HomePage extends HookWidget {
             group: drawerItemTextGroup,
             onTap: () {
               Navigator.pop(context);
-              bottomSheetControllers.close();
+              bottomSheetControllers.closeBottomSheet();
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => SettingsPage()),
@@ -492,14 +493,18 @@ class HomePage extends HookWidget {
   }
 }
 
-extension PersistantBottomSheetExt
+extension _VehiclesBottomSheetCarouselControllersExt
     on ValueNotifier<_VehiclesBottomSheetCarouselControllers> {
-  void close() {
+  void closeBottomSheet() {
     value?.sheetController?.close();
   }
 
-  void showIfClosed(BuildContext context, {@required IconifiedMarker marker}) {
+  void showOrUpdateBottomSheet(
+    BuildContext context, {
+    @required IconifiedMarker marker,
+  }) {
     final bloc = context.bloc<MapBloc>();
+    bloc.selectVehicle(marker.number);
     if (value == null) {
       final carouselController = CarouselControllerImpl();
       final sheetController = showBottomSheet(
@@ -517,36 +522,18 @@ extension PersistantBottomSheetExt
                 enlargeCenterPage: true,
                 initialPage:
                     vehicles.indexWhere((entry) => entry.key == marker.number),
-                onPageChanged: (index, reason) {},
+                onPageChanged: (index, reason) {
+                  final vehicle = vehicles.elementAt(index);
+                  if (vehicle != null) {
+                    bloc.selectVehicle(vehicle.key);
+                  }
+                },
               ),
               itemCount: vehicles.length,
-              itemBuilder: (context, index) {
-                final tracked = vehicles.elementAt(index).value;
-                return Card(
-                  child: Container(
-                    padding: EdgeInsets.all(5),
-                    width: MediaQuery.of(context).size.width,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          tracked.vehicle.symbol,
-                          textAlign: TextAlign.start,
-                          style: const TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        AutoSizeText(
-                          tracked.vehicle.updatedAgoLabel,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+              itemBuilder: (context, index) => _vehicleCard(
+                context: context,
+                tracked: vehicles.elementAt(index).value,
+              ),
             );
           },
         ),
@@ -565,6 +552,36 @@ extension PersistantBottomSheetExt
         value.carouselController.animateToPage(selectedVehicleIndex);
       }
     }
+  }
+
+  Widget _vehicleCard({
+    @required BuildContext context,
+    @required MapVehicle tracked,
+  }) {
+    return Card(
+      child: Container(
+        padding: EdgeInsets.all(5),
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              tracked.vehicle.symbol,
+              textAlign: TextAlign.start,
+              style: const TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            AutoSizeText(
+              tracked.vehicle.updatedAgoLabel,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
