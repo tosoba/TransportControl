@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
@@ -72,6 +73,7 @@ class HomePage extends HookWidget {
 
     final bottomSheetControllers =
         useState<_VehiclesBottomSheetCarouselControllers>(null);
+    final moveToPositionNotifier = useState<LatLng>(null);
 
     final searchFieldFocusNode = useFocusNode();
     searchFieldFocusNode.addListener(() {
@@ -122,11 +124,14 @@ class HomePage extends HookWidget {
             MapPage(
               mapTapped: () => _mapTapped(mapTapAnimController),
               animatedToBounds: () => _hideControls(mapTapAnimController),
-              markerTapped: (marker) =>
-                  bottomSheetControllers.showOrUpdateBottomSheet(
-                context,
-                marker: marker,
-              ),
+              markerTapped: (marker) {
+                bottomSheetControllers.showOrUpdateBottomSheet(
+                  context,
+                  marker: marker,
+                  moveToPositionNotifier: moveToPositionNotifier,
+                );
+              },
+              moveToPositionNotifier: moveToPositionNotifier,
             ),
             SlideTransition(
               child: NearbyPage(),
@@ -502,9 +507,11 @@ extension _VehiclesBottomSheetCarouselControllersExt
   void showOrUpdateBottomSheet(
     BuildContext context, {
     @required IconifiedMarker marker,
+    @required ValueNotifier<LatLng> moveToPositionNotifier,
   }) {
     final bloc = context.bloc<MapBloc>();
     bloc.selectVehicle(marker.number);
+
     if (value == null) {
       final carouselController = CarouselControllerImpl();
       final sheetController = showBottomSheet(
@@ -512,8 +519,8 @@ extension _VehiclesBottomSheetCarouselControllersExt
         builder: (context) => StreamBuilder<List<MapEntry<String, MapVehicle>>>(
           stream: bloc.map((state) => state.trackedVehicles.entries.toList()),
           builder: (context, snapshot) {
-            final vehicles = snapshot.data;
-            if (vehicles == null) return Container();
+            final entries = snapshot.data;
+            if (entries == null) return Container();
             return CarouselSlider.builder(
               carouselController: carouselController,
               options: CarouselOptions(
@@ -521,28 +528,35 @@ extension _VehiclesBottomSheetCarouselControllersExt
                 aspectRatio: 3.0,
                 enlargeCenterPage: true,
                 initialPage:
-                    vehicles.indexWhere((entry) => entry.key == marker.number),
+                    entries.indexWhere((entry) => entry.key == marker.number),
                 onPageChanged: (index, reason) {
-                  final vehicle = vehicles.elementAt(index);
-                  if (vehicle != null) {
-                    bloc.selectVehicle(vehicle.key);
+                  final entry = entries.elementAt(index);
+                  if (entry != null) {
+                    bloc.selectVehicle(entry.key);
+                    final vehicle = entry.value.vehicle;
+                    moveToPositionNotifier.value = LatLng(
+                      vehicle.lat,
+                      vehicle.lon,
+                    );
                   }
                 },
               ),
-              itemCount: vehicles.length,
+              itemCount: entries.length,
               itemBuilder: (context, index) => _vehicleCard(
                 context: context,
-                tracked: vehicles.elementAt(index).value,
+                tracked: entries.elementAt(index).value,
               ),
             );
           },
         ),
         backgroundColor: Colors.transparent,
       );
+
       value = _VehiclesBottomSheetCarouselControllers(
         sheetController,
         carouselController,
       );
+
       sheetController.closed.then((_) => value = null);
     } else {
       final selectedVehicleIndex = bloc.state.trackedVehicles.entries

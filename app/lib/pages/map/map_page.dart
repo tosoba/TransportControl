@@ -13,12 +13,14 @@ class MapPage extends StatefulWidget {
   final void Function() mapTapped;
   final void Function() animatedToBounds;
   final void Function(IconifiedMarker) markerTapped;
+  final ValueNotifier<LatLng> moveToPositionNotifier;
 
   const MapPage({
     Key key,
     @required this.mapTapped,
     @required this.animatedToBounds,
     @required this.markerTapped,
+    @required this.moveToPositionNotifier,
   }) : super(key: key);
 
   @override
@@ -66,6 +68,14 @@ class _MapPageState extends State<MapPage>
             },
           ),
         );
+
+    widget.moveToPositionNotifier.addListener(() async {
+      final latLng = widget.moveToPositionNotifier.value;
+      if (latLng != null) {
+        final controller = await _mapController.future;
+        controller.animateCamera(CameraUpdate.newLatLng(latLng));
+      }
+    });
   }
 
   @override
