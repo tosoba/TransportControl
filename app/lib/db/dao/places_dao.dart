@@ -82,9 +82,12 @@ class PlacesDao extends DatabaseAccessor<Database> with _$PlacesDaoMixin {
   }) {
     return (select(placeSuggestions)
           ..where((suggestion) => isNotNull(suggestion.lastSearched))
-          ..orderBy(
-            [(suggestion) => OrderingTerm(expression: suggestion.lastSearched)],
-          )
+          ..orderBy([
+            (suggestion) => OrderingTerm(
+                  expression: suggestion.lastSearched,
+                  mode: OrderingMode.desc,
+                )
+          ])
           ..limit(limit))
         .watch();
   }

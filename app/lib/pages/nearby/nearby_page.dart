@@ -55,7 +55,11 @@ class NearbyPage extends StatelessWidget {
             )
           : Material(
               child: InkWell(
-                onTap: () {},
+                onTap: () {
+                  context.bloc<NearbyBloc>().suggestionSelected(
+                        locationId: suggestions[index - 1].locationId,
+                      );
+                },
                 child: ListTile(
                   title: Text(suggestions[index - 1].label),
                   subtitle: Text(

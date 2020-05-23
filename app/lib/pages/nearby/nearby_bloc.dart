@@ -92,11 +92,14 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
   }
 
   void queryUpdated(String query, {@required bool submitted}) {
-    if (query == null) return;
+    if (query == null) {
+      add(NearbyEvent.updateQuery(query: query));
+      return;
+    }
+    
     final processedQuery = query.trim().toLowerCase();
-    if (processedQuery.isEmpty) return;
-
     add(NearbyEvent.updateQuery(query: processedQuery));
+    if (processedQuery.isEmpty) return;
 
     if (submitted) {
       _submittedQueries.add(processedQuery);
