@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/load_nearby_vehicles_result.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
@@ -163,19 +164,23 @@ class LocationsPage extends HookWidget {
         stream: context.bloc<LocationsBloc>().listOrderStream,
         builder: (context, snapshot) {
           if (snapshot.data == null) return Container();
-
           return Slidable(
             actionPane: SlidableDrawerActionPane(),
             actionExtentRatio: 0.25,
-            child: Container(
-              color: Colors.white,
-              child: ListTile(
-                title: Text(location.name),
-                subtitle: Text(
-                  snapshot.data.when(
-                    savedTimestamp: (_) => location.savedAtInfo,
-                    lastSearched: (_) => location.lastSearchedInfo,
-                    timesSearched: (_) => location.timesSearchedInfo,
+            child: Material(
+              child: InkWell(
+                onTap: () => _loadVehiclesAndPop(
+                  context,
+                  bounds: location.bounds,
+                ),
+                child: ListTile(
+                  title: Text(location.name),
+                  subtitle: Text(
+                    snapshot.data.when(
+                      savedTimestamp: (_) => location.savedAtInfo,
+                      lastSearched: (_) => location.lastSearchedInfo,
+                      timesSearched: (_) => location.timesSearchedInfo,
+                    ),
                   ),
                 ),
               ),
@@ -213,23 +218,26 @@ class LocationsPage extends HookWidget {
     BuildContext context, {
     @required MapLocationPageMode mode,
   }) {
-    Navigator.of(context).push(PageRouteBuilder(
-      pageBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-      ) {
-        return _mapLocationPage(context, mode: mode);
-      },
-      transitionsBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-        Widget child,
-      ) {
-        return FadeTransition(opacity: animation, child: child);
-      },
-    ));
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (
+          BuildContext ctx,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+        ) {
+          return _mapLocationPage(context, mode: mode);
+        },
+        transitionsBuilder: (
+          BuildContext ctx,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child,
+        ) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    );
   }
 
   Widget _mapLocationPage(
@@ -252,18 +260,16 @@ class LocationsPage extends HookWidget {
       save: (_) => _saveOrUpdateLocation(context, result),
       orElse: (_) {
         _saveOrUpdateLocation(context, result);
-        _loadVehiclesAndPop(context, result);
+        _loadVehiclesAndPop(context, bounds: result.location.bounds);
       },
     );
   }
 
   void _loadVehiclesAndPop(
-    BuildContext context,
-    MapLocationPageResult result,
-  ) async {
-    if (await context
-        .bloc<LocationsBloc>()
-        .loadVehiclesInBounds(result.location.bounds)) {
+    BuildContext context, {
+    @required LatLngBounds bounds,
+  }) async {
+    if (await context.bloc<LocationsBloc>().loadVehiclesInBounds(bounds)) {
       Navigator.pop(context);
     } else {
       Scaffold.of(context)
