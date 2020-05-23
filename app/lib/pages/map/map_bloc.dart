@@ -148,23 +148,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         ),
       ),
       cameraMoved: (evt) => state.copyWith(zoom: evt.zoom, bounds: evt.bounds),
-      trackedLinesRemoved: (evt) {
-        final updatedVehicles = Map<String, MapVehicle>();
-        state.trackedVehicles.forEach((number, tracked) {
-          final sources = tracked.sources;
-          final containsOfLineSource = sources.any(
-            (source) => source is OfLine && evt.lines.contains(source.line),
-          );
-          if (!containsOfLineSource) {
-            updatedVehicles[number] = tracked;
-          } else if (sources.length == 1) {
-            return;
-          } else {
-            updatedVehicles[number] = tracked.withRemovedSource(sources.first);
-          }
-        });
-        return state.copyWith(trackedVehicles: updatedVehicles);
-      },
+      trackedLinesRemoved: (evt) => state.withRemovedSource(
+        (source) => source is OfLine && evt.lines.contains(source.line),
+      ),
+      removeSource: (evt) => state.withRemovedSource(
+        (source) => source == evt.source,
+      ),
       selectVehicle: (evt) => evt.number == state.selectedVehicleNumber
           ? state
           : state.copyWith(selectedVehicleNumber: evt.number),
@@ -284,6 +273,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     _untrackAllLinesSink.add(Object());
     add(MapEvent.clearMap());
   }
+
+  void removeSource(MapVehicleSource source) {
+    add(MapEvent.removeSource(source: source));
+  }
 }
 
 extension _MapStateExt on MapState {
@@ -369,6 +362,26 @@ extension _MapStateExt on MapState {
           vehicle,
           source: sourceForVehicle(vehicle),
         );
+      }
+    });
+    return copyWith(trackedVehicles: updatedVehicles);
+  }
+
+  MapState withRemovedSource(bool Function(MapVehicleSource) sourceMatcher) {
+    final updatedVehicles = Map<String, MapVehicle>();
+    trackedVehicles.forEach((number, tracked) {
+      final sources = tracked.sources;
+      final sourceToRemove = sources.firstWhere(
+        sourceMatcher,
+        orElse: () => null,
+      );
+
+      if (sourceToRemove == null) {
+        updatedVehicles[number] = tracked;
+      } else if (sources.length == 1) {
+        return;
+      } else {
+        updatedVehicles[number] = tracked.withRemovedSource(sourceToRemove);
       }
     });
     return copyWith(trackedVehicles: updatedVehicles);

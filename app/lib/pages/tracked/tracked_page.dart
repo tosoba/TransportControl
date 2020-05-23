@@ -65,7 +65,7 @@ class TrackedPage extends HookWidget {
                       ),
                       floating: true,
                     ),
-                    _sourcesList(sources),
+                    _sourcesList(context, sources: sources),
                   ],
                 ),
           floatingActionButton: _floatingActionButton(
@@ -78,8 +78,10 @@ class TrackedPage extends HookWidget {
   }
 
   Widget _sourcesList(
-    List<MapEntry<MapVehicleSource, Set<Vehicle>>> sources,
-  ) {
+    BuildContext context, {
+    @required List<MapEntry<MapVehicleSource, Set<Vehicle>>> sources,
+  }) {
+    final removeSource = context.bloc<MapBloc>().removeSource;
     return SliverList(
       delegate: SliverChildListDelegate(
         sources
@@ -89,7 +91,9 @@ class TrackedPage extends HookWidget {
                 index,
                 AnimationConfiguration.staggeredList(
                   position: index,
-                  child: FadeInAnimation(child: _sourceListItem(source)),
+                  child: FadeInAnimation(
+                    child: _sourceListItem(source, removeSource: removeSource),
+                  ),
                 ),
               ),
             )
@@ -99,7 +103,10 @@ class TrackedPage extends HookWidget {
     );
   }
 
-  Widget _sourceListItem(MapEntry<MapVehicleSource, Set<Vehicle>> source) {
+  Widget _sourceListItem(
+    MapEntry<MapVehicleSource, Set<Vehicle>> source, {
+    @required void Function(MapVehicleSource) removeSource,
+  }) {
     return Slidable(
       actionPane: SlidableDrawerActionPane(),
       actionExtentRatio: 0.25,
@@ -114,7 +121,7 @@ class TrackedPage extends HookWidget {
           )}''',
         )),
         subtitle: Text(
-          '''${source.value.length.toString()} ${source.value.length > 1 ? 'vehicles' : 'vehicle'} in total''',
+          '${source.value.length.toString()} ${source.value.length > 1 ? 'vehicles' : 'vehicle'} in total',
         ),
       ),
       secondaryActions: [
@@ -122,7 +129,7 @@ class TrackedPage extends HookWidget {
           caption: 'Delete',
           color: Colors.red,
           icon: Icons.delete,
-          onTap: () {}, //TODO: mapBloc.deleteSource
+          onTap: () => removeSource(source.key),
         ),
       ],
     );
