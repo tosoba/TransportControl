@@ -63,14 +63,15 @@ class PlacesDao extends DatabaseAccessor<Database> with _$PlacesDaoMixin {
   }
 
   Future<List<PlaceSuggestion>> selectSuggestionsByQuery(String query) async {
-    final result = await select(placeSuggestions).join([
+    final result =
+        await (select(placeQueries)..where((q) => q.query.equals(query))).join([
       innerJoin(
         placeQuerySuggestions,
-        placeQuerySuggestions.locationId.equalsExp(placeSuggestions.locationId),
+        placeQuerySuggestions.query.equalsExp(placeQueries.query),
       ),
       innerJoin(
-        placeQueries,
-        placeQuerySuggestions.query.equalsExp(placeQueries.query),
+        placeSuggestions,
+        placeQuerySuggestions.locationId.equalsExp(placeSuggestions.locationId),
       ),
     ]).get();
     return result.map((row) => row.readTable(placeSuggestions)).toList();

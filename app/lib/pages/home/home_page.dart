@@ -289,7 +289,6 @@ class HomePage extends HookWidget {
         bottomSheetControllers: bottomSheetControllers,
       ),
       hint: Strings.transportNearby,
-      onChanged: (query) {},
     );
   }
 
