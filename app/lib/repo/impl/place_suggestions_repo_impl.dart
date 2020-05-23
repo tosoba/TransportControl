@@ -1,20 +1,15 @@
-import 'dart:convert';
-
 import 'package:injectable/injectable.dart';
 import 'package:transport_control/api/places_api.dart';
-import 'package:transport_control/db/dao/place_suggestions_responses_dao.dart';
-import 'package:transport_control/db/database.dart' as db;
+import 'package:transport_control/db/dao/places_dao.dart';
 import 'package:transport_control/di/injection.dart';
-import 'package:transport_control/model/place_query.dart';
 import 'package:transport_control/model/place_suggestion.dart';
-import 'package:transport_control/model/place_suggestions_response.dart';
 import 'package:transport_control/model/result.dart';
 import 'package:transport_control/repo/place_suggestions_repo.dart';
 
 @RegisterAs(PlaceSuggestionsRepo, env: Env.dev)
 @singleton
 class PlaceSuggestionsRepoImpl implements PlaceSuggestionsRepo {
-  final PlaceSuggestionsResponsesDao _dao;
+  final PlacesDao _dao;
   final PlacesApi _api;
 
   PlaceSuggestionsRepoImpl(this._dao, this._api);
@@ -22,28 +17,32 @@ class PlaceSuggestionsRepoImpl implements PlaceSuggestionsRepo {
   static const Duration _timeoutDuration = const Duration(seconds: 3);
 
   @override
-  Stream<List<PlaceQuery>> getLatestQueries({int limit}) {
-    return _dao.selectLatestQueriesStream(limit: limit);
+  Stream<List<PlaceSuggestion>> getRecentlySearchedSuggestions({int limit}) {
+    return _dao.selectRecentlySearchedSuggestionsStream(limit: limit).map(
+          (suggestions) => suggestions
+              .map((suggestion) => PlaceSuggestion.fromDb(suggestion))
+              .toList(),
+        );
   }
 
   @override
   Future<Result<List<PlaceSuggestion>>> getSuggestions({String query}) async {
-    final cachedResponse = await _dao.selectByQuery(query);
-    if (cachedResponse != null && cachedResponse.json != null) {
-      final json = jsonDecode(cachedResponse.json) as Map<String, dynamic>;
+    final savedSuggestions = await _dao.selectSuggestionsByQuery(query);
+    if (savedSuggestions != null && savedSuggestions.isNotEmpty) {
       return Result.success(
-        data: PlaceSuggestionsResponse.fromJson(json).suggestions,
-      );
-    } else if (cachedResponse == null) {
-      _dao.insertResponse(
-        db.PlaceSuggestionsResponse(query: query, lastSearched: DateTime.now()),
+        data: savedSuggestions
+            .map((suggestion) => PlaceSuggestion.fromDb(suggestion))
+            .toList(),
       );
     }
 
     try {
       final response =
           await _api.fetchSuggestions(query: query).timeout(_timeoutDuration);
-      _dao.updateByQuery(query: query, json: jsonEncode(response.toJson()));
+      _dao.insertSuggestionsForQuery(
+        query: query,
+        suggestions: response.suggestions.map((suggestion) => suggestion.db),
+      );
       return Result.success(data: response.suggestions);
     } catch (error) {
       return Result<List<PlaceSuggestion>>.failure(error: error);

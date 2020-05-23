@@ -1,7 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:transport_control/model/place_query.dart';
 import 'package:transport_control/model/place_suggestion.dart';
 import 'package:transport_control/pages/nearby/nearby_bloc.dart';
 import 'package:transport_control/pages/nearby/nearby_state.dart';
@@ -23,10 +21,12 @@ class NearbyPage extends StatelessWidget {
     if (state == null) {
       return Center(child: Text('No recent queries.'));
     } else if (state.query == null || state.query.isEmpty) {
-      if (state.latestQueries.isEmpty) {
+      if (state.recentlySearchedSuggestions.isEmpty) {
         return Center(child: Text('No recent queries.'));
       } else {
-        return _latestQueriesList(state.latestQueries);
+        return _recentlySearchedSuggestionsList(
+          state.recentlySearchedSuggestions,
+        );
       }
     }
 
@@ -39,70 +39,59 @@ class NearbyPage extends StatelessWidget {
     );
   }
 
-  Widget _latestQueriesList(List<PlaceQuery> latestQueries) {
+  Widget _recentlySearchedSuggestionsList(List<PlaceSuggestion> suggestions) {
     return ListView.builder(
-      itemCount: latestQueries.length + 1,
-      itemBuilder: (context, index) {
-        return AnimationConfiguration.staggeredList(
-          position: index,
-          child: index == 0
-              ? Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 0.0, 0.0),
-                  child: Text(
-                    'Recent searches'.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                )
-              : Material(
-                  child: InkWell(
-                    onTap: () {},
-                    child: ListTile(
-                      title: Text(latestQueries[index - 1].text),
-                      subtitle: Text(
-                        latestQueries[index - 1].lastSearchedLabel,
-                      ),
-                    ),
+      itemCount: suggestions.length + 1,
+      itemBuilder: (context, index) => index == 0
+          ? Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 0.0, 0.0),
+              child: Text(
+                'Recent searches'.toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+          : Material(
+              child: InkWell(
+                onTap: () {},
+                child: ListTile(
+                  title: Text(suggestions[index - 1].label),
+                  subtitle: Text(
+                    suggestions[index - 1].lastSearchedLabel,
                   ),
                 ),
-        );
-      },
+              ),
+            ),
     );
   }
 
   Widget _placeSuggestionsList(List<PlaceSuggestion> suggestions) {
     return ListView.builder(
       itemCount: suggestions.length + 1,
-      itemBuilder: (context, index) {
-        return AnimationConfiguration.staggeredList(
-          position: index,
-          child: index == 0
-              ? Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 0.0, 0.0),
-                  child: Text(
-                    'Suggestions'.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                )
-              : Material(
-                  child: InkWell(
-                    onTap: () {},
-                    child: ListTile(
-                      title: Text(suggestions[index - 1].label),
-                      subtitle: Text(
-                        suggestions[index - 1].address?.street ??
-                            'Unknown address',
-                      ),
-                    ),
+      itemBuilder: (context, index) => index == 0
+          ? Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 0.0, 0.0),
+              child: Text(
+                'Suggestions'.toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+          : Material(
+              child: InkWell(
+                onTap: () {},
+                child: ListTile(
+                  title: Text(suggestions[index - 1].label),
+                  subtitle: Text(
+                    suggestions[index - 1].address?.street ?? 'Unknown address',
                   ),
                 ),
-        );
-      },
+              ),
+            ),
     );
   }
 }

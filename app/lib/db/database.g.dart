@@ -780,34 +780,23 @@ class $LocationsTable extends Locations
   }
 }
 
-class PlaceSuggestionsResponse extends DataClass
-    implements Insertable<PlaceSuggestionsResponse> {
+class PlaceQuery extends DataClass implements Insertable<PlaceQuery> {
   final String query;
-  final DateTime lastSearched;
-  final String json;
-  PlaceSuggestionsResponse(
-      {@required this.query, @required this.lastSearched, this.json});
-  factory PlaceSuggestionsResponse.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
+  PlaceQuery({@required this.query});
+  factory PlaceQuery.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
-    return PlaceSuggestionsResponse(
+    return PlaceQuery(
       query:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}query']),
-      lastSearched: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}last_searched']),
-      json: stringType.mapFromDatabaseResponse(data['${effectivePrefix}json']),
     );
   }
-  factory PlaceSuggestionsResponse.fromJson(Map<String, dynamic> json,
+  factory PlaceQuery.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
-    return PlaceSuggestionsResponse(
+    return PlaceQuery(
       query: serializer.fromJson<String>(json['query']),
-      lastSearched: serializer.fromJson<DateTime>(json['lastSearched']),
-      json: serializer.fromJson<String>(json['json']),
     );
   }
   @override
@@ -815,83 +804,54 @@ class PlaceSuggestionsResponse extends DataClass
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'query': serializer.toJson<String>(query),
-      'lastSearched': serializer.toJson<DateTime>(lastSearched),
-      'json': serializer.toJson<String>(json),
     };
   }
 
   @override
-  PlaceSuggestionsResponsesCompanion createCompanion(bool nullToAbsent) {
-    return PlaceSuggestionsResponsesCompanion(
+  PlaceQueriesCompanion createCompanion(bool nullToAbsent) {
+    return PlaceQueriesCompanion(
       query:
           query == null && nullToAbsent ? const Value.absent() : Value(query),
-      lastSearched: lastSearched == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastSearched),
-      json: json == null && nullToAbsent ? const Value.absent() : Value(json),
     );
   }
 
-  PlaceSuggestionsResponse copyWith(
-          {String query, DateTime lastSearched, String json}) =>
-      PlaceSuggestionsResponse(
+  PlaceQuery copyWith({String query}) => PlaceQuery(
         query: query ?? this.query,
-        lastSearched: lastSearched ?? this.lastSearched,
-        json: json ?? this.json,
       );
   @override
   String toString() {
-    return (StringBuffer('PlaceSuggestionsResponse(')
-          ..write('query: $query, ')
-          ..write('lastSearched: $lastSearched, ')
-          ..write('json: $json')
-          ..write(')'))
+    return (StringBuffer('PlaceQuery(')..write('query: $query')..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      $mrjf($mrjc(query.hashCode, $mrjc(lastSearched.hashCode, json.hashCode)));
+  int get hashCode => $mrjf(query.hashCode);
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is PlaceSuggestionsResponse &&
-          other.query == this.query &&
-          other.lastSearched == this.lastSearched &&
-          other.json == this.json);
+      (other is PlaceQuery && other.query == this.query);
 }
 
-class PlaceSuggestionsResponsesCompanion
-    extends UpdateCompanion<PlaceSuggestionsResponse> {
+class PlaceQueriesCompanion extends UpdateCompanion<PlaceQuery> {
   final Value<String> query;
-  final Value<DateTime> lastSearched;
-  final Value<String> json;
-  const PlaceSuggestionsResponsesCompanion({
+  const PlaceQueriesCompanion({
     this.query = const Value.absent(),
-    this.lastSearched = const Value.absent(),
-    this.json = const Value.absent(),
   });
-  PlaceSuggestionsResponsesCompanion.insert({
+  PlaceQueriesCompanion.insert({
     @required String query,
-    @required DateTime lastSearched,
-    this.json = const Value.absent(),
-  })  : query = Value(query),
-        lastSearched = Value(lastSearched);
-  PlaceSuggestionsResponsesCompanion copyWith(
-      {Value<String> query, Value<DateTime> lastSearched, Value<String> json}) {
-    return PlaceSuggestionsResponsesCompanion(
+  }) : query = Value(query);
+  PlaceQueriesCompanion copyWith({Value<String> query}) {
+    return PlaceQueriesCompanion(
       query: query ?? this.query,
-      lastSearched: lastSearched ?? this.lastSearched,
-      json: json ?? this.json,
     );
   }
 }
 
-class $PlaceSuggestionsResponsesTable extends PlaceSuggestionsResponses
-    with TableInfo<$PlaceSuggestionsResponsesTable, PlaceSuggestionsResponse> {
+class $PlaceQueriesTable extends PlaceQueries
+    with TableInfo<$PlaceQueriesTable, PlaceQuery> {
   final GeneratedDatabase _db;
   final String _alias;
-  $PlaceSuggestionsResponsesTable(this._db, [this._alias]);
+  $PlaceQueriesTable(this._db, [this._alias]);
   final VerificationMeta _queryMeta = const VerificationMeta('query');
   GeneratedTextColumn _query;
   @override
@@ -901,6 +861,323 @@ class $PlaceSuggestionsResponsesTable extends PlaceSuggestionsResponses
       'query',
       $tableName,
       false,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [query];
+  @override
+  $PlaceQueriesTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'place_queries';
+  @override
+  final String actualTableName = 'place_queries';
+  @override
+  VerificationContext validateIntegrity(PlaceQueriesCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.query.present) {
+      context.handle(
+          _queryMeta, query.isAcceptableValue(d.query.value, _queryMeta));
+    } else if (isInserting) {
+      context.missing(_queryMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {query};
+  @override
+  PlaceQuery map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return PlaceQuery.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(PlaceQueriesCompanion d) {
+    final map = <String, Variable>{};
+    if (d.query.present) {
+      map['query'] = Variable<String, StringType>(d.query.value);
+    }
+    return map;
+  }
+
+  @override
+  $PlaceQueriesTable createAlias(String alias) {
+    return $PlaceQueriesTable(_db, alias);
+  }
+}
+
+class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
+  final String locationId;
+  final String label;
+  final String language;
+  final String countryCode;
+  final String address;
+  final String matchLevel;
+  final DateTime lastSearched;
+  PlaceSuggestion(
+      {@required this.locationId,
+      @required this.label,
+      this.language,
+      this.countryCode,
+      this.address,
+      this.matchLevel,
+      this.lastSearched});
+  factory PlaceSuggestion.fromData(
+      Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    return PlaceSuggestion(
+      locationId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}location_id']),
+      label:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}label']),
+      language: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}language']),
+      countryCode: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}country_code']),
+      address:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}address']),
+      matchLevel: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}match_level']),
+      lastSearched: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}last_searched']),
+    );
+  }
+  factory PlaceSuggestion.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return PlaceSuggestion(
+      locationId: serializer.fromJson<String>(json['locationId']),
+      label: serializer.fromJson<String>(json['label']),
+      language: serializer.fromJson<String>(json['language']),
+      countryCode: serializer.fromJson<String>(json['countryCode']),
+      address: serializer.fromJson<String>(json['address']),
+      matchLevel: serializer.fromJson<String>(json['matchLevel']),
+      lastSearched: serializer.fromJson<DateTime>(json['lastSearched']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'locationId': serializer.toJson<String>(locationId),
+      'label': serializer.toJson<String>(label),
+      'language': serializer.toJson<String>(language),
+      'countryCode': serializer.toJson<String>(countryCode),
+      'address': serializer.toJson<String>(address),
+      'matchLevel': serializer.toJson<String>(matchLevel),
+      'lastSearched': serializer.toJson<DateTime>(lastSearched),
+    };
+  }
+
+  @override
+  PlaceSuggestionsCompanion createCompanion(bool nullToAbsent) {
+    return PlaceSuggestionsCompanion(
+      locationId: locationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(locationId),
+      label:
+          label == null && nullToAbsent ? const Value.absent() : Value(label),
+      language: language == null && nullToAbsent
+          ? const Value.absent()
+          : Value(language),
+      countryCode: countryCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(countryCode),
+      address: address == null && nullToAbsent
+          ? const Value.absent()
+          : Value(address),
+      matchLevel: matchLevel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(matchLevel),
+      lastSearched: lastSearched == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSearched),
+    );
+  }
+
+  PlaceSuggestion copyWith(
+          {String locationId,
+          String label,
+          String language,
+          String countryCode,
+          String address,
+          String matchLevel,
+          DateTime lastSearched}) =>
+      PlaceSuggestion(
+        locationId: locationId ?? this.locationId,
+        label: label ?? this.label,
+        language: language ?? this.language,
+        countryCode: countryCode ?? this.countryCode,
+        address: address ?? this.address,
+        matchLevel: matchLevel ?? this.matchLevel,
+        lastSearched: lastSearched ?? this.lastSearched,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('PlaceSuggestion(')
+          ..write('locationId: $locationId, ')
+          ..write('label: $label, ')
+          ..write('language: $language, ')
+          ..write('countryCode: $countryCode, ')
+          ..write('address: $address, ')
+          ..write('matchLevel: $matchLevel, ')
+          ..write('lastSearched: $lastSearched')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      locationId.hashCode,
+      $mrjc(
+          label.hashCode,
+          $mrjc(
+              language.hashCode,
+              $mrjc(
+                  countryCode.hashCode,
+                  $mrjc(address.hashCode,
+                      $mrjc(matchLevel.hashCode, lastSearched.hashCode)))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is PlaceSuggestion &&
+          other.locationId == this.locationId &&
+          other.label == this.label &&
+          other.language == this.language &&
+          other.countryCode == this.countryCode &&
+          other.address == this.address &&
+          other.matchLevel == this.matchLevel &&
+          other.lastSearched == this.lastSearched);
+}
+
+class PlaceSuggestionsCompanion extends UpdateCompanion<PlaceSuggestion> {
+  final Value<String> locationId;
+  final Value<String> label;
+  final Value<String> language;
+  final Value<String> countryCode;
+  final Value<String> address;
+  final Value<String> matchLevel;
+  final Value<DateTime> lastSearched;
+  const PlaceSuggestionsCompanion({
+    this.locationId = const Value.absent(),
+    this.label = const Value.absent(),
+    this.language = const Value.absent(),
+    this.countryCode = const Value.absent(),
+    this.address = const Value.absent(),
+    this.matchLevel = const Value.absent(),
+    this.lastSearched = const Value.absent(),
+  });
+  PlaceSuggestionsCompanion.insert({
+    @required String locationId,
+    @required String label,
+    this.language = const Value.absent(),
+    this.countryCode = const Value.absent(),
+    this.address = const Value.absent(),
+    this.matchLevel = const Value.absent(),
+    this.lastSearched = const Value.absent(),
+  })  : locationId = Value(locationId),
+        label = Value(label);
+  PlaceSuggestionsCompanion copyWith(
+      {Value<String> locationId,
+      Value<String> label,
+      Value<String> language,
+      Value<String> countryCode,
+      Value<String> address,
+      Value<String> matchLevel,
+      Value<DateTime> lastSearched}) {
+    return PlaceSuggestionsCompanion(
+      locationId: locationId ?? this.locationId,
+      label: label ?? this.label,
+      language: language ?? this.language,
+      countryCode: countryCode ?? this.countryCode,
+      address: address ?? this.address,
+      matchLevel: matchLevel ?? this.matchLevel,
+      lastSearched: lastSearched ?? this.lastSearched,
+    );
+  }
+}
+
+class $PlaceSuggestionsTable extends PlaceSuggestions
+    with TableInfo<$PlaceSuggestionsTable, PlaceSuggestion> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $PlaceSuggestionsTable(this._db, [this._alias]);
+  final VerificationMeta _locationIdMeta = const VerificationMeta('locationId');
+  GeneratedTextColumn _locationId;
+  @override
+  GeneratedTextColumn get locationId => _locationId ??= _constructLocationId();
+  GeneratedTextColumn _constructLocationId() {
+    return GeneratedTextColumn(
+      'location_id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _labelMeta = const VerificationMeta('label');
+  GeneratedTextColumn _label;
+  @override
+  GeneratedTextColumn get label => _label ??= _constructLabel();
+  GeneratedTextColumn _constructLabel() {
+    return GeneratedTextColumn(
+      'label',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _languageMeta = const VerificationMeta('language');
+  GeneratedTextColumn _language;
+  @override
+  GeneratedTextColumn get language => _language ??= _constructLanguage();
+  GeneratedTextColumn _constructLanguage() {
+    return GeneratedTextColumn(
+      'language',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _countryCodeMeta =
+      const VerificationMeta('countryCode');
+  GeneratedTextColumn _countryCode;
+  @override
+  GeneratedTextColumn get countryCode =>
+      _countryCode ??= _constructCountryCode();
+  GeneratedTextColumn _constructCountryCode() {
+    return GeneratedTextColumn(
+      'country_code',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _addressMeta = const VerificationMeta('address');
+  GeneratedTextColumn _address;
+  @override
+  GeneratedTextColumn get address => _address ??= _constructAddress();
+  GeneratedTextColumn _constructAddress() {
+    return GeneratedTextColumn(
+      'address',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _matchLevelMeta = const VerificationMeta('matchLevel');
+  GeneratedTextColumn _matchLevel;
+  @override
+  GeneratedTextColumn get matchLevel => _matchLevel ??= _constructMatchLevel();
+  GeneratedTextColumn _constructMatchLevel() {
+    return GeneratedTextColumn(
+      'match_level',
+      $tableName,
+      true,
     );
   }
 
@@ -914,32 +1191,239 @@ class $PlaceSuggestionsResponsesTable extends PlaceSuggestionsResponses
     return GeneratedDateTimeColumn(
       'last_searched',
       $tableName,
-      false,
-    );
-  }
-
-  final VerificationMeta _jsonMeta = const VerificationMeta('json');
-  GeneratedTextColumn _json;
-  @override
-  GeneratedTextColumn get json => _json ??= _constructJson();
-  GeneratedTextColumn _constructJson() {
-    return GeneratedTextColumn(
-      'json',
-      $tableName,
       true,
     );
   }
 
   @override
-  List<GeneratedColumn> get $columns => [query, lastSearched, json];
+  List<GeneratedColumn> get $columns => [
+        locationId,
+        label,
+        language,
+        countryCode,
+        address,
+        matchLevel,
+        lastSearched
+      ];
   @override
-  $PlaceSuggestionsResponsesTable get asDslTable => this;
+  $PlaceSuggestionsTable get asDslTable => this;
   @override
-  String get $tableName => _alias ?? 'place_suggestions_responses';
+  String get $tableName => _alias ?? 'place_suggestions';
   @override
-  final String actualTableName = 'place_suggestions_responses';
+  final String actualTableName = 'place_suggestions';
   @override
-  VerificationContext validateIntegrity(PlaceSuggestionsResponsesCompanion d,
+  VerificationContext validateIntegrity(PlaceSuggestionsCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.locationId.present) {
+      context.handle(_locationIdMeta,
+          locationId.isAcceptableValue(d.locationId.value, _locationIdMeta));
+    } else if (isInserting) {
+      context.missing(_locationIdMeta);
+    }
+    if (d.label.present) {
+      context.handle(
+          _labelMeta, label.isAcceptableValue(d.label.value, _labelMeta));
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (d.language.present) {
+      context.handle(_languageMeta,
+          language.isAcceptableValue(d.language.value, _languageMeta));
+    }
+    if (d.countryCode.present) {
+      context.handle(_countryCodeMeta,
+          countryCode.isAcceptableValue(d.countryCode.value, _countryCodeMeta));
+    }
+    if (d.address.present) {
+      context.handle(_addressMeta,
+          address.isAcceptableValue(d.address.value, _addressMeta));
+    }
+    if (d.matchLevel.present) {
+      context.handle(_matchLevelMeta,
+          matchLevel.isAcceptableValue(d.matchLevel.value, _matchLevelMeta));
+    }
+    if (d.lastSearched.present) {
+      context.handle(
+          _lastSearchedMeta,
+          lastSearched.isAcceptableValue(
+              d.lastSearched.value, _lastSearchedMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {locationId};
+  @override
+  PlaceSuggestion map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return PlaceSuggestion.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(PlaceSuggestionsCompanion d) {
+    final map = <String, Variable>{};
+    if (d.locationId.present) {
+      map['location_id'] = Variable<String, StringType>(d.locationId.value);
+    }
+    if (d.label.present) {
+      map['label'] = Variable<String, StringType>(d.label.value);
+    }
+    if (d.language.present) {
+      map['language'] = Variable<String, StringType>(d.language.value);
+    }
+    if (d.countryCode.present) {
+      map['country_code'] = Variable<String, StringType>(d.countryCode.value);
+    }
+    if (d.address.present) {
+      map['address'] = Variable<String, StringType>(d.address.value);
+    }
+    if (d.matchLevel.present) {
+      map['match_level'] = Variable<String, StringType>(d.matchLevel.value);
+    }
+    if (d.lastSearched.present) {
+      map['last_searched'] =
+          Variable<DateTime, DateTimeType>(d.lastSearched.value);
+    }
+    return map;
+  }
+
+  @override
+  $PlaceSuggestionsTable createAlias(String alias) {
+    return $PlaceSuggestionsTable(_db, alias);
+  }
+}
+
+class PlaceQuerySuggestion extends DataClass
+    implements Insertable<PlaceQuerySuggestion> {
+  final String query;
+  final String locationId;
+  PlaceQuerySuggestion({@required this.query, @required this.locationId});
+  factory PlaceQuerySuggestion.fromData(
+      Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    return PlaceQuerySuggestion(
+      query:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}query']),
+      locationId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}location_id']),
+    );
+  }
+  factory PlaceQuerySuggestion.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return PlaceQuerySuggestion(
+      query: serializer.fromJson<String>(json['query']),
+      locationId: serializer.fromJson<String>(json['locationId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'query': serializer.toJson<String>(query),
+      'locationId': serializer.toJson<String>(locationId),
+    };
+  }
+
+  @override
+  PlaceQuerySuggestionsCompanion createCompanion(bool nullToAbsent) {
+    return PlaceQuerySuggestionsCompanion(
+      query:
+          query == null && nullToAbsent ? const Value.absent() : Value(query),
+      locationId: locationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(locationId),
+    );
+  }
+
+  PlaceQuerySuggestion copyWith({String query, String locationId}) =>
+      PlaceQuerySuggestion(
+        query: query ?? this.query,
+        locationId: locationId ?? this.locationId,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('PlaceQuerySuggestion(')
+          ..write('query: $query, ')
+          ..write('locationId: $locationId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(query.hashCode, locationId.hashCode));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is PlaceQuerySuggestion &&
+          other.query == this.query &&
+          other.locationId == this.locationId);
+}
+
+class PlaceQuerySuggestionsCompanion
+    extends UpdateCompanion<PlaceQuerySuggestion> {
+  final Value<String> query;
+  final Value<String> locationId;
+  const PlaceQuerySuggestionsCompanion({
+    this.query = const Value.absent(),
+    this.locationId = const Value.absent(),
+  });
+  PlaceQuerySuggestionsCompanion.insert({
+    @required String query,
+    @required String locationId,
+  })  : query = Value(query),
+        locationId = Value(locationId);
+  PlaceQuerySuggestionsCompanion copyWith(
+      {Value<String> query, Value<String> locationId}) {
+    return PlaceQuerySuggestionsCompanion(
+      query: query ?? this.query,
+      locationId: locationId ?? this.locationId,
+    );
+  }
+}
+
+class $PlaceQuerySuggestionsTable extends PlaceQuerySuggestions
+    with TableInfo<$PlaceQuerySuggestionsTable, PlaceQuerySuggestion> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $PlaceQuerySuggestionsTable(this._db, [this._alias]);
+  final VerificationMeta _queryMeta = const VerificationMeta('query');
+  GeneratedTextColumn _query;
+  @override
+  GeneratedTextColumn get query => _query ??= _constructQuery();
+  GeneratedTextColumn _constructQuery() {
+    return GeneratedTextColumn(
+      'query',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _locationIdMeta = const VerificationMeta('locationId');
+  GeneratedTextColumn _locationId;
+  @override
+  GeneratedTextColumn get locationId => _locationId ??= _constructLocationId();
+  GeneratedTextColumn _constructLocationId() {
+    return GeneratedTextColumn(
+      'location_id',
+      $tableName,
+      false,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [query, locationId];
+  @override
+  $PlaceQuerySuggestionsTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'place_query_suggestions';
+  @override
+  final String actualTableName = 'place_query_suggestions';
+  @override
+  VerificationContext validateIntegrity(PlaceQuerySuggestionsCompanion d,
       {bool isInserting = false}) {
     final context = VerificationContext();
     if (d.query.present) {
@@ -948,50 +1432,38 @@ class $PlaceSuggestionsResponsesTable extends PlaceSuggestionsResponses
     } else if (isInserting) {
       context.missing(_queryMeta);
     }
-    if (d.lastSearched.present) {
-      context.handle(
-          _lastSearchedMeta,
-          lastSearched.isAcceptableValue(
-              d.lastSearched.value, _lastSearchedMeta));
+    if (d.locationId.present) {
+      context.handle(_locationIdMeta,
+          locationId.isAcceptableValue(d.locationId.value, _locationIdMeta));
     } else if (isInserting) {
-      context.missing(_lastSearchedMeta);
-    }
-    if (d.json.present) {
-      context.handle(
-          _jsonMeta, json.isAcceptableValue(d.json.value, _jsonMeta));
+      context.missing(_locationIdMeta);
     }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {query};
+  Set<GeneratedColumn> get $primaryKey => {query, locationId};
   @override
-  PlaceSuggestionsResponse map(Map<String, dynamic> data,
-      {String tablePrefix}) {
+  PlaceQuerySuggestion map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return PlaceSuggestionsResponse.fromData(data, _db,
-        prefix: effectivePrefix);
+    return PlaceQuerySuggestion.fromData(data, _db, prefix: effectivePrefix);
   }
 
   @override
-  Map<String, Variable> entityToSql(PlaceSuggestionsResponsesCompanion d) {
+  Map<String, Variable> entityToSql(PlaceQuerySuggestionsCompanion d) {
     final map = <String, Variable>{};
     if (d.query.present) {
       map['query'] = Variable<String, StringType>(d.query.value);
     }
-    if (d.lastSearched.present) {
-      map['last_searched'] =
-          Variable<DateTime, DateTimeType>(d.lastSearched.value);
-    }
-    if (d.json.present) {
-      map['json'] = Variable<String, StringType>(d.json.value);
+    if (d.locationId.present) {
+      map['location_id'] = Variable<String, StringType>(d.locationId.value);
     }
     return map;
   }
 
   @override
-  $PlaceSuggestionsResponsesTable createAlias(String alias) {
-    return $PlaceSuggestionsResponsesTable(_db, alias);
+  $PlaceQuerySuggestionsTable createAlias(String alias) {
+    return $PlaceQuerySuggestionsTable(_db, alias);
   }
 }
 
@@ -1001,21 +1473,25 @@ abstract class _$Database extends GeneratedDatabase {
   $LinesTable get lines => _lines ??= $LinesTable(this);
   $LocationsTable _locations;
   $LocationsTable get locations => _locations ??= $LocationsTable(this);
-  $PlaceSuggestionsResponsesTable _placeSuggestionsResponses;
-  $PlaceSuggestionsResponsesTable get placeSuggestionsResponses =>
-      _placeSuggestionsResponses ??= $PlaceSuggestionsResponsesTable(this);
+  $PlaceQueriesTable _placeQueries;
+  $PlaceQueriesTable get placeQueries =>
+      _placeQueries ??= $PlaceQueriesTable(this);
+  $PlaceSuggestionsTable _placeSuggestions;
+  $PlaceSuggestionsTable get placeSuggestions =>
+      _placeSuggestions ??= $PlaceSuggestionsTable(this);
+  $PlaceQuerySuggestionsTable _placeQuerySuggestions;
+  $PlaceQuerySuggestionsTable get placeQuerySuggestions =>
+      _placeQuerySuggestions ??= $PlaceQuerySuggestionsTable(this);
   LinesDao _linesDao;
   LinesDao get linesDao => _linesDao ??= LinesDao(this as Database);
   LocationsDao _locationsDao;
   LocationsDao get locationsDao =>
       _locationsDao ??= LocationsDao(this as Database);
-  PlaceSuggestionsResponsesDao _placeSuggestionsResponsesDao;
-  PlaceSuggestionsResponsesDao get placeSuggestionsResponsesDao =>
-      _placeSuggestionsResponsesDao ??=
-          PlaceSuggestionsResponsesDao(this as Database);
+  PlacesDao _placesDao;
+  PlacesDao get placesDao => _placesDao ??= PlacesDao(this as Database);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [lines, locations, placeSuggestionsResponses];
+      [lines, locations, placeQueries, placeSuggestions, placeQuerySuggestions];
 }

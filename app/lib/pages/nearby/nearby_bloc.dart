@@ -60,8 +60,10 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
             ),
       )
       ..add(
-        _repo.getLatestQueries(limit: 10).listen((queries) {
-          add(NearbyEvent.updateLatestQueries(queries: queries));
+        _repo.getRecentlySearchedSuggestions(limit: 10).listen((suggestions) {
+          add(NearbyEvent.updateRecentlySearchedSuggestions(
+            suggestions: suggestions,
+          ));
         }),
       );
   }
@@ -83,7 +85,9 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
     yield event.when(
       updateQuery: (evt) => state.copyWith(query: evt.query),
       updateSuggestions: (evt) => state.copyWith(suggestions: evt.suggestions),
-      updateLatestQueries: (evt) => state.copyWith(latestQueries: evt.queries),
+      updateRecentlySearchedSuggestions: (evt) => state.copyWith(
+        recentlySearchedSuggestions: evt.suggestions,
+      ),
     );
   }
 

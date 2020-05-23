@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
+import 'package:moor_flutter/moor_flutter.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
-import 'package:transport_control/model/place_query.dart';
+import 'package:transport_control/model/place_suggestion.dart';
 import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/util/string_util.dart';
 
@@ -127,7 +128,7 @@ extension LocationExt on Location {
   }
 }
 
-extension PlaceQueryExt on PlaceQuery {
+extension PlaceSuggestionExt on PlaceSuggestion {
   String get lastSearchedLabel {
     if (lastSearched == null) return 'Never searched';
     return _dateTimeDiffInfo(
@@ -136,4 +137,8 @@ extension PlaceQueryExt on PlaceQuery {
       prefix: 'Searched',
     );
   }
+}
+
+Value<T> nullableValueFrom<T>(T value) {
+  return value == null ? Value.absent() : Value(value);
 }

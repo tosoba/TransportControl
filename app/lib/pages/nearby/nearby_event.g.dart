@@ -15,20 +15,25 @@ abstract class NearbyEvent extends Equatable {
   factory NearbyEvent.updateSuggestions({@required dynamic suggestions}) =
       UpdateSuggestions;
 
-  factory NearbyEvent.updateLatestQueries(
-      {@required List<PlaceQuery> queries}) = UpdateLatestQueries;
+  factory NearbyEvent.updateRecentlySearchedSuggestions(
+          {@required List<PlaceSuggestion> suggestions}) =
+      UpdateRecentlySearchedSuggestions;
 
   final _NearbyEvent _type;
 
 //ignore: missing_return
   R when<R>(
-      {@required R Function(UpdateQuery) updateQuery,
-      @required R Function(UpdateSuggestions) updateSuggestions,
-      @required R Function(UpdateLatestQueries) updateLatestQueries}) {
+      {@required
+          R Function(UpdateQuery) updateQuery,
+      @required
+          R Function(UpdateSuggestions) updateSuggestions,
+      @required
+          R Function(UpdateRecentlySearchedSuggestions)
+              updateRecentlySearchedSuggestions}) {
     assert(() {
       if (updateQuery == null ||
           updateSuggestions == null ||
-          updateLatestQueries == null) {
+          updateRecentlySearchedSuggestions == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -38,8 +43,9 @@ abstract class NearbyEvent extends Equatable {
         return updateQuery(this as UpdateQuery);
       case _NearbyEvent.UpdateSuggestions:
         return updateSuggestions(this as UpdateSuggestions);
-      case _NearbyEvent.UpdateLatestQueries:
-        return updateLatestQueries(this as UpdateLatestQueries);
+      case _NearbyEvent.UpdateRecentlySearchedSuggestions:
+        return updateRecentlySearchedSuggestions(
+            this as UpdateRecentlySearchedSuggestions);
     }
   }
 
@@ -50,11 +56,12 @@ abstract class NearbyEvent extends Equatable {
       @required
           FutureOr<R> Function(UpdateSuggestions) updateSuggestions,
       @required
-          FutureOr<R> Function(UpdateLatestQueries) updateLatestQueries}) {
+          FutureOr<R> Function(UpdateRecentlySearchedSuggestions)
+              updateRecentlySearchedSuggestions}) {
     assert(() {
       if (updateQuery == null ||
           updateSuggestions == null ||
-          updateLatestQueries == null) {
+          updateRecentlySearchedSuggestions == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -64,15 +71,17 @@ abstract class NearbyEvent extends Equatable {
         return updateQuery(this as UpdateQuery);
       case _NearbyEvent.UpdateSuggestions:
         return updateSuggestions(this as UpdateSuggestions);
-      case _NearbyEvent.UpdateLatestQueries:
-        return updateLatestQueries(this as UpdateLatestQueries);
+      case _NearbyEvent.UpdateRecentlySearchedSuggestions:
+        return updateRecentlySearchedSuggestions(
+            this as UpdateRecentlySearchedSuggestions);
     }
   }
 
   R whenOrElse<R>(
       {R Function(UpdateQuery) updateQuery,
       R Function(UpdateSuggestions) updateSuggestions,
-      R Function(UpdateLatestQueries) updateLatestQueries,
+      R Function(UpdateRecentlySearchedSuggestions)
+          updateRecentlySearchedSuggestions,
       @required R Function(NearbyEvent) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -87,9 +96,10 @@ abstract class NearbyEvent extends Equatable {
       case _NearbyEvent.UpdateSuggestions:
         if (updateSuggestions == null) break;
         return updateSuggestions(this as UpdateSuggestions);
-      case _NearbyEvent.UpdateLatestQueries:
-        if (updateLatestQueries == null) break;
-        return updateLatestQueries(this as UpdateLatestQueries);
+      case _NearbyEvent.UpdateRecentlySearchedSuggestions:
+        if (updateRecentlySearchedSuggestions == null) break;
+        return updateRecentlySearchedSuggestions(
+            this as UpdateRecentlySearchedSuggestions);
     }
     return orElse(this);
   }
@@ -97,7 +107,8 @@ abstract class NearbyEvent extends Equatable {
   Future<R> asyncWhenOrElse<R>(
       {FutureOr<R> Function(UpdateQuery) updateQuery,
       FutureOr<R> Function(UpdateSuggestions) updateSuggestions,
-      FutureOr<R> Function(UpdateLatestQueries) updateLatestQueries,
+      FutureOr<R> Function(UpdateRecentlySearchedSuggestions)
+          updateRecentlySearchedSuggestions,
       @required FutureOr<R> Function(NearbyEvent) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -112,9 +123,10 @@ abstract class NearbyEvent extends Equatable {
       case _NearbyEvent.UpdateSuggestions:
         if (updateSuggestions == null) break;
         return updateSuggestions(this as UpdateSuggestions);
-      case _NearbyEvent.UpdateLatestQueries:
-        if (updateLatestQueries == null) break;
-        return updateLatestQueries(this as UpdateLatestQueries);
+      case _NearbyEvent.UpdateRecentlySearchedSuggestions:
+        if (updateRecentlySearchedSuggestions == null) break;
+        return updateRecentlySearchedSuggestions(
+            this as UpdateRecentlySearchedSuggestions);
     }
     return orElse(this);
   }
@@ -123,11 +135,12 @@ abstract class NearbyEvent extends Equatable {
   Future<void> whenPartial(
       {FutureOr<void> Function(UpdateQuery) updateQuery,
       FutureOr<void> Function(UpdateSuggestions) updateSuggestions,
-      FutureOr<void> Function(UpdateLatestQueries) updateLatestQueries}) {
+      FutureOr<void> Function(UpdateRecentlySearchedSuggestions)
+          updateRecentlySearchedSuggestions}) {
     assert(() {
       if (updateQuery == null &&
           updateSuggestions == null &&
-          updateLatestQueries == null) {
+          updateRecentlySearchedSuggestions == null) {
         throw 'provide at least one branch';
       }
       return true;
@@ -139,9 +152,10 @@ abstract class NearbyEvent extends Equatable {
       case _NearbyEvent.UpdateSuggestions:
         if (updateSuggestions == null) break;
         return updateSuggestions(this as UpdateSuggestions);
-      case _NearbyEvent.UpdateLatestQueries:
-        if (updateLatestQueries == null) break;
-        return updateLatestQueries(this as UpdateLatestQueries);
+      case _NearbyEvent.UpdateRecentlySearchedSuggestions:
+        if (updateRecentlySearchedSuggestions == null) break;
+        return updateRecentlySearchedSuggestions(
+            this as UpdateRecentlySearchedSuggestions);
     }
   }
 
@@ -175,14 +189,15 @@ class UpdateSuggestions extends NearbyEvent {
 }
 
 @immutable
-class UpdateLatestQueries extends NearbyEvent {
-  const UpdateLatestQueries({@required this.queries})
-      : super(_NearbyEvent.UpdateLatestQueries);
+class UpdateRecentlySearchedSuggestions extends NearbyEvent {
+  const UpdateRecentlySearchedSuggestions({@required this.suggestions})
+      : super(_NearbyEvent.UpdateRecentlySearchedSuggestions);
 
-  final List<PlaceQuery> queries;
+  final List<PlaceSuggestion> suggestions;
 
   @override
-  String toString() => 'UpdateLatestQueries(queries:${this.queries})';
+  String toString() =>
+      'UpdateRecentlySearchedSuggestions(suggestions:${this.suggestions})';
   @override
-  List get props => [queries];
+  List get props => [suggestions];
 }

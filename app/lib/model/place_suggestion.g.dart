@@ -16,6 +16,9 @@ PlaceSuggestion _$PlaceSuggestionFromJson(Map<String, dynamic> json) {
         ? null
         : Address.fromJson(json['address'] as Map<String, dynamic>),
     matchLevel: json['matchLevel'] as String,
+    lastSearched: json['lastSearched'] == null
+        ? null
+        : DateTime.parse(json['lastSearched'] as String),
   );
 }
 
@@ -27,4 +30,5 @@ Map<String, dynamic> _$PlaceSuggestionToJson(PlaceSuggestion instance) =>
       'locationId': instance.locationId,
       'address': instance.address,
       'matchLevel': instance.matchLevel,
+      'lastSearched': instance.lastSearched?.toIso8601String(),
     };
