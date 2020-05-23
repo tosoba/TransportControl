@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:moor_flutter/moor_flutter.dart';
 import 'package:transport_control/db/database.dart';
 import 'package:transport_control/db/entity/place_suggestions_responses.dart';
+import 'package:transport_control/model/place_query.dart';
 
 part 'place_suggestions_responses_dao.g.dart';
 
@@ -33,7 +34,7 @@ class PlaceSuggestionsResponsesDao extends DatabaseAccessor<Database>
         .write(PlaceSuggestionsResponsesCompanion(json: Value(json)));
   }
 
-  Stream<List<String>> selectLatestQueriesStream({@required int limit}) {
+  Stream<List<PlaceQuery>> selectLatestQueriesStream({@required int limit}) {
     return (select(placeSuggestionsResponses)
           ..orderBy(
             [(response) => OrderingTerm(expression: response.lastSearched)],
@@ -41,10 +42,15 @@ class PlaceSuggestionsResponsesDao extends DatabaseAccessor<Database>
           ..limit(limit))
         .watch()
         .map(
-      (responsesList) {
-        return responsesList.map((response) => response.query).toList();
-      },
-    );
+          (responsesList) => responsesList
+              .map(
+                (response) => PlaceQuery(
+                  text: response.query,
+                  lastSearched: response.lastSearched,
+                ),
+              )
+              .toList(),
+        );
   }
 
   Future<int> deleteLastSearchedBefore({@required DateTime timestampLimit}) {

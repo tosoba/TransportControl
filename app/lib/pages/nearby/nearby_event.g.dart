@@ -15,8 +15,8 @@ abstract class NearbyEvent extends Equatable {
   factory NearbyEvent.updateSuggestions({@required dynamic suggestions}) =
       UpdateSuggestions;
 
-  factory NearbyEvent.updateLatestQueries({@required List<String> queries}) =
-      UpdateLatestQueries;
+  factory NearbyEvent.updateLatestQueries(
+      {@required List<PlaceQuery> queries}) = UpdateLatestQueries;
 
   final _NearbyEvent _type;
 
@@ -179,7 +179,7 @@ class UpdateLatestQueries extends NearbyEvent {
   const UpdateLatestQueries({@required this.queries})
       : super(_NearbyEvent.UpdateLatestQueries);
 
-  final List<String> queries;
+  final List<PlaceQuery> queries;
 
   @override
   String toString() => 'UpdateLatestQueries(queries:${this.queries})';

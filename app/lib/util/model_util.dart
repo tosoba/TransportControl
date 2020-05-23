@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
+import 'package:transport_control/model/place_query.dart';
 import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/util/string_util.dart';
 
@@ -122,6 +123,17 @@ extension LocationExt on Location {
       diffMillis: DateTime.now().millisecondsSinceEpoch -
           savedAt.millisecondsSinceEpoch,
       prefix: 'Saved',
+    );
+  }
+}
+
+extension PlaceQueryExt on PlaceQuery {
+  String get lastSearchedLabel {
+    if (lastSearched == null) return 'Never searched';
+    return _dateTimeDiffInfo(
+      diffMillis: DateTime.now().millisecondsSinceEpoch -
+          lastSearched.millisecondsSinceEpoch,
+      prefix: 'Searched',
     );
   }
 }

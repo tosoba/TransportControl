@@ -39,7 +39,9 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
                   add(
                     NearbyEvent.updateSuggestions(
                       suggestions: Loadable<List<PlaceSuggestion>>.value(
-                        value: success.data,
+                        value: success.data
+                            .where((suggestion) => suggestion.label != null)
+                            .toList(),
                       ),
                     ),
                   );

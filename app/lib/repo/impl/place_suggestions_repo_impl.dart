@@ -5,6 +5,7 @@ import 'package:transport_control/api/places_api.dart';
 import 'package:transport_control/db/dao/place_suggestions_responses_dao.dart';
 import 'package:transport_control/db/database.dart' as db;
 import 'package:transport_control/di/injection.dart';
+import 'package:transport_control/model/place_query.dart';
 import 'package:transport_control/model/place_suggestion.dart';
 import 'package:transport_control/model/place_suggestions_response.dart';
 import 'package:transport_control/model/result.dart';
@@ -21,7 +22,7 @@ class PlaceSuggestionsRepoImpl implements PlaceSuggestionsRepo {
   static const Duration _timeoutDuration = const Duration(seconds: 3);
 
   @override
-  Stream<List<String>> getLatestQueries({int limit}) {
+  Stream<List<PlaceQuery>> getLatestQueries({int limit}) {
     return _dao.selectLatestQueriesStream(limit: limit);
   }
 

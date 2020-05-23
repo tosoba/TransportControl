@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:transport_control/model/place_query.dart';
 import 'package:transport_control/model/place_suggestion.dart';
 import 'package:transport_control/model/result.dart';
 
@@ -7,5 +8,5 @@ abstract class PlaceSuggestionsRepo {
     @required String query,
   });
 
-  Stream<List<String>> getLatestQueries({@required int limit});
+  Stream<List<PlaceQuery>> getLatestQueries({@required int limit});
 }
