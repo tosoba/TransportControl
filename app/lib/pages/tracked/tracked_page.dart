@@ -104,8 +104,18 @@ class TrackedPage extends HookWidget {
       actionPane: SlidableDrawerActionPane(),
       actionExtentRatio: 0.25,
       child: ListTile(
-        title: Text(source.key.toString()),
-        subtitle: Text(source.value.length.toString()),
+        title: Text(source.key.when(
+          ofLine: (ol) => 'Of line: ${ol.line.symbol}',
+          inBounds: (ib) => 'In bounds', //TODO: name of the location
+          nearby: (n) => '''Nearby your location loaded${dateTimeDiffInfo(
+            diffMillis: DateTime.now().millisecondsSinceEpoch -
+                n.loadedAt.millisecondsSinceEpoch,
+            prefix: '',
+          )}''',
+        )),
+        subtitle: Text(
+          '''${source.value.length.toString()} ${source.value.length > 1 ? 'vehicles' : 'vehicle'} in total''',
+        ),
       ),
       secondaryActions: [
         IconSlideAction(

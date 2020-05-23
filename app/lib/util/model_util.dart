@@ -23,7 +23,7 @@ extension VehicleExt on Vehicle {
   String get updatedAgoLabel {
     if (lastUpdate == null) return 'Unknown update time.';
     final diff = DateTime.now().difference(lastUpdate).inMilliseconds;
-    return _dateTimeDiffInfo(diffMillis: diff, prefix: 'Updated');
+    return dateTimeDiffInfo(diffMillis: diff, prefix: 'Updated');
   }
 }
 
@@ -65,7 +65,7 @@ class VehicleType {
   VehicleType._();
 }
 
-String _dateTimeDiffInfo({
+String dateTimeDiffInfo({
   @required int diffMillis,
   @required String prefix,
 }) {
@@ -113,7 +113,7 @@ extension LocationExt on Location {
 
   String get lastSearchedInfo {
     if (lastSearched == null) return 'Never searched';
-    return _dateTimeDiffInfo(
+    return dateTimeDiffInfo(
       diffMillis: DateTime.now().millisecondsSinceEpoch -
           lastSearched.millisecondsSinceEpoch,
       prefix: 'Searched',
@@ -121,7 +121,7 @@ extension LocationExt on Location {
   }
 
   String get savedAtInfo {
-    return _dateTimeDiffInfo(
+    return dateTimeDiffInfo(
       diffMillis: DateTime.now().millisecondsSinceEpoch -
           savedAt.millisecondsSinceEpoch,
       prefix: 'Saved',
@@ -132,7 +132,7 @@ extension LocationExt on Location {
 extension PlaceSuggestionExt on PlaceSuggestion {
   String get lastSearchedLabel {
     if (lastSearched == null) return 'Never searched';
-    return _dateTimeDiffInfo(
+    return dateTimeDiffInfo(
       diffMillis: DateTime.now().millisecondsSinceEpoch -
           lastSearched.millisecondsSinceEpoch,
       prefix: 'Searched',
