@@ -48,4 +48,9 @@ class PlaceSuggestionsRepoImpl implements PlaceSuggestionsRepo {
       return Result<List<PlaceSuggestion>>.failure(error: error);
     }
   }
+
+  @override
+  Future<int> updateLastSearchedBy({String locationId}) {
+    return _dao.updateLastSearchedByLocationId(locationId);
+  }
 }

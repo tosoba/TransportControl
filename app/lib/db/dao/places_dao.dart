@@ -87,4 +87,10 @@ class PlacesDao extends DatabaseAccessor<Database> with _$PlacesDaoMixin {
           ..limit(limit))
         .watch();
   }
+
+  Future<int> updateLastSearchedByLocationId(String locationId) {
+    return (update(placeSuggestions)
+          ..where((suggestion) => suggestion.locationId.equals(locationId)))
+        .write(PlaceSuggestionsCompanion(lastSearched: Value(DateTime.now())));
+  }
 }

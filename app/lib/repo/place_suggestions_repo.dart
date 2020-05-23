@@ -10,4 +10,6 @@ abstract class PlaceSuggestionsRepo {
   Stream<List<PlaceSuggestion>> getRecentlySearchedSuggestions({
     @required int limit,
   });
+
+  Future<int> updateLastSearchedBy({@required String locationId});
 }

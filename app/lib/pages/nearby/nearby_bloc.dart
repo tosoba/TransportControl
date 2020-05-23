@@ -104,4 +104,8 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
       _queries.add(processedQuery.toLowerCase());
     }
   }
+
+  void suggestionSelected({@required String locationId}) {
+    _repo.updateLastSearchedBy(locationId: locationId);
+  }
 }
