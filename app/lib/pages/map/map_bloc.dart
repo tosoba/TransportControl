@@ -107,29 +107,36 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           evt.lines.map((line) => line.symbol),
           evt.lines,
         );
+        final loadedAt = DateTime.now();
         return state.withNewVehicles(
           evt.vehicles,
           sourceForVehicle: (vehicle) => MapVehicleSource.ofLine(
             line: lineSymbols[vehicle.symbol],
-            loadedAt: DateTime.now(),
+            loadedAt: loadedAt,
           ),
         );
       },
-      addVehiclesInBounds: (evt) => state.withNewVehicles(
-        evt.vehicles,
-        sourceForVehicle: (_) => MapVehicleSource.inBounds(
-          bounds: evt.bounds,
-          loadedAt: DateTime.now(),
-        ),
-      ),
-      addVehiclesNearby: (evt) => state.withNewVehicles(
-        evt.vehicles,
-        sourceForVehicle: (_) => MapVehicleSource.nearby(
-          position: evt.position,
-          radius: evt.radius,
-          loadedAt: DateTime.now(),
-        ),
-      ),
+      addVehiclesInBounds: (evt) {
+        final loadedAt = DateTime.now();
+        return state.withNewVehicles(
+          evt.vehicles,
+          sourceForVehicle: (_) => MapVehicleSource.inBounds(
+            bounds: evt.bounds,
+            loadedAt: loadedAt,
+          ),
+        );
+      },
+      addVehiclesNearby: (evt) {
+        final loadedAt = DateTime.now();
+        return state.withNewVehicles(
+          evt.vehicles,
+          sourceForVehicle: (_) => MapVehicleSource.nearby(
+            position: evt.position,
+            radius: evt.radius,
+            loadedAt: loadedAt,
+          ),
+        );
+      },
       animateVehicles: (_) => state.copyWith(
         trackedVehicles: state.trackedVehicles.map(
           (number, tracked) => tracked.animation.stage.isAnimating
