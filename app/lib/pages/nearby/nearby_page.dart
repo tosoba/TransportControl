@@ -24,8 +24,11 @@ class NearbyPage extends StatelessWidget {
       if (state.recentlySearchedSuggestions.isEmpty) {
         return Center(child: Text('No recent queries.'));
       } else {
-        return _recentlySearchedSuggestionsList(
+        return _suggestionsList(
           state.recentlySearchedSuggestions,
+          headerText: 'Recent searches',
+          title: (suggestion) => Text(suggestion.label),
+          subtitle: (suggestion) => Text(suggestion.lastSearchedLabel),
         );
       }
     }
@@ -34,19 +37,31 @@ class NearbyPage extends StatelessWidget {
       loading: (_) => Center(child: CircularProgressIndicator()),
       value: (suggestions) => suggestions.value.isEmpty
           ? Center(child: Text('No places found.'))
-          : _placeSuggestionsList(suggestions.value),
+          : _suggestionsList(
+              suggestions.value,
+              headerText: 'Suggestions',
+              title: (suggestion) => Text(suggestion.label),
+              subtitle: (suggestion) => Text(
+                suggestion.address?.street ?? 'Unknown address',
+              ),
+            ),
       error: (_) => Center(child: Text('Error loading places.')),
     );
   }
 
-  Widget _recentlySearchedSuggestionsList(List<PlaceSuggestion> suggestions) {
+  Widget _suggestionsList(
+    List<PlaceSuggestion> suggestions, {
+    @required String headerText,
+    @required Widget Function(PlaceSuggestion) title,
+    @required Widget Function(PlaceSuggestion) subtitle,
+  }) {
     return ListView.builder(
       itemCount: suggestions.length + 1,
       itemBuilder: (context, index) => index == 0
           ? Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 16.0, 0.0, 0.0),
               child: Text(
-                'Recent searches'.toUpperCase(),
+                headerText.toUpperCase(),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -61,42 +76,8 @@ class NearbyPage extends StatelessWidget {
                       );
                 },
                 child: ListTile(
-                  title: Text(suggestions[index - 1].label),
-                  subtitle: Text(
-                    suggestions[index - 1].lastSearchedLabel,
-                  ),
-                ),
-              ),
-            ),
-    );
-  }
-
-  Widget _placeSuggestionsList(List<PlaceSuggestion> suggestions) {
-    return ListView.builder(
-      itemCount: suggestions.length + 1,
-      itemBuilder: (context, index) => index == 0
-          ? Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 0.0, 0.0),
-              child: Text(
-                'Suggestions'.toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          : Material(
-              child: InkWell(
-                onTap: () {
-                  context.bloc<NearbyBloc>().suggestionSelected(
-                        locationId: suggestions[index - 1].locationId,
-                      );
-                },
-                child: ListTile(
-                  title: Text(suggestions[index - 1].label),
-                  subtitle: Text(
-                    suggestions[index - 1].address?.street ?? 'Unknown address',
-                  ),
+                  title: title(suggestions[index - 1]),
+                  subtitle: subtitle(suggestions[index - 1]),
                 ),
               ),
             ),
