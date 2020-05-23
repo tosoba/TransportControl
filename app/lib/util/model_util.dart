@@ -5,6 +5,7 @@ import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/model/place_suggestion.dart';
 import 'package:transport_control/model/vehicle.dart';
+import 'package:transport_control/pages/map/map_vehicle_source.dart';
 import 'package:transport_control/util/string_util.dart';
 
 extension VehicleExt on Vehicle {
@@ -141,4 +142,14 @@ extension PlaceSuggestionExt on PlaceSuggestion {
 
 Value<T> nullableValueFrom<T>(T value) {
   return value == null ? Value.absent() : Value(value);
+}
+
+extension MapVehicleSourceExt on MapVehicleSource {
+  DateTime get loadedAt {
+    return when(
+      ofLine: (ol) => ol.loadedAt,
+      inBounds: (ib) => ib.loadedAt,
+      nearby: (n) => n.loadedAt,
+    );
+  }
 }
