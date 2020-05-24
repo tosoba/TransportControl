@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -98,10 +99,8 @@ class TrackedPage extends HookWidget {
       actionPane: SlidableDrawerActionPane(),
       actionExtentRatio: 0.25,
       child: ListTile(
-        title: Text(source.key.title),
-        subtitle: Text(
-          '${source.value.length.toString()} ${source.value.length > 1 ? 'vehicles' : 'vehicle'} in total',
-        ),
+        title: source.key.titleWidget,
+        subtitle: Text('${source.value.length.toString()} in total'),
       ),
       secondaryActions: [
         IconSlideAction(
@@ -146,14 +145,78 @@ extension _MapBlocExt on MapBloc {
 extension _MapVehicleSourceExt on MapVehicleSource {
   String get title {
     return when(
-      ofLine: (s) => 'Vehicles of line: ${s.line.symbol}',
-      nearbyLocation: (s) => 'Vehicles nearby ${s.location.name}',
-      nearbyPosition: (s) =>
+      ofLine: (source) => 'Vehicles of line: ${source.line.symbol}',
+      nearbyLocation: (source) => 'Vehicles nearby ${source.location.name}',
+      nearbyPosition: (source) =>
           '''Vehicles nearby your location loaded${dateTimeDiffInfo(
         diffMillis: DateTime.now().millisecondsSinceEpoch -
-            s.loadedAt.millisecondsSinceEpoch,
+            source.loadedAt.millisecondsSinceEpoch,
         prefix: '',
       )}''',
+    );
+  }
+
+  Widget get titleWidget {
+    return when(
+      ofLine: (source) => RichText(
+        text: TextSpan(children: [
+          const TextSpan(
+            text: 'Vehicles of ',
+            style: const TextStyle(color: Colors.black, fontSize: 16),
+          ),
+          TextSpan(
+            text: 'line ${source.line.symbol}',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontSize: 16,
+            ),
+          )
+        ]),
+        overflow: TextOverflow.ellipsis,
+      ),
+      nearbyLocation: (source) => RichText(
+        text: TextSpan(children: [
+          const TextSpan(
+            text: 'Vehicles nearby ',
+            style: const TextStyle(color: Colors.black, fontSize: 16),
+          ),
+          TextSpan(
+            text: '${source.location.name}',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontSize: 16,
+            ),
+          )
+        ]),
+        overflow: TextOverflow.ellipsis,
+      ),
+      nearbyPosition: (source) => RichText(
+        text: TextSpan(children: [
+          const TextSpan(
+            text: 'Vehicles nearby ',
+            style: const TextStyle(color: Colors.black, fontSize: 16),
+          ),
+          TextSpan(
+            text: 'your location',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontSize: 16,
+            ),
+          ),
+          TextSpan(
+            text: '''loaded${dateTimeDiffInfo(
+              diffMillis: DateTime.now().millisecondsSinceEpoch -
+                  source.loadedAt.millisecondsSinceEpoch,
+              prefix: '',
+            )}''',
+            style: const TextStyle(color: Colors.black, fontSize: 16),
+          ),
+        ]),
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 }
