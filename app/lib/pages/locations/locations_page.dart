@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -5,9 +7,10 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/model/location.dart';
-import 'package:transport_control/pages/locations/load_nearby_vehicles_result.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
+import 'package:transport_control/pages/map/map_bloc.dart';
+import 'package:transport_control/pages/map/map_signal.dart';
 import 'package:transport_control/pages/map_location/map_location_page.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
@@ -19,6 +22,8 @@ import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 class LocationsPage extends HookWidget {
   LocationsPage({Key key}) : super(key: key);
 
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     final searchFieldFocusNode = useFocusNode();
@@ -29,7 +34,12 @@ class LocationsPage extends HookWidget {
           .nameFilterChanged(searchFieldController.value.text),
     );
 
+    _useLocationsSignals(context);
+    final mapSignalsListenTrigger = ValueNotifier<Object>(null);
+    _useMapSignals(context: context, listenTrigger: mapSignalsListenTrigger);
+
     return Scaffold(
+      key: _scaffoldKey,
       extendBodyBehindAppBar: true,
       extendBody: true,
       body: StreamBuilder<FilteredLocationsResult>(
@@ -71,16 +81,30 @@ class LocationsPage extends HookWidget {
                 ),
                 floating: true,
               ),
-              _locationsList(locations: result.locations),
+              _locationsList(
+                locations: result.locations,
+                mapSignalsListenTrigger: mapSignalsListenTrigger,
+              ),
             ],
           );
         },
       ),
-      floatingActionButton: _floatingActionButtons(context),
+      floatingActionButton: _floatingActionButtons(
+        context,
+        loadVehiclesNearbyUserLocation: () {
+          mapSignalsListenTrigger.value = Object();
+          context.bloc<LocationsBloc>().loadVehiclesNearbyUserLocation();
+        },
+        mapSignalsListenTrigger: mapSignalsListenTrigger,
+      ),
     );
   }
 
-  Widget _floatingActionButtons(BuildContext context) {
+  Widget _floatingActionButtons(
+    BuildContext context, {
+    @required void Function() loadVehiclesNearbyUserLocation,
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
+  }) {
     return Container(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -88,17 +112,7 @@ class LocationsPage extends HookWidget {
           FloatingActionButton(
             heroTag: 'tag1',
             child: const Icon(Icons.my_location),
-            onPressed: () async {
-              final result = await context
-                  .bloc<LocationsBloc>()
-                  .loadVehiclesNearbyUserLocation();
-              if (!(result is Success)) {
-                Scaffold.of(context).showSnackBar(
-                    SnackBar(content: Text('Error loading nearby vehicles.')));
-              } else {
-                Navigator.pop(context);
-              }
-            },
+            onPressed: loadVehiclesNearbyUserLocation,
           ),
           SizedBox(height: 10),
           FloatingActionButton(
@@ -107,6 +121,7 @@ class LocationsPage extends HookWidget {
             onPressed: () => _showMapLocationPageWithTransition(
               context,
               mode: MapLocationPageMode.add(),
+              mapSignalsListenTrigger: mapSignalsListenTrigger,
             ),
           ),
         ],
@@ -136,7 +151,10 @@ class LocationsPage extends HookWidget {
     );
   }
 
-  Widget _locationsList({@required List<Location> locations}) {
+  Widget _locationsList({
+    @required List<Location> locations,
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
+  }) {
     return SliverList(
       delegate: SliverChildListDelegate(
         locations
@@ -147,7 +165,10 @@ class LocationsPage extends HookWidget {
                 AnimationConfiguration.staggeredList(
                   position: index,
                   child: FadeInAnimation(
-                    child: _locationListItem(location),
+                    child: _locationListItem(
+                      location,
+                      mapSignalsListenTrigger: mapSignalsListenTrigger,
+                    ),
                   ),
                 ),
               ),
@@ -158,7 +179,10 @@ class LocationsPage extends HookWidget {
     );
   }
 
-  Widget _locationListItem(Location location) {
+  Widget _locationListItem(
+    Location location, {
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
+  }) {
     return Builder(
       builder: (context) => StreamBuilder<LocationsListOrder>(
         stream: context.bloc<LocationsBloc>().listOrderStream,
@@ -172,6 +196,7 @@ class LocationsPage extends HookWidget {
                 onTap: () => _loadVehiclesAndPop(
                   context,
                   bounds: location.bounds,
+                  mapSignalsListenTrigger: mapSignalsListenTrigger,
                 ),
                 child: ListTile(
                   title: Text(location.name),
@@ -194,6 +219,7 @@ class LocationsPage extends HookWidget {
                   _showMapLocationPageWithTransition(
                     context,
                     mode: MapLocationPageMode.existing(location: location),
+                    mapSignalsListenTrigger: mapSignalsListenTrigger,
                   );
                 },
               ),
@@ -217,6 +243,7 @@ class LocationsPage extends HookWidget {
   void _showMapLocationPageWithTransition(
     BuildContext context, {
     @required MapLocationPageMode mode,
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) {
     Navigator.push(
       context,
@@ -226,7 +253,11 @@ class LocationsPage extends HookWidget {
           Animation<double> animation,
           Animation<double> secondaryAnimation,
         ) {
-          return _mapLocationPage(context, mode: mode);
+          return _mapLocationPage(
+            context,
+            mode: mode,
+            mapSignalsListenTrigger: mapSignalsListenTrigger,
+          );
         },
         transitionsBuilder: (
           BuildContext ctx,
@@ -243,11 +274,16 @@ class LocationsPage extends HookWidget {
   Widget _mapLocationPage(
     BuildContext context, {
     @required MapLocationPageMode mode,
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) {
     return MapLocationPage(
       mode: mode,
       finishWith: ({@required MapLocationPageResult result}) {
-        _handleLocationMapPageResult(result, context: context);
+        _handleLocationMapPageResult(
+          result,
+          context: context,
+          mapSignalsListenTrigger: mapSignalsListenTrigger,
+        );
       },
     );
   }
@@ -255,12 +291,17 @@ class LocationsPage extends HookWidget {
   void _handleLocationMapPageResult(
     MapLocationPageResult result, {
     @required BuildContext context,
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) {
     result.action.asyncWhenOrElse(
       save: (_) => _saveOrUpdateLocation(context, result),
       orElse: (_) {
         _saveOrUpdateLocation(context, result);
-        _loadVehiclesAndPop(context, bounds: result.location.bounds);
+        _loadVehiclesAndPop(
+          context,
+          bounds: result.location.bounds,
+          mapSignalsListenTrigger: mapSignalsListenTrigger,
+        );
       },
     );
   }
@@ -268,12 +309,13 @@ class LocationsPage extends HookWidget {
   void _loadVehiclesAndPop(
     BuildContext context, {
     @required LatLngBounds bounds,
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) async {
-    if (await context.bloc<LocationsBloc>().loadVehiclesInBounds(bounds)) {
-      Navigator.pop(context);
-    } else {
+    mapSignalsListenTrigger.value = Object();
+    if (!await context.bloc<LocationsBloc>().loadVehiclesInBounds(bounds)) {
       Scaffold.of(context)
           .showSnackBar(SnackBar(content: Text('No connection.')));
+      return;
     }
   }
 
@@ -282,9 +324,76 @@ class LocationsPage extends HookWidget {
     MapLocationPageResult result,
   ) {
     result.mode.when(
-      add: (_) => context.bloc<LocationsBloc>().saveLocation(result.location),
-      existing: (_) =>
-          context.bloc<LocationsBloc>().updateLocation(result.location),
+      add: (_) {
+        context.bloc<LocationsBloc>().saveLocation(result.location);
+      },
+      existing: (_) {
+        context.bloc<LocationsBloc>().updateLocation(result.location);
+      },
     );
+  }
+
+  void _useLocationsSignals(BuildContext context) {
+    useEffect(() {
+      final subscription =
+          context.bloc<LocationsBloc>().signals.listen((signal) {
+        signal.when(
+          loading: (loading) {
+            _scaffoldKey.currentState
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(loading.message),
+                  duration: const Duration(days: 1),
+                ),
+              );
+          },
+          loadingError: (loadingError) {
+            _scaffoldKey.currentState
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text(loadingError.message)));
+          },
+        );
+      });
+      return subscription.cancel;
+    });
+  }
+
+  void _useMapSignals({
+    @required BuildContext context,
+    @required ValueNotifier<Object> listenTrigger,
+  }) {
+    useEffect(() {
+      StreamSubscription<MapSignal> subscription;
+      listenTrigger.addListener(() {
+        if (listenTrigger.value == null) return;
+        subscription?.cancel();
+        subscription = context.bloc<MapBloc>().signals.listen((signal) {
+          signal.whenPartial(
+            loading: (loading) {
+              _scaffoldKey.currentState
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                    content: Text(loading.message),
+                    duration: const Duration(days: 1),
+                  ),
+                );
+            },
+            loadedSuccessfully: (_) {
+              Navigator.pop(context);
+            },
+            loadingError: (loadingError) {
+              _scaffoldKey.currentState
+                ..hideCurrentSnackBar()
+                ..showSnackBar(SnackBar(content: Text(loadingError.message)));
+            },
+          );
+        });
+      });
+      return () {
+        subscription?.cancel();
+      };
+    });
   }
 }

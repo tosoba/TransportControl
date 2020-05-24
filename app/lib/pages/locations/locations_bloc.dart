@@ -5,9 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as UserLocation;
 import 'package:transport_control/model/location.dart';
-import 'package:transport_control/pages/locations/load_nearby_vehicles_result.dart';
 import 'package:transport_control/pages/locations/locations_event.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
+import 'package:transport_control/pages/locations/locations_signal.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/repo/locations_repo.dart';
 import 'package:transport_control/util/location_util.dart';
@@ -18,6 +18,10 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   final Sink<LatLng> _loadVehiclesNearbySink;
 
   final List<StreamSubscription> _subscriptions = [];
+
+  final StreamController<LocationsSignal> _signals =
+      StreamController.broadcast();
+  Stream<LocationsSignal> get signals => _signals.stream;
 
   LocationsBloc(
     this._repo,
@@ -35,9 +39,10 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
 
   @override
   Future<void> close() async {
-    await Future.wait(
-      _subscriptions.map((subscription) => subscription.cancel()),
-    );
+    await Future.wait([
+      ..._subscriptions.map((subscription) => subscription.cancel()),
+      _signals.close(),
+    ]);
     return super.close();
   }
 
@@ -98,30 +103,34 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     return true;
   }
 
-  Future<LoadNearbyVehiclesResult> loadVehiclesNearbyUserLocation() async {
-    //TODO: Signal loading location with snackbar
+  void loadVehiclesNearbyUserLocation() async {
+    _signals.add(LocationsSignal.loading(message: 'Loading location...'));
     final locationResult = await UserLocation.Location().tryGet();
-    //TODO: hide snackbar
-    return locationResult.asyncWhenOrElse(
+    locationResult.asyncWhenOrElse(
       success: (result) async {
         final locationData = result.data;
         if (locationData.latitude == null || locationData.longitude == null) {
-          return LoadNearbyVehiclesResult.failedToGetUserLocation(
-            locationResult: result,
+          _signals.add(
+            LocationsSignal.loadingError(message: 'Unable to load location.'),
           );
         }
+
         if (await Connectivity().checkConnectivity() ==
             ConnectivityResult.none) {
-          return LoadNearbyVehiclesResult.noConnection();
+          _signals.add(
+            LocationsSignal.loadingError(message: 'No internet connection.'),
+          );
         }
+
         _loadVehiclesNearbySink.add(
           LatLng(result.data.latitude, result.data.longitude),
         );
-        return LoadNearbyVehiclesResult.success();
       },
-      orElse: (result) => LoadNearbyVehiclesResult.failedToGetUserLocation(
-        locationResult: result,
-      ),
+      orElse: (result) {
+        _signals.add(
+          LocationsSignal.loadingError(message: 'Unable to load location.'),
+        );
+      },
     );
   }
 

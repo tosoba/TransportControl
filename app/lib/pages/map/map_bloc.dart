@@ -29,7 +29,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   final List<StreamSubscription> _subscriptions = [];
 
-  final _signals = StreamController<MapSignal>();
+  final StreamController<MapSignal> _signals = StreamController.broadcast();
   Stream<MapSignal> get signals => _signals.stream;
 
   MapBloc(

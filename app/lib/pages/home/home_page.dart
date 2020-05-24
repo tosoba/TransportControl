@@ -381,12 +381,17 @@ class HomePage extends HookWidget {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BlocProvider<LocationsBloc>(
-          create: (_) => LocationsBloc(
-            getIt<LocationsRepo>(),
-            getIt<LoadVehiclesInBounds>().injected.sink,
-            getIt<LoadVehiclesNearby>().injected.sink,
-          ),
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider<LocationsBloc>(
+              create: (_) => LocationsBloc(
+                getIt<LocationsRepo>(),
+                getIt<LoadVehiclesInBounds>().injected.sink,
+                getIt<LoadVehiclesNearby>().injected.sink,
+              ),
+            ),
+            BlocProvider.value(value: context.bloc<MapBloc>()),
+          ],
           child: LocationsPage(),
         ),
       ),
