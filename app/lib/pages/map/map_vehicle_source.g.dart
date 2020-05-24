@@ -13,23 +13,24 @@ abstract class MapVehicleSource extends Equatable {
   factory MapVehicleSource.ofLine(
       {@required Line line, @required DateTime loadedAt}) = OfLine;
 
-  factory MapVehicleSource.inBounds(
-      {@required LatLngBounds bounds, @required DateTime loadedAt}) = InBounds;
+  factory MapVehicleSource.nearbyLocation(
+      {@required Location location,
+      @required DateTime loadedAt}) = NearbyLocation;
 
-  factory MapVehicleSource.nearby(
+  factory MapVehicleSource.nearbyPosition(
       {@required LatLng position,
       @required double radius,
-      @required DateTime loadedAt}) = Nearby;
+      @required DateTime loadedAt}) = NearbyPosition;
 
   final _MapVehicleSource _type;
 
 //ignore: missing_return
   R when<R>(
       {@required R Function(OfLine) ofLine,
-      @required R Function(InBounds) inBounds,
-      @required R Function(Nearby) nearby}) {
+      @required R Function(NearbyLocation) nearbyLocation,
+      @required R Function(NearbyPosition) nearbyPosition}) {
     assert(() {
-      if (ofLine == null || inBounds == null || nearby == null) {
+      if (ofLine == null || nearbyLocation == null || nearbyPosition == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -37,20 +38,20 @@ abstract class MapVehicleSource extends Equatable {
     switch (this._type) {
       case _MapVehicleSource.OfLine:
         return ofLine(this as OfLine);
-      case _MapVehicleSource.InBounds:
-        return inBounds(this as InBounds);
-      case _MapVehicleSource.Nearby:
-        return nearby(this as Nearby);
+      case _MapVehicleSource.NearbyLocation:
+        return nearbyLocation(this as NearbyLocation);
+      case _MapVehicleSource.NearbyPosition:
+        return nearbyPosition(this as NearbyPosition);
     }
   }
 
 //ignore: missing_return
   Future<R> asyncWhen<R>(
       {@required FutureOr<R> Function(OfLine) ofLine,
-      @required FutureOr<R> Function(InBounds) inBounds,
-      @required FutureOr<R> Function(Nearby) nearby}) {
+      @required FutureOr<R> Function(NearbyLocation) nearbyLocation,
+      @required FutureOr<R> Function(NearbyPosition) nearbyPosition}) {
     assert(() {
-      if (ofLine == null || inBounds == null || nearby == null) {
+      if (ofLine == null || nearbyLocation == null || nearbyPosition == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -58,17 +59,17 @@ abstract class MapVehicleSource extends Equatable {
     switch (this._type) {
       case _MapVehicleSource.OfLine:
         return ofLine(this as OfLine);
-      case _MapVehicleSource.InBounds:
-        return inBounds(this as InBounds);
-      case _MapVehicleSource.Nearby:
-        return nearby(this as Nearby);
+      case _MapVehicleSource.NearbyLocation:
+        return nearbyLocation(this as NearbyLocation);
+      case _MapVehicleSource.NearbyPosition:
+        return nearbyPosition(this as NearbyPosition);
     }
   }
 
   R whenOrElse<R>(
       {R Function(OfLine) ofLine,
-      R Function(InBounds) inBounds,
-      R Function(Nearby) nearby,
+      R Function(NearbyLocation) nearbyLocation,
+      R Function(NearbyPosition) nearbyPosition,
       @required R Function(MapVehicleSource) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -80,20 +81,20 @@ abstract class MapVehicleSource extends Equatable {
       case _MapVehicleSource.OfLine:
         if (ofLine == null) break;
         return ofLine(this as OfLine);
-      case _MapVehicleSource.InBounds:
-        if (inBounds == null) break;
-        return inBounds(this as InBounds);
-      case _MapVehicleSource.Nearby:
-        if (nearby == null) break;
-        return nearby(this as Nearby);
+      case _MapVehicleSource.NearbyLocation:
+        if (nearbyLocation == null) break;
+        return nearbyLocation(this as NearbyLocation);
+      case _MapVehicleSource.NearbyPosition:
+        if (nearbyPosition == null) break;
+        return nearbyPosition(this as NearbyPosition);
     }
     return orElse(this);
   }
 
   Future<R> asyncWhenOrElse<R>(
       {FutureOr<R> Function(OfLine) ofLine,
-      FutureOr<R> Function(InBounds) inBounds,
-      FutureOr<R> Function(Nearby) nearby,
+      FutureOr<R> Function(NearbyLocation) nearbyLocation,
+      FutureOr<R> Function(NearbyPosition) nearbyPosition,
       @required FutureOr<R> Function(MapVehicleSource) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -105,12 +106,12 @@ abstract class MapVehicleSource extends Equatable {
       case _MapVehicleSource.OfLine:
         if (ofLine == null) break;
         return ofLine(this as OfLine);
-      case _MapVehicleSource.InBounds:
-        if (inBounds == null) break;
-        return inBounds(this as InBounds);
-      case _MapVehicleSource.Nearby:
-        if (nearby == null) break;
-        return nearby(this as Nearby);
+      case _MapVehicleSource.NearbyLocation:
+        if (nearbyLocation == null) break;
+        return nearbyLocation(this as NearbyLocation);
+      case _MapVehicleSource.NearbyPosition:
+        if (nearbyPosition == null) break;
+        return nearbyPosition(this as NearbyPosition);
     }
     return orElse(this);
   }
@@ -118,10 +119,10 @@ abstract class MapVehicleSource extends Equatable {
 //ignore: missing_return
   Future<void> whenPartial(
       {FutureOr<void> Function(OfLine) ofLine,
-      FutureOr<void> Function(InBounds) inBounds,
-      FutureOr<void> Function(Nearby) nearby}) {
+      FutureOr<void> Function(NearbyLocation) nearbyLocation,
+      FutureOr<void> Function(NearbyPosition) nearbyPosition}) {
     assert(() {
-      if (ofLine == null && inBounds == null && nearby == null) {
+      if (ofLine == null && nearbyLocation == null && nearbyPosition == null) {
         throw 'provide at least one branch';
       }
       return true;
@@ -130,12 +131,12 @@ abstract class MapVehicleSource extends Equatable {
       case _MapVehicleSource.OfLine:
         if (ofLine == null) break;
         return ofLine(this as OfLine);
-      case _MapVehicleSource.InBounds:
-        if (inBounds == null) break;
-        return inBounds(this as InBounds);
-      case _MapVehicleSource.Nearby:
-        if (nearby == null) break;
-        return nearby(this as Nearby);
+      case _MapVehicleSource.NearbyLocation:
+        if (nearbyLocation == null) break;
+        return nearbyLocation(this as NearbyLocation);
+      case _MapVehicleSource.NearbyPosition:
+        if (nearbyPosition == null) break;
+        return nearbyPosition(this as NearbyPosition);
     }
   }
 
@@ -159,26 +160,26 @@ class OfLine extends MapVehicleSource {
 }
 
 @immutable
-class InBounds extends MapVehicleSource {
-  const InBounds({@required this.bounds, @required this.loadedAt})
-      : super(_MapVehicleSource.InBounds);
+class NearbyLocation extends MapVehicleSource {
+  const NearbyLocation({@required this.location, @required this.loadedAt})
+      : super(_MapVehicleSource.NearbyLocation);
 
-  final LatLngBounds bounds;
+  final Location location;
 
   final DateTime loadedAt;
 
   @override
   String toString() =>
-      'InBounds(bounds:${this.bounds},loadedAt:${this.loadedAt})';
+      'NearbyLocation(location:${this.location},loadedAt:${this.loadedAt})';
   @override
-  List get props => [bounds, loadedAt];
+  List get props => [location, loadedAt];
 }
 
 @immutable
-class Nearby extends MapVehicleSource {
-  const Nearby(
+class NearbyPosition extends MapVehicleSource {
+  const NearbyPosition(
       {@required this.position, @required this.radius, @required this.loadedAt})
-      : super(_MapVehicleSource.Nearby);
+      : super(_MapVehicleSource.NearbyPosition);
 
   final LatLng position;
 
@@ -188,7 +189,7 @@ class Nearby extends MapVehicleSource {
 
   @override
   String toString() =>
-      'Nearby(position:${this.position},radius:${this.radius},loadedAt:${this.loadedAt})';
+      'NearbyPosition(position:${this.position},radius:${this.radius},loadedAt:${this.loadedAt})';
   @override
   List get props => [position, radius, loadedAt];
 }

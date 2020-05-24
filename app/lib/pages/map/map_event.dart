@@ -1,6 +1,7 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:super_enum/super_enum.dart';
 import 'package:transport_control/model/line.dart';
+import 'package:transport_control/model/location.dart';
 import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/pages/map/map_vehicle_source.dart';
 
@@ -22,16 +23,16 @@ enum _MapEvent {
 
   @Data(fields: [
     DataField<Iterable<Vehicle>>('vehicles'),
-    DataField<LatLngBounds>('bounds')
+    DataField<Location>('location')
   ])
-  AddVehiclesInBounds,
+  AddVehiclesInLocation,
 
   @Data(fields: [
     DataField<Iterable<Vehicle>>('vehicles'),
     DataField<LatLng>('position'),
     DataField<double>('radius'),
   ])
-  AddVehiclesNearby,
+  AddVehiclesNearbyPosition,
 
   @object
   AnimateVehicles,

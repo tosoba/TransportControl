@@ -386,7 +386,7 @@ class HomePage extends HookWidget {
             BlocProvider<LocationsBloc>(
               create: (_) => LocationsBloc(
                 getIt<LocationsRepo>(),
-                getIt<LoadVehiclesInBounds>().injected.sink,
+                getIt<LoadVehiclesInLocation>().injected.sink,
                 getIt<LoadVehiclesNearby>().injected.sink,
               ),
             ),

@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:injectable/injectable.dart';
 import 'package:transport_control/model/line.dart';
+import 'package:transport_control/model/location.dart';
 
 @registerModule
 abstract class ControllersModule {
   @singleton
-  LoadVehiclesInBounds get loadVehiclesInBounds {
-    return LoadVehiclesInBounds(StreamController<LatLngBounds>());
+  LoadVehiclesInLocation get loadVehiclesInLocation {
+    return LoadVehiclesInLocation(StreamController<Location>());
   }
 
   @singleton
@@ -41,8 +42,8 @@ class Injectable<T> {
   Injectable(this.injected);
 }
 
-class LoadVehiclesInBounds extends Injectable<StreamController<LatLngBounds>> {
-  LoadVehiclesInBounds(StreamController<LatLngBounds> controller)
+class LoadVehiclesInLocation extends Injectable<StreamController<Location>> {
+  LoadVehiclesInLocation(StreamController<Location> controller)
       : super(controller);
 }
 

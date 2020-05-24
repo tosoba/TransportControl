@@ -147,9 +147,9 @@ Value<T> nullableValueFrom<T>(T value) {
 extension MapVehicleSourceExt on MapVehicleSource {
   DateTime get loadedAt {
     return when(
-      ofLine: (ol) => ol.loadedAt,
-      inBounds: (ib) => ib.loadedAt,
-      nearby: (n) => n.loadedAt,
+      ofLine: (source) => source.loadedAt,
+      nearbyLocation: (source) => source.loadedAt,
+      nearbyPosition: (source) => source.loadedAt,
     );
   }
 }

@@ -42,8 +42,8 @@ void $initGetIt(GetIt g, {String environment}) {
   //Eager singletons must be registered in the right order
   g.registerSingleton<Database>(Database());
   g.registerSingleton<Dio>(apiModule.client);
-  g.registerSingleton<LoadVehiclesInBounds>(
-      controllersModule.loadVehiclesInBounds);
+  g.registerSingleton<LoadVehiclesInLocation>(
+      controllersModule.loadVehiclesInLocation);
   g.registerSingleton<LoadVehiclesNearby>(controllersModule.loadVehiclesNearby);
   g.registerSingleton<TrackedLinesAdded>(controllersModule.trackedLinesAdded);
   g.registerSingleton<TrackedLinesRemoved>(

@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
@@ -195,7 +194,7 @@ class LocationsPage extends HookWidget {
               child: InkWell(
                 onTap: () => _loadVehiclesAndPop(
                   context,
-                  bounds: location.bounds,
+                  location: location,
                   mapSignalsListenTrigger: mapSignalsListenTrigger,
                 ),
                 child: ListTile(
@@ -299,7 +298,7 @@ class LocationsPage extends HookWidget {
         _saveOrUpdateLocation(context, result);
         _loadVehiclesAndPop(
           context,
-          bounds: result.location.bounds,
+          location: result.location,
           mapSignalsListenTrigger: mapSignalsListenTrigger,
         );
       },
@@ -308,11 +307,11 @@ class LocationsPage extends HookWidget {
 
   void _loadVehiclesAndPop(
     BuildContext context, {
-    @required LatLngBounds bounds,
+    @required Location location,
     @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) async {
     mapSignalsListenTrigger.value = Object();
-    if (!await context.bloc<LocationsBloc>().loadVehiclesInBounds(bounds)) {
+    if (!await context.bloc<LocationsBloc>().loadVehiclesInLocation(location)) {
       Scaffold.of(context)
           .showSnackBar(SnackBar(content: Text('No connection.')));
       return;

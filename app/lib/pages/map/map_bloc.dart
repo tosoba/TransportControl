@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:transport_control/model/line.dart';
+import 'package:transport_control/model/location.dart';
 import 'package:transport_control/model/result.dart';
 import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
@@ -37,7 +38,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     this._preferences,
     this._loadingVehiclesOfLinesFailedSink,
     this._untrackAllLinesSink,
-    Stream<LatLngBounds> loadVehiclesInBoundsStream,
+    Stream<Location> loadVehiclesInLocationStream,
     Stream<LatLng> loadVehiclesNearbyStream,
     Stream<Set<Line>> trackedLinesAddedStream,
     Stream<Set<Line>> trackedLinesRemovedStream,
@@ -68,7 +69,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             )
             .listen((_) => add(MapEvent.animateVehicles())),
       )
-      ..add(loadVehiclesInBoundsStream.listen(loadVehiclesInBounds))
+      ..add(loadVehiclesInLocationStream.listen(loadVehiclesInLocation))
       ..add(
         loadVehiclesNearbyStream.listen(
           (position) => loadVehiclesNearby(position, radiusInMeters: 1000),
@@ -116,21 +117,21 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           ),
         );
       },
-      addVehiclesInBounds: (evt) {
+      addVehiclesInLocation: (evt) {
         final loadedAt = DateTime.now();
         return state.withNewVehicles(
           evt.vehicles,
-          sourceForVehicle: (_) => MapVehicleSource.inBounds(
-            bounds: evt.bounds,
+          sourceForVehicle: (_) => MapVehicleSource.nearbyLocation(
+            location: evt.location,
             loadedAt: loadedAt,
           ),
         );
       },
-      addVehiclesNearby: (evt) {
+      addVehiclesNearbyPosition: (evt) {
         final loadedAt = DateTime.now();
         return state.withNewVehicles(
           evt.vehicles,
-          sourceForVehicle: (_) => MapVehicleSource.nearby(
+          sourceForVehicle: (_) => MapVehicleSource.nearbyPosition(
             position: evt.position,
             radius: evt.radius,
             loadedAt: loadedAt,
@@ -188,14 +189,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
   }
 
-  void loadVehiclesInBounds(LatLngBounds bounds) {
+  void loadVehiclesInLocation(Location location) {
     _loadVehicles(
-      loadingMsg: 'Loading vehicles in bounds...',
-      emptyResultErrorMsg: 'No vehicles were found in bounds.',
-      loadVehicles: () => _vehiclesRepo.loadVehiclesInBounds(bounds),
-      successEvent: (vehicles) => MapEvent.addVehiclesInBounds(
+      loadingMsg: 'Loading vehicles nearby ${location.name}',
+      emptyResultErrorMsg: 'No vehicles were found nearby ${location.name}.',
+      loadVehicles: () => _vehiclesRepo.loadVehiclesInBounds(location.bounds),
+      successEvent: (vehicles) => MapEvent.addVehiclesInLocation(
         vehicles: vehicles,
-        bounds: bounds,
+        location: location,
       ),
     );
   }
@@ -208,7 +209,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         position,
         radiusInMeters: radiusInMeters,
       ),
-      successEvent: (vehicles) => MapEvent.addVehiclesNearby(
+      successEvent: (vehicles) => MapEvent.addVehiclesNearbyPosition(
         vehicles: vehicles,
         position: position,
         radius: radiusInMeters,

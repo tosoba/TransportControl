@@ -112,11 +112,12 @@ class TrackedPage extends HookWidget {
       actionExtentRatio: 0.25,
       child: ListTile(
         title: Text(source.key.when(
-          ofLine: (ol) => 'Of line: ${ol.line.symbol}',
-          inBounds: (ib) => 'In bounds', //TODO: name of the location
-          nearby: (n) => '''Nearby your location loaded${dateTimeDiffInfo(
+          ofLine: (s) => 'Of line: ${s.line.symbol}',
+          nearbyLocation: (s) => 'Nearby ${s.location.name}',
+          nearbyPosition: (s) =>
+              '''Nearby your location loaded${dateTimeDiffInfo(
             diffMillis: DateTime.now().millisecondsSinceEpoch -
-                n.loadedAt.millisecondsSinceEpoch,
+                s.loadedAt.millisecondsSinceEpoch,
             prefix: '',
           )}''',
         )),

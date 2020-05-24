@@ -1,6 +1,7 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:super_enum/super_enum.dart';
 import 'package:transport_control/model/line.dart';
+import 'package:transport_control/model/location.dart';
 
 part "map_vehicle_source.g.dart";
 
@@ -10,15 +11,15 @@ enum _MapVehicleSource {
   OfLine,
 
   @Data(fields: [
-    DataField<LatLngBounds>('bounds'),
+    DataField<Location>('location'),
     DataField<DateTime>('loadedAt')
   ])
-  InBounds,
+  NearbyLocation,
 
   @Data(fields: [
     DataField<LatLng>('position'),
     DataField<double>('radius'),
     DataField<DateTime>('loadedAt')
   ])
-  Nearby,
+  NearbyPosition,
 }

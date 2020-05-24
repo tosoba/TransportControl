@@ -42,7 +42,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
   void dispose() {
     final getIt = GetIt.instance;
     getIt<RxSharedPreferences>().dispose();
-    getIt<LoadVehiclesInBounds>().injected.close();
+    getIt<LoadVehiclesInLocation>().injected.close();
     getIt<LoadVehiclesNearby>().injected.close();
     getIt<TrackedLinesAdded>().injected.close();
     getIt<TrackedLinesRemoved>().injected.close();
@@ -55,7 +55,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
   @override
   Widget build(BuildContext context) {
     final getIt = GetIt.instance;
-    final loadVehiclesInBounds = getIt<LoadVehiclesInBounds>().injected;
+    final loadVehiclesInBounds = getIt<LoadVehiclesInLocation>().injected;
     final loadVehiclesNearby = getIt<LoadVehiclesNearby>().injected;
     final trackedLinesAdded = getIt<TrackedLinesAdded>().injected;
     final trackedLinesRemoved = getIt<TrackedLinesRemoved>().injected;
