@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:ui';
 
@@ -6,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_vehicle_source.dart';
@@ -21,14 +23,12 @@ class TrackedPage extends HookWidget {
     final filterController = useStreamController<String>();
     searchFieldController.addListener(() {
       final filter = searchFieldController.value.text;
-      if (filter != null && filter.isNotEmpty) {
-        filterController.add(filter.trim().toLowerCase());
-      }
+      filterController.add(filter?.trim()?.toLowerCase() ?? filter);
     });
 
     return StreamBuilder<List<MapEntry<MapVehicleSource, Set<Vehicle>>>>(
-      //TODO: combine stream with filterController
-      stream: context.bloc<MapBloc>().sourcesStream,
+      stream:
+          context.bloc<MapBloc>().sourcesStreamFilteredUsing(filterController),
       builder: (context, snapshot) {
         final sources = snapshot.data;
         final appBar = TextFieldAppBar(
@@ -126,7 +126,8 @@ class TrackedPage extends HookWidget {
 }
 
 extension _MapBlocExt on MapBloc {
-  Stream<List<MapEntry<MapVehicleSource, Set<Vehicle>>>> get sourcesStream {
+  Stream<List<MapEntry<MapVehicleSource, Set<Vehicle>>>>
+      sourcesStreamFilteredUsing(StreamController<String> filterStream) {
     return map((state) {
       final sourcesMap = SplayTreeMap<MapVehicleSource, Set<Vehicle>>(
         (source1, source2) => source2.loadedAt.compareTo(source1.loadedAt),
@@ -138,7 +139,18 @@ extension _MapBlocExt on MapBloc {
         });
       });
       return sourcesMap.entries.toList();
-    });
+    }).combineLatest(
+      filterStream.stream.startWith(null),
+      (sources, String filter) {
+        return filter == null || filter.isEmpty
+            ? sources
+            : sources
+                .where(
+                  (entry) => entry.key.title.toLowerCase().contains(filter),
+                )
+                .toList();
+      },
+    );
   }
 }
 
