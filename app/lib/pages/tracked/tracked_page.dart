@@ -27,18 +27,7 @@ class TrackedPage extends HookWidget {
 
     return StreamBuilder<List<MapEntry<MapVehicleSource, Set<Vehicle>>>>(
       //TODO: combine stream with filterController
-      stream: context.bloc<MapBloc>().map((state) {
-        final sourcesMap = SplayTreeMap<MapVehicleSource, Set<Vehicle>>(
-          (source1, source2) => source2.loadedAt.compareTo(source1.loadedAt),
-        );
-        state.trackedVehicles.values.forEach((tracked) {
-          tracked.sources.forEach((source) {
-            sourcesMap.putIfAbsent(source, () => {});
-            sourcesMap[source].add(tracked.vehicle);
-          });
-        });
-        return sourcesMap.entries.toList();
-      }),
+      stream: context.bloc<MapBloc>().sourcesStream,
       builder: (context, snapshot) {
         final sources = snapshot.data;
         final appBar = TextFieldAppBar(
@@ -56,18 +45,16 @@ class TrackedPage extends HookWidget {
                   appBar,
                   Expanded(child: Center(child: Text('No tracked vehicles.'))),
                 ])
-              : CustomScrollView(
-                  slivers: [
-                    SliverPersistentHeader(
-                      delegate: SliverTextFieldAppBarDelegate(
-                        context,
-                        appBar: appBar,
-                      ),
-                      floating: true,
+              : CustomScrollView(slivers: [
+                  SliverPersistentHeader(
+                    delegate: SliverTextFieldAppBarDelegate(
+                      context,
+                      appBar: appBar,
                     ),
-                    _sourcesList(context, sources: sources),
-                  ],
-                ),
+                    floating: true,
+                  ),
+                  _sourcesList(context, sources: sources),
+                ]),
           floatingActionButton: _floatingActionButton(
             context,
             sources: sources,
@@ -111,16 +98,7 @@ class TrackedPage extends HookWidget {
       actionPane: SlidableDrawerActionPane(),
       actionExtentRatio: 0.25,
       child: ListTile(
-        title: Text(source.key.when(
-          ofLine: (s) => 'Of line: ${s.line.symbol}',
-          nearbyLocation: (s) => 'Nearby ${s.location.name}',
-          nearbyPosition: (s) =>
-              '''Nearby your location loaded${dateTimeDiffInfo(
-            diffMillis: DateTime.now().millisecondsSinceEpoch -
-                s.loadedAt.millisecondsSinceEpoch,
-            prefix: '',
-          )}''',
-        )),
+        title: Text(source.key.title),
         subtitle: Text(
           '${source.value.length.toString()} ${source.value.length > 1 ? 'vehicles' : 'vehicle'} in total',
         ),
@@ -144,6 +122,38 @@ class TrackedPage extends HookWidget {
     return FloatingActionButton.extended(
       onPressed: () => context.bloc<MapBloc>().clearMap(),
       label: Text('Clear all'),
+    );
+  }
+}
+
+extension _MapBlocExt on MapBloc {
+  Stream<List<MapEntry<MapVehicleSource, Set<Vehicle>>>> get sourcesStream {
+    return map((state) {
+      final sourcesMap = SplayTreeMap<MapVehicleSource, Set<Vehicle>>(
+        (source1, source2) => source2.loadedAt.compareTo(source1.loadedAt),
+      );
+      state.trackedVehicles.values.forEach((tracked) {
+        tracked.sources.forEach((source) {
+          sourcesMap.putIfAbsent(source, () => {});
+          sourcesMap[source].add(tracked.vehicle);
+        });
+      });
+      return sourcesMap.entries.toList();
+    });
+  }
+}
+
+extension _MapVehicleSourceExt on MapVehicleSource {
+  String get title {
+    return when(
+      ofLine: (s) => 'Vehicles of line: ${s.line.symbol}',
+      nearbyLocation: (s) => 'Vehicles nearby ${s.location.name}',
+      nearbyPosition: (s) =>
+          '''Vehicles nearby your location loaded${dateTimeDiffInfo(
+        diffMillis: DateTime.now().millisecondsSinceEpoch -
+            s.loadedAt.millisecondsSinceEpoch,
+        prefix: '',
+      )}''',
     );
   }
 }
