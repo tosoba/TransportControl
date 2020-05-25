@@ -231,6 +231,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         final vehicles = success.data;
         if (vehicles.isEmpty) {
           _signals.add(MapSignal.loadingError(message: emptyResultErrorMsg));
+          onFailure?.call(Failure(error: Exception('No vehicles found.')));
         } else {
           add(successEvent(vehicles));
           final zoomToLoadedMarkersBounds = await _preferences.getBool(
