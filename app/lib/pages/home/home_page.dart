@@ -368,8 +368,11 @@ class HomePage extends HookWidget {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
-          value: context.bloc<LinesBloc>(),
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.bloc<MapBloc>()),
+            BlocProvider.value(value: context.bloc<LinesBloc>()),
+          ],
           child: LinesPage(),
         ),
       ),

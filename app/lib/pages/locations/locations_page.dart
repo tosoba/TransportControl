@@ -1,15 +1,13 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:transport_control/hooks/use_location_signals.dart';
+import 'package:transport_control/hooks/use_map_signals.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
-import 'package:transport_control/pages/map/map_bloc.dart';
-import 'package:transport_control/pages/map/map_signal.dart';
 import 'package:transport_control/pages/map_location/map_location_page.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
@@ -33,9 +31,13 @@ class LocationsPage extends HookWidget {
           .nameFilterChanged(searchFieldController.value.text),
     );
 
-    _useLocationsSignals(context);
+    useLocationsSignals(scaffoldKey: _scaffoldKey, context: context);
     final mapSignalsListenTrigger = ValueNotifier<Object>(null);
-    _useMapSignals(context: context, listenTrigger: mapSignalsListenTrigger);
+    useMapSignals(
+      scaffoldKey: _scaffoldKey,
+      context: context,
+      listenTrigger: mapSignalsListenTrigger,
+    );
 
     return Scaffold(
       key: _scaffoldKey,
@@ -330,69 +332,5 @@ class LocationsPage extends HookWidget {
         context.bloc<LocationsBloc>().updateLocation(result.location);
       },
     );
-  }
-
-  void _useLocationsSignals(BuildContext context) {
-    useEffect(() {
-      final subscription =
-          context.bloc<LocationsBloc>().signals.listen((signal) {
-        signal.when(
-          loading: (loading) {
-            _scaffoldKey.currentState
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(loading.message),
-                  duration: const Duration(days: 1),
-                ),
-              );
-          },
-          loadingError: (loadingError) {
-            _scaffoldKey.currentState
-              ..hideCurrentSnackBar()
-              ..showSnackBar(SnackBar(content: Text(loadingError.message)));
-          },
-        );
-      });
-      return subscription.cancel;
-    });
-  }
-
-  void _useMapSignals({
-    @required BuildContext context,
-    @required ValueNotifier<Object> listenTrigger,
-  }) {
-    useEffect(() {
-      StreamSubscription<MapSignal> subscription;
-      listenTrigger.addListener(() {
-        if (listenTrigger.value == null) return;
-        subscription?.cancel();
-        subscription = context.bloc<MapBloc>().signals.listen((signal) {
-          signal.whenPartial(
-            loading: (loading) {
-              _scaffoldKey.currentState
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  SnackBar(
-                    content: Text(loading.message),
-                    duration: const Duration(days: 1),
-                  ),
-                );
-            },
-            loadedSuccessfully: (_) {
-              Navigator.pop(context);
-            },
-            loadingError: (loadingError) {
-              _scaffoldKey.currentState
-                ..hideCurrentSnackBar()
-                ..showSnackBar(SnackBar(content: Text(loadingError.message)));
-            },
-          );
-        });
-      });
-      return () {
-        subscription?.cancel();
-      };
-    });
   }
 }
