@@ -316,7 +316,6 @@ class LocationsPage extends HookWidget {
     if (!await context.bloc<LocationsBloc>().loadVehiclesInLocation(location)) {
       Scaffold.of(context)
           .showSnackBar(SnackBar(content: Text('No connection.')));
-      return;
     }
   }
 

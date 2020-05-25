@@ -7,6 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:scroll_bottom_navigation_bar/scroll_bottom_navigation_bar.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:transport_control/hooks/use_map_signals.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
@@ -20,7 +21,8 @@ import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 class LinesPage extends HookWidget {
   LinesPage({Key key}) : super(key: key);
 
-  final AutoScrollController _autoScrollController = AutoScrollController();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _autoScrollController = AutoScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +45,17 @@ class LinesPage extends HookWidget {
       );
     });
 
+    final mapSignalsListenTrigger = ValueNotifier<Object>(null);
+    useMapSignals(
+      scaffoldKey: _scaffoldKey,
+      context: context,
+      listenTrigger: mapSignalsListenTrigger,
+    );
+
     return StreamBuilder<LinesState>(
       stream: context.bloc<LinesBloc>(),
       builder: (context, snapshot) => Scaffold(
+        key: _scaffoldKey,
         extendBodyBehindAppBar: true,
         extendBody: true,
         resizeToAvoidBottomPadding: false,
@@ -54,11 +64,13 @@ class LinesPage extends HookWidget {
           stateSnapshot: snapshot,
           searchFieldFocusNode: searchFieldFocusNode,
           searchFieldController: searchFieldController,
+          mapSignalsListenTrigger: mapSignalsListenTrigger,
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: _floatingActionButtons(
           context,
           stateSnapshot: snapshot,
+          mapSignalsListenTrigger: mapSignalsListenTrigger,
         ),
         bottomNavigationBar: _listGroupNavigationButtons(
           stateSnapshot: snapshot,
@@ -72,6 +84,7 @@ class LinesPage extends HookWidget {
     @required AsyncSnapshot<LinesState> stateSnapshot,
     @required FocusNode searchFieldFocusNode,
     @required TextEditingController searchFieldController,
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) {
     final appBar = _appBar(
       context,
@@ -103,7 +116,11 @@ class LinesPage extends HookWidget {
           delegate: SliverTextFieldAppBarDelegate(context, appBar: appBar),
           floating: true,
         ),
-        _linesList(context, lines: filteredLines),
+        _linesList(
+          context,
+          lines: filteredLines,
+          mapSignalsListenTrigger: mapSignalsListenTrigger,
+        ),
       ],
     );
   }
@@ -169,6 +186,7 @@ class LinesPage extends HookWidget {
   Widget _floatingActionButtons(
     BuildContext context, {
     @required AsyncSnapshot<LinesState> stateSnapshot,
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) {
     if (stateSnapshot.data == null) return null;
 
@@ -198,10 +216,11 @@ class LinesPage extends HookWidget {
           numberOfLines: numberOfUntracked,
           icon: Icons.location_on,
           label: 'Track',
-          onTap: () async => _popIfTrueOrShowSnackbarWithText(
+          onTap: () async => _trackOrShowSnackbar(
             context,
             condition: await context.bloc<LinesBloc>().trackSelectedLines(),
-            text: 'No connection.',
+            snackBarText: 'No connection.',
+            mapSignalsListenTrigger: mapSignalsListenTrigger,
           ),
         ),
       if (numberOfTracked > 0)
@@ -293,6 +312,7 @@ class LinesPage extends HookWidget {
   Widget _linesList(
     BuildContext context, {
     @required List<MapEntry<Line, LineState>> lines,
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) {
     final lineGroups = lines.groupBy((entry) => entry.key.group).entries;
     return SliverList(
@@ -303,7 +323,11 @@ class LinesPage extends HookWidget {
             key: ValueKey(index),
             controller: _autoScrollController,
             index: index,
-            child: _linesGroup(context, group: lineGroups.elementAt(index)),
+            child: _linesGroup(
+              context,
+              group: lineGroups.elementAt(index),
+              mapSignalsListenTrigger: mapSignalsListenTrigger,
+            ),
           );
         },
       ),
@@ -312,7 +336,8 @@ class LinesPage extends HookWidget {
 
   Widget _linesGroup(
     BuildContext context, {
-    MapEntry<String, List<MapEntry<Line, LineState>>> group,
+    @required MapEntry<String, List<MapEntry<Line, LineState>>> group,
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) {
     final groupLines = group.value;
     final columnsCount =
@@ -345,7 +370,11 @@ class LinesPage extends HookWidget {
                   columnCount: columnsCount,
                   child: ScaleAnimation(
                     child: FadeInAnimation(
-                      child: _lineListItem(context, line: groupLines[index]),
+                      child: _lineListItem(
+                        context,
+                        line: groupLines[index],
+                        mapSignalsListenTrigger: mapSignalsListenTrigger,
+                      ),
                     ),
                   ),
                 );
@@ -360,6 +389,7 @@ class LinesPage extends HookWidget {
   Widget _lineListItem(
     BuildContext context, {
     @required MapEntry<Line, LineState> line,
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) {
     return Card(
       child: InkWell(
@@ -374,6 +404,7 @@ class LinesPage extends HookWidget {
             ),
           ),
           line: line,
+          mapSignalsListenTrigger: mapSignalsListenTrigger,
         ),
         child: Padding(
           padding: const EdgeInsets.all(4.0),
@@ -412,6 +443,7 @@ class LinesPage extends HookWidget {
     BuildContext context, {
     @required _LineActionsDialogResult result,
     @required MapEntry<Line, LineState> line,
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) async {
     if (result == null) return;
     final bloc = context.bloc<LinesBloc>();
@@ -423,24 +455,25 @@ class LinesPage extends HookWidget {
         bloc.toggleFavourite(line.key);
         break;
       case _LineActionsDialogResult.TOGGLE_TRACKED:
-        _popIfTrueOrShowSnackbarWithText(
+        _trackOrShowSnackbar(
           context,
           condition: await bloc.toggleTracked(line),
-          text: 'No connection',
+          snackBarText: 'No connection',
+          mapSignalsListenTrigger: mapSignalsListenTrigger,
         );
         break;
     }
   }
 
-  void _popIfTrueOrShowSnackbarWithText(
+  void _trackOrShowSnackbar(
     BuildContext context, {
     @required bool condition,
-    @required String text,
+    @required String snackBarText,
+    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) {
-    if (condition) {
-      Navigator.pop(context);
-    } else {
-      Scaffold.of(context).showSnackBar(SnackBar(content: Text(text)));
+    mapSignalsListenTrigger.value = Object();
+    if (!condition) {
+      Scaffold.of(context).showSnackBar(SnackBar(content: Text(snackBarText)));
     }
   }
 }
