@@ -46,7 +46,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
     getIt<LoadVehiclesNearby>().injected.close();
     getIt<TrackedLinesAdded>().injected.close();
     getIt<TrackedLinesRemoved>().injected.close();
-    getIt<LoadingVehiclesOfLinesFailed>().injected.close();
+    getIt<UntrackLines>().injected.close();
     getIt<UntrackAllLines>().injected.close();
 
     super.dispose();
@@ -59,8 +59,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
     final loadVehiclesNearby = getIt<LoadVehiclesNearby>().injected;
     final trackedLinesAdded = getIt<TrackedLinesAdded>().injected;
     final trackedLinesRemoved = getIt<TrackedLinesRemoved>().injected;
-    final loadingVehiclesOfLinesFailed =
-        getIt<LoadingVehiclesOfLinesFailed>().injected;
+    final untrackLines = getIt<UntrackLines>().injected;
     final untrackAllLines = getIt<UntrackAllLines>().injected;
 
     return MaterialApp(
@@ -73,7 +72,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
             create: (context) => MapBloc(
               getIt<VehiclesRepo>(),
               getIt<RxSharedPreferences>(),
-              loadingVehiclesOfLinesFailed.sink,
+              untrackLines.sink,
               untrackAllLines.sink,
               loadVehiclesInBounds.stream,
               loadVehiclesNearby.stream,
@@ -86,7 +85,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
               getIt<LinesRepo>(),
               trackedLinesAdded.sink,
               trackedLinesRemoved.sink,
-              loadingVehiclesOfLinesFailed.stream,
+              untrackLines.stream,
               untrackAllLines.stream,
             ),
           ),

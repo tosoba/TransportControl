@@ -25,7 +25,7 @@ import 'package:transport_control/util/preferences_util.dart';
 class MapBloc extends Bloc<MapEvent, MapState> {
   final RxSharedPreferences _preferences;
   final VehiclesRepo _vehiclesRepo;
-  final Sink<Set<Line>> _loadingVehiclesOfLinesFailedSink;
+  final Sink<Set<Line>> _untrackLinesSink;
   final Sink<Object> _untrackAllLinesSink;
 
   final List<StreamSubscription> _subscriptions = [];
@@ -36,7 +36,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   MapBloc(
     this._vehiclesRepo,
     this._preferences,
-    this._loadingVehiclesOfLinesFailedSink,
+    this._untrackLinesSink,
     this._untrackAllLinesSink,
     Stream<Location> loadVehiclesInLocationStream,
     Stream<LatLng> loadVehiclesNearbyStream,
@@ -185,7 +185,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         vehicles: vehicles,
         lines: lines,
       ),
-      onFailure: (_) => _loadingVehiclesOfLinesFailedSink.add(lines),
+      onFailure: (_) => _untrackLinesSink.add(lines),
     );
   }
 
@@ -258,10 +258,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
   }
 
-  void cameraMoved({
-    @required LatLngBounds bounds,
-    @required double zoom,
-  }) {
+  void cameraMoved({@required LatLngBounds bounds, @required double zoom}) {
     add(MapEvent.cameraMoved(bounds: bounds, zoom: zoom));
   }
 
@@ -277,6 +274,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   void removeSource(MapVehicleSource source) {
+    if (source is OfLine) {
+      _untrackLinesSink.add(Set()..add(source.line));
+    }
     add(MapEvent.removeSource(source: source));
   }
 }

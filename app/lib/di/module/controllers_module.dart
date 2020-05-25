@@ -28,9 +28,7 @@ abstract class ControllersModule {
   }
 
   @singleton
-  LoadingVehiclesOfLinesFailed get loadingVehiclesOfLinesFailed {
-    return LoadingVehiclesOfLinesFailed(StreamController<Set<Line>>());
-  }
+  UntrackLines get untrackLines => UntrackLines(StreamController<Set<Line>>());
 
   @singleton
   UntrackAllLines get mapCleared => UntrackAllLines(StreamController<Object>());
@@ -60,10 +58,8 @@ class TrackedLinesRemoved extends Injectable<StreamController<Set<Line>>> {
       : super(controller);
 }
 
-class LoadingVehiclesOfLinesFailed
-    extends Injectable<StreamController<Set<Line>>> {
-  LoadingVehiclesOfLinesFailed(StreamController<Set<Line>> controller)
-      : super(controller);
+class UntrackLines extends Injectable<StreamController<Set<Line>>> {
+  UntrackLines(StreamController<Set<Line>> controller) : super(controller);
 }
 
 class UntrackAllLines extends Injectable<StreamController<Object>> {

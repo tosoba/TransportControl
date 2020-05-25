@@ -20,7 +20,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     this._linesRepo,
     this._trackedLinesAddedSink,
     this._trackedLinesRemovedSink,
-    Stream<Set<Line>> loadingVehiclesOfLinesFailedStream,
+    Stream<Set<Line>> untrackLinesStream,
     Stream<Object> untrackAllLinesStream,
   ) {
     _subscriptions
@@ -52,7 +52,8 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
             .listen((lines) => add(LinesEvent.updateLines(lines: lines))),
       )
       ..add(
-        loadingVehiclesOfLinesFailedStream.listen(loadingVehiclesOfLinesFailed),
+        untrackLinesStream
+            .listen((lines) => add(LinesEvent.untrackLines(lines: lines))),
       )
       ..add(
         untrackAllLinesStream.listen((_) => add(LinesEvent.untrackAllLines())),
@@ -124,7 +125,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
           (line, lineState) => MapEntry(line, lineState.untracked),
         ),
       ),
-      loadingVehiclesOfLinesFailed: (evt) => state.copyWith(
+      untrackLines: (evt) => state.copyWith(
         lines: state.lines.map(
           (line, lineState) => evt.lines.contains(line)
               ? MapEntry(line, lineState.toggleTracked)
@@ -229,10 +230,6 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
 
   void untrackSelectedLines({bool resetSelection = true}) {
     add(LinesEvent.untrackSelectedLines(resetSelection: resetSelection));
-  }
-
-  void loadingVehiclesOfLinesFailed(Set<Line> lines) {
-    add(LinesEvent.loadingVehiclesOfLinesFailed(lines: lines));
   }
 
   void addSelectedLinesToFavourites({bool resetSelection = true}) {

@@ -37,5 +37,5 @@ enum _LinesEvent {
   UntrackAllLines,
 
   @Data(fields: [DataField<Set<Line>>('lines')])
-  LoadingVehiclesOfLinesFailed,
+  UntrackLines,
 }

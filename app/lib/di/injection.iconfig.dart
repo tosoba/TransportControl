@@ -48,8 +48,7 @@ void $initGetIt(GetIt g, {String environment}) {
   g.registerSingleton<TrackedLinesAdded>(controllersModule.trackedLinesAdded);
   g.registerSingleton<TrackedLinesRemoved>(
       controllersModule.trackedLinesRemoved);
-  g.registerSingleton<LoadingVehiclesOfLinesFailed>(
-      controllersModule.loadingVehiclesOfLinesFailed);
+  g.registerSingleton<UntrackLines>(controllersModule.untrackLines);
   g.registerSingleton<UntrackAllLines>(controllersModule.mapCleared);
   g.registerSingleton<RxSharedPreferences>(settingsModule.client);
   g.registerSingleton<PlacesApi>(PlacesApi.create(
