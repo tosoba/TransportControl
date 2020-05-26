@@ -29,7 +29,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage>
     with AutomaticKeepAliveClientMixin<MapPage> {
-  final Completer<GoogleMapController> _mapController = Completer();
+  final _mapController = Completer<GoogleMapController>();
   StreamSubscription<MapSignal> _signalsSubscription;
 
   @override
@@ -40,34 +40,40 @@ class _MapPageState extends State<MapPage>
     super.initState();
 
     _signalsSubscription = context.bloc<MapBloc>().signals.listen(
-          (signal) => signal.when(
-            loading: (loading) {
-              Scaffold.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  SnackBar(
-                    content: Text(loading.message),
-                    duration: const Duration(days: 1),
-                  ),
-                );
-            },
-            loadedSuccessfully: (_) =>
-                Scaffold.of(context).hideCurrentSnackBar(),
-            loadingError: (loadingError) {
-              Scaffold.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(SnackBar(content: Text(loadingError.message)));
-            },
-            zoomToBoundsAfterLoadedSuccessfully: (signal) {
+      (signal) {
+        signal.when(
+          loading: (loading) {
+            Scaffold.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(
+                content: Text(loading.message),
+                duration: const Duration(days: 1),
+              ));
+          },
+          loadedSuccessfully: (_) => Scaffold.of(context).hideCurrentSnackBar(),
+          loadingError: (loadingError) {
+            final duration = const Duration(seconds: 4);
+            Scaffold.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(
+                content: Text(loadingError.message),
+                duration: duration,
+              ));
+            Future.delayed(duration, () {
               Scaffold.of(context).hideCurrentSnackBar();
-              _mapController.future.then(
-                (controller) => controller.animateCamera(
-                  CameraUpdate.newLatLngBounds(signal.bounds, 10.0),
-                ),
-              );
-            },
-          ),
+            });
+          },
+          zoomToBoundsAfterLoadedSuccessfully: (signal) {
+            Scaffold.of(context).hideCurrentSnackBar();
+            _mapController.future.then(
+              (controller) => controller.animateCamera(
+                CameraUpdate.newLatLngBounds(signal.bounds, 10.0),
+              ),
+            );
+          },
         );
+      },
+    );
 
     widget.moveToPositionNotifier.addListener(() async {
       final latLng = widget.moveToPositionNotifier.value;

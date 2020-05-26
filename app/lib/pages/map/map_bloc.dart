@@ -234,9 +234,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           onFailure?.call(Failure(error: Exception('No vehicles found.')));
         } else {
           add(successEvent(vehicles));
-          final zoomToLoadedMarkersBounds = await _preferences.getBool(
-            Preferences.zoomToLoadedMarkersBounds.key,
-          );
+          final zoomToLoadedMarkersBounds = await _preferences
+              .getBool(Preferences.zoomToLoadedMarkersBounds.key);
           _signals.add(
             zoomToLoadedMarkersBounds
                 ? MapSignal.zoomToBoundsAfterLoadedSuccessfully(
@@ -249,9 +248,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         }
       },
       failure: (failure) {
-        _signals.add(
-          MapSignal.loadingError(message: 'Loading error occurred.'),
-        );
+        _signals
+            .add(MapSignal.loadingError(message: 'Loading error occurred.'));
         failure.logError();
         onFailure?.call(failure);
       },
