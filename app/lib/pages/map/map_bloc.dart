@@ -69,13 +69,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             )
             .listen((_) => add(MapEvent.animateVehicles())),
       )
-      ..add(loadVehiclesInLocationStream.listen(loadVehiclesInLocation))
+      ..add(loadVehiclesInLocationStream.listen(_loadVehiclesInLocation))
       ..add(
         loadVehiclesNearbyStream.listen(
-          (position) => loadVehiclesNearby(position, radiusInMeters: 1000),
+          (position) => _loadVehiclesNearby(position, radiusInMeters: 1000),
         ),
       )
-      ..add(trackedLinesAddedStream.listen(trackedLinesAdded))
+      ..add(trackedLinesAddedStream.listen(_loadVehiclesOfLines))
       ..add(
         trackedLinesRemovedStream
             .listen((lines) => add(MapEvent.trackedLinesRemoved(lines: lines))),
@@ -175,7 +175,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     return asyncMap((state) => state.markers);
   }
 
-  void trackedLinesAdded(Set<Line> lines) {
+  void _loadVehiclesOfLines(Set<Line> lines) {
     _loadVehicles(
       loadingMsg:
           'Loading vehicles of ${lines.length} ${lines.length > 1 ? 'lines' : 'line'}...',
@@ -189,7 +189,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
   }
 
-  void loadVehiclesInLocation(Location location) {
+  void _loadVehiclesInLocation(Location location) {
     _loadVehicles(
       loadingMsg: 'Loading vehicles nearby ${location.name}',
       emptyResultErrorMsg: 'No vehicles were found nearby ${location.name}.',
@@ -201,7 +201,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
   }
 
-  void loadVehiclesNearby(LatLng position, {@required double radiusInMeters}) {
+  void _loadVehiclesNearby(LatLng position, {@required double radiusInMeters}) {
     _loadVehicles(
       loadingMsg: 'Loading nearby vehicles...',
       emptyResultErrorMsg: 'No vehicles were found nearby given location.',
