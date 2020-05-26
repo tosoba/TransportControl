@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -129,16 +128,16 @@ extension _MapBlocExt on MapBloc {
   Stream<List<MapEntry<MapVehicleSource, Set<Vehicle>>>>
       sourcesStreamFilteredUsing(StreamController<String> filterStream) {
     return map((state) {
-      final sourcesMap = SplayTreeMap<MapVehicleSource, Set<Vehicle>>(
-        (source1, source2) => source2.loadedAt.compareTo(source1.loadedAt),
-      );
+      final sourcesMap = Map<MapVehicleSource, Set<Vehicle>>();
       state.trackedVehicles.values.forEach((tracked) {
         tracked.sources.forEach((source) {
-          sourcesMap.putIfAbsent(source, () => {});
-          sourcesMap[source].add(tracked.vehicle);
+          sourcesMap.putIfAbsent(source, () => {}).add(tracked.vehicle);
         });
       });
-      return sourcesMap.entries.toList();
+      return sourcesMap.entries.toList()
+        ..sort((entry1, entry2) {
+          return entry2.key.loadedAt.compareTo(entry1.key.loadedAt);
+        });
     }).combineLatest(
       filterStream.stream.startWith(null),
       (sources, String filter) {
