@@ -21,7 +21,7 @@ void useMapSignals({
         signal.whenPartial(
           loading: (loading) {
             scaffoldKey.currentState
-              ..hideCurrentSnackBar()
+              ..removeCurrentSnackBar()
               ..showSnackBar(
                 SnackBar(
                   content: Text(loading.message),
@@ -34,8 +34,17 @@ void useMapSignals({
           },
           loadingError: (loadingError) {
             scaffoldKey.currentState
-              ..hideCurrentSnackBar()
-              ..showSnackBar(SnackBar(content: Text(loadingError.message)));
+              ..removeCurrentSnackBar()
+              ..showSnackBar(SnackBar(
+                content: Text(loadingError.message),
+                action: SnackBarAction(
+                  label: 'Retry',
+                  onPressed: () {
+                    scaffoldKey.currentState.removeCurrentSnackBar();
+                    loadingError.retry();
+                  },
+                ),
+              ));
           },
         );
       });

@@ -125,13 +125,15 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
           (line, lineState) => MapEntry(line, lineState.untracked),
         ),
       ),
-      untrackLines: (evt) => state.copyWith(
-        lines: state.lines.map(
-          (line, lineState) => evt.lines.contains(line)
-              ? MapEntry(line, lineState.toggleTracked)
-              : MapEntry(line, lineState),
-        ),
-      ),
+      untrackLines: (evt) {
+        return state.copyWith(
+          lines: state.lines.map(
+            (line, lineState) => evt.lines.contains(line)
+                ? MapEntry(line, lineState.toggleTracked)
+                : MapEntry(line, lineState),
+          ),
+        );
+      },
       toggleLineFavourite: (evt) => state.copyWith(
         lines: state.lines.map(
           (line, lineState) => evt.line == line

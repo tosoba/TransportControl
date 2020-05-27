@@ -230,7 +230,19 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       success: (success) async {
         final vehicles = success.data;
         if (vehicles.isEmpty) {
-          _signals.add(MapSignal.loadingError(message: emptyResultErrorMsg));
+          _signals.add(MapSignal.loadingError(
+            message: emptyResultErrorMsg,
+            //TODO: pass retry as argument to _loadVehicles -> in _loadVehiclesOfLines it'll set lines to be tracked in LinesBloc
+            retry: () {
+              _loadVehicles(
+                loadingMsg: loadingMsg,
+                emptyResultErrorMsg: emptyResultErrorMsg,
+                loadVehicles: loadVehicles,
+                successEvent: successEvent,
+                onFailure: onFailure,
+              );
+            },
+          ));
           onFailure?.call(Failure(error: Exception('No vehicles found.')));
         } else {
           add(successEvent(vehicles));
@@ -248,8 +260,18 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         }
       },
       failure: (failure) {
-        _signals
-            .add(MapSignal.loadingError(message: 'Loading error occurred.'));
+        _signals.add(MapSignal.loadingError(
+          message: 'Loading error occurred.',
+          retry: () {
+            _loadVehicles(
+              loadingMsg: loadingMsg,
+              emptyResultErrorMsg: emptyResultErrorMsg,
+              loadVehicles: loadVehicles,
+              successEvent: successEvent,
+              onFailure: onFailure,
+            );
+          },
+        ));
         failure.logError();
         onFailure?.call(failure);
       },

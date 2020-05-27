@@ -17,7 +17,9 @@ abstract class MapSignal extends Equatable {
   factory MapSignal.zoomToBoundsAfterLoadedSuccessfully(
       {@required LatLngBounds bounds}) = ZoomToBoundsAfterLoadedSuccessfully;
 
-  factory MapSignal.loadingError({@required String message}) = LoadingError;
+  factory MapSignal.loadingError(
+      {@required String message,
+      @required void Function() retry}) = LoadingError;
 
   final _MapSignal _type;
 
@@ -226,12 +228,16 @@ class ZoomToBoundsAfterLoadedSuccessfully extends MapSignal {
 
 @immutable
 class LoadingError extends MapSignal {
-  const LoadingError({@required this.message}) : super(_MapSignal.LoadingError);
+  const LoadingError({@required this.message, @required this.retry})
+      : super(_MapSignal.LoadingError);
 
   final String message;
 
+  final void Function() retry;
+
   @override
-  String toString() => 'LoadingError(message:${this.message})';
+  String toString() =>
+      'LoadingError(message:${this.message},retry:${this.retry})';
   @override
-  List get props => [message];
+  List get props => [message, retry];
 }

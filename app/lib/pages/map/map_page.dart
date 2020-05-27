@@ -44,7 +44,7 @@ class _MapPageState extends State<MapPage>
         signal.when(
           loading: (loading) {
             Scaffold.of(context)
-              ..hideCurrentSnackBar()
+              ..removeCurrentSnackBar()
               ..showSnackBar(SnackBar(
                 content: Text(loading.message),
                 duration: const Duration(days: 1),
@@ -53,14 +53,23 @@ class _MapPageState extends State<MapPage>
           loadedSuccessfully: (_) => Scaffold.of(context).hideCurrentSnackBar(),
           loadingError: (loadingError) {
             final duration = const Duration(seconds: 4);
+            bool retryPressed = false;
             Scaffold.of(context)
-              ..hideCurrentSnackBar()
+              ..removeCurrentSnackBar()
               ..showSnackBar(SnackBar(
                 content: Text(loadingError.message),
                 duration: duration,
+                action: SnackBarAction(
+                  label: 'Retry',
+                  onPressed: () {
+                    Scaffold.of(context).removeCurrentSnackBar();
+                    retryPressed = true;
+                    loadingError.retry();
+                  },
+                ),
               ));
             Future.delayed(duration, () {
-              Scaffold.of(context).hideCurrentSnackBar();
+              if (!retryPressed) Scaffold.of(context).removeCurrentSnackBar();
             });
           },
           zoomToBoundsAfterLoadedSuccessfully: (signal) {

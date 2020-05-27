@@ -14,6 +14,9 @@ enum _MapSignal {
   @Data(fields: [DataField<LatLngBounds>('bounds')])
   ZoomToBoundsAfterLoadedSuccessfully,
 
-  @Data(fields: [DataField<String>('message')])
+  @Data(fields: [
+    DataField<String>('message'),
+    DataField<void Function()>('retry')
+  ])
   LoadingError,
 }
