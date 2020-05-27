@@ -33,12 +33,13 @@ abstract class LinesEvent extends Equatable {
   factory LinesEvent.trackSelectedLines({@required bool resetSelection}) =
       TrackSelectedLines;
 
+  factory LinesEvent.toggleLinesTracking({@required Set<Line> lines}) =
+      ToggleLinesTracking;
+
   factory LinesEvent.untrackSelectedLines({@required bool resetSelection}) =
       UntrackSelectedLines;
 
   factory LinesEvent.untrackAllLines() = UntrackAllLines;
-
-  factory LinesEvent.untrackLines({@required Set<Line> lines}) = UntrackLines;
 
   final _LinesEvent _type;
 
@@ -52,9 +53,9 @@ abstract class LinesEvent extends Equatable {
       @required R Function(ToggleLineTracking) toggleLineTracking,
       @required R Function(ResetSelection) resetSelection,
       @required R Function(TrackSelectedLines) trackSelectedLines,
+      @required R Function(ToggleLinesTracking) toggleLinesTracking,
       @required R Function(UntrackSelectedLines) untrackSelectedLines,
-      @required R Function(UntrackAllLines) untrackAllLines,
-      @required R Function(UntrackLines) untrackLines}) {
+      @required R Function(UntrackAllLines) untrackAllLines}) {
     assert(() {
       if (updateLines == null ||
           symbolFilterChanged == null ||
@@ -64,9 +65,9 @@ abstract class LinesEvent extends Equatable {
           toggleLineTracking == null ||
           resetSelection == null ||
           trackSelectedLines == null ||
+          toggleLinesTracking == null ||
           untrackSelectedLines == null ||
-          untrackAllLines == null ||
-          untrackLines == null) {
+          untrackAllLines == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -88,12 +89,12 @@ abstract class LinesEvent extends Equatable {
         return resetSelection(this as ResetSelection);
       case _LinesEvent.TrackSelectedLines:
         return trackSelectedLines(this as TrackSelectedLines);
+      case _LinesEvent.ToggleLinesTracking:
+        return toggleLinesTracking(this as ToggleLinesTracking);
       case _LinesEvent.UntrackSelectedLines:
         return untrackSelectedLines(this as UntrackSelectedLines);
       case _LinesEvent.UntrackAllLines:
         return untrackAllLines(this as UntrackAllLines);
-      case _LinesEvent.UntrackLines:
-        return untrackLines(this as UntrackLines);
     }
   }
 
@@ -107,9 +108,9 @@ abstract class LinesEvent extends Equatable {
       @required FutureOr<R> Function(ToggleLineTracking) toggleLineTracking,
       @required FutureOr<R> Function(ResetSelection) resetSelection,
       @required FutureOr<R> Function(TrackSelectedLines) trackSelectedLines,
+      @required FutureOr<R> Function(ToggleLinesTracking) toggleLinesTracking,
       @required FutureOr<R> Function(UntrackSelectedLines) untrackSelectedLines,
-      @required FutureOr<R> Function(UntrackAllLines) untrackAllLines,
-      @required FutureOr<R> Function(UntrackLines) untrackLines}) {
+      @required FutureOr<R> Function(UntrackAllLines) untrackAllLines}) {
     assert(() {
       if (updateLines == null ||
           symbolFilterChanged == null ||
@@ -119,9 +120,9 @@ abstract class LinesEvent extends Equatable {
           toggleLineTracking == null ||
           resetSelection == null ||
           trackSelectedLines == null ||
+          toggleLinesTracking == null ||
           untrackSelectedLines == null ||
-          untrackAllLines == null ||
-          untrackLines == null) {
+          untrackAllLines == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -143,12 +144,12 @@ abstract class LinesEvent extends Equatable {
         return resetSelection(this as ResetSelection);
       case _LinesEvent.TrackSelectedLines:
         return trackSelectedLines(this as TrackSelectedLines);
+      case _LinesEvent.ToggleLinesTracking:
+        return toggleLinesTracking(this as ToggleLinesTracking);
       case _LinesEvent.UntrackSelectedLines:
         return untrackSelectedLines(this as UntrackSelectedLines);
       case _LinesEvent.UntrackAllLines:
         return untrackAllLines(this as UntrackAllLines);
-      case _LinesEvent.UntrackLines:
-        return untrackLines(this as UntrackLines);
     }
   }
 
@@ -161,9 +162,9 @@ abstract class LinesEvent extends Equatable {
       R Function(ToggleLineTracking) toggleLineTracking,
       R Function(ResetSelection) resetSelection,
       R Function(TrackSelectedLines) trackSelectedLines,
+      R Function(ToggleLinesTracking) toggleLinesTracking,
       R Function(UntrackSelectedLines) untrackSelectedLines,
       R Function(UntrackAllLines) untrackAllLines,
-      R Function(UntrackLines) untrackLines,
       @required R Function(LinesEvent) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -196,15 +197,15 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.TrackSelectedLines:
         if (trackSelectedLines == null) break;
         return trackSelectedLines(this as TrackSelectedLines);
+      case _LinesEvent.ToggleLinesTracking:
+        if (toggleLinesTracking == null) break;
+        return toggleLinesTracking(this as ToggleLinesTracking);
       case _LinesEvent.UntrackSelectedLines:
         if (untrackSelectedLines == null) break;
         return untrackSelectedLines(this as UntrackSelectedLines);
       case _LinesEvent.UntrackAllLines:
         if (untrackAllLines == null) break;
         return untrackAllLines(this as UntrackAllLines);
-      case _LinesEvent.UntrackLines:
-        if (untrackLines == null) break;
-        return untrackLines(this as UntrackLines);
     }
     return orElse(this);
   }
@@ -218,9 +219,9 @@ abstract class LinesEvent extends Equatable {
       FutureOr<R> Function(ToggleLineTracking) toggleLineTracking,
       FutureOr<R> Function(ResetSelection) resetSelection,
       FutureOr<R> Function(TrackSelectedLines) trackSelectedLines,
+      FutureOr<R> Function(ToggleLinesTracking) toggleLinesTracking,
       FutureOr<R> Function(UntrackSelectedLines) untrackSelectedLines,
       FutureOr<R> Function(UntrackAllLines) untrackAllLines,
-      FutureOr<R> Function(UntrackLines) untrackLines,
       @required FutureOr<R> Function(LinesEvent) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -253,15 +254,15 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.TrackSelectedLines:
         if (trackSelectedLines == null) break;
         return trackSelectedLines(this as TrackSelectedLines);
+      case _LinesEvent.ToggleLinesTracking:
+        if (toggleLinesTracking == null) break;
+        return toggleLinesTracking(this as ToggleLinesTracking);
       case _LinesEvent.UntrackSelectedLines:
         if (untrackSelectedLines == null) break;
         return untrackSelectedLines(this as UntrackSelectedLines);
       case _LinesEvent.UntrackAllLines:
         if (untrackAllLines == null) break;
         return untrackAllLines(this as UntrackAllLines);
-      case _LinesEvent.UntrackLines:
-        if (untrackLines == null) break;
-        return untrackLines(this as UntrackLines);
     }
     return orElse(this);
   }
@@ -276,9 +277,9 @@ abstract class LinesEvent extends Equatable {
       FutureOr<void> Function(ToggleLineTracking) toggleLineTracking,
       FutureOr<void> Function(ResetSelection) resetSelection,
       FutureOr<void> Function(TrackSelectedLines) trackSelectedLines,
+      FutureOr<void> Function(ToggleLinesTracking) toggleLinesTracking,
       FutureOr<void> Function(UntrackSelectedLines) untrackSelectedLines,
-      FutureOr<void> Function(UntrackAllLines) untrackAllLines,
-      FutureOr<void> Function(UntrackLines) untrackLines}) {
+      FutureOr<void> Function(UntrackAllLines) untrackAllLines}) {
     assert(() {
       if (updateLines == null &&
           symbolFilterChanged == null &&
@@ -288,9 +289,9 @@ abstract class LinesEvent extends Equatable {
           toggleLineTracking == null &&
           resetSelection == null &&
           trackSelectedLines == null &&
+          toggleLinesTracking == null &&
           untrackSelectedLines == null &&
-          untrackAllLines == null &&
-          untrackLines == null) {
+          untrackAllLines == null) {
         throw 'provide at least one branch';
       }
       return true;
@@ -320,15 +321,15 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.TrackSelectedLines:
         if (trackSelectedLines == null) break;
         return trackSelectedLines(this as TrackSelectedLines);
+      case _LinesEvent.ToggleLinesTracking:
+        if (toggleLinesTracking == null) break;
+        return toggleLinesTracking(this as ToggleLinesTracking);
       case _LinesEvent.UntrackSelectedLines:
         if (untrackSelectedLines == null) break;
         return untrackSelectedLines(this as UntrackSelectedLines);
       case _LinesEvent.UntrackAllLines:
         if (untrackAllLines == null) break;
         return untrackAllLines(this as UntrackAllLines);
-      case _LinesEvent.UntrackLines:
-        if (untrackLines == null) break;
-        return untrackLines(this as UntrackLines);
     }
   }
 
@@ -440,6 +441,19 @@ class TrackSelectedLines extends LinesEvent {
 }
 
 @immutable
+class ToggleLinesTracking extends LinesEvent {
+  const ToggleLinesTracking({@required this.lines})
+      : super(_LinesEvent.ToggleLinesTracking);
+
+  final Set<Line> lines;
+
+  @override
+  String toString() => 'ToggleLinesTracking(lines:${this.lines})';
+  @override
+  List get props => [lines];
+}
+
+@immutable
 class UntrackSelectedLines extends LinesEvent {
   const UntrackSelectedLines({@required this.resetSelection})
       : super(_LinesEvent.UntrackSelectedLines);
@@ -463,16 +477,4 @@ class UntrackAllLines extends LinesEvent {
   }
 
   static UntrackAllLines _instance;
-}
-
-@immutable
-class UntrackLines extends LinesEvent {
-  const UntrackLines({@required this.lines}) : super(_LinesEvent.UntrackLines);
-
-  final Set<Line> lines;
-
-  @override
-  String toString() => 'UntrackLines(lines:${this.lines})';
-  @override
-  List get props => [lines];
 }

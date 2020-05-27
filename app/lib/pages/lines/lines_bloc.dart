@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_event.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
@@ -11,7 +12,7 @@ import 'package:transport_control/util/asset_util.dart';
 
 class LinesBloc extends Bloc<LinesEvent, LinesState> {
   final LinesRepo _linesRepo;
-  final Sink<Set<Line>> _trackedLinesAddedSink;
+  final Sink<TrackedLinesAddedEvent> _trackedLinesAddedSink;
   final Sink<Set<Line>> _trackedLinesRemovedSink;
 
   final List<StreamSubscription> _subscriptions = [];
@@ -52,8 +53,9 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
             .listen((lines) => add(LinesEvent.updateLines(lines: lines))),
       )
       ..add(
-        untrackLinesStream
-            .listen((lines) => add(LinesEvent.untrackLines(lines: lines))),
+        untrackLinesStream.listen(
+          (lines) => add(LinesEvent.toggleLinesTracking(lines: lines)),
+        ),
       )
       ..add(
         untrackAllLinesStream.listen((_) => add(LinesEvent.untrackAllLines())),
@@ -102,7 +104,14 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
             updatedLines[line] = toggle(lineState);
           }
         });
-        _trackedLinesAddedSink.add(newlyTrackedLines);
+        _trackedLinesAddedSink.add(
+          TrackedLinesAddedEvent(
+            lines: newlyTrackedLines,
+            beforeRetry: () {
+              add(LinesEvent.toggleLinesTracking(lines: newlyTrackedLines));
+            },
+          ),
+        );
         return state.copyWith(lines: updatedLines);
       },
       untrackSelectedLines: (evt) {
@@ -125,15 +134,13 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
           (line, lineState) => MapEntry(line, lineState.untracked),
         ),
       ),
-      untrackLines: (evt) {
-        return state.copyWith(
-          lines: state.lines.map(
-            (line, lineState) => evt.lines.contains(line)
-                ? MapEntry(line, lineState.toggleTracked)
-                : MapEntry(line, lineState),
-          ),
-        );
-      },
+      toggleLinesTracking: (evt) => state.copyWith(
+        lines: state.lines.map(
+          (line, lineState) => evt.lines.contains(line)
+              ? MapEntry(line, lineState.toggleTracked)
+              : MapEntry(line, lineState),
+        ),
+      ),
       toggleLineFavourite: (evt) => state.copyWith(
         lines: state.lines.map(
           (line, lineState) => evt.line == line
@@ -141,20 +148,13 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
               : MapEntry(line, lineState),
         ),
       ),
-      toggleLineTracking: (evt) {
-        if (state.lines[evt.line].tracked) {
-          _trackedLinesRemovedSink.add(Set<Line>()..add(evt.line));
-        } else {
-          _trackedLinesAddedSink.add(Set<Line>()..add(evt.line));
-        }
-        return state.copyWith(
-          lines: state.lines.map(
-            (line, lineState) => evt.line == line
-                ? MapEntry(line, lineState.toggleTracked)
-                : MapEntry(line, lineState),
-          ),
-        );
-      },
+      toggleLineTracking: (evt) => state.copyWith(
+        lines: state.lines.map(
+          (line, lineState) => evt.line == line
+              ? MapEntry(line, lineState.toggleTracked)
+              : MapEntry(line, lineState),
+        ),
+      ),
     );
   }
 
@@ -208,6 +208,19 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
         await Connectivity().checkConnectivity() == ConnectivityResult.none) {
       return false;
     }
+
+    if (line.value.tracked) {
+      _trackedLinesRemovedSink.add(Set<Line>()..add(line.key));
+    } else {
+      _trackedLinesAddedSink.add(
+        TrackedLinesAddedEvent(
+          lines: Set<Line>()..add(line.key),
+          beforeRetry: () {
+            add(LinesEvent.toggleLineTracking(line: line.key));
+          },
+        ),
+      );
+    }
     add(LinesEvent.toggleLineTracking(line: line.key));
     return true;
   }
@@ -226,6 +239,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     if (await Connectivity().checkConnectivity() == ConnectivityResult.none) {
       return false;
     }
+
     add(LinesEvent.trackSelectedLines(resetSelection: resetSelection));
     return true;
   }

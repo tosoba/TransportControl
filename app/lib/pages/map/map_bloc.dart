@@ -5,6 +5,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
+import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/model/result.dart';
@@ -40,7 +41,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     this._untrackAllLinesSink,
     Stream<Location> loadVehiclesInLocationStream,
     Stream<LatLng> loadVehiclesNearbyStream,
-    Stream<Set<Line>> trackedLinesAddedStream,
+    Stream<TrackedLinesAddedEvent> trackedLinesAddedStream,
     Stream<Set<Line>> trackedLinesRemovedStream,
   ) {
     _subscriptions
@@ -175,7 +176,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     return asyncMap((state) => state.markers);
   }
 
-  void _loadVehiclesOfLines(Set<Line> lines) {
+  void _loadVehiclesOfLines(TrackedLinesAddedEvent event) {
+    final lines = event.lines;
     _loadVehicles(
       loadingMsg:
           'Loading vehicles of ${lines.length} ${lines.length > 1 ? 'lines' : 'line'}...',
@@ -186,6 +188,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         lines: lines,
       ),
       onFailure: (_) => _untrackLinesSink.add(lines),
+      beforeRetry: event.beforeRetry,
     );
   }
 
@@ -223,6 +226,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     @required Future<Result<List<Vehicle>>> Function() loadVehicles,
     @required MapEvent Function(List<Vehicle>) successEvent,
     void Function(Failure<List<Vehicle>>) onFailure,
+    void Function() beforeRetry,
   }) async {
     _signals.add(MapSignal.loading(message: loadingMsg));
     final result = await loadVehicles();
@@ -230,20 +234,23 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       success: (success) async {
         final vehicles = success.data;
         if (vehicles.isEmpty) {
-          _signals.add(MapSignal.loadingError(
-            message: emptyResultErrorMsg,
-            //TODO: pass retry as argument to _loadVehicles -> in _loadVehiclesOfLines it'll set lines to be tracked in LinesBloc
-            retry: () {
-              _loadVehicles(
-                loadingMsg: loadingMsg,
-                emptyResultErrorMsg: emptyResultErrorMsg,
-                loadVehicles: loadVehicles,
-                successEvent: successEvent,
-                onFailure: onFailure,
-              );
-            },
-          ));
           onFailure?.call(Failure(error: Exception('No vehicles found.')));
+          _signals.add(
+            MapSignal.loadingError(
+              message: emptyResultErrorMsg,
+              retry: () {
+                beforeRetry?.call();
+                _loadVehicles(
+                  loadingMsg: loadingMsg,
+                  emptyResultErrorMsg: emptyResultErrorMsg,
+                  loadVehicles: loadVehicles,
+                  successEvent: successEvent,
+                  onFailure: onFailure,
+                  beforeRetry: beforeRetry,
+                );
+              },
+            ),
+          );
         } else {
           add(successEvent(vehicles));
           final zoomToLoadedMarkersBounds = await _preferences
@@ -260,20 +267,24 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         }
       },
       failure: (failure) {
-        _signals.add(MapSignal.loadingError(
-          message: 'Loading error occurred.',
-          retry: () {
-            _loadVehicles(
-              loadingMsg: loadingMsg,
-              emptyResultErrorMsg: emptyResultErrorMsg,
-              loadVehicles: loadVehicles,
-              successEvent: successEvent,
-              onFailure: onFailure,
-            );
-          },
-        ));
         failure.logError();
         onFailure?.call(failure);
+        _signals.add(
+          MapSignal.loadingError(
+            message: 'Loading error occurred.',
+            retry: () {
+              beforeRetry?.call();
+              _loadVehicles(
+                loadingMsg: loadingMsg,
+                emptyResultErrorMsg: emptyResultErrorMsg,
+                loadVehicles: loadVehicles,
+                successEvent: successEvent,
+                onFailure: onFailure,
+                beforeRetry: beforeRetry,
+              );
+            },
+          ),
+        );
       },
     );
   }

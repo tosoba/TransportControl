@@ -30,12 +30,12 @@ enum _LinesEvent {
   @Data(fields: [DataField<bool>('resetSelection')])
   TrackSelectedLines,
 
+  @Data(fields: [DataField<Set<Line>>('lines')])
+  ToggleLinesTracking,
+
   @Data(fields: [DataField<bool>('resetSelection')])
   UntrackSelectedLines,
 
   @object
   UntrackAllLines,
-
-  @Data(fields: [DataField<Set<Line>>('lines')])
-  UntrackLines,
 }

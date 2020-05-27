@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:injectable/injectable.dart';
 import 'package:transport_control/model/line.dart';
@@ -19,7 +20,7 @@ abstract class ControllersModule {
 
   @singleton
   TrackedLinesAdded get trackedLinesAdded {
-    return TrackedLinesAdded(StreamController<Set<Line>>());
+    return TrackedLinesAdded(StreamController<TrackedLinesAddedEvent>());
   }
 
   @singleton
@@ -49,8 +50,17 @@ class LoadVehiclesNearby extends Injectable<StreamController<LatLng>> {
   LoadVehiclesNearby(StreamController<LatLng> controller) : super(controller);
 }
 
-class TrackedLinesAdded extends Injectable<StreamController<Set<Line>>> {
-  TrackedLinesAdded(StreamController<Set<Line>> controller) : super(controller);
+class TrackedLinesAddedEvent {
+  final Set<Line> lines;
+  final void Function() beforeRetry;
+
+  TrackedLinesAddedEvent({@required this.lines, this.beforeRetry});
+}
+
+class TrackedLinesAdded
+    extends Injectable<StreamController<TrackedLinesAddedEvent>> {
+  TrackedLinesAdded(StreamController<TrackedLinesAddedEvent> controller)
+      : super(controller);
 }
 
 class TrackedLinesRemoved extends Injectable<StreamController<Set<Line>>> {
