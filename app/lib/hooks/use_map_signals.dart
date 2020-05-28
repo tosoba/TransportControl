@@ -25,26 +25,30 @@ void useMapSignals({
               ..showSnackBar(
                 SnackBar(
                   content: Text(loading.message),
+                  behavior: SnackBarBehavior.floating,
+                  elevation: 4,
                   duration: const Duration(days: 1),
                 ),
               );
           },
-          loadedSuccessfully: (_) {
-            Navigator.pop(context);
-          },
+          loadedSuccessfully: (_) => Navigator.pop(context),
           loadingError: (loadingError) {
             scaffoldKey.currentState
               ..removeCurrentSnackBar()
-              ..showSnackBar(SnackBar(
-                content: Text(loadingError.message),
-                action: SnackBarAction(
-                  label: 'Retry',
-                  onPressed: () {
-                    scaffoldKey.currentState.removeCurrentSnackBar();
-                    loadingError.retry();
-                  },
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(loadingError.message),
+                  behavior: SnackBarBehavior.floating,
+                  elevation: 4,
+                  action: SnackBarAction(
+                    label: 'Retry',
+                    onPressed: () {
+                      scaffoldKey.currentState.removeCurrentSnackBar();
+                      loadingError.retry();
+                    },
+                  ),
                 ),
-              ));
+              );
           },
         );
       });

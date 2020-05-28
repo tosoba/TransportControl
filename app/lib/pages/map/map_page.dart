@@ -45,10 +45,14 @@ class _MapPageState extends State<MapPage>
           loading: (loading) {
             Scaffold.of(context)
               ..removeCurrentSnackBar()
-              ..showSnackBar(SnackBar(
-                content: Text(loading.message),
-                duration: const Duration(days: 1),
-              ));
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(loading.message),
+                  behavior: SnackBarBehavior.floating,
+                  elevation: 4,
+                  duration: const Duration(days: 1),
+                ),
+              );
           },
           loadedSuccessfully: (_) => Scaffold.of(context).hideCurrentSnackBar(),
           loadingError: (loadingError) {
@@ -56,18 +60,22 @@ class _MapPageState extends State<MapPage>
             bool retryPressed = false;
             Scaffold.of(context)
               ..removeCurrentSnackBar()
-              ..showSnackBar(SnackBar(
-                content: Text(loadingError.message),
-                duration: duration,
-                action: SnackBarAction(
-                  label: 'Retry',
-                  onPressed: () {
-                    Scaffold.of(context).removeCurrentSnackBar();
-                    retryPressed = true;
-                    loadingError.retry();
-                  },
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(loadingError.message),
+                  duration: duration,
+                  behavior: SnackBarBehavior.floating,
+                  elevation: 4,
+                  action: SnackBarAction(
+                    label: 'Retry',
+                    onPressed: () {
+                      Scaffold.of(context).removeCurrentSnackBar();
+                      retryPressed = true;
+                      loadingError.retry();
+                    },
+                  ),
                 ),
-              ));
+              );
             Future.delayed(duration, () {
               if (!retryPressed) Scaffold.of(context).removeCurrentSnackBar();
             });

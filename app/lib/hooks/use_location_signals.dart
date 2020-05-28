@@ -13,18 +13,26 @@ void useLocationsSignals({
       signal.when(
         loading: (loading) {
           scaffoldKey.currentState
-            ..hideCurrentSnackBar()
+            ..removeCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
                 content: Text(loading.message),
+                behavior: SnackBarBehavior.floating,
+                elevation: 4,
                 duration: const Duration(days: 1),
               ),
             );
         },
         loadingError: (loadingError) {
           scaffoldKey.currentState
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(content: Text(loadingError.message)));
+            ..removeCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(loadingError.message),
+                behavior: SnackBarBehavior.floating,
+                elevation: 4,
+              ),
+            );
         },
       );
     });
