@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
 import 'package:moor_flutter/moor_flutter.dart';
+import 'package:super_enum/super_enum.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/model/place_suggestion.dart';
@@ -152,4 +153,25 @@ extension MapVehicleSourceExt on MapVehicleSource {
       nearbyPosition: (source) => source.loadedAt,
     );
   }
+}
+
+class ConsecutiveTypesCounted<T extends Equatable> {
+  final T item;
+  final int timesConsecutiveType;
+
+  ConsecutiveTypesCounted(this.item, this.timesConsecutiveType);
+
+  ConsecutiveTypesCounted nextCounted(T nextItem) {
+    return ConsecutiveTypesCounted(
+      nextItem,
+      nextItem.runtimeType == item.runtimeType ? timesConsecutiveType + 1 : 0,
+    );
+  }
+}
+
+class Pair<A, B> {
+  final A first;
+  final B second;
+
+  Pair(this.first, this.second);
 }
