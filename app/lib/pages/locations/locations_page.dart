@@ -32,12 +32,7 @@ class LocationsPage extends HookWidget {
     );
 
     useLocationsSignals(scaffoldKey: _scaffoldKey, context: context);
-    final mapSignalsListenTrigger = ValueNotifier<Object>(null);
-    useMapSignals(
-      scaffoldKey: _scaffoldKey,
-      context: context,
-      listenTrigger: mapSignalsListenTrigger,
-    );
+    useMapSignals(scaffoldKey: _scaffoldKey, context: context);
 
     return Scaffold(
       key: _scaffoldKey,
@@ -82,10 +77,7 @@ class LocationsPage extends HookWidget {
                 ),
                 floating: true,
               ),
-              _locationsList(
-                locations: result.locations,
-                mapSignalsListenTrigger: mapSignalsListenTrigger,
-              ),
+              _locationsList(locations: result.locations),
             ],
           );
         },
@@ -93,10 +85,8 @@ class LocationsPage extends HookWidget {
       floatingActionButton: _floatingActionButtons(
         context,
         loadVehiclesNearbyUserLocation: () {
-          mapSignalsListenTrigger.value = Object();
           context.bloc<LocationsBloc>().loadVehiclesNearbyUserLocation();
         },
-        mapSignalsListenTrigger: mapSignalsListenTrigger,
       ),
     );
   }
@@ -104,7 +94,6 @@ class LocationsPage extends HookWidget {
   Widget _floatingActionButtons(
     BuildContext context, {
     @required void Function() loadVehiclesNearbyUserLocation,
-    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) {
     return Container(
       child: Column(
@@ -122,7 +111,6 @@ class LocationsPage extends HookWidget {
             onPressed: () => _showMapLocationPageWithTransition(
               context,
               mode: MapLocationPageMode.add(),
-              mapSignalsListenTrigger: mapSignalsListenTrigger,
             ),
           ),
         ],
@@ -134,8 +122,9 @@ class LocationsPage extends HookWidget {
     return StreamBuilder<List<LocationsListOrder>>(
       stream: context.bloc<LocationsBloc>().listOrdersStream,
       builder: (context, snapshot) {
-        if (snapshot.data == null || snapshot.data.isEmpty)
+        if (snapshot.data == null || snapshot.data.isEmpty) {
           return Container(width: 0.0, height: 0.0);
+        }
         return PopupMenuButton<LocationsListOrder>(
           icon: const Icon(Icons.sort),
           onSelected: context.bloc<LocationsBloc>().listOrderChanged,
@@ -152,10 +141,7 @@ class LocationsPage extends HookWidget {
     );
   }
 
-  Widget _locationsList({
-    @required List<Location> locations,
-    @required ValueNotifier<Object> mapSignalsListenTrigger,
-  }) {
+  Widget _locationsList({@required List<Location> locations}) {
     return SliverList(
       delegate: SliverChildListDelegate(
         locations
@@ -165,12 +151,7 @@ class LocationsPage extends HookWidget {
                 index,
                 AnimationConfiguration.staggeredList(
                   position: index,
-                  child: FadeInAnimation(
-                    child: _locationListItem(
-                      location,
-                      mapSignalsListenTrigger: mapSignalsListenTrigger,
-                    ),
-                  ),
+                  child: FadeInAnimation(child: _locationListItem(location)),
                 ),
               ),
             )
@@ -180,10 +161,7 @@ class LocationsPage extends HookWidget {
     );
   }
 
-  Widget _locationListItem(
-    Location location, {
-    @required ValueNotifier<Object> mapSignalsListenTrigger,
-  }) {
+  Widget _locationListItem(Location location) {
     return Builder(
       builder: (context) => StreamBuilder<LocationsListOrder>(
         stream: context.bloc<LocationsBloc>().listOrderStream,
@@ -197,7 +175,6 @@ class LocationsPage extends HookWidget {
                 onTap: () => _loadVehiclesAndPop(
                   context,
                   location: location,
-                  mapSignalsListenTrigger: mapSignalsListenTrigger,
                 ),
                 child: ListTile(
                   title: Text(location.name),
@@ -220,7 +197,6 @@ class LocationsPage extends HookWidget {
                   _showMapLocationPageWithTransition(
                     context,
                     mode: MapLocationPageMode.existing(location: location),
-                    mapSignalsListenTrigger: mapSignalsListenTrigger,
                   );
                 },
               ),
@@ -244,7 +220,6 @@ class LocationsPage extends HookWidget {
   void _showMapLocationPageWithTransition(
     BuildContext context, {
     @required MapLocationPageMode mode,
-    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) {
     Navigator.push(
       context,
@@ -254,11 +229,7 @@ class LocationsPage extends HookWidget {
           Animation<double> animation,
           Animation<double> secondaryAnimation,
         ) {
-          return _mapLocationPage(
-            context,
-            mode: mode,
-            mapSignalsListenTrigger: mapSignalsListenTrigger,
-          );
+          return _mapLocationPage(context, mode: mode);
         },
         transitionsBuilder: (
           BuildContext ctx,
@@ -275,16 +246,11 @@ class LocationsPage extends HookWidget {
   Widget _mapLocationPage(
     BuildContext context, {
     @required MapLocationPageMode mode,
-    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) {
     return MapLocationPage(
       mode: mode,
       finishWith: ({@required MapLocationPageResult result}) {
-        _handleLocationMapPageResult(
-          result,
-          context: context,
-          mapSignalsListenTrigger: mapSignalsListenTrigger,
-        );
+        _handleLocationMapPageResult(result, context: context);
       },
     );
   }
@@ -292,17 +258,12 @@ class LocationsPage extends HookWidget {
   void _handleLocationMapPageResult(
     MapLocationPageResult result, {
     @required BuildContext context,
-    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) {
     result.action.asyncWhenOrElse(
       save: (_) => _saveOrUpdateLocation(context, result),
       orElse: (_) {
         _saveOrUpdateLocation(context, result);
-        _loadVehiclesAndPop(
-          context,
-          location: result.location,
-          mapSignalsListenTrigger: mapSignalsListenTrigger,
-        );
+        _loadVehiclesAndPop(context, location: result.location);
       },
     );
   }
@@ -310,9 +271,7 @@ class LocationsPage extends HookWidget {
   void _loadVehiclesAndPop(
     BuildContext context, {
     @required Location location,
-    @required ValueNotifier<Object> mapSignalsListenTrigger,
   }) async {
-    mapSignalsListenTrigger.value = Object();
     if (!await context.bloc<LocationsBloc>().loadVehiclesInLocation(location)) {
       Scaffold.of(context)
           .showSnackBar(SnackBar(content: Text('No connection.')));
