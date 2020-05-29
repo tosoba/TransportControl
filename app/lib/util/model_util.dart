@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
 import 'package:moor_flutter/moor_flutter.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/model/place_suggestion.dart';
@@ -186,5 +187,21 @@ class LoadingSignalTracker<Signal, Loading extends Signal> {
       signal: signal,
       currentlyLoading: nextLoading,
     );
+  }
+}
+
+extension SignalStreamExt<Signal> on Stream<Signal> {
+  Stream<LoadingSignalTracker<Signal, Loading>>
+      loadingSignalTrackerStream<Loading extends Signal>() {
+    return scan<
+        Pair<LoadingSignalTracker<Signal, Loading>,
+            LoadingSignalTracker<Signal, Loading>>>(
+      Pair(null, null),
+      (latest2Trackers, signal) => Pair(
+        latest2Trackers.second,
+        latest2Trackers.second?.next(signal) ??
+            LoadingSignalTracker.first(signal),
+      ),
+    ).map((pair) => pair.second);
   }
 }
