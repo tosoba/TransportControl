@@ -154,25 +154,37 @@ extension MapVehicleSourceExt on MapVehicleSource {
   }
 }
 
-class ConsecutiveTypesCounted<T> {
-  final T item;
-  final int timesConsecutiveType;
-
-  ConsecutiveTypesCounted._(this.item, this.timesConsecutiveType);
-
-  ConsecutiveTypesCounted.first(this.item) : timesConsecutiveType = 0;
-
-  ConsecutiveTypesCounted<T> nextWith(T nextItem) {
-    return ConsecutiveTypesCounted._(
-      nextItem,
-      nextItem.runtimeType == item.runtimeType ? timesConsecutiveType + 1 : 0,
-    );
-  }
-}
-
 class Pair<A, B> {
   final A first;
   final B second;
 
   Pair(this.first, this.second);
+}
+
+class LoadingSignalTracker<Signal, Loading extends Signal> {
+  final Signal signal;
+  final int currentlyLoading;
+
+  LoadingSignalTracker._({
+    @required this.signal,
+    @required this.currentlyLoading,
+  });
+
+  LoadingSignalTracker.first(this.signal)
+      : currentlyLoading = signal is Loading ? 1 : 0;
+
+  LoadingSignalTracker<Signal, Loading> next(Signal signal) {
+    int nextLoading;
+    if (signal is Loading) {
+      nextLoading = currentlyLoading + 1;
+    } else if (currentlyLoading > 0) {
+      nextLoading = currentlyLoading - 1;
+    } else {
+      nextLoading = 0;
+    }
+    return LoadingSignalTracker._(
+      signal: signal,
+      currentlyLoading: nextLoading,
+    );
+  }
 }

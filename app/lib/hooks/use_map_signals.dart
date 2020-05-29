@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,34 +15,34 @@ void useMapSignals({
   @required ValueNotifier<Object> listenTrigger,
 }) {
   useEffect(() {
-    StreamSubscription<ConsecutiveTypesCounted<MapSignal>> subscription;
+    StreamSubscription<LoadingSignalTracker<MapSignal, Loading>> subscription;
     listenTrigger.addListener(() {
       if (listenTrigger.value == null || subscription != null) return;
       subscription = context
           .bloc<MapBloc>()
           .signals
           .scan<
-              Pair<ConsecutiveTypesCounted<MapSignal>,
-                  ConsecutiveTypesCounted<MapSignal>>>(
+              Pair<LoadingSignalTracker<MapSignal, Loading>,
+                  LoadingSignalTracker<MapSignal, Loading>>>(
             Pair(null, null),
-            (last2Signals, signal) => Pair(
-              last2Signals.second,
-              last2Signals.second?.nextWith(signal) ??
-                  ConsecutiveTypesCounted.first(signal),
+            (latest2Trackers, signal) => Pair(
+              latest2Trackers.second,
+              latest2Trackers.second?.next(signal) ??
+                  LoadingSignalTracker.first(signal),
             ),
           )
           .map((pair) => pair.second)
           .listen(
-            (signal) => signal.item.whenPartial(
+            (tracker) => tracker.signal.whenPartial(
               loading: (loading) {
                 scaffoldKey.currentState
                   ..removeCurrentSnackBar()
                   ..showSnackBar(
                     SnackBar(
                       content: Text(
-                        signal.timesConsecutiveType == 0
+                        tracker.currentlyLoading == 1
                             ? loading.message
-                            : 'Processing ${signal.timesConsecutiveType + 1} loading requests...',
+                            : 'Processing ${tracker.currentlyLoading} loading requests...',
                       ),
                       behavior: SnackBarBehavior.floating,
                       elevation: 4,
@@ -51,7 +50,10 @@ void useMapSignals({
                     ),
                   );
               },
-              loadedSuccessfully: (_) => Navigator.pop(context),
+              loadedSuccessfully: (_) {
+                //TODO: pop or show a success snackbar if more requests are loading - after that is dissmissed show another loading snackbar with (currentlyLoading - 1); same in on error
+                Navigator.pop(context);
+              },
               loadingError: (loadingError) {
                 scaffoldKey.currentState
                   ..removeCurrentSnackBar()
