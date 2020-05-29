@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +18,7 @@ void useMapSignals({
   useEffect(() {
     StreamSubscription<ConsecutiveTypesCounted<MapSignal>> subscription;
     listenTrigger.addListener(() {
-      if (listenTrigger.value == null) return;
-      subscription?.cancel();
+      if (listenTrigger.value == null || subscription != null) return;
       subscription = context
           .bloc<MapBloc>()
           .signals
@@ -28,14 +28,11 @@ void useMapSignals({
             Pair(null, null),
             (last2Signals, signal) => Pair(
               last2Signals.second,
-              ConsecutiveTypesCounted(
-                signal,
-                last2Signals.second?.nextCounted(signal) ?? 0,
-              ),
+              last2Signals.second?.nextWith(signal) ??
+                  ConsecutiveTypesCounted.first(signal),
             ),
           )
           .map((pair) => pair.second)
-          .skip(1)
           .listen(
             (signal) => signal.item.whenPartial(
               loading: (loading) {
