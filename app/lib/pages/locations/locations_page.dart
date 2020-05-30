@@ -12,6 +12,7 @@ import 'package:transport_control/pages/map_location/map_location_page_mode.dart
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/util/model_util.dart';
+import 'package:transport_control/widgets/loading_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
@@ -19,6 +20,7 @@ class LocationsPage extends HookWidget {
   LocationsPage({Key key}) : super(key: key);
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _locationBtnController = LoadingButtonController();
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +33,7 @@ class LocationsPage extends HookWidget {
     );
 
     final nearbyButtonEnabled = useState(true);
-    useLocationsSignals(
+    _useLocationsSignals(
       context: context,
       nearbyButtonEnabled: nearbyButtonEnabled,
     );
@@ -104,10 +106,9 @@ class LocationsPage extends HookWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          FloatingActionButton(
-            heroTag: 'tag1',
-            child: const Icon(Icons.my_location),
-            disabledElevation: 0,
+          LoadingButton(
+            child: const Icon(Icons.my_location, color: Colors.white),
+            controller: _locationBtnController,
             onPressed: nearbyButtonEnabled.value
                 ? loadVehiclesNearbyUserLocation
                 : null,
@@ -289,10 +290,16 @@ class LocationsPage extends HookWidget {
     );
   }
 
-  void useLocationsSignals({
+  void _useLocationsSignals({
     @required BuildContext context,
     @required ValueNotifier<bool> nearbyButtonEnabled,
   }) {
+    final void Function() resetAndEnableLocationBtn = () {
+      Future.delayed(const Duration(seconds: 3), () {
+        _locationBtnController.reset();
+        nearbyButtonEnabled.value = true;
+      });
+    };
     useEffect(() {
       final subscription = context.bloc<LocationsBloc>().signals.listen(
         (signal) {
@@ -301,12 +308,12 @@ class LocationsPage extends HookWidget {
               nearbyButtonEnabled.value = false;
             },
             loadingError: (loadingError) {
-              //TODO: signal error by changing icon or smth
-              nearbyButtonEnabled.value = true;
+              _locationBtnController.error();
+              resetAndEnableLocationBtn();
             },
             loadedSuccessfully: (loadedSuccessfully) {
-              //TODO: signal success by changing icon or smth
-              nearbyButtonEnabled.value = true;
+              _locationBtnController.success();
+              resetAndEnableLocationBtn();
             },
           );
         },
