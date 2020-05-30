@@ -203,12 +203,7 @@ class LinesPage extends HookWidget {
           numberOfLines: numberOfUntracked,
           icon: Icons.location_on,
           label: 'Track',
-          onTap: () async => _trackOrShowSnackbar(
-            context,
-            condition: await context.bloc<LinesBloc>().trackSelectedLines(),
-            //TODO: modify No connection snackbars to be shown MapSignal error
-            snackBarText: 'No connection.',
-          ),
+          onTap: () => context.bloc<LinesBloc>().trackSelectedLines(),
         ),
       if (numberOfTracked > 0)
         _LinesFloatingActionButton(
@@ -429,22 +424,8 @@ class LinesPage extends HookWidget {
         bloc.toggleFavourite(line.key);
         break;
       case _LineActionsDialogResult.TOGGLE_TRACKED:
-        _trackOrShowSnackbar(
-          context,
-          condition: await bloc.toggleTracked(line),
-          snackBarText: 'No connection',
-        );
+        bloc.toggleTracked(line);
         break;
-    }
-  }
-
-  void _trackOrShowSnackbar(
-    BuildContext context, {
-    @required bool condition,
-    @required String snackBarText,
-  }) {
-    if (!condition) {
-      Scaffold.of(context).showSnackBar(SnackBar(content: Text(snackBarText)));
     }
   }
 }

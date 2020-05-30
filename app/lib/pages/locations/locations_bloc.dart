@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as UserLocation;
@@ -95,12 +94,8 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     add(LocationsEvent.changeListOrder(order: order));
   }
 
-  Future<bool> loadVehiclesInLocation(Location location) async {
-    if (await Connectivity().checkConnectivity() == ConnectivityResult.none) {
-      return false;
-    }
+  void loadVehiclesInLocation(Location location) {
     _loadVehiclesInLocationSink.add(location);
-    return true;
   }
 
   void loadVehiclesNearbyUserLocation() async {
@@ -115,18 +110,9 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
           );
         }
 
-        if (await Connectivity().checkConnectivity() ==
-            ConnectivityResult.none) {
-          //TODO: handle this with MapSignals
-          _signals.add(
-            LocationsSignal.loadingError(message: 'No internet connection.'),
-          );
-        }
-
         _loadVehiclesNearbySink.add(
           LatLng(result.data.latitude, result.data.longitude),
         );
-
         _signals.add(LocationsSignal.loadedSuccessfully());
       },
       orElse: (result) {

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
@@ -203,12 +202,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     add(LinesEvent.toggleLineFavourite(line: line));
   }
 
-  Future<bool> toggleTracked(MapEntry<Line, LineState> line) async {
-    if (!line.value.tracked &&
-        await Connectivity().checkConnectivity() == ConnectivityResult.none) {
-      return false;
-    }
-
+  void toggleTracked(MapEntry<Line, LineState> line) async {
     if (line.value.tracked) {
       _trackedLinesRemovedSink.add(Set<Line>()..add(line.key));
     } else {
@@ -222,7 +216,6 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
       );
     }
     add(LinesEvent.toggleLineTracking(line: line.key));
-    return true;
   }
 
   void resetSelection() => add(LinesEvent.resetSelection());
@@ -235,13 +228,8 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     add(LinesEvent.listFilterChanged(filter: filter));
   }
 
-  Future<bool> trackSelectedLines({bool resetSelection = true}) async {
-    if (await Connectivity().checkConnectivity() == ConnectivityResult.none) {
-      return false;
-    }
-
+  void trackSelectedLines({bool resetSelection = true}) async {
     add(LinesEvent.trackSelectedLines(resetSelection: resetSelection));
-    return true;
   }
 
   void untrackSelectedLines({bool resetSelection = true}) {

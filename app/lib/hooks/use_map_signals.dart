@@ -27,6 +27,10 @@ void useMapSignals({
               scaffoldKey.currentState.showNewLoadedSuccessfullySnackBar(
                 tracker: tracker,
                 getScaffoldState: () => scaffoldKey.currentState,
+                action: SnackBarAction(
+                  label: 'Map',
+                  onPressed: () => Navigator.pop(context),
+                ),
               );
             }
           },

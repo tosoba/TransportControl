@@ -49,18 +49,17 @@ extension ScaffoldStateExt on ScaffoldState {
   void showNewLoadedSuccessfullySnackBar<Signal, Loading extends Signal>({
     @required LoadingSignalTracker<Signal, Loading> tracker,
     @required ScaffoldState Function() getScaffoldState,
+    SnackBarAction action,
   }) {
     _hideCurrentAndShowSnackBar(
       _signalSnackBar(
         text:
             'Loading finished successfully. ${tracker.currentlyLoading} request${tracker.currentlyLoading > 1 ? 's' : ''} left.',
-        action: SnackBarAction(
-          label: 'Map',
-          onPressed: () => Navigator.pop(context),
-        ),
+        action: action,
       ),
     )._showLoadingSnackBarOnClose(
-      text: 'Loading in progress',
+      text:
+          'Processing remaining ${tracker.currentlyLoading} loading request${tracker.currentlyLoading > 1 ? 's' : ''}.',
       currentlyLoading: tracker.currentlyLoading,
       getScaffoldState: getScaffoldState,
     );
@@ -70,7 +69,7 @@ extension ScaffoldStateExt on ScaffoldState {
     @required LoadingSignalTracker<Signal, Loading> tracker,
     @required ScaffoldState Function() getScaffoldState,
     @required String errorMessage,
-    @required void Function() retry,
+    void Function() retry,
     bool autoHide = false,
   }) {
     final duration = const Duration(seconds: 4);
@@ -80,28 +79,31 @@ extension ScaffoldStateExt on ScaffoldState {
       _signalSnackBar(
         duration: duration,
         text: errorMessage,
-        action: SnackBarAction(
-          label: 'Retry',
-          onPressed: () {
-            hideCurrentSnackBar();
-            retryPressed = true;
-            retry();
-          },
-        ),
+        action: retry != null
+            ? SnackBarAction(
+                label: 'Retry',
+                onPressed: () {
+                  hideCurrentSnackBar();
+                  retryPressed = true;
+                  retry();
+                },
+              )
+            : null,
       ),
     );
 
     if (tracker.currentlyLoading == 0) {
       if (!retryPressed && autoHide) {
         Future.delayed(duration, () {
-         getScaffoldState().removeCurrentSnackBar();
+          getScaffoldState().removeCurrentSnackBar();
         });
       }
       return;
     }
 
     snackBarController._showLoadingSnackBarOnClose(
-      text: 'Loading in progress',
+      text:
+          'Processing remaining ${tracker.currentlyLoading} loading request${tracker.currentlyLoading > 1 ? 's' : ''}.',
       currentlyLoading: tracker.currentlyLoading,
       getScaffoldState: getScaffoldState,
     );

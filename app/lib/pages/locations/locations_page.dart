@@ -107,7 +107,7 @@ class LocationsPage extends HookWidget {
           FloatingActionButton(
             heroTag: 'tag1',
             child: const Icon(Icons.my_location),
-            disabledElevation: .5,
+            disabledElevation: 0,
             onPressed: nearbyButtonEnabled.value
                 ? loadVehiclesNearbyUserLocation
                 : null,
@@ -180,10 +180,9 @@ class LocationsPage extends HookWidget {
             actionExtentRatio: 0.25,
             child: Material(
               child: InkWell(
-                onTap: () => _loadVehiclesAndPop(
-                  context,
-                  location: location,
-                ),
+                onTap: () => context
+                    .bloc<LocationsBloc>()
+                    .loadVehiclesInLocation(location),
                 child: ListTile(
                   title: Text(location.name),
                   subtitle: Text(
@@ -271,20 +270,9 @@ class LocationsPage extends HookWidget {
       save: (_) => _saveOrUpdateLocation(context, result),
       orElse: (_) {
         _saveOrUpdateLocation(context, result);
-        _loadVehiclesAndPop(context, location: result.location);
+        context.bloc<LocationsBloc>().loadVehiclesInLocation(result.location);
       },
     );
-  }
-
-  void _loadVehiclesAndPop(
-    BuildContext context, {
-    @required Location location,
-  }) async {
-    if (!await context.bloc<LocationsBloc>().loadVehiclesInLocation(location)) {
-      //TODO: modify No connection snackbars to be shown MapSignal error
-      Scaffold.of(context)
-          .showSnackBar(SnackBar(content: Text('No connection.')));
-    }
   }
 
   void _saveOrUpdateLocation(

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -228,7 +229,16 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     void Function(Failure<List<Vehicle>>) onFailure,
     void Function() beforeRetry,
   }) async {
+    if (await Connectivity().checkConnectivity() == ConnectivityResult.none) {
+      _signals.add(
+        MapSignal.loadingError(message: 'No internet connection.', retry: null),
+      );
+      onFailure?.call(Failure(error: Exception('No internet connection.')));
+      return;
+    }
+
     _signals.add(MapSignal.loading(message: loadingMsg));
+
     final result = await loadVehicles();
     result.asyncWhen(
       success: (success) async {
