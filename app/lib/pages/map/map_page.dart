@@ -8,6 +8,8 @@ import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_markers.dart';
 import 'package:transport_control/pages/map/map_signal.dart';
 import 'package:transport_control/util/lat_lng_util.dart';
+import 'package:transport_control/util/model_util.dart';
+import 'package:transport_control/util/snack_bar_util.dart';
 
 class MapPage extends StatefulWidget {
   final void Function() mapTapped;
@@ -30,7 +32,8 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage>
     with AutomaticKeepAliveClientMixin<MapPage> {
   final _mapController = Completer<GoogleMapController>();
-  StreamSubscription<MapSignal> _signalsSubscription;
+  StreamSubscription<LoadingSignalTracker<MapSignal, Loading>>
+      _signalTrackersSubscription;
 
   @override
   bool get wantKeepAlive => true;
@@ -39,49 +42,47 @@ class _MapPageState extends State<MapPage>
   void initState() {
     super.initState();
 
-    _signalsSubscription = context.bloc<MapBloc>().signals.listen(
-      (signal) {
-        signal.when(
+    _signalTrackersSubscription = context
+        .bloc<MapBloc>()
+        .signals
+        .loadingSignalTrackerStream<Loading>()
+        .listen(
+      (tracker) {
+        tracker.signal.when(
           loading: (loading) {
-            Scaffold.of(context)
-              ..removeCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(loading.message),
-                  behavior: SnackBarBehavior.floating,
-                  elevation: 4,
-                  duration: const Duration(days: 1),
-                ),
-              );
+            Scaffold.of(context).showNewLoadingSnackBar(
+              text: loading.message,
+              currentlyLoading: tracker.currentlyLoading,
+            );
           },
-          loadedSuccessfully: (_) => Scaffold.of(context).hideCurrentSnackBar(),
-          loadingError: (loadingError) {
-            final duration = const Duration(seconds: 4);
-            bool retryPressed = false;
-            Scaffold.of(context)
-              ..removeCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(loadingError.message),
-                  duration: duration,
-                  behavior: SnackBarBehavior.floating,
-                  elevation: 4,
-                  action: SnackBarAction(
-                    label: 'Retry',
-                    onPressed: () {
-                      Scaffold.of(context).removeCurrentSnackBar();
-                      retryPressed = true;
-                      loadingError.retry();
-                    },
-                  ),
-                ),
+          loadedSuccessfully: (_) {
+            if (tracker.currentlyLoading == 0) {
+              Scaffold.of(context).hideCurrentSnackBar();
+            } else {
+              Scaffold.of(context).showNewLoadedSuccessfullySnackBar(
+                tracker: tracker,
+                getScaffoldState: () => Scaffold.of(context),
               );
-            Future.delayed(duration, () {
-              if (!retryPressed) Scaffold.of(context).removeCurrentSnackBar();
-            });
+            }
+          },
+          loadingError: (loadingError) {
+            Scaffold.of(context).showNewLoadingErrorSnackBar(
+              tracker: tracker,
+              getScaffoldState: () => Scaffold.of(context),
+              errorMessage: loadingError.message,
+              retry: loadingError.retry,
+            );
           },
           zoomToBoundsAfterLoadedSuccessfully: (signal) {
-            Scaffold.of(context).hideCurrentSnackBar();
+            if (tracker.currentlyLoading == 0) {
+              Scaffold.of(context).hideCurrentSnackBar();
+            } else {
+              Scaffold.of(context).showNewLoadedSuccessfullySnackBar(
+                tracker: tracker,
+                getScaffoldState: () => Scaffold.of(context),
+              );
+            }
+
             _mapController.future.then(
               (controller) => controller.animateCamera(
                 CameraUpdate.newLatLngBounds(signal.bounds, 10.0),
@@ -103,7 +104,7 @@ class _MapPageState extends State<MapPage>
 
   @override
   void dispose() {
-    _signalsSubscription?.cancel();
+    _signalTrackersSubscription?.cancel();
     super.dispose();
   }
 

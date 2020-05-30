@@ -19,7 +19,7 @@ void useMapSignals({
         .listen(
           (tracker) => tracker.signal.whenPartial(
             loading: (loading) {
-              scaffoldKey.currentState.hideCurrentAndShowLoadingSnackBar(
+              scaffoldKey.currentState.showNewLoadingSnackBar(
                 text: loading.message,
                 currentlyLoading: tracker.currentlyLoading,
               );
@@ -28,43 +28,18 @@ void useMapSignals({
               if (tracker.currentlyLoading == 0) {
                 Navigator.pop(context);
               } else {
-                scaffoldKey.currentState
-                    .hideCurrentAndShowSnackBar(
-                      signalSnackBar(
-                        text:
-                            'Loading finished successfully. ${tracker.currentlyLoading} request${tracker.currentlyLoading > 1 ? 's' : ''} left.',
-                        action: SnackBarAction(
-                          label: 'Map',
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ),
-                    )
-                    .showLoadingSnackBarOnClose(
-                      text: 'Loading in progress',
-                      currentlyLoading: tracker.currentlyLoading,
-                      getScaffoldState: () => scaffoldKey.currentState,
-                    );
+                scaffoldKey.currentState.showNewLoadedSuccessfullySnackBar(
+                  tracker: tracker,
+                  getScaffoldState: () => scaffoldKey.currentState,
+                );
               }
             },
             loadingError: (loadingError) {
-              final snackBarController =
-                  scaffoldKey.currentState.hideCurrentAndShowSnackBar(
-                signalSnackBar(
-                  text: loadingError.message,
-                  action: SnackBarAction(
-                    label: 'Retry',
-                    onPressed: () {
-                      scaffoldKey.currentState.hideCurrentSnackBar();
-                      loadingError.retry();
-                    },
-                  ),
-                ),
-              );
-              if (tracker.currentlyLoading == 0) return;
-              snackBarController.showLoadingSnackBarOnClose(
-                text: 'Loading in progress',
-                currentlyLoading: tracker.currentlyLoading,
+              scaffoldKey.currentState.showNewLoadingErrorSnackBar(
+                tracker: tracker,
                 getScaffoldState: () => scaffoldKey.currentState,
+                errorMessage: loadingError.message,
+                retry: loadingError.retry,
               );
             },
           ),
