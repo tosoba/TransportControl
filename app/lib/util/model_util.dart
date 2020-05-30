@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:latlong/latlong.dart';
 import 'package:moor_flutter/moor_flutter.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -6,6 +9,8 @@ import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/model/place_suggestion.dart';
 import 'package:transport_control/model/vehicle.dart';
+import 'package:transport_control/pages/map/map_bloc.dart';
+import 'package:transport_control/pages/map/map_signal.dart';
 import 'package:transport_control/pages/map/map_vehicle_source.dart';
 import 'package:transport_control/util/string_util.dart';
 
@@ -187,6 +192,18 @@ class LoadingSignalTracker<Signal, Loading extends Signal> {
       signal: signal,
       currentlyLoading: nextLoading,
     );
+  }
+}
+
+extension MapBlocExt on MapBloc {
+  StreamSubscription<LoadingSignalTracker<MapSignal, Loading>>
+      listenToLoadingSignalTrackers(
+    void Function(LoadingSignalTracker<MapSignal, Loading>) onData,
+  ) {
+    return signals
+        .loadingSignalTrackerStream<Loading>()
+        .debounce(const Duration(seconds: 1))
+        .listen(onData);
   }
 }
 

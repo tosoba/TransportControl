@@ -42,11 +42,8 @@ class _MapPageState extends State<MapPage>
   void initState() {
     super.initState();
 
-    _signalTrackersSubscription = context
-        .bloc<MapBloc>()
-        .signals
-        .loadingSignalTrackerStream<Loading>()
-        .listen(
+    _signalTrackersSubscription =
+        context.bloc<MapBloc>().listenToLoadingSignalTrackers(
       (tracker) {
         tracker.signal.when(
           loading: (loading) {
