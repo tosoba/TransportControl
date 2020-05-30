@@ -24,10 +24,10 @@ class _VehiclesApi implements VehiclesApi {
       apiKey = VehiclesApiData.key}) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
-      'type': type,
-      'line': line,
-      'resource_id': resourceId,
-      'apikey': apiKey
+      r'type': type,
+      r'line': line,
+      r'resource_id': resourceId,
+      r'apikey': apiKey
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
@@ -41,6 +41,6 @@ class _VehiclesApi implements VehiclesApi {
             baseUrl: baseUrl),
         data: _data);
     final value = VehiclesResponse.fromJson(_result.data);
-    return Future.value(value);
+    return value;
   }
 }

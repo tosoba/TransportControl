@@ -206,6 +206,7 @@ class LinesPage extends HookWidget {
           onTap: () async => _trackOrShowSnackbar(
             context,
             condition: await context.bloc<LinesBloc>().trackSelectedLines(),
+            //TODO: modify No connection snackbars to be shown MapSignal error
             snackBarText: 'No connection.',
           ),
         ),

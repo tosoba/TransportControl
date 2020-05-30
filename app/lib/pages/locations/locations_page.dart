@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:transport_control/hooks/use_location_signals.dart';
 import 'package:transport_control/hooks/use_map_signals.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
@@ -31,7 +30,11 @@ class LocationsPage extends HookWidget {
           .nameFilterChanged(searchFieldController.value.text),
     );
 
-    useLocationsSignals(scaffoldKey: _scaffoldKey, context: context);
+    final nearbyButtonEnabled = useState(true);
+    useLocationsSignals(
+      context: context,
+      nearbyButtonEnabled: nearbyButtonEnabled,
+    );
     useMapSignals(scaffoldKey: _scaffoldKey, context: context);
 
     return Scaffold(
@@ -84,6 +87,7 @@ class LocationsPage extends HookWidget {
       ),
       floatingActionButton: _floatingActionButtons(
         context,
+        nearbyButtonEnabled: nearbyButtonEnabled,
         loadVehiclesNearbyUserLocation: () {
           context.bloc<LocationsBloc>().loadVehiclesNearbyUserLocation();
         },
@@ -94,6 +98,7 @@ class LocationsPage extends HookWidget {
   Widget _floatingActionButtons(
     BuildContext context, {
     @required void Function() loadVehiclesNearbyUserLocation,
+    @required ValueNotifier<bool> nearbyButtonEnabled,
   }) {
     return Container(
       child: Column(
@@ -102,7 +107,10 @@ class LocationsPage extends HookWidget {
           FloatingActionButton(
             heroTag: 'tag1',
             child: const Icon(Icons.my_location),
-            onPressed: loadVehiclesNearbyUserLocation,
+            disabledElevation: .5,
+            onPressed: nearbyButtonEnabled.value
+                ? loadVehiclesNearbyUserLocation
+                : null,
           ),
           SizedBox(height: 10),
           FloatingActionButton(
@@ -273,6 +281,7 @@ class LocationsPage extends HookWidget {
     @required Location location,
   }) async {
     if (!await context.bloc<LocationsBloc>().loadVehiclesInLocation(location)) {
+      //TODO: modify No connection snackbars to be shown MapSignal error
       Scaffold.of(context)
           .showSnackBar(SnackBar(content: Text('No connection.')));
     }
@@ -290,5 +299,31 @@ class LocationsPage extends HookWidget {
         context.bloc<LocationsBloc>().updateLocation(result.location);
       },
     );
+  }
+
+  void useLocationsSignals({
+    @required BuildContext context,
+    @required ValueNotifier<bool> nearbyButtonEnabled,
+  }) {
+    useEffect(() {
+      final subscription = context.bloc<LocationsBloc>().signals.listen(
+        (signal) {
+          signal.when(
+            loading: (loading) {
+              nearbyButtonEnabled.value = false;
+            },
+            loadingError: (loadingError) {
+              //TODO: signal error by changing icon or smth
+              nearbyButtonEnabled.value = true;
+            },
+            loadedSuccessfully: (loadedSuccessfully) {
+              //TODO: signal success by changing icon or smth
+              nearbyButtonEnabled.value = true;
+            },
+          );
+        },
+      );
+      return subscription.cancel;
+    });
   }
 }

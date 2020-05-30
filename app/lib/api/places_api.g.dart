@@ -28,13 +28,13 @@ class _PlacesApi implements PlacesApi {
     ArgumentError.checkNotNull(query, 'query');
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
-      'query': query,
-      'maxresults': maxResults,
-      'prox': bounds,
-      'country': country,
-      'language': language,
-      'app_id': appId,
-      'app_code': appCode
+      r'query': query,
+      r'maxresults': maxResults,
+      r'prox': bounds,
+      r'country': country,
+      r'language': language,
+      r'app_id': appId,
+      r'app_code': appCode
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
@@ -48,6 +48,6 @@ class _PlacesApi implements PlacesApi {
             baseUrl: baseUrl),
         data: _data);
     final value = PlaceSuggestionsResponse.fromJson(_result.data);
-    return Future.value(value);
+    return value;
   }
 }

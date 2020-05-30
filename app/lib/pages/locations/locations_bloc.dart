@@ -117,6 +117,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
 
         if (await Connectivity().checkConnectivity() ==
             ConnectivityResult.none) {
+          //TODO: handle this with MapSignals
           _signals.add(
             LocationsSignal.loadingError(message: 'No internet connection.'),
           );
@@ -125,6 +126,8 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
         _loadVehiclesNearbySink.add(
           LatLng(result.data.latitude, result.data.longitude),
         );
+
+        _signals.add(LocationsSignal.loadedSuccessfully());
       },
       orElse: (result) {
         _signals.add(

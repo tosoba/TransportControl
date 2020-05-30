@@ -9,4 +9,7 @@ enum _LocationsSignal {
 
   @Data(fields: [DataField<String>('message')])
   LoadingError,
+
+  @object
+  LoadedSuccessfully,
 }
