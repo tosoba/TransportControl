@@ -524,7 +524,13 @@ extension _VehiclesBottomSheetCarouselControllersExt
       final sheetController = showBottomSheet(
         context: context,
         builder: (context) => StreamBuilder<List<MapEntry<String, MapVehicle>>>(
-          stream: bloc.map((state) => state.trackedVehicles.entries.toList()),
+          stream: bloc.map(
+            (state) => state.trackedVehicles.entries.toList()
+              ..sort(
+                (entry1, entry2) => entry1.value.vehicle.lon
+                    .compareTo(entry2.value.vehicle.lon),
+              ),
+          ),
           builder: (context, snapshot) {
             final entries = snapshot.data;
             if (entries == null) return Container();
@@ -534,6 +540,7 @@ extension _VehiclesBottomSheetCarouselControllersExt
                 viewportFraction: .5,
                 aspectRatio: 3.0,
                 enlargeCenterPage: true,
+                enableInfiniteScroll: entries.length > 2,
                 initialPage:
                     entries.indexWhere((entry) => entry.key == marker.number),
                 onPageChanged: (index, reason) {
@@ -581,7 +588,7 @@ extension _VehiclesBottomSheetCarouselControllersExt
   }) {
     return Card(
       child: Container(
-        padding: EdgeInsets.all(5),
+        padding: const EdgeInsets.all(5),
         width: MediaQuery.of(context).size.width,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
