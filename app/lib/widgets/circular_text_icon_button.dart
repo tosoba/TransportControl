@@ -6,6 +6,8 @@ class CircularTextIconButton extends StatelessWidget {
   final void Function() onTap;
   final Color color;
   final Color splashColor;
+  final TextStyle textStyle;
+  final Color iconColor;
 
   const CircularTextIconButton({
     Key key,
@@ -14,23 +16,26 @@ class CircularTextIconButton extends StatelessWidget {
     @required this.onTap,
     this.color,
     this.splashColor,
+    this.iconColor = Colors.white,
+    this.textStyle = const TextStyle(color: Colors.white),
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SizedBox.fromSize(
       size: const Size(56, 56),
       child: ClipOval(
         child: Material(
-          color: color,
+          color: color ?? theme.primaryColor,
           child: InkWell(
-            splashColor: splashColor,
+            splashColor: splashColor ?? theme.splashColor,
             onTap: onTap,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(icon),
-                Text(text),
+                Icon(icon, color: iconColor),
+                Text(text, style: textStyle),
               ],
             ),
           ),
