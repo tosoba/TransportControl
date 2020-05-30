@@ -68,6 +68,7 @@ class _MapPageState extends State<MapPage>
               getScaffoldState: () => Scaffold.of(context),
               errorMessage: loadingError.message,
               retry: loadingError.retry,
+              autoHide: true,
             );
           },
           zoomToBoundsAfterLoadedSuccessfully: (signal) {

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:latlong/latlong.dart';
 import 'package:moor_flutter/moor_flutter.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -55,7 +54,7 @@ int _typeFrom(String symbol) {
   if (symbol == null)
     return null;
   else {
-    int parsedSymbol = int.tryParse(symbol);
+    final parsedSymbol = int.tryParse(symbol);
     if (symbol.firstCharIsLetter ||
         (parsedSymbol != null && parsedSymbol >= 100))
       return VehicleType.BUS;

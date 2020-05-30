@@ -41,8 +41,6 @@ void useMapSignals({
         );
       },
     );
-    return () {
-      subscription?.cancel();
-    };
+    return subscription.cancel;
   });
 }

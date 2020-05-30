@@ -229,7 +229,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     void Function() beforeRetry,
   }) async {
     _signals.add(MapSignal.loading(message: loadingMsg));
-    final result = Result<List<Vehicle>>.failure(error: Exception());
+    final result = await loadVehicles();
     result.asyncWhen(
       success: (success) async {
         final vehicles = success.data;

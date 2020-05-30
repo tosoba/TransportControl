@@ -71,10 +71,14 @@ extension ScaffoldStateExt on ScaffoldState {
     @required ScaffoldState Function() getScaffoldState,
     @required String errorMessage,
     @required void Function() retry,
+    bool autoHide = false,
   }) {
+    final duration = const Duration(seconds: 4);
     bool retryPressed = false;
+
     final snackBarController = _hideCurrentAndShowSnackBar(
       _signalSnackBar(
+        duration: duration,
         text: errorMessage,
         action: SnackBarAction(
           label: 'Retry',
@@ -87,7 +91,14 @@ extension ScaffoldStateExt on ScaffoldState {
       ),
     );
 
-    if (tracker.currentlyLoading == 0 || retryPressed) return;
+    if (tracker.currentlyLoading == 0) {
+      if (!retryPressed && autoHide) {
+        Future.delayed(duration, () {
+         getScaffoldState().removeCurrentSnackBar();
+        });
+      }
+      return;
+    }
 
     snackBarController._showLoadingSnackBarOnClose(
       text: 'Loading in progress',
