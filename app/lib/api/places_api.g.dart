@@ -23,8 +23,8 @@ class _PlacesApi implements PlacesApi {
       bounds = '52.237049,21.017532,20000',
       country = 'POL',
       language = 'PL',
-      appId = PlacesApiData.appId,
-      appCode = PlacesApiData.appCode}) async {
+      appId = _PlacesApiData.appId,
+      appCode = _PlacesApiData.appCode}) async {
     ArgumentError.checkNotNull(query, 'query');
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{

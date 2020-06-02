@@ -21,7 +21,7 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
     subscriptions
       ..add(
         _submittedQueries.stream
-            .merge(_queries.stream.debounce(const Duration(milliseconds: 1000)))
+            .merge(_queries.stream.debounce(const Duration(seconds: 1)))
             .distinct()
             .tap(
               (_) => add(
@@ -96,7 +96,7 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
       add(NearbyEvent.updateQuery(query: query));
       return;
     }
-    
+
     final processedQuery = query.trim().toLowerCase();
     add(NearbyEvent.updateQuery(query: processedQuery));
     if (processedQuery.isEmpty) return;

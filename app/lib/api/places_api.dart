@@ -18,15 +18,15 @@ abstract class PlacesApi {
     @Query('prox') String bounds = '52.237049,21.017532,20000',
     @Query('country') String country = 'POL',
     @Query('language') String language = 'PL',
-    @Query("app_id") String appId = PlacesApiData.appId,
-    @Query("app_code") String appCode = PlacesApiData.appCode,
+    @Query("app_id") String appId = _PlacesApiData.appId,
+    @Query("app_code") String appCode = _PlacesApiData.appCode,
   });
 
   @factoryMethod
   static PlacesApi create(Dio client) => PlacesApi(client);
 }
 
-class PlacesApiData {
+class _PlacesApiData {
   static const appId = 'UojlDRBl2upvHhSYJEF1';
   static const appCode = '4QvUQmYhVJLYXd95Ng5iBg';
 }

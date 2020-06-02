@@ -21,7 +21,7 @@ class _VehiclesApi implements VehiclesApi {
       {type,
       line,
       resourceId = "f2e5503e-927d-4ad3-9500-4ab9e55deb59",
-      apiKey = VehiclesApiData.key}) async {
+      apiKey = _VehiclesApiData.key}) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'type': type,

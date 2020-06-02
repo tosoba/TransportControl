@@ -16,13 +16,13 @@ abstract class VehiclesApi {
     @Query("line") String line,
     @Query("resource_id")
         String resourceId = "f2e5503e-927d-4ad3-9500-4ab9e55deb59",
-    @Query("apikey") String apiKey = VehiclesApiData.key,
+    @Query("apikey") String apiKey = _VehiclesApiData.key,
   });
 
   @factoryMethod
   static VehiclesApi create(Dio client) => VehiclesApi(client);
 }
 
-class VehiclesApiData {
+class _VehiclesApiData {
   static const key = '9a96f3a2-a68d-4533-ba91-0775ac9f937d';
 }
