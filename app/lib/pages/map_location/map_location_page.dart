@@ -299,6 +299,7 @@ class MapLocationPage extends HookWidget {
     @required AnimationController mapTapAnimController,
   }) {
     return GoogleMap(
+      zoomControlsEnabled: false,
       mapType: MapType.normal,
       //TODO:
       // minMaxZoomPreference: MinMaxZoomPreference(

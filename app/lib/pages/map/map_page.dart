@@ -112,6 +112,7 @@ class _MapPageState extends State<MapPage>
     return StreamBuilder<List<IconifiedMarker>>(
       stream: context.bloc<MapBloc>().markers,
       builder: (context, snapshot) => GoogleMap(
+        zoomControlsEnabled: false,
         mapType: MapType.normal,
         initialCameraPosition: CameraPosition(
           target: MapConstants.initialTarget,
