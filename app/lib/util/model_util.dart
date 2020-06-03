@@ -201,7 +201,7 @@ extension MapBlocExt on MapBloc {
   ) {
     return signals
         .loadingSignalTrackerStream<Loading>()
-        .debounce(const Duration(seconds: 1))
+        .debounce(const Duration(milliseconds: 250), leading: true)
         .listen(onData);
   }
 }
