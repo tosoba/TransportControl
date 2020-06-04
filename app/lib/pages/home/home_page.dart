@@ -122,7 +122,10 @@ class HomePage extends HookWidget {
         body: Builder(
           builder: (context) => Stack(children: [
             MapPage(
-              mapTapped: () => _mapTapped(mapTapAnimController),
+              mapTapped: () => _mapTapped(
+                mapTapAnimController: mapTapAnimController,
+                bottomSheetControllers: bottomSheetControllers,
+              ),
               animatedToBounds: () => _hideControls(mapTapAnimController),
               markerTapped: (marker) {
                 bottomSheetControllers.showOrUpdateBottomSheet(
@@ -492,12 +495,18 @@ class HomePage extends HookWidget {
     );
   }
 
-  void _mapTapped(AnimationController mapTapAnimController) {
+  void _mapTapped({
+    @required AnimationController mapTapAnimController,
+    @required
+        ValueNotifier<_VehiclesBottomSheetCarouselControllers>
+            bottomSheetControllers,
+  }) {
     if (mapTapAnimController.isCompleted) {
       mapTapAnimController.reverse();
     } else {
       mapTapAnimController.forward();
     }
+    bottomSheetControllers.closeBottomSheet();
   }
 
   void _hideControls(AnimationController mapTapAnimController) {
