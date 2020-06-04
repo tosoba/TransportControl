@@ -45,4 +45,16 @@ class MapState {
       selectedVehicleNumber: null,
     );
   }
+
+  MapState withNoSelectedVehicleBoundsAndZoom({
+    @required LatLngBounds bounds,
+    @required double zoom,
+  }) {
+    return MapState._(
+      trackedVehicles: trackedVehicles,
+      zoom: zoom,
+      bounds: bounds,
+      selectedVehicleNumber: null,
+    );
+  }
 }

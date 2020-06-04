@@ -40,6 +40,7 @@ enum _MapEvent {
   @Data(fields: [
     DataField<LatLngBounds>('bounds'),
     DataField<double>('zoom'),
+    DataField<bool>('byUser'),
   ])
   CameraMoved,
 

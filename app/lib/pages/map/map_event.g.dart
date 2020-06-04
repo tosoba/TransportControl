@@ -31,7 +31,9 @@ abstract class MapEvent extends Equatable {
   factory MapEvent.animateVehicles() = AnimateVehicles;
 
   factory MapEvent.cameraMoved(
-      {@required LatLngBounds bounds, @required double zoom}) = CameraMoved;
+      {@required LatLngBounds bounds,
+      @required double zoom,
+      @required bool byUser}) = CameraMoved;
 
   factory MapEvent.trackedLinesRemoved({@required Set<Line> lines}) =
       TrackedLinesRemoved;
@@ -442,17 +444,21 @@ class AnimateVehicles extends MapEvent {
 
 @immutable
 class CameraMoved extends MapEvent {
-  const CameraMoved({@required this.bounds, @required this.zoom})
+  const CameraMoved(
+      {@required this.bounds, @required this.zoom, @required this.byUser})
       : super(_MapEvent.CameraMoved);
 
   final LatLngBounds bounds;
 
   final double zoom;
 
+  final bool byUser;
+
   @override
-  String toString() => 'CameraMoved(bounds:${this.bounds},zoom:${this.zoom})';
+  String toString() =>
+      'CameraMoved(bounds:${this.bounds},zoom:${this.zoom},byUser:${this.byUser})';
   @override
-  List get props => [bounds, zoom];
+  List get props => [bounds, zoom, byUser];
 }
 
 @immutable

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_markers.dart';
@@ -42,8 +43,26 @@ class _MapPageState extends State<MapPage>
   void initState() {
     super.initState();
 
-    _signalTrackersSubscription =
-        context.bloc<MapBloc>().listenToLoadingSignalTrackers(
+    final bloc = context.bloc<MapBloc>();
+
+    bloc
+        .where((state) => state.selectedVehicleNumber != null)
+        .map(
+          (state) => state
+              .trackedVehicles[state.selectedVehicleNumber].vehicle.position,
+        )
+        .distinct()
+        .debounce(const Duration(milliseconds: 250))
+        .listen(
+      (position) async {
+        final controller = await _mapController.future;
+        controller.animateCamera(
+          CameraUpdate.newLatLng(LatLng(position.latitude, position.longitude)),
+        );
+      },
+    );
+
+    _signalTrackersSubscription = bloc.listenToLoadingSignalTrackers(
       (tracker) {
         tracker.signal.when(
           loading: (loading) {
@@ -106,37 +125,45 @@ class _MapPageState extends State<MapPage>
     super.dispose();
   }
 
+  bool _cameraMovedByUser = false;
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return StreamBuilder<List<IconifiedMarker>>(
       stream: context.bloc<MapBloc>().markers,
-      builder: (context, snapshot) => GoogleMap(
-        zoomControlsEnabled: false,
-        mapType: MapType.normal,
-        initialCameraPosition: CameraPosition(
-          target: MapConstants.initialTarget,
-          zoom: MapConstants.initialZoom,
+      builder: (context, snapshot) => Listener(
+        onPointerDown: (event) => _cameraMovedByUser = true,
+        child: GoogleMap(
+          zoomControlsEnabled: false,
+          mapType: MapType.normal,
+          initialCameraPosition: CameraPosition(
+            target: MapConstants.initialTarget,
+            zoom: MapConstants.initialZoom,
+          ),
+          onMapCreated: _mapController.complete,
+          onCameraIdle: () => _cameraMoved(context),
+          markers: snapshot.data == null
+              ? null
+              : snapshot.data
+                  .map(
+                    (marker) => marker.toGoogleMapMarker(
+                      onTap: marker.isCluster
+                          ? () => _animateToClusterChildrenBounds(
+                                marker.childrenPositions,
+                              )
+                          : () {
+                              widget.markerTapped(marker);
+                              _cameraMovedByUser = false;
+                            },
+                    ),
+                  )
+                  .toSet(),
+          onTap: (position) {
+            context.bloc<MapBloc>().deselectVehicle();
+            widget.mapTapped();
+          },
         ),
-        onMapCreated: _mapController.complete,
-        onCameraIdle: () => _cameraMoved(context),
-        markers: snapshot.data == null
-            ? null
-            : snapshot.data
-                .map(
-                  (marker) => marker.toGoogleMapMarker(
-                    onTap: marker.isCluster
-                        ? () => _animateToClusterChildrenBounds(
-                              marker.childrenPositions,
-                            )
-                        : () => widget.markerTapped(marker),
-                  ),
-                )
-                .toSet(),
-        onTap: (position) {
-          context.bloc<MapBloc>().mapTapped();
-          widget.mapTapped();
-        },
       ),
     );
   }
@@ -150,7 +177,9 @@ class _MapPageState extends State<MapPage>
     context.bloc<MapBloc>().cameraMoved(
           bounds: results[0] as LatLngBounds,
           zoom: results[1] as double,
+          byUser: _cameraMovedByUser,
         );
+    _cameraMovedByUser = false;
   }
 
   void _animateToClusterChildrenBounds(List<LatLng> childrenPositions) async {

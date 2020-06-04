@@ -150,7 +150,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
               : MapEntry(number, tracked),
         ),
       ),
-      cameraMoved: (evt) => state.copyWith(zoom: evt.zoom, bounds: evt.bounds),
+      cameraMoved: (evt) => evt.byUser
+          ? state.withNoSelectedVehicleBoundsAndZoom(
+              bounds: evt.bounds,
+              zoom: evt.zoom,
+            )
+          : state.copyWith(zoom: evt.zoom, bounds: evt.bounds),
       trackedLinesRemoved: (evt) => state.withRemovedSource(
         (source) => source is OfLine && evt.lines.contains(source.line),
       ),
@@ -299,15 +304,21 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
   }
 
-  void cameraMoved({@required LatLngBounds bounds, @required double zoom}) {
-    add(MapEvent.cameraMoved(bounds: bounds, zoom: zoom));
+  void cameraMoved({
+    @required LatLngBounds bounds,
+    @required double zoom,
+    @required bool byUser,
+  }) {
+    add(MapEvent.cameraMoved(bounds: bounds, zoom: zoom, byUser: byUser));
   }
 
   void selectVehicle(String number) {
     add(MapEvent.selectVehicle(number: number));
   }
 
-  void mapTapped() => add(MapEvent.deselectVehicle());
+  void deselectVehicle() {
+    if (state.selectedVehicleNumber != null) add(MapEvent.deselectVehicle());
+  }
 
   void clearMap() {
     _untrackAllLinesSink.add(Object());
