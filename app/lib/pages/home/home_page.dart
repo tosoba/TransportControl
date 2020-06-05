@@ -127,6 +127,9 @@ class HomePage extends HookWidget {
                 bottomSheetControllers: bottomSheetControllers,
               ),
               animatedToBounds: () => _hideControls(mapTapAnimController),
+              cameraMovedByUser: () {
+                bottomSheetControllers.closeBottomSheet();
+              },
               markerTapped: (marker) {
                 bottomSheetControllers.showOrUpdateBottomSheet(
                   context,
@@ -580,7 +583,10 @@ extension _VehiclesBottomSheetCarouselControllersExt
         carouselController,
       );
 
-      sheetController.closed.then((_) => value = null);
+      sheetController.closed.then((_) {
+        bloc.deselectVehicle();
+        value = null;
+      });
     } else {
       final selectedVehicleIndex = bloc.state.trackedVehicles.entries
           .toList()

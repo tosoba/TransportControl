@@ -15,6 +15,7 @@ import 'package:transport_control/util/snack_bar_util.dart';
 class MapPage extends StatefulWidget {
   final void Function() mapTapped;
   final void Function() animatedToBounds;
+  final void Function() cameraMovedByUser;
   final void Function(IconifiedMarker) markerTapped;
   final ValueNotifier<LatLng> moveToPositionNotifier;
 
@@ -22,6 +23,7 @@ class MapPage extends StatefulWidget {
     Key key,
     @required this.mapTapped,
     @required this.animatedToBounds,
+    @required this.cameraMovedByUser,
     @required this.markerTapped,
     @required this.moveToPositionNotifier,
   }) : super(key: key);
@@ -125,7 +127,7 @@ class _MapPageState extends State<MapPage>
     super.dispose();
   }
 
-  bool _cameraMovedByUser = false;
+  bool _cameraWasMovedByUser = false;
 
   @override
   Widget build(BuildContext context) {
@@ -133,7 +135,7 @@ class _MapPageState extends State<MapPage>
     return StreamBuilder<List<IconifiedMarker>>(
       stream: context.bloc<MapBloc>().markers,
       builder: (context, snapshot) => Listener(
-        onPointerDown: (event) => _cameraMovedByUser = true,
+        onPointerDown: (event) => _cameraWasMovedByUser = true,
         child: GoogleMap(
           zoomControlsEnabled: false,
           mapType: MapType.normal,
@@ -154,7 +156,7 @@ class _MapPageState extends State<MapPage>
                               )
                           : () {
                               widget.markerTapped(marker);
-                              _cameraMovedByUser = false;
+                              _cameraWasMovedByUser = false;
                             },
                     ),
                   )
@@ -177,9 +179,12 @@ class _MapPageState extends State<MapPage>
     context.bloc<MapBloc>().cameraMoved(
           bounds: results[0] as LatLngBounds,
           zoom: results[1] as double,
-          byUser: _cameraMovedByUser,
+          byUser: _cameraWasMovedByUser,
         );
-    _cameraMovedByUser = false;
+    if (_cameraWasMovedByUser) {
+      widget.cameraMovedByUser();
+      _cameraWasMovedByUser = false;
+    }
   }
 
   void _animateToClusterChildrenBounds(List<LatLng> childrenPositions) async {
