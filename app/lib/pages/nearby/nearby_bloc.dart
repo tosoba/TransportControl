@@ -12,12 +12,13 @@ import 'package:stream_transform/stream_transform.dart';
 
 class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
   final PlaceSuggestionsRepo _repo;
+  final Sink<PlaceSuggestion> _loadVehiclesNearbyPlaceSink;
   final _queries = StreamController<String>();
   final _submittedQueries = StreamController<String>();
 
   final List<StreamSubscription> subscriptions = [];
 
-  NearbyBloc(this._repo) {
+  NearbyBloc(this._repo, this._loadVehiclesNearbyPlaceSink) {
     subscriptions
       ..add(
         _submittedQueries.stream
@@ -106,7 +107,8 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
     }
   }
 
-  void suggestionSelected({@required String locationId}) {
-    _repo.updateLastSearchedBy(locationId: locationId);
+  void suggestionSelected(PlaceSuggestion suggestion) {
+    _repo.updateLastSearchedBy(locationId: suggestion.id);
+    _loadVehiclesNearbyPlaceSink.add(suggestion);
   }
 }

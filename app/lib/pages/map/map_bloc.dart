@@ -9,6 +9,7 @@ import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
+import 'package:transport_control/model/place_suggestion.dart';
 import 'package:transport_control/model/result.dart';
 import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
@@ -41,7 +42,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     this._untrackLinesSink,
     this._untrackAllLinesSink,
     Stream<Location> loadVehiclesInLocationStream,
-    Stream<LatLng> loadVehiclesNearbyStream,
+    Stream<LatLng> loadVehiclesNearbyUserLocationStream,
+    Stream<PlaceSuggestion> loadVehiclesNearbyPlaceStream,
     Stream<TrackedLinesAddedEvent> trackedLinesAddedStream,
     Stream<Set<Line>> trackedLinesRemovedStream,
   ) {
@@ -73,8 +75,22 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       )
       ..add(loadVehiclesInLocationStream.listen(_loadVehiclesInLocation))
       ..add(
-        loadVehiclesNearbyStream.listen(
-          (position) => _loadVehiclesNearby(position, radiusInMeters: 1000),
+        loadVehiclesNearbyUserLocationStream.listen(
+          (position) => _loadVehiclesNearbyUserLocation(
+            position,
+            //TODO: take radius from settings
+            radiusInMeters: 1000,
+          ),
+        ),
+      )
+      ..add(
+        loadVehiclesNearbyPlaceStream.listen(
+          (place) => _loadVehiclesNearbyPlace(
+            LatLng(place.position.lat, place.position.lng),
+            title: place.title,
+            //TODO: take radius from settings
+            radiusInMeters: 1000,
+          ),
         ),
       )
       ..add(trackedLinesAddedStream.listen(_loadVehiclesOfLines))
@@ -129,13 +145,25 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           ),
         );
       },
-      addVehiclesNearbyPosition: (evt) {
+      addVehiclesNearbyUserLocation: (evt) {
         final loadedAt = DateTime.now();
         return state.withNewVehicles(
           evt.vehicles,
-          sourceForVehicle: (_) => MapVehicleSource.nearbyPosition(
+          sourceForVehicle: (_) => MapVehicleSource.nearbyUserLocation(
             position: evt.position,
             radius: evt.radius,
+            loadedAt: loadedAt,
+          ),
+        );
+      },
+      addVehiclesNearbyPlace: (evt) {
+        final loadedAt = DateTime.now();
+        return state.withNewVehicles(
+          evt.vehicles,
+          sourceForVehicle: (_) => MapVehicleSource.nearbyPlace(
+            position: evt.position,
+            radius: evt.radius,
+            title: evt.title,
             loadedAt: loadedAt,
           ),
         );
@@ -210,17 +238,41 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
   }
 
-  void _loadVehiclesNearby(LatLng position, {@required double radiusInMeters}) {
+  void _loadVehiclesNearbyUserLocation(
+    LatLng position, {
+    @required double radiusInMeters,
+  }) {
     _loadVehicles(
       loadingMsg: 'Loading nearby vehicles...',
-      emptyResultErrorMsg: 'No vehicles were found nearby given location.',
+      emptyResultErrorMsg: 'No vehicles were found nearby your location.',
       loadVehicles: () => _vehiclesRepo.loadVehiclesNearby(
         position,
         radiusInMeters: radiusInMeters,
       ),
-      successEvent: (vehicles) => MapEvent.addVehiclesNearbyPosition(
+      successEvent: (vehicles) => MapEvent.addVehiclesNearbyUserLocation(
         vehicles: vehicles,
         position: position,
+        radius: radiusInMeters,
+      ),
+    );
+  }
+
+  void _loadVehiclesNearbyPlace(
+    LatLng position, {
+    @required String title,
+    @required double radiusInMeters,
+  }) {
+    _loadVehicles(
+      loadingMsg: 'Loading vehicles nearby $title...',
+      emptyResultErrorMsg: 'No vehicles were found nearby $title.',
+      loadVehicles: () => _vehiclesRepo.loadVehiclesNearby(
+        position,
+        radiusInMeters: radiusInMeters,
+      ),
+      successEvent: (vehicles) => MapEvent.addVehiclesNearbyPlace(
+        vehicles: vehicles,
+        position: position,
+        title: title,
         radius: radiusInMeters,
       ),
     );

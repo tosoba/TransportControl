@@ -17,10 +17,16 @@ abstract class MapVehicleSource extends Equatable {
       {@required Location location,
       @required DateTime loadedAt}) = NearbyLocation;
 
-  factory MapVehicleSource.nearbyPosition(
+  factory MapVehicleSource.nearbyUserLocation(
       {@required LatLng position,
       @required double radius,
-      @required DateTime loadedAt}) = NearbyPosition;
+      @required DateTime loadedAt}) = NearbyUserLocation;
+
+  factory MapVehicleSource.nearbyPlace(
+      {@required LatLng position,
+      @required String title,
+      @required double radius,
+      @required DateTime loadedAt}) = NearbyPlace;
 
   final _MapVehicleSource _type;
 
@@ -28,9 +34,13 @@ abstract class MapVehicleSource extends Equatable {
   R when<R>(
       {@required R Function(OfLine) ofLine,
       @required R Function(NearbyLocation) nearbyLocation,
-      @required R Function(NearbyPosition) nearbyPosition}) {
+      @required R Function(NearbyUserLocation) nearbyUserLocation,
+      @required R Function(NearbyPlace) nearbyPlace}) {
     assert(() {
-      if (ofLine == null || nearbyLocation == null || nearbyPosition == null) {
+      if (ofLine == null ||
+          nearbyLocation == null ||
+          nearbyUserLocation == null ||
+          nearbyPlace == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -40,8 +50,10 @@ abstract class MapVehicleSource extends Equatable {
         return ofLine(this as OfLine);
       case _MapVehicleSource.NearbyLocation:
         return nearbyLocation(this as NearbyLocation);
-      case _MapVehicleSource.NearbyPosition:
-        return nearbyPosition(this as NearbyPosition);
+      case _MapVehicleSource.NearbyUserLocation:
+        return nearbyUserLocation(this as NearbyUserLocation);
+      case _MapVehicleSource.NearbyPlace:
+        return nearbyPlace(this as NearbyPlace);
     }
   }
 
@@ -49,9 +61,13 @@ abstract class MapVehicleSource extends Equatable {
   Future<R> asyncWhen<R>(
       {@required FutureOr<R> Function(OfLine) ofLine,
       @required FutureOr<R> Function(NearbyLocation) nearbyLocation,
-      @required FutureOr<R> Function(NearbyPosition) nearbyPosition}) {
+      @required FutureOr<R> Function(NearbyUserLocation) nearbyUserLocation,
+      @required FutureOr<R> Function(NearbyPlace) nearbyPlace}) {
     assert(() {
-      if (ofLine == null || nearbyLocation == null || nearbyPosition == null) {
+      if (ofLine == null ||
+          nearbyLocation == null ||
+          nearbyUserLocation == null ||
+          nearbyPlace == null) {
         throw 'check for all possible cases';
       }
       return true;
@@ -61,15 +77,18 @@ abstract class MapVehicleSource extends Equatable {
         return ofLine(this as OfLine);
       case _MapVehicleSource.NearbyLocation:
         return nearbyLocation(this as NearbyLocation);
-      case _MapVehicleSource.NearbyPosition:
-        return nearbyPosition(this as NearbyPosition);
+      case _MapVehicleSource.NearbyUserLocation:
+        return nearbyUserLocation(this as NearbyUserLocation);
+      case _MapVehicleSource.NearbyPlace:
+        return nearbyPlace(this as NearbyPlace);
     }
   }
 
   R whenOrElse<R>(
       {R Function(OfLine) ofLine,
       R Function(NearbyLocation) nearbyLocation,
-      R Function(NearbyPosition) nearbyPosition,
+      R Function(NearbyUserLocation) nearbyUserLocation,
+      R Function(NearbyPlace) nearbyPlace,
       @required R Function(MapVehicleSource) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -84,9 +103,12 @@ abstract class MapVehicleSource extends Equatable {
       case _MapVehicleSource.NearbyLocation:
         if (nearbyLocation == null) break;
         return nearbyLocation(this as NearbyLocation);
-      case _MapVehicleSource.NearbyPosition:
-        if (nearbyPosition == null) break;
-        return nearbyPosition(this as NearbyPosition);
+      case _MapVehicleSource.NearbyUserLocation:
+        if (nearbyUserLocation == null) break;
+        return nearbyUserLocation(this as NearbyUserLocation);
+      case _MapVehicleSource.NearbyPlace:
+        if (nearbyPlace == null) break;
+        return nearbyPlace(this as NearbyPlace);
     }
     return orElse(this);
   }
@@ -94,7 +116,8 @@ abstract class MapVehicleSource extends Equatable {
   Future<R> asyncWhenOrElse<R>(
       {FutureOr<R> Function(OfLine) ofLine,
       FutureOr<R> Function(NearbyLocation) nearbyLocation,
-      FutureOr<R> Function(NearbyPosition) nearbyPosition,
+      FutureOr<R> Function(NearbyUserLocation) nearbyUserLocation,
+      FutureOr<R> Function(NearbyPlace) nearbyPlace,
       @required FutureOr<R> Function(MapVehicleSource) orElse}) {
     assert(() {
       if (orElse == null) {
@@ -109,9 +132,12 @@ abstract class MapVehicleSource extends Equatable {
       case _MapVehicleSource.NearbyLocation:
         if (nearbyLocation == null) break;
         return nearbyLocation(this as NearbyLocation);
-      case _MapVehicleSource.NearbyPosition:
-        if (nearbyPosition == null) break;
-        return nearbyPosition(this as NearbyPosition);
+      case _MapVehicleSource.NearbyUserLocation:
+        if (nearbyUserLocation == null) break;
+        return nearbyUserLocation(this as NearbyUserLocation);
+      case _MapVehicleSource.NearbyPlace:
+        if (nearbyPlace == null) break;
+        return nearbyPlace(this as NearbyPlace);
     }
     return orElse(this);
   }
@@ -120,9 +146,13 @@ abstract class MapVehicleSource extends Equatable {
   Future<void> whenPartial(
       {FutureOr<void> Function(OfLine) ofLine,
       FutureOr<void> Function(NearbyLocation) nearbyLocation,
-      FutureOr<void> Function(NearbyPosition) nearbyPosition}) {
+      FutureOr<void> Function(NearbyUserLocation) nearbyUserLocation,
+      FutureOr<void> Function(NearbyPlace) nearbyPlace}) {
     assert(() {
-      if (ofLine == null && nearbyLocation == null && nearbyPosition == null) {
+      if (ofLine == null &&
+          nearbyLocation == null &&
+          nearbyUserLocation == null &&
+          nearbyPlace == null) {
         throw 'provide at least one branch';
       }
       return true;
@@ -134,9 +164,12 @@ abstract class MapVehicleSource extends Equatable {
       case _MapVehicleSource.NearbyLocation:
         if (nearbyLocation == null) break;
         return nearbyLocation(this as NearbyLocation);
-      case _MapVehicleSource.NearbyPosition:
-        if (nearbyPosition == null) break;
-        return nearbyPosition(this as NearbyPosition);
+      case _MapVehicleSource.NearbyUserLocation:
+        if (nearbyUserLocation == null) break;
+        return nearbyUserLocation(this as NearbyUserLocation);
+      case _MapVehicleSource.NearbyPlace:
+        if (nearbyPlace == null) break;
+        return nearbyPlace(this as NearbyPlace);
     }
   }
 
@@ -176,10 +209,10 @@ class NearbyLocation extends MapVehicleSource {
 }
 
 @immutable
-class NearbyPosition extends MapVehicleSource {
-  const NearbyPosition(
+class NearbyUserLocation extends MapVehicleSource {
+  const NearbyUserLocation(
       {@required this.position, @required this.radius, @required this.loadedAt})
-      : super(_MapVehicleSource.NearbyPosition);
+      : super(_MapVehicleSource.NearbyUserLocation);
 
   final LatLng position;
 
@@ -189,7 +222,31 @@ class NearbyPosition extends MapVehicleSource {
 
   @override
   String toString() =>
-      'NearbyPosition(position:${this.position},radius:${this.radius},loadedAt:${this.loadedAt})';
+      'NearbyUserLocation(position:${this.position},radius:${this.radius},loadedAt:${this.loadedAt})';
   @override
   List get props => [position, radius, loadedAt];
+}
+
+@immutable
+class NearbyPlace extends MapVehicleSource {
+  const NearbyPlace(
+      {@required this.position,
+      @required this.title,
+      @required this.radius,
+      @required this.loadedAt})
+      : super(_MapVehicleSource.NearbyPlace);
+
+  final LatLng position;
+
+  final String title;
+
+  final double radius;
+
+  final DateTime loadedAt;
+
+  @override
+  String toString() =>
+      'NearbyPlace(position:${this.position},title:${this.title},radius:${this.radius},loadedAt:${this.loadedAt})';
+  @override
+  List get props => [position, title, radius, loadedAt];
 }

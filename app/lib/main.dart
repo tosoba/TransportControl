@@ -43,7 +43,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
     final getIt = GetIt.instance;
     getIt<RxSharedPreferences>().dispose();
     getIt<LoadVehiclesInLocation>().injected.close();
-    getIt<LoadVehiclesNearby>().injected.close();
+    getIt<LoadVehiclesNearbyUserLocation>().injected.close();
     getIt<TrackedLinesAdded>().injected.close();
     getIt<TrackedLinesRemoved>().injected.close();
     getIt<UntrackLines>().injected.close();
@@ -56,7 +56,9 @@ class _TransportControlAppState extends State<TransportControlApp> {
   Widget build(BuildContext context) {
     final getIt = GetIt.instance;
     final loadVehiclesInBounds = getIt<LoadVehiclesInLocation>().injected;
-    final loadVehiclesNearby = getIt<LoadVehiclesNearby>().injected;
+    final loadVehiclesNearbyUserLocation =
+        getIt<LoadVehiclesNearbyUserLocation>().injected;
+    final loadVehiclesNearbyPlace = getIt<LoadVehiclesNearbyPlace>().injected;
     final trackedLinesAdded = getIt<TrackedLinesAdded>().injected;
     final trackedLinesRemoved = getIt<TrackedLinesRemoved>().injected;
     final untrackLines = getIt<UntrackLines>().injected;
@@ -75,7 +77,8 @@ class _TransportControlAppState extends State<TransportControlApp> {
               untrackLines.sink,
               untrackAllLines.sink,
               loadVehiclesInBounds.stream,
-              loadVehiclesNearby.stream,
+              loadVehiclesNearbyUserLocation.stream,
+              loadVehiclesNearbyPlace.stream,
               trackedLinesAdded.stream,
               trackedLinesRemoved.stream,
             ),
@@ -90,7 +93,10 @@ class _TransportControlAppState extends State<TransportControlApp> {
             ),
           ),
           BlocProvider<NearbyBloc>(
-            create: (context) => NearbyBloc(getIt<PlaceSuggestionsRepo>()),
+            create: (context) => NearbyBloc(
+              getIt<PlaceSuggestionsRepo>(),
+              loadVehiclesNearbyPlace.sink,
+            ),
           )
         ],
         child: HomePage(),

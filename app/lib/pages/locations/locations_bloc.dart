@@ -14,7 +14,7 @@ import 'package:transport_control/util/location_util.dart';
 class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   final LocationsRepo _repo;
   final Sink<Location> _loadVehiclesInLocationSink;
-  final Sink<LatLng> _loadVehiclesNearbySink;
+  final Sink<LatLng> _loadVehiclesNearbyUserLocationSink;
 
   final List<StreamSubscription> _subscriptions = [];
 
@@ -25,7 +25,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   LocationsBloc(
     this._repo,
     this._loadVehiclesInLocationSink,
-    this._loadVehiclesNearbySink,
+    this._loadVehiclesNearbyUserLocationSink,
   ) {
     _subscriptions
       ..add(
@@ -110,7 +110,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
           );
         }
 
-        _loadVehiclesNearbySink.add(
+        _loadVehiclesNearbyUserLocationSink.add(
           LatLng(result.data.latitude, result.data.longitude),
         );
         _signals.add(LocationsSignal.loadedSuccessfully());

@@ -21,5 +21,13 @@ enum _MapVehicleSource {
     DataField<double>('radius'),
     DataField<DateTime>('loadedAt')
   ])
-  NearbyPosition,
+  NearbyUserLocation,
+
+  @Data(fields: [
+    DataField<LatLng>('position'),
+    DataField<String>('title'),
+    DataField<double>('radius'),
+    DataField<DateTime>('loadedAt')
+  ])
+  NearbyPlace,
 }

@@ -34,6 +34,8 @@ class PlacesDao extends DatabaseAccessor<Database> with _$PlacesDaoMixin {
                 (suggestion) => PlaceSuggestionsCompanion.insert(
                   id: suggestion.id,
                   title: suggestion.title,
+                  lat: suggestion.lat,
+                  lng: suggestion.lng,
                   address: nullableValueFrom(suggestion.address),
                   lastSearched: nullableValueFrom(suggestion.lastSearched),
                 ),

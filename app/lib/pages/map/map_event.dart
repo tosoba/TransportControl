@@ -32,7 +32,15 @@ enum _MapEvent {
     DataField<LatLng>('position'),
     DataField<double>('radius'),
   ])
-  AddVehiclesNearbyPosition,
+  AddVehiclesNearbyUserLocation,
+
+  @Data(fields: [
+    DataField<Iterable<Vehicle>>('vehicles'),
+    DataField<LatLng>('position'),
+    DataField<String>('title'),
+    DataField<double>('radius'),
+  ])
+  AddVehiclesNearbyPlace,
 
   @object
   AnimateVehicles,

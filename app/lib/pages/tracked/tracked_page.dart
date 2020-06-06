@@ -157,9 +157,20 @@ extension _MapVehicleSourceExt on MapVehicleSource {
   String get title {
     return when(
       ofLine: (source) => 'Vehicles of line: ${source.line.symbol}',
-      nearbyLocation: (source) => 'Vehicles nearby ${source.location.name}',
-      nearbyPosition: (source) =>
+      nearbyLocation: (source) =>
+          '''Vehicles nearby ${source.location.name} loaded${dateTimeDiffInfo(
+        diffMillis: DateTime.now().millisecondsSinceEpoch -
+            source.loadedAt.millisecondsSinceEpoch,
+        prefix: '',
+      )}''',
+      nearbyUserLocation: (source) =>
           '''Vehicles nearby your location loaded${dateTimeDiffInfo(
+        diffMillis: DateTime.now().millisecondsSinceEpoch -
+            source.loadedAt.millisecondsSinceEpoch,
+        prefix: '',
+      )}''',
+      nearbyPlace: (source) =>
+          '''Vehicles nearby ${source.title} loaded${dateTimeDiffInfo(
         diffMillis: DateTime.now().millisecondsSinceEpoch -
             source.loadedAt.millisecondsSinceEpoch,
         prefix: '',
@@ -192,42 +203,57 @@ extension _MapVehicleSourceExt on MapVehicleSource {
             text: 'Vehicles nearby ',
             style: const TextStyle(color: Colors.black, fontSize: 16),
           ),
-          TextSpan(
-            text: '${source.location.name}',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              fontSize: 16,
-            ),
-          )
+          loadedAgoTextSpan(source.loadedAt),
         ]),
         overflow: TextOverflow.ellipsis,
       ),
-      nearbyPosition: (source) => RichText(
+      nearbyUserLocation: (source) => RichText(
         text: TextSpan(children: [
           const TextSpan(
             text: 'Vehicles nearby ',
             style: const TextStyle(color: Colors.black, fontSize: 16),
           ),
           TextSpan(
-            text: 'your location',
+            text: 'your location ',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.black,
               fontSize: 16,
             ),
           ),
-          TextSpan(
-            text: '''loaded${dateTimeDiffInfo(
-              diffMillis: DateTime.now().millisecondsSinceEpoch -
-                  source.loadedAt.millisecondsSinceEpoch,
-              prefix: '',
-            )}''',
-            style: const TextStyle(color: Colors.black, fontSize: 16),
-          ),
+          loadedAgoTextSpan(source.loadedAt),
         ]),
         overflow: TextOverflow.ellipsis,
       ),
+      nearbyPlace: (source) => RichText(
+        text: TextSpan(children: [
+          const TextSpan(
+            text: 'Vehicles nearby ',
+            style: const TextStyle(color: Colors.black, fontSize: 16),
+          ),
+          TextSpan(
+            text: '${source.title} ',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontSize: 16,
+            ),
+          ),
+          loadedAgoTextSpan(source.loadedAt),
+        ]),
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  TextSpan loadedAgoTextSpan(DateTime loadedAt) {
+    return TextSpan(
+      text: '''loaded${dateTimeDiffInfo(
+        diffMillis: DateTime.now().millisecondsSinceEpoch -
+            loadedAt.millisecondsSinceEpoch,
+        prefix: '',
+      )}''',
+      style: const TextStyle(color: Colors.black, fontSize: 16),
     );
   }
 }

@@ -9,6 +9,10 @@ class PlaceSuggestions extends Table {
 
   TextColumn get address => text().nullable()();
 
+  RealColumn get lat => real()();
+
+  RealColumn get lng => real()();
+
   DateTimeColumn get lastSearched => dateTime().nullable()();
 
   @override

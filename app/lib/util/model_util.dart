@@ -154,7 +154,8 @@ extension MapVehicleSourceExt on MapVehicleSource {
     return when(
       ofLine: (source) => source.loadedAt,
       nearbyLocation: (source) => source.loadedAt,
-      nearbyPosition: (source) => source.loadedAt,
+      nearbyUserLocation: (source) => source.loadedAt,
+      nearbyPlace: (source) => source.loadedAt,
     );
   }
 }

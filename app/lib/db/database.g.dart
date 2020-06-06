@@ -912,17 +912,22 @@ class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
   final String id;
   final String title;
   final String address;
+  final double lat;
+  final double lng;
   final DateTime lastSearched;
   PlaceSuggestion(
       {@required this.id,
       @required this.title,
       this.address,
+      @required this.lat,
+      @required this.lng,
       this.lastSearched});
   factory PlaceSuggestion.fromData(
       Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final doubleType = db.typeSystem.forDartType<double>();
     final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return PlaceSuggestion(
       id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
@@ -930,6 +935,8 @@ class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}title']),
       address:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}address']),
+      lat: doubleType.mapFromDatabaseResponse(data['${effectivePrefix}lat']),
+      lng: doubleType.mapFromDatabaseResponse(data['${effectivePrefix}lng']),
       lastSearched: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}last_searched']),
     );
@@ -941,6 +948,8 @@ class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
       id: serializer.fromJson<String>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       address: serializer.fromJson<String>(json['address']),
+      lat: serializer.fromJson<double>(json['lat']),
+      lng: serializer.fromJson<double>(json['lng']),
       lastSearched: serializer.fromJson<DateTime>(json['lastSearched']),
     );
   }
@@ -951,6 +960,8 @@ class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
       'id': serializer.toJson<String>(id),
       'title': serializer.toJson<String>(title),
       'address': serializer.toJson<String>(address),
+      'lat': serializer.toJson<double>(lat),
+      'lng': serializer.toJson<double>(lng),
       'lastSearched': serializer.toJson<DateTime>(lastSearched),
     };
   }
@@ -964,6 +975,8 @@ class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
       address: address == null && nullToAbsent
           ? const Value.absent()
           : Value(address),
+      lat: lat == null && nullToAbsent ? const Value.absent() : Value(lat),
+      lng: lng == null && nullToAbsent ? const Value.absent() : Value(lng),
       lastSearched: lastSearched == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSearched),
@@ -971,11 +984,18 @@ class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
   }
 
   PlaceSuggestion copyWith(
-          {String id, String title, String address, DateTime lastSearched}) =>
+          {String id,
+          String title,
+          String address,
+          double lat,
+          double lng,
+          DateTime lastSearched}) =>
       PlaceSuggestion(
         id: id ?? this.id,
         title: title ?? this.title,
         address: address ?? this.address,
+        lat: lat ?? this.lat,
+        lng: lng ?? this.lng,
         lastSearched: lastSearched ?? this.lastSearched,
       );
   @override
@@ -984,14 +1004,22 @@ class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('address: $address, ')
+          ..write('lat: $lat, ')
+          ..write('lng: $lng, ')
           ..write('lastSearched: $lastSearched')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(id.hashCode,
-      $mrjc(title.hashCode, $mrjc(address.hashCode, lastSearched.hashCode))));
+  int get hashCode => $mrjf($mrjc(
+      id.hashCode,
+      $mrjc(
+          title.hashCode,
+          $mrjc(
+              address.hashCode,
+              $mrjc(
+                  lat.hashCode, $mrjc(lng.hashCode, lastSearched.hashCode))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -999,6 +1027,8 @@ class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
           other.id == this.id &&
           other.title == this.title &&
           other.address == this.address &&
+          other.lat == this.lat &&
+          other.lng == this.lng &&
           other.lastSearched == this.lastSearched);
 }
 
@@ -1006,29 +1036,41 @@ class PlaceSuggestionsCompanion extends UpdateCompanion<PlaceSuggestion> {
   final Value<String> id;
   final Value<String> title;
   final Value<String> address;
+  final Value<double> lat;
+  final Value<double> lng;
   final Value<DateTime> lastSearched;
   const PlaceSuggestionsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.address = const Value.absent(),
+    this.lat = const Value.absent(),
+    this.lng = const Value.absent(),
     this.lastSearched = const Value.absent(),
   });
   PlaceSuggestionsCompanion.insert({
     @required String id,
     @required String title,
     this.address = const Value.absent(),
+    @required double lat,
+    @required double lng,
     this.lastSearched = const Value.absent(),
   })  : id = Value(id),
-        title = Value(title);
+        title = Value(title),
+        lat = Value(lat),
+        lng = Value(lng);
   PlaceSuggestionsCompanion copyWith(
       {Value<String> id,
       Value<String> title,
       Value<String> address,
+      Value<double> lat,
+      Value<double> lng,
       Value<DateTime> lastSearched}) {
     return PlaceSuggestionsCompanion(
       id: id ?? this.id,
       title: title ?? this.title,
       address: address ?? this.address,
+      lat: lat ?? this.lat,
+      lng: lng ?? this.lng,
       lastSearched: lastSearched ?? this.lastSearched,
     );
   }
@@ -1075,6 +1117,30 @@ class $PlaceSuggestionsTable extends PlaceSuggestions
     );
   }
 
+  final VerificationMeta _latMeta = const VerificationMeta('lat');
+  GeneratedRealColumn _lat;
+  @override
+  GeneratedRealColumn get lat => _lat ??= _constructLat();
+  GeneratedRealColumn _constructLat() {
+    return GeneratedRealColumn(
+      'lat',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _lngMeta = const VerificationMeta('lng');
+  GeneratedRealColumn _lng;
+  @override
+  GeneratedRealColumn get lng => _lng ??= _constructLng();
+  GeneratedRealColumn _constructLng() {
+    return GeneratedRealColumn(
+      'lng',
+      $tableName,
+      false,
+    );
+  }
+
   final VerificationMeta _lastSearchedMeta =
       const VerificationMeta('lastSearched');
   GeneratedDateTimeColumn _lastSearched;
@@ -1090,7 +1156,8 @@ class $PlaceSuggestionsTable extends PlaceSuggestions
   }
 
   @override
-  List<GeneratedColumn> get $columns => [id, title, address, lastSearched];
+  List<GeneratedColumn> get $columns =>
+      [id, title, address, lat, lng, lastSearched];
   @override
   $PlaceSuggestionsTable get asDslTable => this;
   @override
@@ -1115,6 +1182,16 @@ class $PlaceSuggestionsTable extends PlaceSuggestions
     if (d.address.present) {
       context.handle(_addressMeta,
           address.isAcceptableValue(d.address.value, _addressMeta));
+    }
+    if (d.lat.present) {
+      context.handle(_latMeta, lat.isAcceptableValue(d.lat.value, _latMeta));
+    } else if (isInserting) {
+      context.missing(_latMeta);
+    }
+    if (d.lng.present) {
+      context.handle(_lngMeta, lng.isAcceptableValue(d.lng.value, _lngMeta));
+    } else if (isInserting) {
+      context.missing(_lngMeta);
     }
     if (d.lastSearched.present) {
       context.handle(
@@ -1144,6 +1221,12 @@ class $PlaceSuggestionsTable extends PlaceSuggestions
     }
     if (d.address.present) {
       map['address'] = Variable<String, StringType>(d.address.value);
+    }
+    if (d.lat.present) {
+      map['lat'] = Variable<double, RealType>(d.lat.value);
+    }
+    if (d.lng.present) {
+      map['lng'] = Variable<double, RealType>(d.lng.value);
     }
     if (d.lastSearched.present) {
       map['last_searched'] =

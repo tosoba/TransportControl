@@ -44,7 +44,10 @@ void $initGetIt(GetIt g, {String environment}) {
   g.registerSingleton<Dio>(apiModule.client);
   g.registerSingleton<LoadVehiclesInLocation>(
       controllersModule.loadVehiclesInLocation);
-  g.registerSingleton<LoadVehiclesNearby>(controllersModule.loadVehiclesNearby);
+  g.registerSingleton<LoadVehiclesNearbyUserLocation>(
+      controllersModule.loadVehiclesNearbyUserLocation);
+  g.registerSingleton<LoadVehiclesNearbyPlace>(
+      controllersModule.loadVehiclesNearbyplace);
   g.registerSingleton<TrackedLinesAdded>(controllersModule.trackedLinesAdded);
   g.registerSingleton<TrackedLinesRemoved>(
       controllersModule.trackedLinesRemoved);

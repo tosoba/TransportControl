@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:injectable/injectable.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
+import 'package:transport_control/model/place_suggestion.dart';
 
 @registerModule
 abstract class ControllersModule {
@@ -14,8 +15,13 @@ abstract class ControllersModule {
   }
 
   @singleton
-  LoadVehiclesNearby get loadVehiclesNearby {
-    return LoadVehiclesNearby(StreamController<LatLng>());
+  LoadVehiclesNearbyUserLocation get loadVehiclesNearbyUserLocation {
+    return LoadVehiclesNearbyUserLocation(StreamController<LatLng>());
+  }
+
+  @singleton
+  LoadVehiclesNearbyPlace get loadVehiclesNearbyplace {
+    return LoadVehiclesNearbyPlace(StreamController<PlaceSuggestion>());
   }
 
   @singleton
@@ -46,8 +52,16 @@ class LoadVehiclesInLocation extends Injectable<StreamController<Location>> {
       : super(controller);
 }
 
-class LoadVehiclesNearby extends Injectable<StreamController<LatLng>> {
-  LoadVehiclesNearby(StreamController<LatLng> controller) : super(controller);
+class LoadVehiclesNearbyUserLocation
+    extends Injectable<StreamController<LatLng>> {
+  LoadVehiclesNearbyUserLocation(StreamController<LatLng> controller)
+      : super(controller);
+}
+
+class LoadVehiclesNearbyPlace
+    extends Injectable<StreamController<PlaceSuggestion>> {
+  LoadVehiclesNearbyPlace(StreamController<PlaceSuggestion> controller)
+      : super(controller);
 }
 
 class TrackedLinesAddedEvent {

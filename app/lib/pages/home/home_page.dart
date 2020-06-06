@@ -141,7 +141,15 @@ class HomePage extends HookWidget {
               moveToPositionNotifier: moveToPositionNotifier,
             ),
             SlideTransition(
-              child: NearbyPage(),
+              child: NearbyPage(
+                suggestionSelected: () => _showMapPage(
+                  currentPage: currentPage,
+                  searchFieldFocusNode: searchFieldFocusNode,
+                  placesPageAnimController: placesPageAnimController,
+                  mapTapAnimController: mapTapAnimController,
+                  bottomSheetControllers: bottomSheetControllers,
+                ),
+              ),
               position: placesPageOffset,
             ),
             SlideTransition(
@@ -400,7 +408,7 @@ class HomePage extends HookWidget {
               create: (_) => LocationsBloc(
                 getIt<LocationsRepo>(),
                 getIt<LoadVehiclesInLocation>().injected.sink,
-                getIt<LoadVehiclesNearby>().injected.sink,
+                getIt<LoadVehiclesNearbyUserLocation>().injected.sink,
               ),
             ),
             BlocProvider.value(value: context.bloc<MapBloc>()),

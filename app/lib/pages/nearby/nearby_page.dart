@@ -7,6 +7,13 @@ import 'package:transport_control/pages/nearby/nearby_state.dart';
 import 'package:transport_control/util/model_util.dart';
 
 class NearbyPage extends StatelessWidget {
+  final void Function() suggestionSelected;
+
+  const NearbyPage({
+    Key key,
+    @required this.suggestionSelected,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<NearbyState>(
@@ -74,9 +81,8 @@ class NearbyPage extends StatelessWidget {
               child: InkWell(
                 onTap: () {
                   final suggestion = suggestions[index - 1];
-                  context.bloc<NearbyBloc>().suggestionSelected(
-                        locationId: suggestion.id,
-                      );
+                  context.bloc<NearbyBloc>().suggestionSelected(suggestion);
+                  suggestionSelected();
                 },
                 child: ListTile(
                   title: title(suggestions[index - 1]),
