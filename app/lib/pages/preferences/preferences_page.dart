@@ -19,16 +19,8 @@ class PreferencesPage extends HookWidget {
           .add(searchFieldController.text?.trim()?.toLowerCase());
     });
 
-    final preferencesWithValues = <_PreferenceWithValue>[
-      _PreferenceWithValue<bool>(
-        preference: Preferences.zoomToLoadedMarkersBounds,
-        value: useStream(
-          _preferences
-              .getBoolStream(Preferences.zoomToLoadedMarkersBounds.key)
-              .distinct(),
-        ),
-      ),
-    ];
+    final preferencesWithValues =
+        Preferences.list.map(_preferences.use).toList();
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -59,22 +51,23 @@ class PreferencesPage extends HookWidget {
     );
   }
 
-  Widget _preferenceListItem(_PreferenceWithValue preferenceWithValue) {
-    if (preferenceWithValue.preference is ListPreference) {
+  Widget _preferenceListItem(PreferenceWithValue preferenceWithValue) {
+    final preference = preferenceWithValue.preference;
+    if (preference is ListPreference) {
       //TODO:
       throw UnimplementedError();
     } else {
-      switch (preferenceWithValue.type) {
+      switch (preference.type) {
         case bool:
           return _boolPreferenceListItem(preferenceWithValue);
         default:
-          throw ArgumentError();
+          throw ArgumentError('Invalid preference type.');
       }
     }
   }
 
   Widget _boolPreferenceListItem(
-    _PreferenceWithValue<bool> preferenceWithValue,
+    PreferenceWithValue<bool> preferenceWithValue,
   ) {
     final preference = preferenceWithValue.preference;
     return SwitchListTile(
@@ -85,13 +78,4 @@ class PreferencesPage extends HookWidget {
       },
     );
   }
-}
-
-class _PreferenceWithValue<T> {
-  final Preference<T> preference;
-  final AsyncSnapshot<T> value;
-
-  Type get type => preference.defaultValue.runtimeType;
-
-  _PreferenceWithValue({@required this.preference, @required this.value});
 }
