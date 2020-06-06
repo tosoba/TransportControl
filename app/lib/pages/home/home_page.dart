@@ -306,6 +306,19 @@ class HomePage extends HookWidget {
         mapTapAnimController: mapTapAnimController,
         bottomSheetControllers: bottomSheetControllers,
       ),
+      trailing: StreamBuilder<String>(
+        stream: nearbyBloc.map((state) => state.query),
+        builder: (context, snapshot) {
+          if (snapshot.data == null || snapshot.data.isEmpty)
+            return Container(width: 0.0, height: 0.0);
+          return CircularButton(
+            child: const Icon(Icons.close, color: Colors.black),
+            onPressed: () {
+              searchFieldController.value = TextEditingValue();
+            },
+          );
+        },
+      ),
       hint: Strings.transportNearby,
     );
   }
