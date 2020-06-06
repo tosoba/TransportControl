@@ -44,6 +44,7 @@ class PreferencesPage extends HookWidget {
             itemCount: filteredPreferencesWithValues.length,
             itemBuilder: (context, index) => _preferenceListItem(
               filteredPreferencesWithValues.elementAt(index),
+              context: context,
             ),
           );
         },
@@ -51,31 +52,102 @@ class PreferencesPage extends HookWidget {
     );
   }
 
-  Widget _preferenceListItem(PreferenceWithValue preferenceWithValue) {
+  Widget _preferenceListItem(
+    PreferenceWithValue preferenceWithValue, {
+    @required BuildContext context,
+  }) {
     final preference = preferenceWithValue.preference;
-    if (preference is ListPreference) {
-      //TODO:
-      throw UnimplementedError();
+    if (preference is EnumeratedPreference) {
+      switch (preference.type) {
+        case int:
+          return _intEnumeratedPreferenceItem(
+            preferenceWithValue,
+            context: context,
+          );
+        default:
+          throw ArgumentError('Invalid preference type.');
+      }
     } else {
       switch (preference.type) {
         case bool:
-          return _boolPreferenceListItem(preferenceWithValue);
+          return _boolPreferenceItem(preferenceWithValue);
         default:
           throw ArgumentError('Invalid preference type.');
       }
     }
   }
 
-  Widget _boolPreferenceListItem(
+  Widget _boolPreferenceItem(
     PreferenceWithValue<bool> preferenceWithValue,
   ) {
     final preference = preferenceWithValue.preference;
     return SwitchListTile(
-      value: preferenceWithValue.value.data ?? preference.defaultValue,
+      value: preferenceWithValue.valueOrDefault,
       title: Text(preference.title),
       onChanged: (value) {
         _preferences.setBool(preference.key, value);
       },
+    );
+  }
+
+  Widget _intEnumeratedPreferenceItem(
+    PreferenceWithValue<int> preferenceWithValue, {
+    @required BuildContext context,
+  }) {
+    final preference = preferenceWithValue.preference.enumerated;
+    return Material(
+      child: InkWell(
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) => SimpleDialog(
+              title: const Text('Select radius'),
+              children: preference.values
+                  .map(
+                    (value) => _EnumeratedPreferenceListTile(
+                      value: value,
+                      preference: preference,
+                      onChanged: (_) {
+                        _preferences.setInt(preference.key, value);
+                      },
+                    ),
+                  )
+                  .toList(),
+            ),
+          );
+        },
+        child: ListTile(
+          title: Text(preference.title),
+          subtitle: Text(
+            preference.valueLabel(preferenceWithValue.valueOrDefault),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EnumeratedPreferenceListTile<T> extends HookWidget {
+  final T value;
+  final EnumeratedPreference<T> preference;
+  final void Function(bool) onChanged;
+
+  final _preferences = GetIt.instance<RxSharedPreferences>();
+
+  _EnumeratedPreferenceListTile({
+    Key key,
+    @required this.value,
+    @required this.preference,
+    @required this.onChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final preferenceWithValue = _preferences.use(preference);
+    return CheckboxListTile(
+      title: Text(preference.valueLabel(value)),
+      value: preferenceWithValue.valueOrDefault == value,
+      onChanged: onChanged,
     );
   }
 }

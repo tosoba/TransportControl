@@ -11,7 +11,19 @@ class Preferences {
     title: "Zoom to loaded markers' bounds",
   );
 
-  static const List<Preference> list = const [zoomToLoadedMarkersBounds];
+  static EnumeratedPreference<int> nearbySearchRadius = EnumeratedPreference(
+    [100, 500, 1000, 2000, 5000],
+    defaultValue: 1000,
+    key: 'nearbySearchRadius',
+    title: 'Vehicles nearby location search radius',
+    valueLabel: (radius) =>
+        radius < 1000 ? '$radius m' : '${radius ~/ 1000} km',
+  );
+
+  static List<Preference> list = [
+    zoomToLoadedMarkersBounds,
+    nearbySearchRadius
+  ];
 }
 
 class Preference<T> {
@@ -21,6 +33,10 @@ class Preference<T> {
 
   Type get type => defaultValue.runtimeType;
 
+  EnumeratedPreference<T> get enumerated {
+    return this is EnumeratedPreference<T> ? this : throw TypeError();
+  }
+
   const Preference({
     @required this.key,
     @required this.defaultValue,
@@ -28,14 +44,16 @@ class Preference<T> {
   });
 }
 
-class ListPreference<T> extends Preference<T> {
+class EnumeratedPreference<T> extends Preference<T> {
   final List<T> values;
+  final String Function(T) valueLabel;
 
-  const ListPreference(
+  const EnumeratedPreference(
     this.values, {
     @required T defaultValue,
     @required String key,
     @required String title,
+    this.valueLabel,
   }) : super(title: title, key: key, defaultValue: defaultValue);
 }
 
@@ -49,6 +67,8 @@ class SilentPreferencesLogger extends LoggerAdapter {
 class PreferenceWithValue<T> {
   final Preference<T> preference;
   final AsyncSnapshot<T> value;
+
+  T get valueOrDefault => value.data ?? preference.defaultValue;
 
   PreferenceWithValue({@required this.preference, @required this.value});
 }
