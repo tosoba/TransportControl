@@ -12,6 +12,7 @@ import 'package:transport_control/pages/map_location/map_location_page_mode.dart
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/util/model_util.dart';
+import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/loading_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
@@ -53,9 +54,24 @@ class LocationsPage extends HookWidget {
             textFieldController: searchFieldController,
             hint: "Search locations...",
             leading: TextFieldAppBarBackButton(searchFieldFocusNode),
-            trailing: result != null && result.locations.isNotEmpty
-                ? _listOrderMenu(context)
-                : null,
+            trailing: result == null
+                ? null
+                : Container(
+                    child: Row(
+                      children: [
+                        if (result.nameFilter != null &&
+                            result.nameFilter.isNotEmpty)
+                          CircularButton(
+                            child: const Icon(Icons.close, color: Colors.black),
+                            onPressed: () {
+                              searchFieldController.value = TextEditingValue();
+                            },
+                          ),
+                        if (result.locations.isNotEmpty)
+                          _listOrderMenu(context),
+                      ],
+                    ),
+                  ),
           );
 
           if (result == null || !result.anyLocationsSaved) {

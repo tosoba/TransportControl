@@ -68,6 +68,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
         locations: state.locations.where(filter).toList()
           ..orderBy(state.listOrder),
         anyLocationsSaved: state.locations.isNotEmpty,
+        nameFilter: state.nameFilter,
       );
     });
   }

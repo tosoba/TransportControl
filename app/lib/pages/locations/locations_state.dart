@@ -34,9 +34,11 @@ class LocationsState {
 class FilteredLocationsResult {
   final List<Location> locations;
   final bool anyLocationsSaved;
+  final String nameFilter;
 
   FilteredLocationsResult({
     @required this.locations,
     @required this.anyLocationsSaved,
+    @required this.nameFilter,
   });
 }
