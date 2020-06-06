@@ -41,7 +41,7 @@ class PlacesDao extends DatabaseAccessor<Database> with _$PlacesDaoMixin {
                 ),
               )
               .toList(),
-          mode: InsertMode.insertOrReplace,
+          mode: InsertMode.insertOrIgnore,
         ),
       );
       await db.batch(

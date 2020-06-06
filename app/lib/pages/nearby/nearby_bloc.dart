@@ -59,10 +59,12 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
             ),
       )
       ..add(
-        _repo.getRecentlySearchedSuggestions(limit: 10).listen((suggestions) {
-          add(NearbyEvent.updateRecentlySearchedSuggestions(
-            suggestions: suggestions,
-          ));
+        _repo.getRecentlySearchedSuggestions(limit: 20).listen((suggestions) {
+          add(
+            NearbyEvent.updateRecentlySearchedSuggestions(
+              suggestions: suggestions,
+            ),
+          );
         }),
       );
   }

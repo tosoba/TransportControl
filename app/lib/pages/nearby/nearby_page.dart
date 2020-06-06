@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:transport_control/model/loadable.dart';
 import 'package:transport_control/model/place_suggestion.dart';
 import 'package:transport_control/pages/nearby/nearby_bloc.dart';
 import 'package:transport_control/pages/nearby/nearby_state.dart';
@@ -28,8 +27,7 @@ class NearbyPage extends StatelessWidget {
   Widget _nearbyWidget({@required NearbyState state}) {
     if (state == null) {
       return Center(child: Text('No recent queries.'));
-    } else if ((state.query == null || state.query.isEmpty) &&
-        !(state.suggestions is Loading)) {
+    } else if (state.query == null || state.query.isEmpty) {
       if (state.recentlySearchedSuggestions.isEmpty) {
         return Center(child: Text('No recent queries.'));
       } else {
