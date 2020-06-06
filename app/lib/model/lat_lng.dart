@@ -4,12 +4,10 @@ part 'lat_lng.g.dart';
 
 @JsonSerializable()
 class LatLng {
-  @JsonKey(name: 'Latitude')
-  final double latitude;
-  @JsonKey(name: 'Longitude')
-  final double longitude;
+  final double lat;
+  final double lng;
 
-  LatLng({this.latitude, this.longitude});
+  LatLng({this.lat, this.lng});
 
   factory LatLng.fromJson(Map<String, dynamic> json) {
     return _$LatLngFromJson(json);

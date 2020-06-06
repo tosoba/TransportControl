@@ -7,6 +7,7 @@ class TextFieldAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Widget trailing;
   final String hint;
   final Function(String) onChanged;
+  final Function(String) onSubmitted;
   final bool enabled;
   final bool readOnly;
 
@@ -19,6 +20,7 @@ class TextFieldAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.trailing,
     this.hint,
     this.onChanged,
+    this.onSubmitted,
     this.textFieldController,
     this.enabled = true,
     this.readOnly = false,
@@ -81,6 +83,7 @@ class _TextFieldAppBarState extends State<TextFieldAppBar> {
       autofocus: false,
       enabled: widget.enabled,
       readOnly: widget.readOnly,
+      onSubmitted: widget.onSubmitted,
       decoration: InputDecoration(
         hintText: widget.hint,
         border: InputBorder.none,

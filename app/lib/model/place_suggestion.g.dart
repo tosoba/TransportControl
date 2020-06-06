@@ -8,14 +8,11 @@ part of 'place_suggestion.dart';
 
 PlaceSuggestion _$PlaceSuggestionFromJson(Map<String, dynamic> json) {
   return PlaceSuggestion(
-    label: json['label'] as String,
-    language: json['language'] as String,
-    countryCode: json['countryCode'] as String,
-    locationId: json['locationId'] as String,
+    id: json['id'] as String,
+    title: json['title'] as String,
     address: json['address'] == null
         ? null
         : Address.fromJson(json['address'] as Map<String, dynamic>),
-    matchLevel: json['matchLevel'] as String,
     lastSearched: json['lastSearched'] == null
         ? null
         : DateTime.parse(json['lastSearched'] as String),
@@ -24,11 +21,8 @@ PlaceSuggestion _$PlaceSuggestionFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$PlaceSuggestionToJson(PlaceSuggestion instance) =>
     <String, dynamic>{
-      'label': instance.label,
-      'language': instance.language,
-      'countryCode': instance.countryCode,
-      'locationId': instance.locationId,
+      'id': instance.id,
+      'title': instance.title,
       'address': instance.address,
-      'matchLevel': instance.matchLevel,
       'lastSearched': instance.lastSearched?.toIso8601String(),
     };

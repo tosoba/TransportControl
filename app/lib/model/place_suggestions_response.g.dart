@@ -9,7 +9,7 @@ part of 'place_suggestions_response.dart';
 PlaceSuggestionsResponse _$PlaceSuggestionsResponseFromJson(
     Map<String, dynamic> json) {
   return PlaceSuggestionsResponse(
-    suggestions: (json['suggestions'] as List)
+    suggestions: (json['items'] as List)
         ?.map((e) => e == null
             ? null
             : PlaceSuggestion.fromJson(e as Map<String, dynamic>))
@@ -20,5 +20,5 @@ PlaceSuggestionsResponse _$PlaceSuggestionsResponseFromJson(
 Map<String, dynamic> _$PlaceSuggestionsResponseToJson(
         PlaceSuggestionsResponse instance) =>
     <String, dynamic>{
-      'suggestions': instance.suggestions,
+      'items': instance.suggestions,
     };

@@ -39,11 +39,13 @@ class PlaceSuggestionsRepoImpl implements PlaceSuggestionsRepo {
     try {
       final response =
           await _api.fetchSuggestions(query: query).timeout(_timeoutDuration);
+      final filteredSuggestions =
+          response.suggestions.where((suggestion) => suggestion.title != null);
       _dao.insertSuggestionsForQuery(
         query: query,
-        suggestions: response.suggestions.map((suggestion) => suggestion.db),
+        suggestions: filteredSuggestions.map((suggestion) => suggestion.db),
       );
-      return Result.success(data: response.suggestions);
+      return Result.success(data: filteredSuggestions.toList());
     } catch (error) {
       return Result<List<PlaceSuggestion>>.failure(error: error);
     }

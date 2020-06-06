@@ -111,6 +111,7 @@ class HomePage extends HookWidget {
         appBar: SlideTransitionPreferredSizeWidget(
           offset: appBarOffset,
           child: _appBar(
+            context,
             currentPage: currentPage,
             searchFieldFocusNode: searchFieldFocusNode,
             searchFieldController: searchFieldController,
@@ -274,7 +275,8 @@ class HomePage extends HookWidget {
     );
   }
 
-  TextFieldAppBar _appBar({
+  TextFieldAppBar _appBar(
+    BuildContext context, {
     @required FocusNode searchFieldFocusNode,
     @required TextEditingController searchFieldController,
     @required ValueNotifier<_HomeSubPage> currentPage,
@@ -284,9 +286,11 @@ class HomePage extends HookWidget {
         ValueNotifier<_VehiclesBottomSheetCarouselControllers>
             bottomSheetControllers,
   }) {
+    final nearbyBloc = context.bloc<NearbyBloc>();
     return TextFieldAppBar(
       textFieldFocusNode: searchFieldFocusNode,
       textFieldController: searchFieldController,
+      onSubmitted: (query) => nearbyBloc.queryUpdated(query, submitted: true),
       leading: _leadingAppBarButton(
         currentPage: currentPage,
         searchFieldFocusNode: searchFieldFocusNode,

@@ -4,17 +4,21 @@ part 'address.g.dart';
 
 @JsonSerializable()
 class Address {
-  final String country;
+  final String label;
+  final String countryCode;
+  final String countryName;
   final String state;
   final String county;
   final String city;
   final String district;
   final String street;
-  final String houseNumber;
   final String postalCode;
+  final String houseNumber;
 
   Address({
-    this.country,
+    this.label,
+    this.countryCode,
+    this.countryName,
     this.state,
     this.county,
     this.city,

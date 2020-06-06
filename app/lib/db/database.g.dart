@@ -909,20 +909,14 @@ class $PlaceQueriesTable extends PlaceQueries
 }
 
 class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
-  final String locationId;
-  final String label;
-  final String language;
-  final String countryCode;
+  final String id;
+  final String title;
   final String address;
-  final String matchLevel;
   final DateTime lastSearched;
   PlaceSuggestion(
-      {@required this.locationId,
-      @required this.label,
-      this.language,
-      this.countryCode,
+      {@required this.id,
+      @required this.title,
       this.address,
-      this.matchLevel,
       this.lastSearched});
   factory PlaceSuggestion.fromData(
       Map<String, dynamic> data, GeneratedDatabase db,
@@ -931,18 +925,11 @@ class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
     final stringType = db.typeSystem.forDartType<String>();
     final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return PlaceSuggestion(
-      locationId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}location_id']),
-      label:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}label']),
-      language: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}language']),
-      countryCode: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}country_code']),
+      id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
+      title:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}title']),
       address:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}address']),
-      matchLevel: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}match_level']),
       lastSearched: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}last_searched']),
     );
@@ -951,12 +938,9 @@ class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return PlaceSuggestion(
-      locationId: serializer.fromJson<String>(json['locationId']),
-      label: serializer.fromJson<String>(json['label']),
-      language: serializer.fromJson<String>(json['language']),
-      countryCode: serializer.fromJson<String>(json['countryCode']),
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
       address: serializer.fromJson<String>(json['address']),
-      matchLevel: serializer.fromJson<String>(json['matchLevel']),
       lastSearched: serializer.fromJson<DateTime>(json['lastSearched']),
     );
   }
@@ -964,12 +948,9 @@ class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
   Map<String, dynamic> toJson({ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'locationId': serializer.toJson<String>(locationId),
-      'label': serializer.toJson<String>(label),
-      'language': serializer.toJson<String>(language),
-      'countryCode': serializer.toJson<String>(countryCode),
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
       'address': serializer.toJson<String>(address),
-      'matchLevel': serializer.toJson<String>(matchLevel),
       'lastSearched': serializer.toJson<DateTime>(lastSearched),
     };
   }
@@ -977,23 +958,12 @@ class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
   @override
   PlaceSuggestionsCompanion createCompanion(bool nullToAbsent) {
     return PlaceSuggestionsCompanion(
-      locationId: locationId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(locationId),
-      label:
-          label == null && nullToAbsent ? const Value.absent() : Value(label),
-      language: language == null && nullToAbsent
-          ? const Value.absent()
-          : Value(language),
-      countryCode: countryCode == null && nullToAbsent
-          ? const Value.absent()
-          : Value(countryCode),
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      title:
+          title == null && nullToAbsent ? const Value.absent() : Value(title),
       address: address == null && nullToAbsent
           ? const Value.absent()
           : Value(address),
-      matchLevel: matchLevel == null && nullToAbsent
-          ? const Value.absent()
-          : Value(matchLevel),
       lastSearched: lastSearched == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSearched),
@@ -1001,102 +971,64 @@ class PlaceSuggestion extends DataClass implements Insertable<PlaceSuggestion> {
   }
 
   PlaceSuggestion copyWith(
-          {String locationId,
-          String label,
-          String language,
-          String countryCode,
-          String address,
-          String matchLevel,
-          DateTime lastSearched}) =>
+          {String id, String title, String address, DateTime lastSearched}) =>
       PlaceSuggestion(
-        locationId: locationId ?? this.locationId,
-        label: label ?? this.label,
-        language: language ?? this.language,
-        countryCode: countryCode ?? this.countryCode,
+        id: id ?? this.id,
+        title: title ?? this.title,
         address: address ?? this.address,
-        matchLevel: matchLevel ?? this.matchLevel,
         lastSearched: lastSearched ?? this.lastSearched,
       );
   @override
   String toString() {
     return (StringBuffer('PlaceSuggestion(')
-          ..write('locationId: $locationId, ')
-          ..write('label: $label, ')
-          ..write('language: $language, ')
-          ..write('countryCode: $countryCode, ')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
           ..write('address: $address, ')
-          ..write('matchLevel: $matchLevel, ')
           ..write('lastSearched: $lastSearched')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      locationId.hashCode,
-      $mrjc(
-          label.hashCode,
-          $mrjc(
-              language.hashCode,
-              $mrjc(
-                  countryCode.hashCode,
-                  $mrjc(address.hashCode,
-                      $mrjc(matchLevel.hashCode, lastSearched.hashCode)))))));
+  int get hashCode => $mrjf($mrjc(id.hashCode,
+      $mrjc(title.hashCode, $mrjc(address.hashCode, lastSearched.hashCode))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
       (other is PlaceSuggestion &&
-          other.locationId == this.locationId &&
-          other.label == this.label &&
-          other.language == this.language &&
-          other.countryCode == this.countryCode &&
+          other.id == this.id &&
+          other.title == this.title &&
           other.address == this.address &&
-          other.matchLevel == this.matchLevel &&
           other.lastSearched == this.lastSearched);
 }
 
 class PlaceSuggestionsCompanion extends UpdateCompanion<PlaceSuggestion> {
-  final Value<String> locationId;
-  final Value<String> label;
-  final Value<String> language;
-  final Value<String> countryCode;
+  final Value<String> id;
+  final Value<String> title;
   final Value<String> address;
-  final Value<String> matchLevel;
   final Value<DateTime> lastSearched;
   const PlaceSuggestionsCompanion({
-    this.locationId = const Value.absent(),
-    this.label = const Value.absent(),
-    this.language = const Value.absent(),
-    this.countryCode = const Value.absent(),
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
     this.address = const Value.absent(),
-    this.matchLevel = const Value.absent(),
     this.lastSearched = const Value.absent(),
   });
   PlaceSuggestionsCompanion.insert({
-    @required String locationId,
-    @required String label,
-    this.language = const Value.absent(),
-    this.countryCode = const Value.absent(),
+    @required String id,
+    @required String title,
     this.address = const Value.absent(),
-    this.matchLevel = const Value.absent(),
     this.lastSearched = const Value.absent(),
-  })  : locationId = Value(locationId),
-        label = Value(label);
+  })  : id = Value(id),
+        title = Value(title);
   PlaceSuggestionsCompanion copyWith(
-      {Value<String> locationId,
-      Value<String> label,
-      Value<String> language,
-      Value<String> countryCode,
+      {Value<String> id,
+      Value<String> title,
       Value<String> address,
-      Value<String> matchLevel,
       Value<DateTime> lastSearched}) {
     return PlaceSuggestionsCompanion(
-      locationId: locationId ?? this.locationId,
-      label: label ?? this.label,
-      language: language ?? this.language,
-      countryCode: countryCode ?? this.countryCode,
+      id: id ?? this.id,
+      title: title ?? this.title,
       address: address ?? this.address,
-      matchLevel: matchLevel ?? this.matchLevel,
       lastSearched: lastSearched ?? this.lastSearched,
     );
   }
@@ -1107,53 +1039,27 @@ class $PlaceSuggestionsTable extends PlaceSuggestions
   final GeneratedDatabase _db;
   final String _alias;
   $PlaceSuggestionsTable(this._db, [this._alias]);
-  final VerificationMeta _locationIdMeta = const VerificationMeta('locationId');
-  GeneratedTextColumn _locationId;
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  GeneratedTextColumn _id;
   @override
-  GeneratedTextColumn get locationId => _locationId ??= _constructLocationId();
-  GeneratedTextColumn _constructLocationId() {
+  GeneratedTextColumn get id => _id ??= _constructId();
+  GeneratedTextColumn _constructId() {
     return GeneratedTextColumn(
-      'location_id',
+      'id',
       $tableName,
       false,
     );
   }
 
-  final VerificationMeta _labelMeta = const VerificationMeta('label');
-  GeneratedTextColumn _label;
+  final VerificationMeta _titleMeta = const VerificationMeta('title');
+  GeneratedTextColumn _title;
   @override
-  GeneratedTextColumn get label => _label ??= _constructLabel();
-  GeneratedTextColumn _constructLabel() {
+  GeneratedTextColumn get title => _title ??= _constructTitle();
+  GeneratedTextColumn _constructTitle() {
     return GeneratedTextColumn(
-      'label',
+      'title',
       $tableName,
       false,
-    );
-  }
-
-  final VerificationMeta _languageMeta = const VerificationMeta('language');
-  GeneratedTextColumn _language;
-  @override
-  GeneratedTextColumn get language => _language ??= _constructLanguage();
-  GeneratedTextColumn _constructLanguage() {
-    return GeneratedTextColumn(
-      'language',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _countryCodeMeta =
-      const VerificationMeta('countryCode');
-  GeneratedTextColumn _countryCode;
-  @override
-  GeneratedTextColumn get countryCode =>
-      _countryCode ??= _constructCountryCode();
-  GeneratedTextColumn _constructCountryCode() {
-    return GeneratedTextColumn(
-      'country_code',
-      $tableName,
-      true,
     );
   }
 
@@ -1164,18 +1070,6 @@ class $PlaceSuggestionsTable extends PlaceSuggestions
   GeneratedTextColumn _constructAddress() {
     return GeneratedTextColumn(
       'address',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _matchLevelMeta = const VerificationMeta('matchLevel');
-  GeneratedTextColumn _matchLevel;
-  @override
-  GeneratedTextColumn get matchLevel => _matchLevel ??= _constructMatchLevel();
-  GeneratedTextColumn _constructMatchLevel() {
-    return GeneratedTextColumn(
-      'match_level',
       $tableName,
       true,
     );
@@ -1196,15 +1090,7 @@ class $PlaceSuggestionsTable extends PlaceSuggestions
   }
 
   @override
-  List<GeneratedColumn> get $columns => [
-        locationId,
-        label,
-        language,
-        countryCode,
-        address,
-        matchLevel,
-        lastSearched
-      ];
+  List<GeneratedColumn> get $columns => [id, title, address, lastSearched];
   @override
   $PlaceSuggestionsTable get asDslTable => this;
   @override
@@ -1215,33 +1101,20 @@ class $PlaceSuggestionsTable extends PlaceSuggestions
   VerificationContext validateIntegrity(PlaceSuggestionsCompanion d,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.locationId.present) {
-      context.handle(_locationIdMeta,
-          locationId.isAcceptableValue(d.locationId.value, _locationIdMeta));
+    if (d.id.present) {
+      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
     } else if (isInserting) {
-      context.missing(_locationIdMeta);
+      context.missing(_idMeta);
     }
-    if (d.label.present) {
+    if (d.title.present) {
       context.handle(
-          _labelMeta, label.isAcceptableValue(d.label.value, _labelMeta));
+          _titleMeta, title.isAcceptableValue(d.title.value, _titleMeta));
     } else if (isInserting) {
-      context.missing(_labelMeta);
-    }
-    if (d.language.present) {
-      context.handle(_languageMeta,
-          language.isAcceptableValue(d.language.value, _languageMeta));
-    }
-    if (d.countryCode.present) {
-      context.handle(_countryCodeMeta,
-          countryCode.isAcceptableValue(d.countryCode.value, _countryCodeMeta));
+      context.missing(_titleMeta);
     }
     if (d.address.present) {
       context.handle(_addressMeta,
           address.isAcceptableValue(d.address.value, _addressMeta));
-    }
-    if (d.matchLevel.present) {
-      context.handle(_matchLevelMeta,
-          matchLevel.isAcceptableValue(d.matchLevel.value, _matchLevelMeta));
     }
     if (d.lastSearched.present) {
       context.handle(
@@ -1253,7 +1126,7 @@ class $PlaceSuggestionsTable extends PlaceSuggestions
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {locationId};
+  Set<GeneratedColumn> get $primaryKey => {id};
   @override
   PlaceSuggestion map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
@@ -1263,23 +1136,14 @@ class $PlaceSuggestionsTable extends PlaceSuggestions
   @override
   Map<String, Variable> entityToSql(PlaceSuggestionsCompanion d) {
     final map = <String, Variable>{};
-    if (d.locationId.present) {
-      map['location_id'] = Variable<String, StringType>(d.locationId.value);
+    if (d.id.present) {
+      map['id'] = Variable<String, StringType>(d.id.value);
     }
-    if (d.label.present) {
-      map['label'] = Variable<String, StringType>(d.label.value);
-    }
-    if (d.language.present) {
-      map['language'] = Variable<String, StringType>(d.language.value);
-    }
-    if (d.countryCode.present) {
-      map['country_code'] = Variable<String, StringType>(d.countryCode.value);
+    if (d.title.present) {
+      map['title'] = Variable<String, StringType>(d.title.value);
     }
     if (d.address.present) {
       map['address'] = Variable<String, StringType>(d.address.value);
-    }
-    if (d.matchLevel.present) {
-      map['match_level'] = Variable<String, StringType>(d.matchLevel.value);
     }
     if (d.lastSearched.present) {
       map['last_searched'] =

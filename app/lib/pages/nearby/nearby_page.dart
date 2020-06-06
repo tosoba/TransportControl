@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:transport_control/model/loadable.dart';
 import 'package:transport_control/model/place_suggestion.dart';
 import 'package:transport_control/pages/nearby/nearby_bloc.dart';
 import 'package:transport_control/pages/nearby/nearby_state.dart';
@@ -20,14 +21,15 @@ class NearbyPage extends StatelessWidget {
   Widget _nearbyWidget({@required NearbyState state}) {
     if (state == null) {
       return Center(child: Text('No recent queries.'));
-    } else if (state.query == null || state.query.isEmpty) {
+    } else if ((state.query == null || state.query.isEmpty) &&
+        !(state.suggestions is Loading)) {
       if (state.recentlySearchedSuggestions.isEmpty) {
         return Center(child: Text('No recent queries.'));
       } else {
         return _suggestionsList(
           state.recentlySearchedSuggestions,
           headerText: 'Recent searches',
-          title: (suggestion) => Text(suggestion.label),
+          title: (suggestion) => Text(suggestion.title),
           subtitle: (suggestion) => Text(suggestion.lastSearchedLabel),
         );
       }
@@ -40,9 +42,9 @@ class NearbyPage extends StatelessWidget {
           : _suggestionsList(
               suggestions.value,
               headerText: 'Suggestions',
-              title: (suggestion) => Text(suggestion.label),
+              title: (suggestion) => Text(suggestion.title),
               subtitle: (suggestion) => Text(
-                suggestion.address?.street ?? 'Unknown address',
+                suggestion.address?.label ?? 'Unknown address',
               ),
             ),
       error: (_) => Center(child: Text('Error loading places.')),
@@ -73,7 +75,7 @@ class NearbyPage extends StatelessWidget {
                 onTap: () {
                   final suggestion = suggestions[index - 1];
                   context.bloc<NearbyBloc>().suggestionSelected(
-                        locationId: suggestion.locationId,
+                        locationId: suggestion.id,
                       );
                 },
                 child: ListTile(

@@ -32,12 +32,9 @@ class PlacesDao extends DatabaseAccessor<Database> with _$PlacesDaoMixin {
           suggestions
               .map(
                 (suggestion) => PlaceSuggestionsCompanion.insert(
-                  locationId: suggestion.locationId,
-                  label: suggestion.label,
-                  language: nullableValueFrom(suggestion.language),
+                  id: suggestion.id,
+                  title: suggestion.title,
                   address: nullableValueFrom(suggestion.address),
-                  countryCode: nullableValueFrom(suggestion.countryCode),
-                  matchLevel: nullableValueFrom(suggestion.matchLevel),
                   lastSearched: nullableValueFrom(suggestion.lastSearched),
                 ),
               )
@@ -52,7 +49,7 @@ class PlacesDao extends DatabaseAccessor<Database> with _$PlacesDaoMixin {
               .map(
                 (suggestion) => PlaceQuerySuggestionsCompanion.insert(
                   query: query,
-                  locationId: suggestion.locationId,
+                  locationId: suggestion.id,
                 ),
               )
               .toList(),
@@ -71,7 +68,7 @@ class PlacesDao extends DatabaseAccessor<Database> with _$PlacesDaoMixin {
       ),
       innerJoin(
         placeSuggestions,
-        placeQuerySuggestions.locationId.equalsExp(placeSuggestions.locationId),
+        placeQuerySuggestions.locationId.equalsExp(placeSuggestions.id),
       ),
     ]).get();
     return result.map((row) => row.readTable(placeSuggestions)).toList();
@@ -94,7 +91,7 @@ class PlacesDao extends DatabaseAccessor<Database> with _$PlacesDaoMixin {
 
   Future<int> updateLastSearchedByLocationId(String locationId) {
     return (update(placeSuggestions)
-          ..where((suggestion) => suggestion.locationId.equals(locationId)))
+          ..where((suggestion) => suggestion.id.equals(locationId)))
         .write(PlaceSuggestionsCompanion(lastSearched: Value(DateTime.now())));
   }
 }

@@ -9,7 +9,7 @@ part of 'places_api.dart';
 class _PlacesApi implements PlacesApi {
   _PlacesApi(this._dio, {this.baseUrl}) {
     ArgumentError.checkNotNull(_dio, '_dio');
-    this.baseUrl ??= 'https://autocomplete.geocoder.api.here.com/6.2';
+    this.baseUrl ??= 'https://autosuggest.search.hereapi.com/v1';
   }
 
   final Dio _dio;
@@ -19,27 +19,23 @@ class _PlacesApi implements PlacesApi {
   @override
   fetchSuggestions(
       {query,
-      maxResults = 20,
-      bounds = '52.237049,21.017532,20000',
-      country = 'POL',
+      limit = 20,
+      area = 'circle:52.237049,21.017532;r=20000',
       language = 'PL',
-      appId = _PlacesApiData.appId,
-      appCode = _PlacesApiData.appCode}) async {
+      key = _PlacesApiData.key}) async {
     ArgumentError.checkNotNull(query, 'query');
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
-      r'query': query,
-      r'maxresults': maxResults,
-      r'prox': bounds,
-      r'country': country,
-      r'language': language,
-      r'app_id': appId,
-      r'app_code': appCode
+      r'q': query,
+      r'limit': limit,
+      r'in': area,
+      r'lang': language,
+      r'apikey': key
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     final Response<Map<String, dynamic>> _result = await _dio.request(
-        '/suggest.json',
+        '/autosuggest',
         queryParameters: queryParameters,
         options: RequestOptions(
             method: 'GET',

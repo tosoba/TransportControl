@@ -8,21 +8,15 @@ part 'place_suggestion.g.dart';
 
 @JsonSerializable()
 class PlaceSuggestion {
-  final String label;
-  final String language;
-  final String countryCode;
-  final String locationId;
+  final String id;
+  final String title;
   final Address address;
-  final String matchLevel;
   final DateTime lastSearched;
 
   PlaceSuggestion({
-    this.label,
-    this.language,
-    this.countryCode,
-    this.locationId,
+    this.id,
+    this.title,
     this.address,
-    this.matchLevel,
     this.lastSearched,
   });
 
@@ -33,26 +27,20 @@ class PlaceSuggestion {
   Map<String, dynamic> toJson() => _$PlaceSuggestionToJson(this);
 
   PlaceSuggestion.fromDb(Db.PlaceSuggestion suggestion)
-      : label = suggestion.label,
-        language = suggestion.language,
-        countryCode = suggestion.countryCode,
-        locationId = suggestion.locationId,
+      : id = suggestion.id,
+        title = suggestion.title,
         address = suggestion.address == null
             ? null
             : Address.fromJson(
                 jsonDecode(suggestion.address) as Map<String, dynamic>,
               ),
-        matchLevel = suggestion.matchLevel,
         lastSearched = suggestion.lastSearched;
 
   Db.PlaceSuggestion get db {
     return Db.PlaceSuggestion(
-      label: label,
-      language: language,
-      countryCode: countryCode,
-      locationId: locationId,
+      id: id,
+      title: title,
       address: address == null ? null : jsonEncode(address.toJson()),
-      matchLevel: matchLevel,
       lastSearched: lastSearched,
     );
   }

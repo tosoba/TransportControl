@@ -5,6 +5,7 @@ part 'place_suggestions_response.g.dart';
 
 @JsonSerializable()
 class PlaceSuggestionsResponse {
+  @JsonKey(name: 'items')
   final List<PlaceSuggestion> suggestions;
 
   PlaceSuggestionsResponse({this.suggestions});
