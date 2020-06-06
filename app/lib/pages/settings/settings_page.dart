@@ -7,18 +7,28 @@ import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
 class SettingsPage extends HookWidget {
+  final settings = GetIt.instance<RxSharedPreferences>();
+
   @override
   Widget build(BuildContext context) {
     final searchFieldFocusNode = useFocusNode();
     final searchFieldController = useTextEditingController();
-    searchFieldController.addListener(() {});
+    final searchFieldTextController = useStreamController<String>();
+    searchFieldController.addListener(() {
+      searchFieldTextController
+          .add(searchFieldController.text?.trim()?.toLowerCase());
+    });
 
-    final settings = GetIt.instance<RxSharedPreferences>();
-    final zoomToLoadedMarkersBounds = useStream(
-      settings
-          .getBoolStream(Preferences.zoomToLoadedMarkersBounds.key)
-          .distinct(),
-    );
+    final preferencesWithValues = <_PreferenceWithValue>[
+      _PreferenceWithValue<bool>(
+        preference: Preferences.zoomToLoadedMarkersBounds,
+        value: useStream(
+          settings
+              .getBoolStream(Preferences.zoomToLoadedMarkersBounds.key)
+              .distinct(),
+        ),
+      ),
+    ];
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -29,21 +39,58 @@ class SettingsPage extends HookWidget {
         hint: "Search settings...",
         leading: TextFieldAppBarBackButton(searchFieldFocusNode),
       ),
-      body: ListView(
-        children: [
-          SwitchListTile(
-            value: zoomToLoadedMarkersBounds.data ??
-                Preferences.zoomToLoadedMarkersBounds.defaultValue,
-            title: Text("Zoom to loaded markers' bounds"),
-            onChanged: (value) {
-              settings.setBool(
-                Preferences.zoomToLoadedMarkersBounds.key,
-                value,
-              );
-            },
-          )
-        ],
+      body: StreamBuilder<String>(
+        stream: searchFieldTextController.stream,
+        builder: (context, snapshot) {
+          final preferences = snapshot.data == null || snapshot.data.isEmpty
+              ? preferencesWithValues
+              : preferencesWithValues.where(
+                  (pwv) => pwv.preference.title.contains(snapshot.data),
+                );
+          return ListView.builder(
+            itemCount: preferences.length,
+            itemBuilder: (context, index) => _preferenceListItem(
+              preferences.elementAt(index),
+            ),
+          );
+        },
       ),
     );
   }
+
+  Widget _preferenceListItem(_PreferenceWithValue preferenceWithValue) {
+    if (preferenceWithValue.preference is ListPreference) {
+      //TODO:
+      throw UnimplementedError();
+    } else {
+      switch (preferenceWithValue.type) {
+        case bool:
+          return _boolPreferenceListItem(preferenceWithValue);
+        default:
+          throw ArgumentError();
+      }
+    }
+  }
+
+  Widget _boolPreferenceListItem(
+    _PreferenceWithValue<bool> preferenceWithValue,
+  ) {
+    final preference = preferenceWithValue.preference;
+    return SwitchListTile(
+      value: preferenceWithValue.value.data ?? preference.defaultValue,
+      title: Text(preference.title),
+      onChanged: (value) {
+        settings.setBool(preference.key, value);
+      },
+    );
+  }
+}
+
+class _PreferenceWithValue<T> {
+  final Preference<T> preference;
+  final AsyncSnapshot<T> value;
+
+  Type get type => preference.defaultValue.runtimeType;
+
+  _PreferenceWithValue({@required this.preference, @required this.value});
 }

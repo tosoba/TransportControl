@@ -203,7 +203,7 @@ extension _MapVehicleSourceExt on MapVehicleSource {
             text: 'Vehicles nearby ',
             style: const TextStyle(color: Colors.black, fontSize: 16),
           ),
-          loadedAgoTextSpan(source.loadedAt),
+          _loadedAgoTextSpan(source.loadedAt),
         ]),
         overflow: TextOverflow.ellipsis,
       ),
@@ -221,7 +221,7 @@ extension _MapVehicleSourceExt on MapVehicleSource {
               fontSize: 16,
             ),
           ),
-          loadedAgoTextSpan(source.loadedAt),
+          _loadedAgoTextSpan(source.loadedAt),
         ]),
         overflow: TextOverflow.ellipsis,
       ),
@@ -239,14 +239,14 @@ extension _MapVehicleSourceExt on MapVehicleSource {
               fontSize: 16,
             ),
           ),
-          loadedAgoTextSpan(source.loadedAt),
+          _loadedAgoTextSpan(source.loadedAt),
         ]),
         overflow: TextOverflow.ellipsis,
       ),
     );
   }
 
-  TextSpan loadedAgoTextSpan(DateTime loadedAt) {
+  TextSpan _loadedAgoTextSpan(DateTime loadedAt) {
     return TextSpan(
       text: '''loaded${dateTimeDiffInfo(
         diffMillis: DateTime.now().millisecondsSinceEpoch -

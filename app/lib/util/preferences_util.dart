@@ -2,17 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 
 class Preferences {
-  static final _Preference<bool> zoomToLoadedMarkersBounds = _Preference(
+  Preferences._();
+
+  static final Preference<bool> zoomToLoadedMarkersBounds = const Preference(
     key: 'zoomToLoadedMarkersBounds',
     defaultValue: false,
+    title: "Zoom to loaded markers' bounds",
   );
 }
 
-class _Preference<T> {
+class Preference<T> {
   final String key;
   final T defaultValue;
+  final String title;
 
-  _Preference({@required this.key, @required this.defaultValue});
+  const Preference({
+    @required this.key,
+    @required this.defaultValue,
+    @required this.title,
+  });
+}
+
+class ListPreference<T> extends Preference<T> {
+  final List<T> values;
+
+  const ListPreference(
+    this.values, {
+    @required T defaultValue,
+    @required String key,
+    @required String title,
+  }) : super(title: title, key: key, defaultValue: defaultValue);
 }
 
 class SilentPreferencesLogger extends LoggerAdapter {
