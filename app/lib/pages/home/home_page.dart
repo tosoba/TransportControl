@@ -17,7 +17,7 @@ import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/map/map_vehicle.dart';
 import 'package:transport_control/pages/nearby/nearby_bloc.dart';
 import 'package:transport_control/pages/nearby/nearby_page.dart';
-import 'package:transport_control/pages/settings/settings_page.dart';
+import 'package:transport_control/pages/preferences/preferences_page.dart';
 import 'package:transport_control/pages/tracked/tracked_page.dart';
 import 'package:transport_control/repo/locations_repo.dart';
 import 'package:transport_control/util/model_util.dart';
@@ -506,7 +506,7 @@ class HomePage extends HookWidget {
             },
           ),
           _drawerListTile(
-            labelText: 'Settings',
+            labelText: 'Preferences',
             icon: Icons.settings,
             group: drawerItemTextGroup,
             onTap: () {
@@ -514,7 +514,7 @@ class HomePage extends HookWidget {
               bottomSheetControllers.closeBottomSheet();
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => SettingsPage()),
+                MaterialPageRoute(builder: (_) => PreferencesPage()),
               );
             },
           ),

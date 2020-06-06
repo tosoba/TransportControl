@@ -6,8 +6,8 @@ import 'package:transport_control/util/preferences_util.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
-class SettingsPage extends HookWidget {
-  final settings = GetIt.instance<RxSharedPreferences>();
+class PreferencesPage extends HookWidget {
+  final _preferences = GetIt.instance<RxSharedPreferences>();
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class SettingsPage extends HookWidget {
       _PreferenceWithValue<bool>(
         preference: Preferences.zoomToLoadedMarkersBounds,
         value: useStream(
-          settings
+          _preferences
               .getBoolStream(Preferences.zoomToLoadedMarkersBounds.key)
               .distinct(),
         ),
@@ -36,21 +36,22 @@ class SettingsPage extends HookWidget {
       appBar: TextFieldAppBar(
         textFieldFocusNode: searchFieldFocusNode,
         textFieldController: searchFieldController,
-        hint: "Search settings...",
+        hint: "Search preferences...",
         leading: TextFieldAppBarBackButton(searchFieldFocusNode),
       ),
       body: StreamBuilder<String>(
         stream: searchFieldTextController.stream,
         builder: (context, snapshot) {
-          final preferences = snapshot.data == null || snapshot.data.isEmpty
-              ? preferencesWithValues
-              : preferencesWithValues.where(
-                  (pwv) => pwv.preference.title.contains(snapshot.data),
-                );
+          final filteredPreferencesWithValues =
+              snapshot.data == null || snapshot.data.isEmpty
+                  ? preferencesWithValues
+                  : preferencesWithValues.where(
+                      (pwv) => pwv.preference.title.contains(snapshot.data),
+                    );
           return ListView.builder(
-            itemCount: preferences.length,
+            itemCount: filteredPreferencesWithValues.length,
             itemBuilder: (context, index) => _preferenceListItem(
-              preferences.elementAt(index),
+              filteredPreferencesWithValues.elementAt(index),
             ),
           );
         },
@@ -80,7 +81,7 @@ class SettingsPage extends HookWidget {
       value: preferenceWithValue.value.data ?? preference.defaultValue,
       title: Text(preference.title),
       onChanged: (value) {
-        settings.setBool(preference.key, value);
+        _preferences.setBool(preference.key, value);
       },
     );
   }

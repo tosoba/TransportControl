@@ -16,11 +16,11 @@ import 'package:transport_control/util/preferences_util.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   configureInjection(Env.dev);
-  _initSettings();
+  _initPreferences();
   runApp(TransportControlApp());
 }
 
-void _initSettings() async {
+void _initPreferences() async {
   final settings = GetIt.instance<RxSharedPreferences>();
   if (!(await settings.containsKey(
     Preferences.zoomToLoadedMarkersBounds.key,
