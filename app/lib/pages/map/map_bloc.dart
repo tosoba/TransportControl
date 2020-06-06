@@ -76,20 +76,22 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       ..add(loadVehiclesInLocationStream.listen(_loadVehiclesInLocation))
       ..add(
         loadVehiclesNearbyUserLocationStream.listen(
-          (position) => _loadVehiclesNearbyUserLocation(
+          (position) async => _loadVehiclesNearbyUserLocation(
             position,
-            //TODO: take radius from settings
-            radiusInMeters: 1000,
+            radiusInMeters:
+                (await _preferences.getInt(Preferences.nearbySearchRadius.key))
+                    .toDouble(),
           ),
         ),
       )
       ..add(
         loadVehiclesNearbyPlaceStream.listen(
-          (place) => _loadVehiclesNearbyPlace(
+          (place) async => _loadVehiclesNearbyPlace(
             LatLng(place.position.lat, place.position.lng),
             title: place.title,
-            //TODO: take radius from settings
-            radiusInMeters: 1000,
+            radiusInMeters:
+                (await _preferences.getInt(Preferences.nearbySearchRadius.key))
+                    .toDouble(),
           ),
         ),
       )
