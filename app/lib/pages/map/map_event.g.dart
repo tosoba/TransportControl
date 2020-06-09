@@ -26,13 +26,13 @@ abstract class MapEvent extends Equatable {
   factory MapEvent.addVehiclesNearbyUserLocation(
       {@required Iterable<Vehicle> vehicles,
       @required LatLng position,
-      @required double radius}) = AddVehiclesNearbyUserLocation;
+      @required int radius}) = AddVehiclesNearbyUserLocation;
 
   factory MapEvent.addVehiclesNearbyPlace(
       {@required Iterable<Vehicle> vehicles,
       @required LatLng position,
       @required String title,
-      @required double radius}) = AddVehiclesNearbyPlace;
+      @required int radius}) = AddVehiclesNearbyPlace;
 
   factory MapEvent.animateVehicles() = AnimateVehicles;
 
@@ -468,7 +468,7 @@ class AddVehiclesNearbyUserLocation extends MapEvent {
 
   final LatLng position;
 
-  final double radius;
+  final int radius;
 
   @override
   String toString() =>
@@ -492,7 +492,7 @@ class AddVehiclesNearbyPlace extends MapEvent {
 
   final String title;
 
-  final double radius;
+  final int radius;
 
   @override
   String toString() =>
