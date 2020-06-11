@@ -8,6 +8,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:scroll_bottom_navigation_bar/scroll_bottom_navigation_bar.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:transport_control/hooks/use_map_signals.dart';
+import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
@@ -46,6 +47,8 @@ class LinesPage extends HookWidget {
     });
 
     useMapSignals(scaffoldKey: _scaffoldKey, context: context);
+
+    useUnfocusOnKeyboardHidden(focusNode: searchFieldFocusNode);
 
     return StreamBuilder<LinesState>(
       stream: context.bloc<LinesBloc>(),

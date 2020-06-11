@@ -54,6 +54,7 @@ dependencies:
   stream_transform: ^1.2.0
   carousel_slider: ^2.1.0
   rounded_loading_button: ^1.0.6
+  keyboard_visibility: ^0.5.6
 
 dev_dependencies:
   flutter_test:

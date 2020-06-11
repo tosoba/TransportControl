@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:transport_control/hooks/use_map_signals.dart';
+import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
@@ -39,6 +40,8 @@ class LocationsPage extends HookWidget {
       nearbyButtonEnabled: nearbyButtonEnabled,
     );
     useMapSignals(scaffoldKey: _scaffoldKey, context: context);
+
+    useUnfocusOnKeyboardHidden(focusNode: searchFieldFocusNode);
 
     return Scaffold(
       key: _scaffoldKey,

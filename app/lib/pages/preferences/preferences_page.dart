@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:get_it/get_it.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
+import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
 import 'package:transport_control/util/preferences_util.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
@@ -18,6 +19,8 @@ class PreferencesPage extends HookWidget {
       searchFieldTextController
           .add(searchFieldController.text?.trim()?.toLowerCase());
     });
+
+    useUnfocusOnKeyboardHidden(focusNode: searchFieldFocusNode);
 
     final preferencesWithValues =
         Preferences.list.map(_preferences.use).toList();
