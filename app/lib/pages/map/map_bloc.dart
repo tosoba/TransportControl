@@ -79,8 +79,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           (position) async => _loadVehiclesNearbyUserLocation(
             position,
             radiusInMeters:
-                (await _preferences.getInt(Preferences.nearbySearchRadius.key))
-                    .toDouble(),
+                await _preferences.getInt(Preferences.nearbySearchRadius.key),
           ),
         ),
       )
@@ -90,8 +89,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             LatLng(place.position.lat, place.position.lng),
             title: place.title,
             radiusInMeters:
-                (await _preferences.getInt(Preferences.nearbySearchRadius.key))
-                    .toDouble(),
+                await _preferences.getInt(Preferences.nearbySearchRadius.key),
           ),
         ),
       )
@@ -242,7 +240,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   void _loadVehiclesNearbyUserLocation(
     LatLng position, {
-    @required double radiusInMeters,
+    @required int radiusInMeters,
   }) {
     _loadVehicles(
       loadingMsg: 'Loading nearby vehicles...',
@@ -262,7 +260,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   void _loadVehiclesNearbyPlace(
     LatLng position, {
     @required String title,
-    @required double radiusInMeters,
+    @required int radiusInMeters,
   }) {
     _loadVehicles(
       loadingMsg: 'Loading vehicles nearby $title...',

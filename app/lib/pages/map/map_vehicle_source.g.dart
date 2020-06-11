@@ -19,13 +19,13 @@ abstract class MapVehicleSource extends Equatable {
 
   factory MapVehicleSource.nearbyUserLocation(
       {@required LatLng position,
-      @required double radius,
+      @required int radius,
       @required DateTime loadedAt}) = NearbyUserLocation;
 
   factory MapVehicleSource.nearbyPlace(
       {@required LatLng position,
       @required String title,
-      @required double radius,
+      @required int radius,
       @required DateTime loadedAt}) = NearbyPlace;
 
   final _MapVehicleSource _type;
@@ -216,7 +216,7 @@ class NearbyUserLocation extends MapVehicleSource {
 
   final LatLng position;
 
-  final double radius;
+  final int radius;
 
   final DateTime loadedAt;
 
@@ -240,7 +240,7 @@ class NearbyPlace extends MapVehicleSource {
 
   final String title;
 
-  final double radius;
+  final int radius;
 
   final DateTime loadedAt;
 
