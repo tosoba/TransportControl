@@ -66,7 +66,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
       builder: (context, snapshot) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Transport Control',
-        theme: ThemeData.light(),
+        theme: ThemeData.light().copyWith(primaryColor: Colors.white),
         darkTheme: ThemeData.dark(),
         themeMode: snapshot.data ?? ThemeMode.system,
         home: MultiBlocProvider(
