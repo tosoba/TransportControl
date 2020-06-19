@@ -138,6 +138,7 @@ class _MapPageState extends State<MapPage>
         onPointerDown: (event) => _cameraWasMovedByUser = true,
         child: GoogleMap(
           zoomControlsEnabled: false,
+          rotateGesturesEnabled: false,
           mapType: MapType.normal,
           initialCameraPosition: CameraPosition(
             target: MapConstants.initialTarget,

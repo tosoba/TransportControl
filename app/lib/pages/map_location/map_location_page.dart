@@ -300,6 +300,7 @@ class MapLocationPage extends HookWidget {
   }) {
     return GoogleMap(
       zoomControlsEnabled: false,
+      rotateGesturesEnabled: false,
       mapType: MapType.normal,
       //TODO:
       // minMaxZoomPreference: MinMaxZoomPreference(
