@@ -63,7 +63,12 @@ class PreferencesPage extends HookWidget {
     if (preference is EnumeratedPreference) {
       switch (preference.type) {
         case int:
-          return _intEnumeratedPreferenceItem(
+          return _enumeratedPreferenceItem<int>(
+            preferenceWithValue,
+            context: context,
+          );
+        case String:
+          return _enumeratedPreferenceItem<String>(
             preferenceWithValue,
             context: context,
           );
@@ -93,8 +98,8 @@ class PreferencesPage extends HookWidget {
     );
   }
 
-  Widget _intEnumeratedPreferenceItem(
-    PreferenceWithValue<int> preferenceWithValue, {
+  Widget _enumeratedPreferenceItem<T>(
+    PreferenceWithValue<T> preferenceWithValue, {
     @required BuildContext context,
   }) {
     final preference = preferenceWithValue.preference.enumerated;
@@ -104,14 +109,13 @@ class PreferencesPage extends HookWidget {
           showDialog(
             context: context,
             builder: (context) => SimpleDialog(
-              title: const Text('Select radius'),
               children: preference.values
                   .map(
                     (value) => _EnumeratedPreferenceListTile(
                       value: value,
                       preference: preference,
                       onChanged: (_) {
-                        _preferences.setInt(preference.key, value);
+                        _preferences.set(preference, value: value);
                       },
                     ),
                   )

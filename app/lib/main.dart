@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -51,43 +52,56 @@ class _TransportControlAppState extends State<TransportControlApp> {
     final trackedLinesRemoved = getIt<TrackedLinesRemoved>().injected;
     final untrackLines = getIt<UntrackLines>().injected;
     final untrackAllLines = getIt<UntrackAllLines>().injected;
+    final preferences = getIt<RxSharedPreferences>();
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Transport Control',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<MapBloc>(
-            create: (context) => MapBloc(
-              getIt<VehiclesRepo>(),
-              getIt<RxSharedPreferences>(),
-              untrackLines.sink,
-              untrackAllLines.sink,
-              loadVehiclesInBounds.stream,
-              loadVehiclesNearbyUserLocation.stream,
-              loadVehiclesNearbyPlace.stream,
-              trackedLinesAdded.stream,
-              trackedLinesRemoved.stream,
+    return StreamBuilder<ThemeMode>(
+      stream: preferences
+          .getStringStream(Preferences.theme.key)
+          .where((themeString) => themeString != null)
+          .map(
+            (themeString) => ThemeMode.values.firstWhere(
+              (themeMode) => describeEnum(themeMode) == themeString,
             ),
           ),
-          BlocProvider<LinesBloc>(
-            create: (context) => LinesBloc(
-              getIt<LinesRepo>(),
-              trackedLinesAdded.sink,
-              trackedLinesRemoved.sink,
-              untrackLines.stream,
-              untrackAllLines.stream,
+      builder: (context, snapshot) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Transport Control',
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        themeMode: snapshot.data ?? ThemeMode.system,
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<MapBloc>(
+              create: (context) => MapBloc(
+                getIt<VehiclesRepo>(),
+                preferences,
+                untrackLines.sink,
+                untrackAllLines.sink,
+                loadVehiclesInBounds.stream,
+                loadVehiclesNearbyUserLocation.stream,
+                loadVehiclesNearbyPlace.stream,
+                trackedLinesAdded.stream,
+                trackedLinesRemoved.stream,
+              ),
             ),
-          ),
-          BlocProvider<NearbyBloc>(
-            create: (context) => NearbyBloc(
-              getIt<PlaceSuggestionsRepo>(),
-              loadVehiclesNearbyPlace.sink,
+            BlocProvider<LinesBloc>(
+              create: (context) => LinesBloc(
+                getIt<LinesRepo>(),
+                trackedLinesAdded.sink,
+                trackedLinesRemoved.sink,
+                untrackLines.stream,
+                untrackAllLines.stream,
+              ),
             ),
-          )
-        ],
-        child: HomePage(),
+            BlocProvider<NearbyBloc>(
+              create: (context) => NearbyBloc(
+                getIt<PlaceSuggestionsRepo>(),
+                loadVehiclesNearbyPlace.sink,
+              ),
+            )
+          ],
+          child: HomePage(),
+        ),
       ),
     );
   }

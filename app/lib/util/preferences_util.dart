@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
@@ -20,9 +21,19 @@ class Preferences {
         radius < 1000 ? '$radius m' : '${radius ~/ 1000} km',
   );
 
+  static EnumeratedPreference<String> theme = EnumeratedPreference(
+    ThemeMode.values.map(describeEnum).toList(),
+    defaultValue: describeEnum(ThemeMode.system),
+    key: 'theme',
+    title: 'Theme',
+    valueLabel: (theme) =>
+        '${theme.substring(0, 1).toUpperCase()}${theme.substring(1)}',
+  );
+
   static List<Preference> list = [
     zoomToLoadedMarkersBounds,
-    nearbySearchRadius
+    nearbySearchRadius,
+    theme,
   ];
 }
 
@@ -53,7 +64,7 @@ class EnumeratedPreference<T> extends Preference<T> {
     @required T defaultValue,
     @required String key,
     @required String title,
-    this.valueLabel,
+    @required this.valueLabel,
   }) : super(title: title, key: key, defaultValue: defaultValue);
 }
 
@@ -78,30 +89,29 @@ extension RxSharedPreferencesExt on RxSharedPreferences {
     final keys = await getKeys();
     Preferences.list.forEach((preference) {
       if (keys.contains(preference.key)) return;
-      _setDefault(preference);
+      setDefault(preference);
     });
   }
 
-  void _setDefault(Preference preference) {
+  Future<bool> set(Preference preference, {@required dynamic value}) {
     switch (preference.type) {
       case bool:
-        setBool(preference.key, preference.defaultValue);
-        break;
+        return setBool(preference.key, value);
       case double:
-        setDouble(preference.key, preference.defaultValue);
-        break;
+        return setDouble(preference.key, value);
       case int:
-        setInt(preference.key, preference.defaultValue);
-        break;
+        return setInt(preference.key, value);
       case String:
-        setString(preference.key, preference.defaultValue);
-        break;
+        return setString(preference.key, value);
       case List:
-        setStringList(preference.key, preference.defaultValue);
-        break;
+        return setStringList(preference.key, value);
       default:
         throw ArgumentError('Invalid preference type.');
     }
+  }
+
+  Future<bool> setDefault(Preference preference) {
+    return set(preference, value: preference.defaultValue);
   }
 
   PreferenceWithValue use(Preference preference) {

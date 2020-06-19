@@ -7,7 +7,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
-import 'package:transport_control/hooks/use_keyboard_visibility.dart';
 import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
