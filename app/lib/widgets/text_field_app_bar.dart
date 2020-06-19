@@ -55,10 +55,10 @@ class _TextFieldAppBarState extends State<TextFieldAppBar> {
         child: Container(
           child: Row(children: [
             if (widget.leading != null) widget.leading,
-            Flexible(child: _textField),
+            Flexible(child: _textField(context)),
             if (widget.trailing != null) widget.trailing,
           ]),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(const Radius.circular(15.0)),
             boxShadow: [
               const BoxShadow(
@@ -67,7 +67,7 @@ class _TextFieldAppBarState extends State<TextFieldAppBar> {
                 spreadRadius: 1.0,
               )
             ],
-            color: Colors.white,
+            color: Theme.of(context).primaryColor,
           ),
           width: double.infinity,
           height: kToolbarHeight,
@@ -76,7 +76,7 @@ class _TextFieldAppBarState extends State<TextFieldAppBar> {
     );
   }
 
-  Widget get _textField {
+  Widget _textField(BuildContext context) {
     return TextField(
       controller: widget.textFieldController,
       focusNode: widget.textFieldFocusNode,
@@ -89,7 +89,10 @@ class _TextFieldAppBarState extends State<TextFieldAppBar> {
         border: InputBorder.none,
         hintStyle: const TextStyle(color: Colors.grey),
       ),
-      style: const TextStyle(color: Colors.black, fontSize: 16.0),
+      style: TextStyle(
+        color: Theme.of(context).textTheme.button.color,
+        fontSize: 16.0,
+      ),
       onChanged: widget.onChanged,
     );
   }

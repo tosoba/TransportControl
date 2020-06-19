@@ -14,9 +14,11 @@ class TextFieldAppBarBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CircularButton(
-      child: const Icon(
+      child: Icon(
         Icons.arrow_back,
-        color: Colors.black,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : Colors.black,
       ),
       onPressed: () {
         if (_textFieldFocusNode.hasFocus && !textFieldDisabled) {

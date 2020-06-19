@@ -319,7 +319,12 @@ class HomePage extends HookWidget {
           if (snapshot.data == null || snapshot.data.isEmpty)
             return Container(width: 0.0, height: 0.0);
           return CircularButton(
-            child: const Icon(Icons.close, color: Colors.black),
+            child: Icon(
+              Icons.close,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : Colors.black,
+            ),
             onPressed: () {
               searchFieldController.value = TextEditingValue();
             },
@@ -383,7 +388,9 @@ class HomePage extends HookWidget {
           currentPage.value == _HomeSubPage.places
               ? Icons.arrow_back
               : Icons.menu,
-          color: Colors.black,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white
+              : Colors.black,
         ),
         onPressed: () {
           if (currentPage.value == _HomeSubPage.places) {

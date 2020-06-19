@@ -64,7 +64,13 @@ class LocationsPage extends HookWidget {
                         if (result.nameFilter != null &&
                             result.nameFilter.isNotEmpty)
                           CircularButton(
-                            child: const Icon(Icons.close, color: Colors.black),
+                            child: Icon(
+                              Icons.close,
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
                             onPressed: () {
                               searchFieldController.value = TextEditingValue();
                             },
