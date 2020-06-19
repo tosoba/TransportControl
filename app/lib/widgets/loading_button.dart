@@ -7,7 +7,6 @@ class LoadingButton extends StatefulWidget {
   final LoadingButtonController controller;
   final VoidCallback onPressed;
   final Widget child;
-  final Color color;
   final double height;
   final double width;
   final bool animateOnTap;
@@ -17,7 +16,6 @@ class LoadingButton extends StatefulWidget {
     @required this.controller,
     @required this.onPressed,
     @required this.child,
-    this.color = Colors.blue,
     this.height = 56,
     this.width = 56,
     this.animateOnTap = true,
@@ -44,14 +42,14 @@ class LoadingButtonState extends State<LoadingButton>
     final check = Container(
       alignment: FractionalOffset.center,
       decoration: BoxDecoration(
-        color: widget.color,
+        color: Theme.of(context).floatingActionButtonTheme.backgroundColor,
         borderRadius:
             BorderRadius.all(Radius.circular(_bounceAnimation.value / 2)),
       ),
       width: _bounceAnimation.value,
       height: _bounceAnimation.value,
       child: _bounceAnimation.value > 20
-          ? const Icon(Icons.check, color: Colors.white)
+          ? Icon(Icons.check, color: Theme.of(context).iconTheme.color)
           : null,
     );
 
@@ -65,7 +63,7 @@ class LoadingButtonState extends State<LoadingButton>
       width: _bounceAnimation.value,
       height: _bounceAnimation.value,
       child: _bounceAnimation.value > 20
-          ? const Icon(Icons.close, color: Colors.white)
+          ? Icon(Icons.close, color: Theme.of(context).iconTheme.color)
           : null,
     );
 
@@ -86,14 +84,14 @@ class LoadingButtonState extends State<LoadingButton>
       ),
     );
 
-    final btn = ButtonTheme(
+    final idle = ButtonTheme(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(35)),
       minWidth: _squeezeAnimation.value,
       height: widget.height,
       child: RaisedButton(
         padding: const EdgeInsets.all(0),
         child: childStream,
-        color: widget.color,
+        color: Theme.of(context).accentColor,
         onPressed: widget.onPressed == null ? null : _btnPressed,
       ),
     );
@@ -104,7 +102,7 @@ class LoadingButtonState extends State<LoadingButton>
       child: Center(
         child: _loadingState.value == _LoadingState.error
             ? cross
-            : _loadingState.value == _LoadingState.success ? check : btn,
+            : _loadingState.value == _LoadingState.success ? check : idle,
       ),
     );
   }

@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:get_it/get_it.dart';
+import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:transport_control/hooks/use_map_signals.dart';
 import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
 import 'package:transport_control/model/location.dart';
@@ -13,6 +15,7 @@ import 'package:transport_control/pages/map_location/map_location_page_mode.dart
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/util/model_util.dart';
+import 'package:transport_control/util/preferences_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/loading_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
@@ -40,7 +43,6 @@ class LocationsPage extends HookWidget {
       nearbyButtonEnabled: nearbyButtonEnabled,
     );
     useMapSignals(scaffoldKey: _scaffoldKey, context: context);
-
     useUnfocusOnKeyboardHidden(focusNode: searchFieldFocusNode);
 
     return Scaffold(
@@ -126,7 +128,12 @@ class LocationsPage extends HookWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           LoadingButton(
-            child: const Icon(Icons.my_location, color: Colors.white),
+            child: Icon(
+              Icons.my_location,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black
+                  : Colors.white,
+            ),
             controller: _locationBtnController,
             onPressed: nearbyButtonEnabled.value
                 ? loadVehiclesNearbyUserLocation
@@ -134,7 +141,6 @@ class LocationsPage extends HookWidget {
           ),
           SizedBox(height: 10),
           FloatingActionButton(
-            heroTag: 'tag2',
             child: const Icon(Icons.add),
             onPressed: () => _showMapLocationPageWithTransition(
               context,
