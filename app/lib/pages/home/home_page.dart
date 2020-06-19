@@ -489,8 +489,11 @@ class HomePage extends HookWidget {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            child: Text(Strings.transportControl),
-            decoration: const BoxDecoration(color: Colors.blue),
+            child: const Text(
+              Strings.transportControl,
+              style: const TextStyle(fontSize: 22),
+            ),
+            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
           ),
           _drawerListTile(
             labelText: Strings.lines,
