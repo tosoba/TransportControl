@@ -224,6 +224,7 @@ class HomePage extends HookWidget {
             shrinkWrap: true,
             children: [
               _bottomNavBarButton(
+                context,
                 labelText: Strings.lines,
                 onPressed: () {
                   bottomSheetControllers.closeBottomSheet();
@@ -233,6 +234,7 @@ class HomePage extends HookWidget {
                 icon: Icons.grid_on,
               ),
               _bottomNavBarButton(
+                context,
                 labelText: Strings.locations,
                 onPressed: () {
                   bottomSheetControllers.closeBottomSheet();
@@ -243,6 +245,7 @@ class HomePage extends HookWidget {
               ),
               if (snapshot.data ?? false)
                 _bottomNavBarButton(
+                  context,
                   labelText: 'Tracked',
                   onPressed: () {
                     bottomSheetControllers.closeBottomSheet();
@@ -258,7 +261,8 @@ class HomePage extends HookWidget {
     );
   }
 
-  Widget _bottomNavBarButton({
+  Widget _bottomNavBarButton(
+    BuildContext context, {
     @required String labelText,
     @required void Function() onPressed,
     @required Animation<double> bottomNavButtonsOpacity,
@@ -273,7 +277,7 @@ class HomePage extends HookWidget {
             borderRadius: BorderRadius.circular(10.0),
           ),
           icon: Icon(icon),
-          color: Colors.white,
+          color: Theme.of(context).primaryColor,
           onPressed: onPressed,
           label: Text(
             labelText,

@@ -191,6 +191,7 @@ class MapLocationPage extends HookWidget {
           shrinkWrap: true,
           children: [
             _bottomNavBarButton(
+              context,
               labelText: 'Save',
               bottomNavButtonsOpacity: bottomNavButtonsOpacity,
               onPressed: () {
@@ -207,6 +208,7 @@ class MapLocationPage extends HookWidget {
               },
             ),
             _bottomNavBarButton(
+              context,
               labelText: 'Load',
               bottomNavButtonsOpacity: bottomNavButtonsOpacity,
               onPressed: () {
@@ -224,6 +226,7 @@ class MapLocationPage extends HookWidget {
               },
             ),
             _bottomNavBarButton(
+              context,
               labelText: 'Save & load',
               bottomNavButtonsOpacity: bottomNavButtonsOpacity,
               onPressed: () {
@@ -245,7 +248,8 @@ class MapLocationPage extends HookWidget {
     );
   }
 
-  Widget _bottomNavBarButton({
+  Widget _bottomNavBarButton(
+    BuildContext context, {
     @required String labelText,
     @required void Function() onPressed,
     @required Animation<double> bottomNavButtonsOpacity,
@@ -258,7 +262,7 @@ class MapLocationPage extends HookWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
-          color: Colors.white,
+          color: Theme.of(context).primaryColor,
           onPressed: onPressed,
           child: Text(
             labelText,

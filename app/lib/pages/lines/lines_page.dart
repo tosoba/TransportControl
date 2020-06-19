@@ -69,6 +69,7 @@ class LinesPage extends HookWidget {
           stateSnapshot: snapshot,
         ),
         bottomNavigationBar: _listGroupNavigationButtons(
+          context,
           stateSnapshot: snapshot,
         ),
       ),
@@ -264,7 +265,8 @@ class LinesPage extends HookWidget {
     );
   }
 
-  Widget _listGroupNavigationButtons({
+  Widget _listGroupNavigationButtons(
+    BuildContext context, {
     @required AsyncSnapshot<LinesState> stateSnapshot,
   }) {
     if (stateSnapshot.data == null) return Container();
@@ -282,11 +284,10 @@ class LinesPage extends HookWidget {
         (index) => BottomNavigationBarItem(
           icon: Text(
             lineGroups.elementAt(index).key,
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .button
+                .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           title: Container(),
         ),
