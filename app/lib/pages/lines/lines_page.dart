@@ -400,8 +400,8 @@ class LinesPage extends HookWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      if (line.value.tracked) Icon(Icons.location_on),
-                      if (line.value.favourite) Icon(Icons.favorite),
+                      if (line.value.tracked) const Icon(Icons.location_on),
+                      if (line.value.favourite) const Icon(Icons.favorite),
                     ],
                   ),
                 )
@@ -454,7 +454,10 @@ class _LinesFloatingActionButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Badge(
         padding: const EdgeInsets.all(8.0),
-        badgeContent: Text(numberOfLines.toString()),
+        badgeContent: Text(
+          numberOfLines.toString(),
+          style: const TextStyle(color: Colors.white),
+        ),
         child: CircularTextIconButton(icon: icon, text: label, onTap: onTap),
       ),
     );
