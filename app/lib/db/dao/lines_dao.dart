@@ -2,6 +2,7 @@ import 'package:injectable/injectable.dart';
 import 'package:moor_flutter/moor_flutter.dart';
 import 'package:transport_control/db/database.dart';
 import 'package:transport_control/db/entity/lines.dart';
+import 'package:transport_control/util/model_util.dart';
 
 part 'lines_dao.g.dart';
 
@@ -33,14 +34,30 @@ class LinesDao extends DatabaseAccessor<Database> with _$LinesDaoMixin {
     );
   }
 
-  Future<int> deleteLines(Iterable<String> symbols) {
-    return (delete(lines)..where((line) => line.symbol.isIn(symbols))).go();
-  }
-
-  Stream<List<Line>> get selectFavouriteLinesStream => select(lines).watch();
+  Stream<List<Line>> get selectLinesStream => select(lines).watch();
 
   Future<int> updateLastSearched(Iterable<String> symbols) {
     return (update(lines)..where((line) => line.symbol.isIn(symbols)))
         .write(LinesCompanion(lastSearched: Value(DateTime.now())));
+  }
+
+  Future<void> updateIsFavourite(Iterable<Line> linesToUpdate) {
+    return db.batch(
+      (batch) => batch.replaceAll(
+        lines,
+        linesToUpdate
+            .map(
+              (line) => LinesCompanion(
+                symbol: Value(line.symbol),
+                dest1: Value(line.dest1),
+                dest2: Value(line.dest2),
+                type: Value(line.type),
+                lastSearched: nullableValueFrom(line.lastSearched),
+                isFavourite: Value(!line.isFavourite),
+              ),
+            )
+            .toList(),
+      ),
+    );
   }
 }

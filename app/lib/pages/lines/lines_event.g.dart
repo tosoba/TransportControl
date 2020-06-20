@@ -22,9 +22,6 @@ abstract class LinesEvent extends Equatable {
   factory LinesEvent.toggleLineSelection({@required Line line}) =
       ToggleLineSelection;
 
-  factory LinesEvent.toggleLineFavourite({@required Line line}) =
-      ToggleLineFavourite;
-
   factory LinesEvent.toggleLineTracking({@required Line line}) =
       ToggleLineTracking;
 
@@ -49,7 +46,6 @@ abstract class LinesEvent extends Equatable {
       @required R Function(SymbolFilterChanged) symbolFilterChanged,
       @required R Function(ListFilterChanged) listFilterChanged,
       @required R Function(ToggleLineSelection) toggleLineSelection,
-      @required R Function(ToggleLineFavourite) toggleLineFavourite,
       @required R Function(ToggleLineTracking) toggleLineTracking,
       @required R Function(ResetSelection) resetSelection,
       @required R Function(TrackSelectedLines) trackSelectedLines,
@@ -61,7 +57,6 @@ abstract class LinesEvent extends Equatable {
           symbolFilterChanged == null ||
           listFilterChanged == null ||
           toggleLineSelection == null ||
-          toggleLineFavourite == null ||
           toggleLineTracking == null ||
           resetSelection == null ||
           trackSelectedLines == null ||
@@ -81,8 +76,6 @@ abstract class LinesEvent extends Equatable {
         return listFilterChanged(this as ListFilterChanged);
       case _LinesEvent.ToggleLineSelection:
         return toggleLineSelection(this as ToggleLineSelection);
-      case _LinesEvent.ToggleLineFavourite:
-        return toggleLineFavourite(this as ToggleLineFavourite);
       case _LinesEvent.ToggleLineTracking:
         return toggleLineTracking(this as ToggleLineTracking);
       case _LinesEvent.ResetSelection:
@@ -104,7 +97,6 @@ abstract class LinesEvent extends Equatable {
       @required FutureOr<R> Function(SymbolFilterChanged) symbolFilterChanged,
       @required FutureOr<R> Function(ListFilterChanged) listFilterChanged,
       @required FutureOr<R> Function(ToggleLineSelection) toggleLineSelection,
-      @required FutureOr<R> Function(ToggleLineFavourite) toggleLineFavourite,
       @required FutureOr<R> Function(ToggleLineTracking) toggleLineTracking,
       @required FutureOr<R> Function(ResetSelection) resetSelection,
       @required FutureOr<R> Function(TrackSelectedLines) trackSelectedLines,
@@ -116,7 +108,6 @@ abstract class LinesEvent extends Equatable {
           symbolFilterChanged == null ||
           listFilterChanged == null ||
           toggleLineSelection == null ||
-          toggleLineFavourite == null ||
           toggleLineTracking == null ||
           resetSelection == null ||
           trackSelectedLines == null ||
@@ -136,8 +127,6 @@ abstract class LinesEvent extends Equatable {
         return listFilterChanged(this as ListFilterChanged);
       case _LinesEvent.ToggleLineSelection:
         return toggleLineSelection(this as ToggleLineSelection);
-      case _LinesEvent.ToggleLineFavourite:
-        return toggleLineFavourite(this as ToggleLineFavourite);
       case _LinesEvent.ToggleLineTracking:
         return toggleLineTracking(this as ToggleLineTracking);
       case _LinesEvent.ResetSelection:
@@ -158,7 +147,6 @@ abstract class LinesEvent extends Equatable {
       R Function(SymbolFilterChanged) symbolFilterChanged,
       R Function(ListFilterChanged) listFilterChanged,
       R Function(ToggleLineSelection) toggleLineSelection,
-      R Function(ToggleLineFavourite) toggleLineFavourite,
       R Function(ToggleLineTracking) toggleLineTracking,
       R Function(ResetSelection) resetSelection,
       R Function(TrackSelectedLines) trackSelectedLines,
@@ -185,9 +173,6 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.ToggleLineSelection:
         if (toggleLineSelection == null) break;
         return toggleLineSelection(this as ToggleLineSelection);
-      case _LinesEvent.ToggleLineFavourite:
-        if (toggleLineFavourite == null) break;
-        return toggleLineFavourite(this as ToggleLineFavourite);
       case _LinesEvent.ToggleLineTracking:
         if (toggleLineTracking == null) break;
         return toggleLineTracking(this as ToggleLineTracking);
@@ -215,7 +200,6 @@ abstract class LinesEvent extends Equatable {
       FutureOr<R> Function(SymbolFilterChanged) symbolFilterChanged,
       FutureOr<R> Function(ListFilterChanged) listFilterChanged,
       FutureOr<R> Function(ToggleLineSelection) toggleLineSelection,
-      FutureOr<R> Function(ToggleLineFavourite) toggleLineFavourite,
       FutureOr<R> Function(ToggleLineTracking) toggleLineTracking,
       FutureOr<R> Function(ResetSelection) resetSelection,
       FutureOr<R> Function(TrackSelectedLines) trackSelectedLines,
@@ -242,9 +226,6 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.ToggleLineSelection:
         if (toggleLineSelection == null) break;
         return toggleLineSelection(this as ToggleLineSelection);
-      case _LinesEvent.ToggleLineFavourite:
-        if (toggleLineFavourite == null) break;
-        return toggleLineFavourite(this as ToggleLineFavourite);
       case _LinesEvent.ToggleLineTracking:
         if (toggleLineTracking == null) break;
         return toggleLineTracking(this as ToggleLineTracking);
@@ -273,7 +254,6 @@ abstract class LinesEvent extends Equatable {
       FutureOr<void> Function(SymbolFilterChanged) symbolFilterChanged,
       FutureOr<void> Function(ListFilterChanged) listFilterChanged,
       FutureOr<void> Function(ToggleLineSelection) toggleLineSelection,
-      FutureOr<void> Function(ToggleLineFavourite) toggleLineFavourite,
       FutureOr<void> Function(ToggleLineTracking) toggleLineTracking,
       FutureOr<void> Function(ResetSelection) resetSelection,
       FutureOr<void> Function(TrackSelectedLines) trackSelectedLines,
@@ -285,7 +265,6 @@ abstract class LinesEvent extends Equatable {
           symbolFilterChanged == null &&
           listFilterChanged == null &&
           toggleLineSelection == null &&
-          toggleLineFavourite == null &&
           toggleLineTracking == null &&
           resetSelection == null &&
           trackSelectedLines == null &&
@@ -309,9 +288,6 @@ abstract class LinesEvent extends Equatable {
       case _LinesEvent.ToggleLineSelection:
         if (toggleLineSelection == null) break;
         return toggleLineSelection(this as ToggleLineSelection);
-      case _LinesEvent.ToggleLineFavourite:
-        if (toggleLineFavourite == null) break;
-        return toggleLineFavourite(this as ToggleLineFavourite);
       case _LinesEvent.ToggleLineTracking:
         if (toggleLineTracking == null) break;
         return toggleLineTracking(this as ToggleLineTracking);
@@ -384,19 +360,6 @@ class ToggleLineSelection extends LinesEvent {
 
   @override
   String toString() => 'ToggleLineSelection(line:${this.line})';
-  @override
-  List get props => [line];
-}
-
-@immutable
-class ToggleLineFavourite extends LinesEvent {
-  const ToggleLineFavourite({@required this.line})
-      : super(_LinesEvent.ToggleLineFavourite);
-
-  final Line line;
-
-  @override
-  String toString() => 'ToggleLineFavourite(line:${this.line})';
   @override
   List get props => [line];
 }

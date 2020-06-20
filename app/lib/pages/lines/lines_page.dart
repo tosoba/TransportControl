@@ -200,49 +200,46 @@ class LinesPage extends HookWidget {
         ++numberOfTracked;
       else
         ++numberOfUntracked;
-      if (entry.value.favourite)
+      if (entry.key.isFavourite)
         ++numberOfFav;
       else
         ++numberOfNonFav;
     });
 
+    final bloc = context.bloc<LinesBloc>();
     final buttons = [
       if (numberOfUntracked > 0)
         _LinesFloatingActionButton(
           numberOfLines: numberOfUntracked,
           icon: Icons.location_on,
           label: 'Track',
-          onTap: () => context.bloc<LinesBloc>().trackSelectedLines(),
+          onTap: () => bloc.trackSelectedLines(),
         ),
       if (numberOfTracked > 0)
         _LinesFloatingActionButton(
           numberOfLines: numberOfTracked,
           icon: Icons.location_off,
           label: 'Untrack',
-          onTap: () => context.bloc<LinesBloc>().untrackSelectedLines(),
+          onTap: () => bloc.untrackSelectedLines(),
         ),
       if (numberOfNonFav > 0)
         _LinesFloatingActionButton(
           numberOfLines: numberOfNonFav,
           icon: Icons.save,
           label: 'Save',
-          onTap: () {
-            context.bloc<LinesBloc>().addSelectedLinesToFavourites();
-          },
+          onTap: () => bloc.toggleSelectedLinesFavourite(false),
         ),
       if (numberOfFav > 0)
         _LinesFloatingActionButton(
           numberOfLines: numberOfFav,
           icon: Icons.delete_forever,
           label: 'Delete',
-          onTap: () {
-            context.bloc<LinesBloc>().removeSelectedLinesFromFavourites();
-          },
+          onTap: () => bloc.toggleSelectedLinesFavourite(true),
         ),
       CircularTextIconButton(
         icon: Icons.cancel,
         text: 'Cancel',
-        onTap: () => context.bloc<LinesBloc>().resetSelection(),
+        onTap: () => bloc.resetSelection(),
       ),
     ];
 
@@ -399,14 +396,14 @@ class LinesPage extends HookWidget {
                   ),
                 ),
               ),
-              if (line.value.tracked || line.value.favourite)
+              if (line.value.tracked || line.key.isFavourite)
                 Align(
                   alignment: Alignment.bottomRight,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       if (line.value.tracked) const Icon(Icons.location_on),
-                      if (line.value.favourite) const Icon(Icons.favorite),
+                      if (line.key.isFavourite) const Icon(Icons.favorite),
                     ],
                   ),
                 )
@@ -525,7 +522,7 @@ class _LineActionsDialog extends HookWidget {
                     group: buttonsTextAutoSizeGroup,
                   ),
                   _popWithResultButton(
-                    state.favourite ? 'Unfavourite' : 'Favourite',
+                    line.isFavourite ? 'Unfavourite' : 'Favourite',
                     result: _LineActionsDialogResult.TOGGLE_FAVOURITE,
                     group: buttonsTextAutoSizeGroup,
                   ),

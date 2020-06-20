@@ -34,7 +34,7 @@ class LinesState {
   }
 
   Iterable<MapEntry<Line, LineState>> get favouriteLines {
-    return _filteredLines((entry) => entry.value.favourite);
+    return _filteredLines((entry) => entry.key.isFavourite);
   }
 
   Iterable<MapEntry<Line, LineState>> get trackedLines {
@@ -72,7 +72,7 @@ class LinesState {
       case LineListFilter.tracked:
         return (entry) => entry.value.tracked;
       case LineListFilter.favourite:
-        return (entry) => entry.value.favourite;
+        return (entry) => entry.key.isFavourite;
         break;
       case LineListFilter.all:
         return (_) => true;
@@ -83,33 +83,24 @@ class LinesState {
 }
 
 class LineState {
-  final bool favourite;
   final bool tracked;
   final bool selected;
 
   LineState({
-    @required this.favourite,
     @required this.tracked,
     @required this.selected,
   });
 
   LineState.initial()
-      : favourite = false,
-        tracked = false,
-        selected = false;
-
-  LineState.initialFavourite()
-      : favourite = true,
-        tracked = false,
+      : tracked = false,
         selected = false;
 
   LineState get untracked {
-    return LineState(favourite: favourite, tracked: false, selected: selected);
+    return LineState(tracked: false, selected: selected);
   }
 
   LineState get toggleSelection {
     return LineState(
-      favourite: favourite,
       tracked: tracked,
       selected: !selected,
     );
@@ -117,7 +108,6 @@ class LineState {
 
   LineState get toggleTracked {
     return LineState(
-      favourite: favourite,
       tracked: !tracked,
       selected: selected,
     );
@@ -125,17 +115,8 @@ class LineState {
 
   LineState get toggleTrackedAndSelection {
     return LineState(
-      favourite: favourite,
       tracked: !tracked,
       selected: !selected,
-    );
-  }
-
-  LineState get toggleFavourite {
-    return LineState(
-      favourite: !favourite,
-      tracked: tracked,
-      selected: selected,
     );
   }
 }

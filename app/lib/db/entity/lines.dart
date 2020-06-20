@@ -13,6 +13,8 @@ class Lines extends Table {
 
   DateTimeColumn get lastSearched => dateTime().nullable()();
 
+  BoolColumn get isFavourite => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {symbol};
 }

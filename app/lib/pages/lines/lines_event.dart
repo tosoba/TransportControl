@@ -19,9 +19,6 @@ enum _LinesEvent {
   ToggleLineSelection,
 
   @Data(fields: [DataField<Line>('line')])
-  ToggleLineFavourite,
-
-  @Data(fields: [DataField<Line>('line')])
   ToggleLineTracking,
 
   @object

@@ -13,18 +13,21 @@ class Line extends DataClass implements Insertable<Line> {
   final String dest2;
   final int type;
   final DateTime lastSearched;
+  final bool isFavourite;
   Line(
       {@required this.symbol,
       @required this.dest1,
       @required this.dest2,
       @required this.type,
-      this.lastSearched});
+      this.lastSearched,
+      @required this.isFavourite});
   factory Line.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
     final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    final boolType = db.typeSystem.forDartType<bool>();
     return Line(
       symbol:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}symbol']),
@@ -35,6 +38,8 @@ class Line extends DataClass implements Insertable<Line> {
       type: intType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
       lastSearched: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}last_searched']),
+      isFavourite: boolType
+          .mapFromDatabaseResponse(data['${effectivePrefix}is_favourite']),
     );
   }
   factory Line.fromJson(Map<String, dynamic> json,
@@ -46,6 +51,7 @@ class Line extends DataClass implements Insertable<Line> {
       dest2: serializer.fromJson<String>(json['dest2']),
       type: serializer.fromJson<int>(json['type']),
       lastSearched: serializer.fromJson<DateTime>(json['lastSearched']),
+      isFavourite: serializer.fromJson<bool>(json['isFavourite']),
     );
   }
   @override
@@ -57,6 +63,7 @@ class Line extends DataClass implements Insertable<Line> {
       'dest2': serializer.toJson<String>(dest2),
       'type': serializer.toJson<int>(type),
       'lastSearched': serializer.toJson<DateTime>(lastSearched),
+      'isFavourite': serializer.toJson<bool>(isFavourite),
     };
   }
 
@@ -73,6 +80,9 @@ class Line extends DataClass implements Insertable<Line> {
       lastSearched: lastSearched == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSearched),
+      isFavourite: isFavourite == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isFavourite),
     );
   }
 
@@ -81,13 +91,15 @@ class Line extends DataClass implements Insertable<Line> {
           String dest1,
           String dest2,
           int type,
-          DateTime lastSearched}) =>
+          DateTime lastSearched,
+          bool isFavourite}) =>
       Line(
         symbol: symbol ?? this.symbol,
         dest1: dest1 ?? this.dest1,
         dest2: dest2 ?? this.dest2,
         type: type ?? this.type,
         lastSearched: lastSearched ?? this.lastSearched,
+        isFavourite: isFavourite ?? this.isFavourite,
       );
   @override
   String toString() {
@@ -96,7 +108,8 @@ class Line extends DataClass implements Insertable<Line> {
           ..write('dest1: $dest1, ')
           ..write('dest2: $dest2, ')
           ..write('type: $type, ')
-          ..write('lastSearched: $lastSearched')
+          ..write('lastSearched: $lastSearched, ')
+          ..write('isFavourite: $isFavourite')
           ..write(')'))
         .toString();
   }
@@ -104,8 +117,12 @@ class Line extends DataClass implements Insertable<Line> {
   @override
   int get hashCode => $mrjf($mrjc(
       symbol.hashCode,
-      $mrjc(dest1.hashCode,
-          $mrjc(dest2.hashCode, $mrjc(type.hashCode, lastSearched.hashCode)))));
+      $mrjc(
+          dest1.hashCode,
+          $mrjc(
+              dest2.hashCode,
+              $mrjc(type.hashCode,
+                  $mrjc(lastSearched.hashCode, isFavourite.hashCode))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -114,7 +131,8 @@ class Line extends DataClass implements Insertable<Line> {
           other.dest1 == this.dest1 &&
           other.dest2 == this.dest2 &&
           other.type == this.type &&
-          other.lastSearched == this.lastSearched);
+          other.lastSearched == this.lastSearched &&
+          other.isFavourite == this.isFavourite);
 }
 
 class LinesCompanion extends UpdateCompanion<Line> {
@@ -123,12 +141,14 @@ class LinesCompanion extends UpdateCompanion<Line> {
   final Value<String> dest2;
   final Value<int> type;
   final Value<DateTime> lastSearched;
+  final Value<bool> isFavourite;
   const LinesCompanion({
     this.symbol = const Value.absent(),
     this.dest1 = const Value.absent(),
     this.dest2 = const Value.absent(),
     this.type = const Value.absent(),
     this.lastSearched = const Value.absent(),
+    this.isFavourite = const Value.absent(),
   });
   LinesCompanion.insert({
     @required String symbol,
@@ -136,6 +156,7 @@ class LinesCompanion extends UpdateCompanion<Line> {
     @required String dest2,
     @required int type,
     this.lastSearched = const Value.absent(),
+    this.isFavourite = const Value.absent(),
   })  : symbol = Value(symbol),
         dest1 = Value(dest1),
         dest2 = Value(dest2),
@@ -145,13 +166,15 @@ class LinesCompanion extends UpdateCompanion<Line> {
       Value<String> dest1,
       Value<String> dest2,
       Value<int> type,
-      Value<DateTime> lastSearched}) {
+      Value<DateTime> lastSearched,
+      Value<bool> isFavourite}) {
     return LinesCompanion(
       symbol: symbol ?? this.symbol,
       dest1: dest1 ?? this.dest1,
       dest2: dest2 ?? this.dest2,
       type: type ?? this.type,
       lastSearched: lastSearched ?? this.lastSearched,
+      isFavourite: isFavourite ?? this.isFavourite,
     );
   }
 }
@@ -222,9 +245,20 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
     );
   }
 
+  final VerificationMeta _isFavouriteMeta =
+      const VerificationMeta('isFavourite');
+  GeneratedBoolColumn _isFavourite;
+  @override
+  GeneratedBoolColumn get isFavourite =>
+      _isFavourite ??= _constructIsFavourite();
+  GeneratedBoolColumn _constructIsFavourite() {
+    return GeneratedBoolColumn('is_favourite', $tableName, false,
+        defaultValue: const Constant(false));
+  }
+
   @override
   List<GeneratedColumn> get $columns =>
-      [symbol, dest1, dest2, type, lastSearched];
+      [symbol, dest1, dest2, type, lastSearched, isFavourite];
   @override
   $LinesTable get asDslTable => this;
   @override
@@ -265,6 +299,10 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
           lastSearched.isAcceptableValue(
               d.lastSearched.value, _lastSearchedMeta));
     }
+    if (d.isFavourite.present) {
+      context.handle(_isFavouriteMeta,
+          isFavourite.isAcceptableValue(d.isFavourite.value, _isFavouriteMeta));
+    }
     return context;
   }
 
@@ -294,6 +332,9 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
     if (d.lastSearched.present) {
       map['last_searched'] =
           Variable<DateTime, DateTimeType>(d.lastSearched.value);
+    }
+    if (d.isFavourite.present) {
+      map['is_favourite'] = Variable<bool, BoolType>(d.isFavourite.value);
     }
     return map;
   }

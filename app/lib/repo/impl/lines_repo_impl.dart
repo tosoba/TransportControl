@@ -12,19 +12,14 @@ class LinesRepoImpl extends LinesRepo {
   LinesRepoImpl(this._dao);
 
   @override
-  Stream<Iterable<Line>> get favouriteLinesStream {
-    return _dao.selectFavouriteLinesStream
-        .map((dbLines) => dbLines.map((dbLine) => Line.fromDb(dbLine)));
+  Stream<Iterable<Line>> get linesStream {
+    return _dao.selectLinesStream
+        .map((lines) => lines.map((line) => Line.fromDb(line)));
   }
 
   @override
   Future insertLine(Line line) => _dao.insertLine(line.db);
-
-  @override
-  Future<int> deleteLines(Iterable<String> symbols) {
-    return _dao.deleteLines(symbols);
-  }
-
+  
   @override
   Future<void> insertLines(Iterable<Line> lines) {
     return _dao.insertLines(lines.map((line) => line.db));
@@ -33,5 +28,10 @@ class LinesRepoImpl extends LinesRepo {
   @override
   Future<int> updateLastSearched(Iterable<String> symbols) {
     return _dao.updateLastSearched(symbols);
+  }
+
+  @override
+  Future<void> updateIsFavourite(Iterable<Line> lines) {
+    return _dao.updateIsFavourite(lines.map((line) => line.db));
   }
 }

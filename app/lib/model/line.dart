@@ -11,8 +11,16 @@ class Line {
   final String dest2;
   final int type;
   final DateTime lastSearched;
+  final bool isFavourite;
 
-  Line(this.symbol, this.dest1, this.dest2, this.type, this.lastSearched);
+  Line(
+    this.symbol,
+    this.dest1,
+    this.dest2,
+    this.type,
+    this.lastSearched,
+    this.isFavourite,
+  );
 
   factory Line.fromJson(Map<String, dynamic> json) => _$LineFromJson(json);
 
@@ -42,6 +50,7 @@ class Line {
       dest2: dest2,
       type: type,
       lastSearched: lastSearched,
+      isFavourite: isFavourite,
     );
   }
 
@@ -50,5 +59,6 @@ class Line {
         dest1 = line.dest1,
         dest2 = line.dest2,
         type = line.type,
-        lastSearched = line.lastSearched;
+        lastSearched = line.lastSearched,
+        isFavourite = line.isFavourite;
 }

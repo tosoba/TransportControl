@@ -15,6 +15,7 @@ Line _$LineFromJson(Map<String, dynamic> json) {
     json['lastSearched'] == null
         ? null
         : DateTime.parse(json['lastSearched'] as String),
+    json['isFavourite'] as bool,
   );
 }
 
@@ -24,4 +25,5 @@ Map<String, dynamic> _$LineToJson(Line instance) => <String, dynamic>{
       'dest2': instance.dest2,
       'type': instance.type,
       'lastSearched': instance.lastSearched?.toIso8601String(),
+      'isFavourite': instance.isFavourite,
     };

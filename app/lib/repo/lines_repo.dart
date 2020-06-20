@@ -5,9 +5,9 @@ abstract class LinesRepo {
 
   Future<void> insertLines(Iterable<Line> lines);
 
-  Future<int> deleteLines(Iterable<String> symbols);
-
-  Stream<Iterable<Line>> get favouriteLinesStream;
+  Stream<Iterable<Line>> get linesStream;
 
   Future<int> updateLastSearched(Iterable<String> symbols);
+
+  Future<void> updateIsFavourite(Iterable<Line> lines);
 }

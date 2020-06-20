@@ -8,6 +8,7 @@ import 'package:transport_control/pages/lines/lines_event.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 import 'package:transport_control/repo/lines_repo.dart';
 import 'package:transport_control/util/asset_util.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 class LinesBloc extends Bloc<LinesEvent, LinesState> {
   final LinesRepo _linesRepo;
@@ -25,29 +26,24 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
   ) {
     _subscriptions
       ..add(
-        _linesRepo.favouriteLinesStream
-            .asyncMap(
-              (favouriteLines) => state.lines.isEmpty
-                  ? rootBundle.loadString(JsonAssets.lines).then(
-                        (jsonString) => Map.fromIterable(
-                          jsonDecode(jsonString) as Iterable,
-                          key: (lineJson) => Line.fromJson(lineJson),
-                          value: (line) => favouriteLines.contains(line)
-                              ? LineState.initialFavourite()
-                              : LineState.initial(),
-                        ),
-                      )
-                  : Future.value(
-                      state.lines.map((line, state) {
-                        final isFavourite = favouriteLines.contains(line);
-                        if ((state.favourite && !isFavourite) ||
-                            (!state.favourite && isFavourite)) {
-                          return MapEntry(line, state.toggleFavourite);
-                        } else {
-                          return MapEntry(line, state);
-                        }
-                      }),
-                    ),
+        _linesRepo.linesStream
+            .tap((lines) async {
+              if (lines.isEmpty) {
+                final linesJsonString =
+                    await rootBundle.loadString(JsonAssets.lines);
+                _linesRepo.insertLines(
+                  (jsonDecode(linesJsonString) as Iterable)
+                      .map((lineJson) => Line.fromJson(lineJson)),
+                );
+              }
+            })
+            .where((lines) => lines.isNotEmpty)
+            .map(
+              (lines) => Map.fromIterable(
+                lines,
+                key: (line) => line as Line,
+                value: (line) => state.lines[line] ?? LineState.initial(),
+              ),
             )
             .listen((lines) => add(LinesEvent.updateLines(lines: lines))),
       )
@@ -103,8 +99,10 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
             updatedLines[line] = toggle(lineState);
           }
         });
+
         _linesRepo
             .updateLastSearched(newlyTrackedLines.map((line) => line.symbol));
+
         _trackedLinesAddedSink.add(
           TrackedLinesAddedEvent(
             lines: newlyTrackedLines,
@@ -113,6 +111,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
             },
           ),
         );
+
         return state.copyWith(lines: updatedLines);
       },
       untrackSelectedLines: (evt) {
@@ -127,7 +126,9 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
             updatedLines[line] = toggle(lineState);
           }
         });
+
         _trackedLinesRemovedSink.add(linesRemovedFromTracking);
+
         return state.copyWith(lines: updatedLines);
       },
       untrackAllLines: (_) => state.copyWith(
@@ -139,13 +140,6 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
         lines: state.lines.map(
           (line, lineState) => evt.lines.contains(line)
               ? MapEntry(line, lineState.toggleTracked)
-              : MapEntry(line, lineState),
-        ),
-      ),
-      toggleLineFavourite: (evt) => state.copyWith(
-        lines: state.lines.map(
-          (line, lineState) => evt.line == line
-              ? MapEntry(line, lineState.toggleFavourite)
               : MapEntry(line, lineState),
         ),
       ),
@@ -201,7 +195,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
   }
 
   void toggleFavourite(Line line) {
-    add(LinesEvent.toggleLineFavourite(line: line));
+    _linesRepo.updateIsFavourite([line]);
   }
 
   void toggleTracked(MapEntry<Line, LineState> line) async {
@@ -211,16 +205,12 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
       _trackedLinesAddedSink.add(
         TrackedLinesAddedEvent(
           lines: Set<Line>()..add(line.key),
-          beforeRetry: () {
-            add(LinesEvent.toggleLineTracking(line: line.key));
-          },
+          beforeRetry: () => add(LinesEvent.toggleLineTracking(line: line.key)),
         ),
       );
     }
 
-    if (line.value.favourite) {
-      _linesRepo.updateLastSearched([line.key.symbol]);
-    }
+    _linesRepo.updateLastSearched([line.key.symbol]);
 
     add(LinesEvent.toggleLineTracking(line: line.key));
   }
@@ -243,14 +233,13 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     add(LinesEvent.untrackSelectedLines(resetSelection: resetSelection));
   }
 
-  void addSelectedLinesToFavourites({bool resetSelection = true}) {
-    _linesRepo.insertLines(state.selectedLines.map((entry) => entry.key));
-    if (resetSelection) this.resetSelection();
-  }
-
-  void removeSelectedLinesFromFavourites({bool resetSelection = true}) {
-    _linesRepo
-        .deleteLines(state.selectedLines.map((entry) => entry.key.symbol));
+  void toggleSelectedLinesFavourite(bool delete, {bool resetSelection = true}) {
+    final filter = delete
+        ? (MapEntry<Line, LineState> entry) => entry.key.isFavourite
+        : (MapEntry<Line, LineState> entry) => !entry.key.isFavourite;
+    _linesRepo.updateIsFavourite(
+      state.selectedLines.where(filter).map((entry) => entry.key),
+    );
     if (resetSelection) this.resetSelection();
   }
 }
