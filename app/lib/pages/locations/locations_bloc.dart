@@ -96,7 +96,9 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   }
 
   void loadVehiclesInLocation(Location location) {
-    _loadVehiclesInLocationSink.add(location);
+    final updatedLocation = location.copyWith(lastSearched: DateTime.now());
+    updateLocation(updatedLocation);
+    _loadVehiclesInLocationSink.add(updatedLocation);
   }
 
   void loadVehiclesNearbyUserLocation() async {

@@ -37,7 +37,7 @@ class LastSearchedDao extends DatabaseAccessor<Database>
           if (type == 'line') {
             lineSymbols.add(row.readString('id'));
           } else {
-            locationIds.add(row.readInt('id'));
+            locationIds.add(int.parse(row.readString('id')));
           }
         });
 

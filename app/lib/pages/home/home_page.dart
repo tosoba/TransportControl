@@ -134,18 +134,20 @@ class HomePage extends HookWidget {
               if (snapshot.data != null && snapshot.data.isNotEmpty)
                 PreferredSizeWrapped(
                   size: Size.fromHeight(32.0 + 10.0),
-                  child: ListView.builder(itemBuilder: (context, index) {
-                    final item = snapshot.data.elementAt(index);
-                    return Chip(
-                      label: Text(
-                        item.when(
-                          lineItem: (lineItem) => lineItem.line.symbol,
-                          locationItem: (locationItem) =>
-                              locationItem.location.name,
+                  child: Expanded(
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: snapshot.data.length,
+                      itemBuilder: (context, index) => Chip(
+                        label: Text(
+                          snapshot.data.elementAt(index).when(
+                                lineItem: (item) => item.line.symbol,
+                                locationItem: (item) => item.location.name,
+                              ),
                         ),
                       ),
-                    );
-                  }),
+                    ),
+                  ),
                 )
             ]),
           ),
