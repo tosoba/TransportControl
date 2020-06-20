@@ -103,6 +103,16 @@ class HomePage extends HookWidget {
 
     useUnfocusOnKeyboardHidden(focusNode: searchFieldFocusNode);
 
+    final appBar = _appBar(
+      context,
+      currentPage: currentPage,
+      searchFieldFocusNode: searchFieldFocusNode,
+      searchFieldController: searchFieldController,
+      placesPageAnimController: placesPageAnimController,
+      mapTapAnimController: mapTapAnimController,
+      bottomSheetControllers: bottomSheetControllers,
+    );
+
     return WillPopScope(
       onWillPop: () => _onWillPop(
         currentPage: currentPage,
@@ -121,35 +131,13 @@ class HomePage extends HookWidget {
           resizeToAvoidBottomPadding: false,
           appBar: SlideTransitionPreferredSizeWidget(
             offset: appBarOffset,
-            child: PreferredSizeColumn(widgets: [
-              _appBar(
-                context,
-                currentPage: currentPage,
-                searchFieldFocusNode: searchFieldFocusNode,
-                searchFieldController: searchFieldController,
-                placesPageAnimController: placesPageAnimController,
-                mapTapAnimController: mapTapAnimController,
-                bottomSheetControllers: bottomSheetControllers,
-              ),
-              if (snapshot.data != null && snapshot.data.isNotEmpty)
-                PreferredSizeWrapped(
-                  size: Size.fromHeight(32.0 + 10.0),
-                  child: Expanded(
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: snapshot.data.length,
-                      itemBuilder: (context, index) => Chip(
-                        label: Text(
-                          snapshot.data.elementAt(index).when(
-                                lineItem: (item) => item.line.symbol,
-                                locationItem: (item) => item.location.name,
-                              ),
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-            ]),
+            child: MediaQuery.of(context).orientation == Orientation.portrait
+                ? PreferredSizeColumn(widgets: [
+                    appBar,
+                    if (snapshot.data != null && snapshot.data.isNotEmpty)
+                      _lastSearchedItemsList(snapshot: snapshot)
+                  ])
+                : appBar,
           ),
           body: Builder(
             builder: (context) => Stack(children: [
@@ -361,6 +349,49 @@ class HomePage extends HookWidget {
         },
       ),
       hint: Strings.transportNearby,
+    );
+  }
+
+  PreferredSizeWidget _lastSearchedItemsList({
+    @required AsyncSnapshot<List<SearchedItem>> snapshot,
+  }) {
+    return PreferredSizeWrapped(
+      size: Size.fromHeight(32.0 + 10.0),
+      child: Expanded(
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.only(left: 10, top: 5),
+          itemCount: snapshot.data.length,
+          itemBuilder: (context, index) {
+            final theme = Theme.of(context);
+            return snapshot.data.elementAt(index).when(
+                  lineItem: (item) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: RawChip(
+                      avatar: item.line.type == VehicleType.BUS
+                          ? const Icon(Icons.directions_bus)
+                          : const Icon(Icons.tram),
+                      backgroundColor: theme.primaryColor,
+                      elevation: 5,
+                      label: Text(item.line.symbol),
+                      labelPadding: const EdgeInsets.symmetric(horizontal: 15),
+                      onPressed: () {},
+                    ),
+                  ),
+                  locationItem: (item) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: RawChip(
+                      avatar: const Icon(Icons.location_on),
+                      backgroundColor: theme.primaryColor,
+                      elevation: 5,
+                      label: Text(item.location.name),
+                      onPressed: () {},
+                    ),
+                  ),
+                );
+          },
+        ),
+      ),
     );
   }
 
