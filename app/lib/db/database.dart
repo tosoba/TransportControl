@@ -1,5 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:moor_flutter/moor_flutter.dart';
+import 'package:transport_control/db/dao/last_searched_dao.dart';
 import 'package:transport_control/db/dao/lines_dao.dart';
 import 'package:transport_control/db/dao/locations_dao.dart';
 import 'package:transport_control/db/dao/places_dao.dart';
@@ -19,7 +20,7 @@ part 'database.g.dart';
     PlaceSuggestions,
     PlaceQuerySuggestions
   ],
-  daos: [LinesDao, LocationsDao, PlacesDao],
+  daos: [LinesDao, LocationsDao, PlacesDao, LastSearchedDao],
 )
 @singleton
 class Database extends _$Database {

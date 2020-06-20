@@ -6,9 +6,11 @@ import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:transport_control/di/injection.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/pages/home/home_page.dart';
+import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/nearby/nearby_bloc.dart';
+import 'package:transport_control/repo/last_searched_repo.dart';
 import 'package:transport_control/repo/lines_repo.dart';
 import 'package:transport_control/repo/place_suggestions_repo.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
@@ -98,6 +100,9 @@ class _TransportControlAppState extends State<TransportControlApp> {
                 getIt<PlaceSuggestionsRepo>(),
                 loadVehiclesNearbyPlace.sink,
               ),
+            ),
+            BlocProvider<LastSearchedBloc>(
+              create: (context) => LastSearchedBloc(getIt<LastSearchedRepo>()),
             )
           ],
           child: HomePage(),

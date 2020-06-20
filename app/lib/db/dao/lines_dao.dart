@@ -38,4 +38,9 @@ class LinesDao extends DatabaseAccessor<Database> with _$LinesDaoMixin {
   }
 
   Stream<List<Line>> get selectFavouriteLinesStream => select(lines).watch();
+
+  Future<int> updateLastSearched(Iterable<String> symbols) {
+    return (update(lines)..where((line) => line.symbol.isIn(symbols)))
+        .write(LinesCompanion(lastSearched: Value(DateTime.now())));
+  }
 }

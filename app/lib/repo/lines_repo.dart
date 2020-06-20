@@ -8,4 +8,6 @@ abstract class LinesRepo {
   Future<int> deleteLines(Iterable<String> symbols);
 
   Stream<Iterable<Line>> get favouriteLinesStream;
+
+  Future<int> updateLastSearched(Iterable<String> symbols);
 }

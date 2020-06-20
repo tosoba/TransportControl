@@ -29,4 +29,9 @@ class LinesRepoImpl extends LinesRepo {
   Future<void> insertLines(Iterable<Line> lines) {
     return _dao.insertLines(lines.map((line) => line.db));
   }
+
+  @override
+  Future<int> updateLastSearched(Iterable<String> symbols) {
+    return _dao.updateLastSearched(symbols);
+  }
 }

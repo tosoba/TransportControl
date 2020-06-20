@@ -10,6 +10,9 @@ import 'package:transport_control/di/module/api_module.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:transport_control/di/module/settings_module.dart';
+import 'package:transport_control/db/dao/last_searched_dao.dart';
+import 'package:transport_control/repo/impl/last_searched_repo_impl.dart';
+import 'package:transport_control/repo/last_searched_repo.dart';
 import 'package:transport_control/api/places_api.dart';
 import 'package:transport_control/api/vehicles_api.dart';
 import 'package:transport_control/db/dao/lines_dao.dart';
@@ -29,6 +32,9 @@ void $initGetIt(GetIt g, {String environment}) {
   final apiModule = _$ApiModule();
   final controllersModule = _$ControllersModule();
   final settingsModule = _$SettingsModule();
+  g.registerFactory<LastSearchedDao>(() => LastSearchedDao.of(
+        g<Database>(),
+      ));
   g.registerFactory<LinesDao>(() => LinesDao.of(
         g<Database>(),
       ));
@@ -54,6 +60,11 @@ void $initGetIt(GetIt g, {String environment}) {
   g.registerSingleton<UntrackLines>(controllersModule.untrackLines);
   g.registerSingleton<UntrackAllLines>(controllersModule.mapCleared);
   g.registerSingleton<RxSharedPreferences>(settingsModule.client);
+  if (environment == 'dev') {
+    g.registerSingleton<LastSearchedRepo>(LastSearchedRepoImpl(
+      g<LastSearchedDao>(),
+    ));
+  }
   g.registerSingleton<PlacesApi>(PlacesApi.create(
     g<Dio>(),
   ));

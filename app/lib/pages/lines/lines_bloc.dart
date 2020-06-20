@@ -103,6 +103,8 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
             updatedLines[line] = toggle(lineState);
           }
         });
+        _linesRepo
+            .updateLastSearched(newlyTrackedLines.map((line) => line.symbol));
         _trackedLinesAddedSink.add(
           TrackedLinesAddedEvent(
             lines: newlyTrackedLines,
@@ -215,6 +217,11 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
         ),
       );
     }
+
+    if (line.value.favourite) {
+      _linesRepo.updateLastSearched([line.key.symbol]);
+    }
+
     add(LinesEvent.toggleLineTracking(line: line.key));
   }
 

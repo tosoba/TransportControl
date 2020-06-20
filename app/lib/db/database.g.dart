@@ -12,16 +12,19 @@ class Line extends DataClass implements Insertable<Line> {
   final String dest1;
   final String dest2;
   final int type;
+  final DateTime lastSearched;
   Line(
       {@required this.symbol,
       @required this.dest1,
       @required this.dest2,
-      @required this.type});
+      @required this.type,
+      this.lastSearched});
   factory Line.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return Line(
       symbol:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}symbol']),
@@ -30,6 +33,8 @@ class Line extends DataClass implements Insertable<Line> {
       dest2:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}dest2']),
       type: intType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
+      lastSearched: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}last_searched']),
     );
   }
   factory Line.fromJson(Map<String, dynamic> json,
@@ -40,6 +45,7 @@ class Line extends DataClass implements Insertable<Line> {
       dest1: serializer.fromJson<String>(json['dest1']),
       dest2: serializer.fromJson<String>(json['dest2']),
       type: serializer.fromJson<int>(json['type']),
+      lastSearched: serializer.fromJson<DateTime>(json['lastSearched']),
     );
   }
   @override
@@ -50,6 +56,7 @@ class Line extends DataClass implements Insertable<Line> {
       'dest1': serializer.toJson<String>(dest1),
       'dest2': serializer.toJson<String>(dest2),
       'type': serializer.toJson<int>(type),
+      'lastSearched': serializer.toJson<DateTime>(lastSearched),
     };
   }
 
@@ -63,14 +70,24 @@ class Line extends DataClass implements Insertable<Line> {
       dest2:
           dest2 == null && nullToAbsent ? const Value.absent() : Value(dest2),
       type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      lastSearched: lastSearched == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSearched),
     );
   }
 
-  Line copyWith({String symbol, String dest1, String dest2, int type}) => Line(
+  Line copyWith(
+          {String symbol,
+          String dest1,
+          String dest2,
+          int type,
+          DateTime lastSearched}) =>
+      Line(
         symbol: symbol ?? this.symbol,
         dest1: dest1 ?? this.dest1,
         dest2: dest2 ?? this.dest2,
         type: type ?? this.type,
+        lastSearched: lastSearched ?? this.lastSearched,
       );
   @override
   String toString() {
@@ -78,14 +95,17 @@ class Line extends DataClass implements Insertable<Line> {
           ..write('symbol: $symbol, ')
           ..write('dest1: $dest1, ')
           ..write('dest2: $dest2, ')
-          ..write('type: $type')
+          ..write('type: $type, ')
+          ..write('lastSearched: $lastSearched')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(symbol.hashCode,
-      $mrjc(dest1.hashCode, $mrjc(dest2.hashCode, type.hashCode))));
+  int get hashCode => $mrjf($mrjc(
+      symbol.hashCode,
+      $mrjc(dest1.hashCode,
+          $mrjc(dest2.hashCode, $mrjc(type.hashCode, lastSearched.hashCode)))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -93,7 +113,8 @@ class Line extends DataClass implements Insertable<Line> {
           other.symbol == this.symbol &&
           other.dest1 == this.dest1 &&
           other.dest2 == this.dest2 &&
-          other.type == this.type);
+          other.type == this.type &&
+          other.lastSearched == this.lastSearched);
 }
 
 class LinesCompanion extends UpdateCompanion<Line> {
@@ -101,17 +122,20 @@ class LinesCompanion extends UpdateCompanion<Line> {
   final Value<String> dest1;
   final Value<String> dest2;
   final Value<int> type;
+  final Value<DateTime> lastSearched;
   const LinesCompanion({
     this.symbol = const Value.absent(),
     this.dest1 = const Value.absent(),
     this.dest2 = const Value.absent(),
     this.type = const Value.absent(),
+    this.lastSearched = const Value.absent(),
   });
   LinesCompanion.insert({
     @required String symbol,
     @required String dest1,
     @required String dest2,
     @required int type,
+    this.lastSearched = const Value.absent(),
   })  : symbol = Value(symbol),
         dest1 = Value(dest1),
         dest2 = Value(dest2),
@@ -120,12 +144,14 @@ class LinesCompanion extends UpdateCompanion<Line> {
       {Value<String> symbol,
       Value<String> dest1,
       Value<String> dest2,
-      Value<int> type}) {
+      Value<int> type,
+      Value<DateTime> lastSearched}) {
     return LinesCompanion(
       symbol: symbol ?? this.symbol,
       dest1: dest1 ?? this.dest1,
       dest2: dest2 ?? this.dest2,
       type: type ?? this.type,
+      lastSearched: lastSearched ?? this.lastSearched,
     );
   }
 }
@@ -182,8 +208,23 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
     );
   }
 
+  final VerificationMeta _lastSearchedMeta =
+      const VerificationMeta('lastSearched');
+  GeneratedDateTimeColumn _lastSearched;
   @override
-  List<GeneratedColumn> get $columns => [symbol, dest1, dest2, type];
+  GeneratedDateTimeColumn get lastSearched =>
+      _lastSearched ??= _constructLastSearched();
+  GeneratedDateTimeColumn _constructLastSearched() {
+    return GeneratedDateTimeColumn(
+      'last_searched',
+      $tableName,
+      true,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns =>
+      [symbol, dest1, dest2, type, lastSearched];
   @override
   $LinesTable get asDslTable => this;
   @override
@@ -218,6 +259,12 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
+    if (d.lastSearched.present) {
+      context.handle(
+          _lastSearchedMeta,
+          lastSearched.isAcceptableValue(
+              d.lastSearched.value, _lastSearchedMeta));
+    }
     return context;
   }
 
@@ -243,6 +290,10 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
     }
     if (d.type.present) {
       map['type'] = Variable<int, IntType>(d.type.value);
+    }
+    if (d.lastSearched.present) {
+      map['last_searched'] =
+          Variable<DateTime, DateTimeType>(d.lastSearched.value);
     }
     return map;
   }
@@ -1436,6 +1487,9 @@ abstract class _$Database extends GeneratedDatabase {
       _locationsDao ??= LocationsDao(this as Database);
   PlacesDao _placesDao;
   PlacesDao get placesDao => _placesDao ??= PlacesDao(this as Database);
+  LastSearchedDao _lastSearchedDao;
+  LastSearchedDao get lastSearchedDao =>
+      _lastSearchedDao ??= LastSearchedDao(this as Database);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override

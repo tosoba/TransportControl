@@ -8,6 +8,8 @@ import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
+import 'package:transport_control/model/searched_item.dart';
+import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
@@ -24,6 +26,8 @@ import 'package:transport_control/repo/locations_repo.dart';
 import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
+import 'package:transport_control/widgets/preferred_size_column.dart';
+import 'package:transport_control/widgets/preferred_size_wrapped.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 
@@ -107,75 +111,98 @@ class HomePage extends HookWidget {
         placesPageAnimController: placesPageAnimController,
         bottomSheetControllers: bottomSheetControllers,
       ),
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        extendBody: true,
-        resizeToAvoidBottomPadding: false,
-        appBar: SlideTransitionPreferredSizeWidget(
-          offset: appBarOffset,
-          child: _appBar(
-            context,
-            currentPage: currentPage,
-            searchFieldFocusNode: searchFieldFocusNode,
-            searchFieldController: searchFieldController,
-            placesPageAnimController: placesPageAnimController,
-            mapTapAnimController: mapTapAnimController,
-            bottomSheetControllers: bottomSheetControllers,
-          ),
-        ),
-        body: Builder(
-          builder: (context) => Stack(children: [
-            MapPage(
-              mapTapped: () => _mapTapped(
+      child: StreamBuilder<List<SearchedItem>>(
+        stream: context
+            .bloc<LastSearchedBloc>()
+            .map((items) => items.take(10).toList()),
+        builder: (context, snapshot) => Scaffold(
+          extendBodyBehindAppBar: true,
+          extendBody: true,
+          resizeToAvoidBottomPadding: false,
+          appBar: SlideTransitionPreferredSizeWidget(
+            offset: appBarOffset,
+            child: PreferredSizeColumn(widgets: [
+              _appBar(
+                context,
+                currentPage: currentPage,
+                searchFieldFocusNode: searchFieldFocusNode,
+                searchFieldController: searchFieldController,
+                placesPageAnimController: placesPageAnimController,
                 mapTapAnimController: mapTapAnimController,
                 bottomSheetControllers: bottomSheetControllers,
               ),
-              animatedToBounds: () => _hideControls(mapTapAnimController),
-              cameraMovedByUser: () {
-                bottomSheetControllers.closeBottomSheet();
-              },
-              markerTapped: (marker) {
-                bottomSheetControllers.showOrUpdateBottomSheet(
-                  context,
-                  marker: marker,
-                  moveToPositionNotifier: moveToPositionNotifier,
-                );
-              },
-              moveToPositionNotifier: moveToPositionNotifier,
-            ),
-            SlideTransition(
-              child: NearbyPage(
-                suggestionSelected: () => _showMapPage(
-                  currentPage: currentPage,
-                  searchFieldFocusNode: searchFieldFocusNode,
-                  placesPageAnimController: placesPageAnimController,
+              if (snapshot.data != null && snapshot.data.isNotEmpty)
+                PreferredSizeWrapped(
+                  size: Size.fromHeight(32.0 + 10.0),
+                  child: ListView.builder(itemBuilder: (context, index) {
+                    final item = snapshot.data.elementAt(index);
+                    return Chip(
+                      label: Text(
+                        item.when(
+                          lineItem: (lineItem) => lineItem.line.symbol,
+                          locationItem: (locationItem) =>
+                              locationItem.location.name,
+                        ),
+                      ),
+                    );
+                  }),
+                )
+            ]),
+          ),
+          body: Builder(
+            builder: (context) => Stack(children: [
+              MapPage(
+                mapTapped: () => _mapTapped(
                   mapTapAnimController: mapTapAnimController,
                   bottomSheetControllers: bottomSheetControllers,
                 ),
+                animatedToBounds: () => _hideControls(mapTapAnimController),
+                cameraMovedByUser: () {
+                  bottomSheetControllers.closeBottomSheet();
+                },
+                markerTapped: (marker) {
+                  bottomSheetControllers.showOrUpdateBottomSheet(
+                    context,
+                    marker: marker,
+                    moveToPositionNotifier: moveToPositionNotifier,
+                  );
+                },
+                moveToPositionNotifier: moveToPositionNotifier,
               ),
-              position: placesPageOffset,
-            ),
-            SlideTransition(
-              position: connectivityStatusBarOffset,
-              child: ConnectionStatusBar(),
-            ),
-          ]),
-        ),
-        bottomNavigationBar: Visibility(
-          visible: currentPage.value == _HomeSubPage.map,
-          child: SizeTransition(
-            child: _bottomNavBar(
-              context,
-              bottomNavButtonsOpacity: bottomNavButtonsOpacity,
-              bottomSheetControllers: bottomSheetControllers,
-            ),
-            sizeFactor: bottomNavSize,
+              SlideTransition(
+                child: NearbyPage(
+                  suggestionSelected: () => _showMapPage(
+                    currentPage: currentPage,
+                    searchFieldFocusNode: searchFieldFocusNode,
+                    placesPageAnimController: placesPageAnimController,
+                    mapTapAnimController: mapTapAnimController,
+                    bottomSheetControllers: bottomSheetControllers,
+                  ),
+                ),
+                position: placesPageOffset,
+              ),
+              SlideTransition(
+                position: connectivityStatusBarOffset,
+                child: ConnectionStatusBar(),
+              ),
+            ]),
           ),
-        ),
-        drawer: _navigationDrawer(
-          context,
-          drawerItemTextGroup: drawerItemTextGroup,
-          bottomSheetControllers: bottomSheetControllers,
+          bottomNavigationBar: Visibility(
+            visible: currentPage.value == _HomeSubPage.map,
+            child: SizeTransition(
+              child: _bottomNavBar(
+                context,
+                bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+                bottomSheetControllers: bottomSheetControllers,
+              ),
+              sizeFactor: bottomNavSize,
+            ),
+          ),
+          drawer: _navigationDrawer(
+            context,
+            drawerItemTextGroup: drawerItemTextGroup,
+            bottomSheetControllers: bottomSheetControllers,
+          ),
         ),
       ),
     );

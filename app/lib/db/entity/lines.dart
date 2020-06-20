@@ -11,6 +11,8 @@ class Lines extends Table {
 
   IntColumn get type => integer()();
 
+  DateTimeColumn get lastSearched => dateTime().nullable()();
+
   @override
   Set<Column> get primaryKey => {symbol};
 }

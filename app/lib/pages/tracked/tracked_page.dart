@@ -203,6 +203,14 @@ extension _MapVehicleSourceExt on MapVehicleSource {
             text: 'Vehicles nearby ',
             style: const TextStyle(color: Colors.black, fontSize: 16),
           ),
+          TextSpan(
+            text: '${source.location.name} ',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontSize: 16,
+            ),
+          ),
           _loadedAgoTextSpan(source.loadedAt),
         ]),
         overflow: TextOverflow.ellipsis,
@@ -213,7 +221,7 @@ extension _MapVehicleSourceExt on MapVehicleSource {
             text: 'Vehicles nearby ',
             style: const TextStyle(color: Colors.black, fontSize: 16),
           ),
-          TextSpan(
+          const TextSpan(
             text: 'your location ',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
