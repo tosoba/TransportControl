@@ -19,7 +19,7 @@ class NearbyPage extends StatelessWidget {
       stream: context.bloc<NearbyBloc>(),
       builder: (context, snapshot) => Container(
         child: _nearbyWidget(state: snapshot.data),
-        color: Colors.white,
+        color: Theme.of(context).primaryColor,
       ),
     );
   }
