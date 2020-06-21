@@ -26,12 +26,12 @@ class Line {
 
   Map<String, dynamic> toJson() => _$LineToJson(this);
 
-  bool operator ==(o) {
-    return o is Line &&
-        symbol == o.symbol &&
-        dest1 == o.dest1 &&
-        dest2 == o.dest2 &&
-        type == o.type;
+  bool operator ==(other) {
+    return other is Line &&
+        symbol == other.symbol &&
+        dest1 == other.dest1 &&
+        dest2 == other.dest2 &&
+        type == other.type;
   }
 
   int get hashCode {

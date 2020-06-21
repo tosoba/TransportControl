@@ -6,8 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
+import 'package:transport_control/model/line.dart';
+import 'package:transport_control/model/location.dart';
 import 'package:transport_control/model/searched_item.dart';
 import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
@@ -18,6 +21,7 @@ import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_markers.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/map/map_vehicle.dart';
+import 'package:transport_control/pages/map/map_vehicle_source.dart';
 import 'package:transport_control/pages/nearby/nearby_bloc.dart';
 import 'package:transport_control/pages/nearby/nearby_page.dart';
 import 'package:transport_control/pages/preferences/preferences_page.dart';
@@ -122,9 +126,10 @@ class HomePage extends HookWidget {
         bottomSheetControllers: bottomSheetControllers,
       ),
       child: StreamBuilder<List<SearchedItem>>(
-        stream: context
-            .bloc<LastSearchedBloc>()
-            .map((items) => items.take(10).toList()),
+        stream: context.bloc<LastSearchedBloc>().notLoadedLastSearchedItems(
+              loadedVehicleSourcesStream:
+                  context.bloc<MapBloc>().mapVehicleSourcesStream,
+            ),
         builder: (context, snapshot) => Scaffold(
           extendBodyBehindAppBar: true,
           extendBody: true,
@@ -738,4 +743,53 @@ class _VehiclesBottomSheetCarouselControllers {
     this.sheetController,
     this.carouselController,
   );
+}
+
+extension _MapBlocExt on MapBloc {
+  Stream<Set<MapVehicleSource>> get mapVehicleSourcesStream {
+    return map((state) {
+      final sources = <MapVehicleSource>{};
+      state.trackedVehicles.values.forEach((tracked) {
+        sources.addAll(tracked.sources);
+      });
+      return sources;
+    });
+  }
+}
+
+extension _LastSearchedBlocExt on LastSearchedBloc {
+  Stream<List<SearchedItem>> notLoadedLastSearchedItems({
+    @required Stream<Set<MapVehicleSource>> loadedVehicleSourcesStream,
+  }) {
+    return combineLatest(
+      loadedVehicleSourcesStream,
+      (items, Set<MapVehicleSource> sources) {
+        final lineSources = <Line>{};
+        final locationSources = <Location>{};
+        sources.forEach((source) {
+          source.whenPartial(
+            ofLine: (lineSource) {
+              lineSources.add(lineSource.line);
+            },
+            nearbyLocation: (locationSource) {
+              locationSources.add(locationSource.location);
+            },
+          );
+        });
+        return items
+            .where(
+              (item) => item.when(
+                lineItem: (lineItem) => !lineSources.contains(
+                  lineItem.line,
+                ),
+                locationItem: (locationItem) => !locationSources.contains(
+                  locationItem.location,
+                ),
+              ),
+            )
+            .take(10)
+            .toList();
+      },
+    );
+  }
 }

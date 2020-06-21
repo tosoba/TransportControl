@@ -1,4 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:quiver/core.dart';
 import 'package:transport_control/db/database.dart' as Db;
 
 class Location {
@@ -19,6 +20,23 @@ class Location {
     this.timesSearched,
     this.savedAt,
   );
+
+  bool operator ==(other) {
+    return other is Location &&
+        id == other.id &&
+        name == other.name &&
+        bounds == other.bounds &&
+        isFavourite == other.isFavourite;
+  }
+
+  int get hashCode {
+    return hash4(
+      id.hashCode,
+      name.hashCode,
+      bounds.hashCode,
+      isFavourite.hashCode,
+    );
+  }
 
   Location copyWith({
     String name,
