@@ -13,6 +13,9 @@ class ImageAssets {
 
 class JsonAssets {
   static const lines = 'assets/json/lines.json';
+  static const darkMapStyle = 'assets/json/dark_map_style.json';
+
+  JsonAssets._();
 }
 
 extension AssetBundleExt on AssetBundle {

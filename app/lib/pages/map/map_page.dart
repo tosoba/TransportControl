@@ -1,15 +1,20 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_markers.dart';
-import 'package:transport_control/pages/map/map_signal.dart';
+import 'package:transport_control/util/asset_util.dart';
 import 'package:transport_control/util/lat_lng_util.dart';
 import 'package:transport_control/util/model_util.dart';
+import 'package:transport_control/util/preferences_util.dart';
 import 'package:transport_control/util/snack_bar_util.dart';
 
 class MapPage extends StatefulWidget {
@@ -34,9 +39,9 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage>
     with AutomaticKeepAliveClientMixin<MapPage> {
+  final _preferences = GetIt.instance<RxSharedPreferences>();
   final _mapController = Completer<GoogleMapController>();
-  StreamSubscription<LoadingSignalTracker<MapSignal, Loading>>
-      _signalTrackersSubscription;
+  final _subscriptions = <StreamSubscription>[];
 
   @override
   bool get wantKeepAlive => true;
@@ -46,71 +51,90 @@ class _MapPageState extends State<MapPage>
     super.initState();
 
     final bloc = context.bloc<MapBloc>();
-
-    bloc
-        .where((state) => state.selectedVehicleNumber != null)
-        .map(
-          (state) => state
-              .trackedVehicles[state.selectedVehicleNumber].vehicle.position,
-        )
-        .distinct()
-        .debounce(const Duration(milliseconds: 250))
-        .listen(
-      (position) async {
-        final controller = await _mapController.future;
-        controller.animateCamera(
-          CameraUpdate.newLatLng(LatLng(position.latitude, position.longitude)),
-        );
-      },
-    );
-
-    _signalTrackersSubscription = bloc.listenToLoadingSignalTrackers(
-      (tracker) {
-        tracker.signal.when(
-          loading: (loading) {
-            Scaffold.of(context).showNewLoadingSnackBar(
-              text: loading.message,
-              currentlyLoading: tracker.currentlyLoading,
-            );
-          },
-          loadedSuccessfully: (_) {
-            if (tracker.currentlyLoading == 0) {
-              Scaffold.of(context).hideCurrentSnackBar();
-            } else {
-              Scaffold.of(context).showNewLoadedSuccessfullySnackBar(
-                tracker: tracker,
-                getScaffoldState: () => Scaffold.of(context),
-              );
-            }
-          },
-          loadingError: (loadingError) {
-            Scaffold.of(context).showNewLoadingErrorSnackBar(
-              tracker: tracker,
-              getScaffoldState: () => Scaffold.of(context),
-              errorMessage: loadingError.message,
-              retry: loadingError.retry,
-              autoHide: true,
-            );
-          },
-          zoomToBoundsAfterLoadedSuccessfully: (signal) {
-            if (tracker.currentlyLoading == 0) {
-              Scaffold.of(context).hideCurrentSnackBar();
-            } else {
-              Scaffold.of(context).showNewLoadedSuccessfullySnackBar(
-                tracker: tracker,
-                getScaffoldState: () => Scaffold.of(context),
-              );
-            }
-
-            _mapController.future.then(
-              (controller) => controller.animateCamera(
-                CameraUpdate.newLatLngBounds(signal.bounds, 10.0),
+    _subscriptions
+      ..add(
+        bloc
+            .where((state) => state.selectedVehicleNumber != null)
+            .map(
+              (state) => state.trackedVehicles[state.selectedVehicleNumber]
+                  .vehicle.position,
+            )
+            .distinct()
+            .debounce(const Duration(milliseconds: 250))
+            .listen(
+          (position) async {
+            final controller = await _mapController.future;
+            controller.animateCamera(
+              CameraUpdate.newLatLng(
+                LatLng(position.latitude, position.longitude),
               ),
             );
           },
-        );
-      },
-    );
+        ),
+      )
+      ..add(
+        bloc.listenToLoadingSignalTrackers(
+          (tracker) {
+            tracker.signal.when(
+              loading: (loading) {
+                Scaffold.of(context).showNewLoadingSnackBar(
+                  text: loading.message,
+                  currentlyLoading: tracker.currentlyLoading,
+                );
+              },
+              loadedSuccessfully: (_) {
+                if (tracker.currentlyLoading == 0) {
+                  Scaffold.of(context).hideCurrentSnackBar();
+                } else {
+                  Scaffold.of(context).showNewLoadedSuccessfullySnackBar(
+                    tracker: tracker,
+                    getScaffoldState: () => Scaffold.of(context),
+                  );
+                }
+              },
+              loadingError: (loadingError) {
+                Scaffold.of(context).showNewLoadingErrorSnackBar(
+                  tracker: tracker,
+                  getScaffoldState: () => Scaffold.of(context),
+                  errorMessage: loadingError.message,
+                  retry: loadingError.retry,
+                  autoHide: true,
+                );
+              },
+              zoomToBoundsAfterLoadedSuccessfully: (signal) {
+                if (tracker.currentlyLoading == 0) {
+                  Scaffold.of(context).hideCurrentSnackBar();
+                } else {
+                  Scaffold.of(context).showNewLoadedSuccessfullySnackBar(
+                    tracker: tracker,
+                    getScaffoldState: () => Scaffold.of(context),
+                  );
+                }
+
+                _mapController.future.then(
+                  (controller) => controller.animateCamera(
+                    CameraUpdate.newLatLngBounds(signal.bounds, 10.0),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      )
+      ..add(
+        _preferences
+            .getStringStream(Preferences.theme.key)
+            .where((themeString) => themeString != null && context != null)
+            .map((_) => Theme.of(context)?.brightness)
+            .where((brightness) => brightness != null)
+            .distinct()
+            .listen((brightness) async {
+          final controller = await _mapController.future;
+          controller.setMapStyle(brightness == Brightness.light
+              ? await rootBundle.loadString(JsonAssets.darkMapStyle)
+              : null);
+        }),
+      );
 
     widget.moveToPositionNotifier.addListener(() async {
       final latLng = widget.moveToPositionNotifier.value;
@@ -123,7 +147,9 @@ class _MapPageState extends State<MapPage>
 
   @override
   void dispose() {
-    _signalTrackersSubscription?.cancel();
+    _subscriptions.forEach((subscription) {
+      subscription.cancel();
+    });
     super.dispose();
   }
 

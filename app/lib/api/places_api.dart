@@ -25,5 +25,5 @@ abstract class PlacesApi {
 }
 
 class _PlacesApiData {
-  static const key = '';
+  static const key = '_6iYa-pHK0qHgQdzKY4wrE0bP7pUUHGK982W6V-6iDo';
 }
