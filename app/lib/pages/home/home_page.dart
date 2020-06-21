@@ -125,8 +125,10 @@ class HomePage extends HookWidget {
         placesPageAnimController: placesPageAnimController,
         bottomSheetControllers: bottomSheetControllers,
       ),
-      child: StreamBuilder<List<SearchedItem>>(
-        stream: context.bloc<LastSearchedBloc>().notLoadedLastSearchedItems(
+      child: StreamBuilder<_SearchedItemsData>(
+        stream: context
+            .bloc<LastSearchedBloc>()
+            .notLoadedLastSearchedItemsDataStream(
               loadedVehicleSourcesStream:
                   context.bloc<MapBloc>().mapVehicleSourcesStream,
             ),
@@ -139,8 +141,9 @@ class HomePage extends HookWidget {
             child: MediaQuery.of(context).orientation == Orientation.portrait
                 ? PreferredSizeColumn(widgets: [
                     appBar,
-                    if (snapshot.data != null && snapshot.data.isNotEmpty)
-                      _lastSearchedItemsList(snapshot: snapshot)
+                    if (snapshot.data != null &&
+                        snapshot.data.mostRecentItems.isNotEmpty)
+                      _lastSearchedItemsList(itemsDataSnapshot: snapshot)
                   ])
                 : appBar,
           ),
@@ -358,42 +361,54 @@ class HomePage extends HookWidget {
   }
 
   PreferredSizeWidget _lastSearchedItemsList({
-    @required AsyncSnapshot<List<SearchedItem>> snapshot,
+    @required AsyncSnapshot<_SearchedItemsData> itemsDataSnapshot,
   }) {
+    final items = itemsDataSnapshot.data.mostRecentItems;
+    final showMoreAvailable = itemsDataSnapshot.data.showMoreAvailable;
     return PreferredSizeWrapped(
       size: Size.fromHeight(32.0 + 10.0),
       child: Expanded(
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.only(left: 10, top: 5),
-          itemCount: snapshot.data.length,
+          itemCount: showMoreAvailable ? items.length + 1 : items.length,
           itemBuilder: (context, index) {
             final theme = Theme.of(context);
-            return snapshot.data.elementAt(index).when(
-                  lineItem: (item) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: RawChip(
-                      avatar: item.line.type == VehicleType.BUS
-                          ? const Icon(Icons.directions_bus)
-                          : const Icon(Icons.tram),
-                      backgroundColor: theme.primaryColor,
-                      elevation: 5,
-                      label: Text(item.line.symbol),
-                      labelPadding: const EdgeInsets.symmetric(horizontal: 15),
-                      onPressed: () {},
-                    ),
-                  ),
-                  locationItem: (item) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: RawChip(
-                      avatar: const Icon(Icons.location_on),
-                      backgroundColor: theme.primaryColor,
-                      elevation: 5,
-                      label: Text(item.location.name),
-                      onPressed: () {},
-                    ),
-                  ),
-                );
+            return showMoreAvailable && index == items.length
+                ? RawChip(
+                    avatar: const Icon(Icons.more_vert),
+                    backgroundColor: theme.primaryColor,
+                    elevation: 5,
+                    label: const Text('More'),
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 10),
+                    onPressed: () {},
+                  )
+                : items.elementAt(index).when(
+                      lineItem: (item) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: RawChip(
+                          avatar: item.line.type == VehicleType.BUS
+                              ? const Icon(Icons.directions_bus)
+                              : const Icon(Icons.tram),
+                          backgroundColor: theme.primaryColor,
+                          elevation: 5,
+                          label: Text(item.line.symbol),
+                          labelPadding:
+                              const EdgeInsets.symmetric(horizontal: 15),
+                          onPressed: () {},
+                        ),
+                      ),
+                      locationItem: (item) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: RawChip(
+                          avatar: const Icon(Icons.location_on),
+                          backgroundColor: theme.primaryColor,
+                          elevation: 5,
+                          label: Text(item.location.name),
+                          onPressed: () {},
+                        ),
+                      ),
+                    );
           },
         ),
       ),
@@ -758,8 +773,9 @@ extension _MapBlocExt on MapBloc {
 }
 
 extension _LastSearchedBlocExt on LastSearchedBloc {
-  Stream<List<SearchedItem>> notLoadedLastSearchedItems({
+  Stream<_SearchedItemsData> notLoadedLastSearchedItemsDataStream({
     @required Stream<Set<MapVehicleSource>> loadedVehicleSourcesStream,
+    int limit = 10,
   }) {
     return combineLatest(
       loadedVehicleSourcesStream,
@@ -776,20 +792,37 @@ extension _LastSearchedBlocExt on LastSearchedBloc {
             },
           );
         });
-        return items
-            .where(
-              (item) => item.when(
-                lineItem: (lineItem) => !lineSources.contains(
-                  lineItem.line,
-                ),
-                locationItem: (locationItem) => !locationSources.contains(
-                  locationItem.location,
-                ),
-              ),
-            )
-            .take(10)
-            .toList();
+
+        final filteredItems = items.where(
+          (item) => item.when(
+            lineItem: (lineItem) => !lineSources.contains(
+              lineItem.line,
+            ),
+            locationItem: (locationItem) => !locationSources.contains(
+              locationItem.location,
+            ),
+          ),
+        );
+        return filteredItems.length > limit
+            ? _SearchedItemsData(
+                mostRecentItems: filteredItems.take(limit).toList(),
+                showMoreAvailable: true,
+              )
+            : _SearchedItemsData(
+                mostRecentItems: filteredItems.toList(),
+                showMoreAvailable: false,
+              );
       },
     );
   }
+}
+
+class _SearchedItemsData {
+  final List<SearchedItem> mostRecentItems;
+  final bool showMoreAvailable;
+
+  _SearchedItemsData({
+    @required this.mostRecentItems,
+    @required this.showMoreAvailable,
+  });
 }
