@@ -79,7 +79,11 @@ class TrackedPage extends HookWidget {
                 AnimationConfiguration.staggeredList(
                   position: index,
                   child: FadeInAnimation(
-                    child: _sourceListItem(source, removeSource: removeSource),
+                    child: _sourceListItem(
+                      source,
+                      context: context,
+                      removeSource: removeSource,
+                    ),
                   ),
                 ),
               ),
@@ -92,13 +96,14 @@ class TrackedPage extends HookWidget {
 
   Widget _sourceListItem(
     MapEntry<MapVehicleSource, Set<Vehicle>> source, {
+    @required BuildContext context,
     @required void Function(MapVehicleSource) removeSource,
   }) {
     return Slidable(
       actionPane: SlidableDrawerActionPane(),
       actionExtentRatio: 0.25,
       child: ListTile(
-        title: source.key.titleWidget,
+        title: source.key.titleWidget(context),
         subtitle: Text('${source.value.length.toString()} in total'),
       ),
       secondaryActions: [
@@ -178,90 +183,62 @@ extension _MapVehicleSourceExt on MapVehicleSource {
     );
   }
 
-  Widget get titleWidget {
+  Widget titleWidget(BuildContext context) {
+    final titleTextTheme = Theme.of(context).textTheme.subtitle1;
+    final normalTextStyle = titleTextTheme.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.normal,
+    );
+    final boldTextStyle = titleTextTheme.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.bold,
+    );
     return when(
       ofLine: (source) => RichText(
         text: TextSpan(children: [
-          const TextSpan(
-            text: 'Vehicles of ',
-            style: const TextStyle(color: Colors.black, fontSize: 16),
-          ),
-          TextSpan(
-            text: 'line ${source.line.symbol}',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              fontSize: 16,
-            ),
-          )
+          TextSpan(text: 'Vehicles of ', style: normalTextStyle),
+          TextSpan(text: 'line ${source.line.symbol}', style: boldTextStyle)
         ]),
         overflow: TextOverflow.ellipsis,
       ),
       nearbyLocation: (source) => RichText(
         text: TextSpan(children: [
-          const TextSpan(
-            text: 'Vehicles nearby ',
-            style: const TextStyle(color: Colors.black, fontSize: 16),
-          ),
-          TextSpan(
-            text: '${source.location.name} ',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              fontSize: 16,
-            ),
-          ),
-          _loadedAgoTextSpan(source.loadedAt),
+          TextSpan(text: 'Vehicles nearby ', style: normalTextStyle),
+          TextSpan(text: '${source.location.name} ', style: boldTextStyle),
+          _loadedAgoTextSpan(source.loadedAt, context),
         ]),
         overflow: TextOverflow.ellipsis,
       ),
       nearbyUserLocation: (source) => RichText(
         text: TextSpan(children: [
-          const TextSpan(
-            text: 'Vehicles nearby ',
-            style: const TextStyle(color: Colors.black, fontSize: 16),
-          ),
-          const TextSpan(
-            text: 'your location ',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              fontSize: 16,
-            ),
-          ),
-          _loadedAgoTextSpan(source.loadedAt),
+          TextSpan(text: 'Vehicles nearby ', style: normalTextStyle),
+          TextSpan(text: 'your location ', style: boldTextStyle),
+          _loadedAgoTextSpan(source.loadedAt, context),
         ]),
         overflow: TextOverflow.ellipsis,
       ),
       nearbyPlace: (source) => RichText(
         text: TextSpan(children: [
-          const TextSpan(
-            text: 'Vehicles nearby ',
-            style: const TextStyle(color: Colors.black, fontSize: 16),
-          ),
-          TextSpan(
-            text: '${source.title} ',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              fontSize: 16,
-            ),
-          ),
-          _loadedAgoTextSpan(source.loadedAt),
+          TextSpan(text: 'Vehicles nearby ', style: normalTextStyle),
+          TextSpan(text: '${source.title} ', style: boldTextStyle),
+          _loadedAgoTextSpan(source.loadedAt, context),
         ]),
         overflow: TextOverflow.ellipsis,
       ),
     );
   }
 
-  TextSpan _loadedAgoTextSpan(DateTime loadedAt) {
+  TextSpan _loadedAgoTextSpan(DateTime loadedAt, BuildContext context) {
     return TextSpan(
       text: '''loaded${dateTimeDiffInfo(
         diffMillis: DateTime.now().millisecondsSinceEpoch -
             loadedAt.millisecondsSinceEpoch,
         prefix: '',
       )}''',
-      style: const TextStyle(color: Colors.black, fontSize: 16),
+      style: Theme.of(context).textTheme.subtitle1.copyWith(
+            fontSize: 16,
+            fontWeight: FontWeight.normal,
+          ),
     );
   }
 }
