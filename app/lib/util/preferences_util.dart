@@ -145,4 +145,28 @@ extension RxSharedPreferencesExt on RxSharedPreferences {
         throw ArgumentError('Invalid preference type.');
     }
   }
+
+  Stream<Brightness> themeBrightnessStream({
+    @required BuildContext Function() context,
+  }) {
+    return getStringStream(Preferences.theme.key)
+        .where((themeString) => themeString != null)
+        .map((_) {
+          final ctx = context();
+          return ctx == null ? null : Theme.of(ctx)?.brightness;
+        })
+        .where((brightness) => brightness != null)
+        .distinct();
+  }
+
+  void useThemeBrightness({
+    @required BuildContext Function() context,
+    @required void Function(Brightness) onChanged,
+  }) {
+    useEffect(() {
+      final subscription =
+          themeBrightnessStream(context: context).listen(onChanged);
+      return subscription.cancel;
+    });
+  }
 }

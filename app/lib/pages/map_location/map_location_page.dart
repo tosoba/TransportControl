@@ -2,13 +2,18 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result_action.dart';
+import 'package:transport_control/util/asset_util.dart';
+import 'package:transport_control/util/preferences_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
@@ -17,7 +22,8 @@ import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 class MapLocationPage extends HookWidget {
   final MapLocationPageMode mode;
   final void Function({@required MapLocationPageResult result}) finishWith;
-  final Completer<GoogleMapController> _mapController = Completer();
+  final _mapController = Completer<GoogleMapController>();
+  final _preferences = GetIt.instance<RxSharedPreferences>();
 
   MapLocationPage({
     Key key,
@@ -86,6 +92,16 @@ class MapLocationPage extends HookWidget {
         begin: 1.0,
         end: 0.0,
       ).animate(mapTapAnimController),
+    );
+
+    _preferences.useThemeBrightness(
+      context: () => context,
+      onChanged: (brightness) async {
+        final controller = await _mapController.future;
+        controller.setMapStyle(brightness == Brightness.dark
+            ? await rootBundle.loadString(JsonAssets.darkMapStyle)
+            : null);
+      },
     );
 
     final queryData = MediaQuery.of(context);
@@ -304,7 +320,7 @@ class MapLocationPage extends HookWidget {
     }
   }
 
-  GoogleMap _googleMap({
+  Widget _googleMap({
     @required ValueNotifier<Location> location,
     @required MediaQueryData queryData,
     @required AnimationController mapTapAnimController,

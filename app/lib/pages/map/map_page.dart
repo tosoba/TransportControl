@@ -123,11 +123,7 @@ class _MapPageState extends State<MapPage>
       )
       ..add(
         _preferences
-            .getStringStream(Preferences.theme.key)
-            .where((themeString) => themeString != null && context != null)
-            .map((_) => Theme.of(context)?.brightness)
-            .where((brightness) => brightness != null)
-            .distinct()
+            .themeBrightnessStream(context: () => context)
             .listen((brightness) async {
           final controller = await _mapController.future;
           controller.setMapStyle(brightness == Brightness.light
