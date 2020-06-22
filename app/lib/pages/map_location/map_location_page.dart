@@ -15,6 +15,7 @@ import 'package:transport_control/pages/map_location/map_location_page_result_ac
 import 'package:transport_control/util/asset_util.dart';
 import 'package:transport_control/util/preferences_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
+import 'package:transport_control/widgets/preferred_size_wrapped.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
@@ -87,7 +88,7 @@ class MapLocationPage extends HookWidget {
         end: 0.0,
       ).animate(mapTapAnimController),
     );
-    final bottomNavButtonsOpacity = useMemoized(
+    final controlsOpacity = useMemoized(
       () => Tween<double>(
         begin: 1.0,
         end: 0.0,
@@ -104,6 +105,19 @@ class MapLocationPage extends HookWidget {
       },
     );
 
+    final appBar = TextFieldAppBar(
+      textFieldController: textFieldController,
+      textFieldFocusNode: textFieldFocusNode,
+      leading: TextFieldAppBarBackButton(
+        textFieldFocusNode,
+      ),
+      hint: 'Location name',
+      trailing: _trailingResetNameButton(
+        context,
+        textFieldController: textFieldController,
+      ),
+    );
+
     final queryData = MediaQuery.of(context);
 
     return WillPopScope(
@@ -114,16 +128,11 @@ class MapLocationPage extends HookWidget {
         resizeToAvoidBottomPadding: false,
         appBar: SlideTransitionPreferredSizeWidget(
           offset: appBarOffset,
-          child: TextFieldAppBar(
-            textFieldController: textFieldController,
-            textFieldFocusNode: textFieldFocusNode,
-            leading: TextFieldAppBarBackButton(
-              textFieldFocusNode,
-            ),
-            hint: 'Location name',
-            trailing: _trailingResetNameButton(
-              context,
-              textFieldController: textFieldController,
+          child: PreferredSizeWrapped(
+            size: appBar.size,
+            child: FadeTransition(
+              child: appBar,
+              opacity: controlsOpacity,
             ),
           ),
         ),
@@ -145,7 +154,7 @@ class MapLocationPage extends HookWidget {
           child: _bottomNavBar(
             context,
             location: location,
-            bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+            controlsOpacity: controlsOpacity,
           ),
           sizeFactor: bottomNavSize,
         ),
@@ -203,7 +212,7 @@ class MapLocationPage extends HookWidget {
   Widget _bottomNavBar(
     BuildContext context, {
     @required ValueNotifier<Location> location,
-    @required Animation<double> bottomNavButtonsOpacity,
+    @required Animation<double> controlsOpacity,
   }) {
     return Container(
       height: kBottomNavigationBarHeight,
@@ -216,7 +225,7 @@ class MapLocationPage extends HookWidget {
             _bottomNavBarButton(
               context,
               labelText: 'Save',
-              bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+              controlsOpacity: controlsOpacity,
               onPressed: () {
                 if (mode is Add) {
                   location.value = location.value.copyWith(
@@ -233,7 +242,7 @@ class MapLocationPage extends HookWidget {
             _bottomNavBarButton(
               context,
               labelText: 'Load',
-              bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+              controlsOpacity: controlsOpacity,
               onPressed: () {
                 finishWith(
                   result: MapLocationPageResult(
@@ -251,7 +260,7 @@ class MapLocationPage extends HookWidget {
             _bottomNavBarButton(
               context,
               labelText: 'Save & load',
-              bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+              controlsOpacity: controlsOpacity,
               onPressed: () {
                 location.value = location.value.copyWith(
                   lastSearched: DateTime.now(),
@@ -275,12 +284,12 @@ class MapLocationPage extends HookWidget {
     BuildContext context, {
     @required String labelText,
     @required void Function() onPressed,
-    @required Animation<double> bottomNavButtonsOpacity,
+    @required Animation<double> controlsOpacity,
   }) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: FadeTransition(
-        opacity: bottomNavButtonsOpacity,
+        opacity: controlsOpacity,
         child: RaisedButton(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
