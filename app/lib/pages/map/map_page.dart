@@ -120,16 +120,6 @@ class _MapPageState extends State<MapPage>
             );
           },
         ),
-      )
-      ..add(
-        _preferences
-            .themeBrightnessStream(context: () => context)
-            .listen((brightness) async {
-          final controller = await _mapController.future;
-          controller.setMapStyle(brightness == Brightness.light
-              ? await rootBundle.loadString(JsonAssets.darkMapStyle)
-              : null);
-        }),
       );
 
     widget.moveToPositionNotifier.addListener(() async {
@@ -154,6 +144,20 @@ class _MapPageState extends State<MapPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    if (_subscriptions.length > 2) {
+      _subscriptions.last.cancel();
+      _subscriptions.removeLast();
+    }
+    _subscriptions.add(_preferences
+        .themeBrightnessStream(context: () => context)
+        .listen((brightness) async {
+      final controller = await _mapController.future;
+      controller.setMapStyle(brightness == Brightness.dark
+          ? await rootBundle.loadString(JsonAssets.darkMapStyle)
+          : null);
+    }));
+
     return StreamBuilder<List<IconifiedMarker>>(
       stream: context.bloc<MapBloc>().markers,
       builder: (context, snapshot) => Listener(
