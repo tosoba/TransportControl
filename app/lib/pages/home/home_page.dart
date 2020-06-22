@@ -73,7 +73,7 @@ class HomePage extends HookWidget {
         end: 0.0,
       ).animate(mapTapAnimController),
     );
-    final bottomNavButtonsOpacity = useMemoized(
+    final controlsOpacity = useMemoized(
       () => Tween<double>(
         begin: 1.0,
         end: 0.0,
@@ -116,6 +116,13 @@ class HomePage extends HookWidget {
       mapTapAnimController: mapTapAnimController,
       bottomSheetControllers: bottomSheetControllers,
     );
+    final wrappedAppBar = PreferredSizeWrapped(
+      size: appBar.size,
+      child: FadeTransition(
+        child: appBar,
+        opacity: controlsOpacity,
+      ),
+    );
 
     return WillPopScope(
       onWillPop: () => _onWillPop(
@@ -140,12 +147,15 @@ class HomePage extends HookWidget {
             offset: appBarOffset,
             child: MediaQuery.of(context).orientation == Orientation.portrait
                 ? PreferredSizeColumn(widgets: [
-                    appBar,
+                    wrappedAppBar,
                     if (snapshot.data != null &&
                         snapshot.data.mostRecentItems.isNotEmpty)
-                      _lastSearchedItemsList(itemsDataSnapshot: snapshot)
+                      _lastSearchedItemsList(
+                        itemsDataSnapshot: snapshot,
+                        controlsOpacity: controlsOpacity,
+                      )
                   ])
-                : appBar,
+                : wrappedAppBar,
           ),
           body: Builder(
             builder: (context) => Stack(children: [
@@ -190,7 +200,7 @@ class HomePage extends HookWidget {
             child: SizeTransition(
               child: _bottomNavBar(
                 context,
-                bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+                controlsOpacity: controlsOpacity,
                 bottomSheetControllers: bottomSheetControllers,
               ),
               sizeFactor: bottomNavSize,
@@ -231,7 +241,7 @@ class HomePage extends HookWidget {
 
   Widget _bottomNavBar(
     BuildContext context, {
-    @required Animation<double> bottomNavButtonsOpacity,
+    @required Animation<double> controlsOpacity,
     @required
         ValueNotifier<_VehiclesBottomSheetCarouselControllers>
             bottomSheetControllers,
@@ -255,7 +265,7 @@ class HomePage extends HookWidget {
                   bottomSheetControllers.closeBottomSheet();
                   _showLinesPage(context);
                 },
-                bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+                controlsOpacity: controlsOpacity,
                 icon: Icons.grid_on,
               ),
               _bottomNavBarButton(
@@ -265,7 +275,7 @@ class HomePage extends HookWidget {
                   bottomSheetControllers.closeBottomSheet();
                   _showLocationsPage(context);
                 },
-                bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+                controlsOpacity: controlsOpacity,
                 icon: Icons.location_on,
               ),
               if (snapshot.data ?? false)
@@ -276,7 +286,7 @@ class HomePage extends HookWidget {
                     bottomSheetControllers.closeBottomSheet();
                     _showTrackedPage(context);
                   },
-                  bottomNavButtonsOpacity: bottomNavButtonsOpacity,
+                  controlsOpacity: controlsOpacity,
                   icon: Icons.track_changes,
                 ),
             ],
@@ -290,13 +300,13 @@ class HomePage extends HookWidget {
     BuildContext context, {
     @required String labelText,
     @required void Function() onPressed,
-    @required Animation<double> bottomNavButtonsOpacity,
+    @required Animation<double> controlsOpacity,
     @required IconData icon,
   }) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: FadeTransition(
-        opacity: bottomNavButtonsOpacity,
+        opacity: controlsOpacity,
         child: RaisedButton.icon(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
@@ -362,54 +372,58 @@ class HomePage extends HookWidget {
 
   PreferredSizeWidget _lastSearchedItemsList({
     @required AsyncSnapshot<_SearchedItemsData> itemsDataSnapshot,
+    @required Animation<double> controlsOpacity,
   }) {
     final items = itemsDataSnapshot.data.mostRecentItems;
     final showMoreAvailable = itemsDataSnapshot.data.showMoreAvailable;
     return PreferredSizeWrapped(
       size: Size.fromHeight(32.0 + 10.0),
-      child: Expanded(
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.only(left: 10, top: 5),
-          itemCount: showMoreAvailable ? items.length + 1 : items.length,
-          itemBuilder: (context, index) {
-            final theme = Theme.of(context);
-            return showMoreAvailable && index == items.length
-                ? RawChip(
-                    avatar: const Icon(Icons.more_vert),
-                    backgroundColor: theme.primaryColor,
-                    elevation: 5,
-                    label: const Text('More'),
-                    labelPadding: const EdgeInsets.symmetric(horizontal: 10),
-                    onPressed: () {},
-                  )
-                : items.elementAt(index).when(
-                      lineItem: (item) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: RawChip(
-                          avatar: item.line.type == VehicleType.BUS
-                              ? const Icon(Icons.directions_bus)
-                              : const Icon(Icons.tram),
-                          backgroundColor: theme.primaryColor,
-                          elevation: 5,
-                          label: Text(item.line.symbol),
-                          labelPadding:
-                              const EdgeInsets.symmetric(horizontal: 15),
-                          onPressed: () {},
+      child: FadeTransition(
+        opacity: controlsOpacity,
+        child: Expanded(
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(left: 10, top: 5),
+            itemCount: showMoreAvailable ? items.length + 1 : items.length,
+            itemBuilder: (context, index) {
+              final theme = Theme.of(context);
+              return showMoreAvailable && index == items.length
+                  ? RawChip(
+                      avatar: const Icon(Icons.more_vert),
+                      backgroundColor: theme.primaryColor,
+                      elevation: 5,
+                      label: const Text('More'),
+                      labelPadding: const EdgeInsets.symmetric(horizontal: 10),
+                      onPressed: () {},
+                    )
+                  : items.elementAt(index).when(
+                        lineItem: (item) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: RawChip(
+                            avatar: item.line.type == VehicleType.BUS
+                                ? const Icon(Icons.directions_bus)
+                                : const Icon(Icons.tram),
+                            backgroundColor: theme.primaryColor,
+                            elevation: 5,
+                            label: Text(item.line.symbol),
+                            labelPadding:
+                                const EdgeInsets.symmetric(horizontal: 15),
+                            onPressed: () {},
+                          ),
                         ),
-                      ),
-                      locationItem: (item) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: RawChip(
-                          avatar: const Icon(Icons.location_on),
-                          backgroundColor: theme.primaryColor,
-                          elevation: 5,
-                          label: Text(item.location.name),
-                          onPressed: () {},
+                        locationItem: (item) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: RawChip(
+                            avatar: const Icon(Icons.location_on),
+                            backgroundColor: theme.primaryColor,
+                            elevation: 5,
+                            label: Text(item.location.name),
+                            onPressed: () {},
+                          ),
                         ),
-                      ),
-                    );
-          },
+                      );
+            },
+          ),
         ),
       ),
     );
