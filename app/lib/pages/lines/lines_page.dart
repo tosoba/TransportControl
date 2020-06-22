@@ -390,10 +390,16 @@ class LinesPage extends HookWidget {
                 alignment: Alignment.topLeft,
                 child: Text(
                   line.key.symbol,
-                  style: const TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: line.value.selected
+                      ? TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).accentColor,
+                        )
+                      : const TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
                 ),
               ),
               if (line.value.tracked || line.key.isFavourite)
