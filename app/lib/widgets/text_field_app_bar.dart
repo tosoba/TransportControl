@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:transport_control/widgets/last_searched_items_list.dart';
 
 class TextFieldAppBar extends StatefulWidget implements PreferredSizeWidget {
   final TextEditingController textFieldController;
@@ -121,5 +122,46 @@ class SliverTextFieldAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(SliverTextFieldAppBarDelegate oldDelegate) {
     return appBar != oldDelegate.appBar;
+  }
+}
+
+class SliverTextFieldAppBarWithSearchedItemsListDelegate
+    extends SliverPersistentHeaderDelegate {
+  final BuildContext context;
+  final TextFieldAppBar appBar;
+  final LastSearchedItemsList lastSearchedItemsList;
+
+  SliverTextFieldAppBarWithSearchedItemsListDelegate(
+    this.context, {
+    @required this.appBar,
+    @required this.lastSearchedItemsList,
+  });
+
+  @override
+  double get minExtent {
+    return appBar.heightWithPadding(context) +
+        lastSearchedItemsList.preferredSize.height;
+  }
+
+  @override
+  double get maxExtent {
+    return appBar.heightWithPadding(context) +
+        lastSearchedItemsList.preferredSize.height;
+  }
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Column(children: [appBar, lastSearchedItemsList]);
+  }
+
+  @override
+  bool shouldRebuild(
+    SliverTextFieldAppBarWithSearchedItemsListDelegate oldDelegate,
+  ) {
+    return true;
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class PreferredSizeColumn extends Column implements PreferredSizeWidget {
-  final List<PreferredSizeWidget> widgets;
+  final List<PreferredSizeWidget> children;
 
   PreferredSizeColumn({
     Key key,
@@ -11,9 +11,9 @@ class PreferredSizeColumn extends Column implements PreferredSizeWidget {
     TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline textBaseline,
-    this.widgets = const <PreferredSizeWidget>[],
+    this.children = const <PreferredSizeWidget>[],
   }) : super(
-          children: widgets,
+          children: children,
           key: key,
           mainAxisAlignment: mainAxisAlignment,
           mainAxisSize: mainAxisSize,
@@ -26,7 +26,7 @@ class PreferredSizeColumn extends Column implements PreferredSizeWidget {
   @override
   Size get preferredSize {
     return Size.fromHeight(
-      widgets
+      children
           .map((widget) => widget.preferredSize.height)
           .fold(0, (heightSum, height) => heightSum + height),
     );

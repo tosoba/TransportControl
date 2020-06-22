@@ -383,6 +383,16 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     }
     add(MapEvent.removeSource(source: source));
   }
+
+  Stream<Set<MapVehicleSource>> get mapVehicleSourcesStream {
+    return map((state) {
+      final sources = <MapVehicleSource>{};
+      state.trackedVehicles.values.forEach((tracked) {
+        sources.addAll(tracked.sources);
+      });
+      return sources;
+    });
+  }
 }
 
 extension _MapStateExt on MapState {

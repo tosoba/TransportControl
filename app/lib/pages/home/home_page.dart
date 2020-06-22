@@ -6,12 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
-import 'package:transport_control/model/line.dart';
-import 'package:transport_control/model/location.dart';
-import 'package:transport_control/model/searched_item.dart';
 import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
@@ -30,6 +26,7 @@ import 'package:transport_control/repo/locations_repo.dart';
 import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
+import 'package:transport_control/widgets/last_searched_items_list.dart';
 import 'package:transport_control/widgets/preferred_size_column.dart';
 import 'package:transport_control/widgets/preferred_size_wrapped.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
@@ -132,7 +129,7 @@ class HomePage extends HookWidget {
         placesPageAnimController: placesPageAnimController,
         bottomSheetControllers: bottomSheetControllers,
       ),
-      child: StreamBuilder<_SearchedItemsData>(
+      child: StreamBuilder<SearchedItemsData>(
         stream: context
             .bloc<LastSearchedBloc>()
             .notLoadedLastSearchedItemsDataStream(
@@ -146,15 +143,20 @@ class HomePage extends HookWidget {
           appBar: SlideTransitionPreferredSizeWidget(
             offset: appBarOffset,
             child: MediaQuery.of(context).orientation == Orientation.portrait
-                ? PreferredSizeColumn(widgets: [
-                    wrappedAppBar,
-                    if (snapshot.data != null &&
-                        snapshot.data.mostRecentItems.isNotEmpty)
-                      _lastSearchedItemsList(
-                        itemsDataSnapshot: snapshot,
-                        controlsOpacity: controlsOpacity,
-                      )
-                  ])
+                ? PreferredSizeColumn(
+                    children: [
+                      wrappedAppBar,
+                      if (snapshot.data != null &&
+                          snapshot.data.mostRecentItems.isNotEmpty)
+                        LastSearchedItemsList(
+                          itemsDataSnapshot: snapshot,
+                          opacity: controlsOpacity,
+                          lineItemPressed: (line) {}, //TODO:
+                          locationItemPressed: (location) {}, //TODO:
+                          morePressed: () {}, //TODO:
+                        )
+                    ],
+                  )
                 : wrappedAppBar,
           ),
           body: Builder(
@@ -370,65 +372,6 @@ class HomePage extends HookWidget {
     );
   }
 
-  PreferredSizeWidget _lastSearchedItemsList({
-    @required AsyncSnapshot<_SearchedItemsData> itemsDataSnapshot,
-    @required Animation<double> controlsOpacity,
-  }) {
-    final items = itemsDataSnapshot.data.mostRecentItems;
-    final showMoreAvailable = itemsDataSnapshot.data.showMoreAvailable;
-    return PreferredSizeWrapped(
-      size: Size.fromHeight(32.0 + 10.0),
-      child: FadeTransition(
-        opacity: controlsOpacity,
-        child: Expanded(
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: 10, top: 5),
-            itemCount: showMoreAvailable ? items.length + 1 : items.length,
-            itemBuilder: (context, index) {
-              final theme = Theme.of(context);
-              return showMoreAvailable && index == items.length
-                  ? RawChip(
-                      avatar: const Icon(Icons.more_vert),
-                      backgroundColor: theme.primaryColor,
-                      elevation: 5,
-                      label: const Text('More'),
-                      labelPadding: const EdgeInsets.symmetric(horizontal: 10),
-                      onPressed: () {},
-                    )
-                  : items.elementAt(index).when(
-                        lineItem: (item) => Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: RawChip(
-                            avatar: item.line.type == VehicleType.BUS
-                                ? const Icon(Icons.directions_bus)
-                                : const Icon(Icons.tram),
-                            backgroundColor: theme.primaryColor,
-                            elevation: 5,
-                            label: Text(item.line.symbol),
-                            labelPadding:
-                                const EdgeInsets.symmetric(horizontal: 15),
-                            onPressed: () {},
-                          ),
-                        ),
-                        locationItem: (item) => Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: RawChip(
-                            avatar: const Icon(Icons.location_on),
-                            backgroundColor: theme.primaryColor,
-                            elevation: 5,
-                            label: Text(item.location.name),
-                            onPressed: () {},
-                          ),
-                        ),
-                      );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
   void _changeSubPage(
     _HomeSubPage page, {
     @required ValueNotifier<_HomeSubPage> currentPage,
@@ -511,6 +454,7 @@ class HomePage extends HookWidget {
           providers: [
             BlocProvider.value(value: context.bloc<MapBloc>()),
             BlocProvider.value(value: context.bloc<LinesBloc>()),
+            BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
           ],
           child: LinesPage(),
         ),
@@ -772,71 +716,4 @@ class _VehiclesBottomSheetCarouselControllers {
     this.sheetController,
     this.carouselController,
   );
-}
-
-extension _MapBlocExt on MapBloc {
-  Stream<Set<MapVehicleSource>> get mapVehicleSourcesStream {
-    return map((state) {
-      final sources = <MapVehicleSource>{};
-      state.trackedVehicles.values.forEach((tracked) {
-        sources.addAll(tracked.sources);
-      });
-      return sources;
-    });
-  }
-}
-
-extension _LastSearchedBlocExt on LastSearchedBloc {
-  Stream<_SearchedItemsData> notLoadedLastSearchedItemsDataStream({
-    @required Stream<Set<MapVehicleSource>> loadedVehicleSourcesStream,
-    int limit = 10,
-  }) {
-    return combineLatest(
-      loadedVehicleSourcesStream,
-      (items, Set<MapVehicleSource> sources) {
-        final lineSources = <Line>{};
-        final locationSources = <Location>{};
-        sources.forEach((source) {
-          source.whenPartial(
-            ofLine: (lineSource) {
-              lineSources.add(lineSource.line);
-            },
-            nearbyLocation: (locationSource) {
-              locationSources.add(locationSource.location);
-            },
-          );
-        });
-
-        final filteredItems = items.where(
-          (item) => item.when(
-            lineItem: (lineItem) => !lineSources.contains(
-              lineItem.line,
-            ),
-            locationItem: (locationItem) => !locationSources.contains(
-              locationItem.location,
-            ),
-          ),
-        );
-        return filteredItems.length > limit
-            ? _SearchedItemsData(
-                mostRecentItems: filteredItems.take(limit).toList(),
-                showMoreAvailable: true,
-              )
-            : _SearchedItemsData(
-                mostRecentItems: filteredItems.toList(),
-                showMoreAvailable: false,
-              );
-      },
-    );
-  }
-}
-
-class _SearchedItemsData {
-  final List<SearchedItem> mostRecentItems;
-  final bool showMoreAvailable;
-
-  _SearchedItemsData({
-    @required this.mostRecentItems,
-    @required this.showMoreAvailable,
-  });
 }

@@ -10,10 +10,15 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:transport_control/hooks/use_map_signals.dart';
 import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
 import 'package:transport_control/model/line.dart';
+import 'package:transport_control/model/searched_item.dart';
+import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
+import 'package:transport_control/pages/map/map_bloc.dart';
+import 'package:transport_control/pages/map/map_vehicle_source.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/circular_text_icon_button.dart';
+import 'package:transport_control/widgets/last_searched_items_list.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/util/collection_util.dart';
 import 'package:transport_control/util/model_util.dart';
@@ -105,15 +110,43 @@ class LinesPage extends HookWidget {
       ]);
     }
 
-    return CustomScrollView(
-      controller: _autoScrollController,
-      slivers: [
-        SliverPersistentHeader(
-          delegate: SliverTextFieldAppBarDelegate(context, appBar: appBar),
-          floating: true,
-        ),
-        _linesList(context, lines: filteredLines),
-      ],
+    return StreamBuilder<SearchedItemsData>(
+      stream: context
+          .bloc<LastSearchedBloc>()
+          .notLoadedLastSearchedItemsDataStream(
+            loadedVehicleSourcesStream:
+                context.bloc<MapBloc>().mapVehicleSourcesStream,
+          )
+          .map(
+            (data) => SearchedItemsData(
+              showMoreAvailable: data.showMoreAvailable,
+              mostRecentItems: data.mostRecentItems
+                  .where((item) => item is LineItem)
+                  .toList(),
+            ),
+          ),
+      builder: (context, snapshot) => CustomScrollView(
+        controller: _autoScrollController,
+        slivers: [
+          SliverPersistentHeader(
+            delegate: snapshot.data == null ||
+                    snapshot.data.mostRecentItems.isEmpty ||
+                    MediaQuery.of(context).orientation != Orientation.portrait
+                ? SliverTextFieldAppBarDelegate(context, appBar: appBar)
+                : SliverTextFieldAppBarWithSearchedItemsListDelegate(
+                    context,
+                    appBar: appBar,
+                    lastSearchedItemsList: LastSearchedItemsList(
+                      itemsDataSnapshot: snapshot,
+                      lineItemPressed: (line) {}, //TODO:
+                      morePressed: () {}, //TODO:
+                    ),
+                  ),
+            floating: true,
+          ),
+          _linesList(context, lines: filteredLines),
+        ],
+      ),
     );
   }
 
