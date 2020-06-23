@@ -8,10 +8,12 @@ import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/pages/home/home_page.dart';
 import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
+import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/nearby/nearby_bloc.dart';
 import 'package:transport_control/repo/last_searched_repo.dart';
 import 'package:transport_control/repo/lines_repo.dart';
+import 'package:transport_control/repo/locations_repo.dart';
 import 'package:transport_control/repo/place_suggestions_repo.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
 import 'package:transport_control/util/preferences_util.dart';
@@ -46,7 +48,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
   @override
   Widget build(BuildContext context) {
     final getIt = GetIt.instance;
-    final loadVehiclesInBounds = getIt<LoadVehiclesInLocation>().injected;
+    final loadVehiclesInLocation = getIt<LoadVehiclesInLocation>().injected;
     final loadVehiclesNearbyUserLocation =
         getIt<LoadVehiclesNearbyUserLocation>().injected;
     final loadVehiclesNearbyPlace = getIt<LoadVehiclesNearbyPlace>().injected;
@@ -79,7 +81,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
                 preferences,
                 untrackLines.sink,
                 untrackAllLines.sink,
-                loadVehiclesInBounds.stream,
+                loadVehiclesInLocation.stream,
                 loadVehiclesNearbyUserLocation.stream,
                 loadVehiclesNearbyPlace.stream,
                 trackedLinesAdded.stream,
@@ -93,6 +95,13 @@ class _TransportControlAppState extends State<TransportControlApp> {
                 trackedLinesRemoved.sink,
                 untrackLines.stream,
                 untrackAllLines.stream,
+              ),
+            ),
+            BlocProvider<LocationsBloc>(
+              create: (context) => LocationsBloc(
+                getIt<LocationsRepo>(),
+                loadVehiclesInLocation.sink,
+                loadVehiclesNearbyUserLocation.sink,
               ),
             ),
             BlocProvider<NearbyBloc>(

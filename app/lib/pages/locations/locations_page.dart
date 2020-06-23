@@ -125,7 +125,9 @@ class LocationsPage extends HookWidget {
                           appBar: appBar,
                           lastSearchedItemsList: LastSearchedItemsList(
                             itemsSnapshot: snapshot,
-                            locationItemPressed: (location) {}, //TODO:
+                            locationItemPressed: context
+                                .bloc<LocationsBloc>()
+                                .loadVehiclesInLocation,
                             morePressed: () {}, //TODO:
                           ),
                         ),

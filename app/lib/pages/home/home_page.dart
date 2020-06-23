@@ -4,9 +4,7 @@ import 'package:connection_status_bar/connection_status_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
 import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
@@ -21,7 +19,6 @@ import 'package:transport_control/pages/nearby/nearby_bloc.dart';
 import 'package:transport_control/pages/nearby/nearby_page.dart';
 import 'package:transport_control/pages/preferences/preferences_page.dart';
 import 'package:transport_control/pages/tracked/tracked_page.dart';
-import 'package:transport_control/repo/locations_repo.dart';
 import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
@@ -151,7 +148,9 @@ class HomePage extends HookWidget {
                           itemsSnapshot: snapshot,
                           opacity: controlsOpacity,
                           lineItemPressed: context.bloc<LinesBloc>().track,
-                          locationItemPressed: (location) {}, //TODO:
+                          locationItemPressed: context
+                              .bloc<LocationsBloc>()
+                              .loadVehiclesInLocation,
                           morePressed: () {}, //TODO:
                         )
                     ],
@@ -462,19 +461,12 @@ class HomePage extends HookWidget {
   }
 
   void _showLocationsPage(BuildContext context) async {
-    final getIt = GetIt.instance;
     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => MultiBlocProvider(
           providers: [
-            BlocProvider<LocationsBloc>(
-              create: (_) => LocationsBloc(
-                getIt<LocationsRepo>(),
-                getIt<LoadVehiclesInLocation>().injected.sink,
-                getIt<LoadVehiclesNearbyUserLocation>().injected.sink,
-              ),
-            ),
+            BlocProvider.value(value: context.bloc<LocationsBloc>()),
             BlocProvider.value(value: context.bloc<MapBloc>()),
             BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
           ],
