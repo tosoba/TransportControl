@@ -7,6 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
 import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
+import 'package:transport_control/pages/last_searched/last_searched_page.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
@@ -151,7 +152,9 @@ class HomePage extends HookWidget {
                           locationItemPressed: context
                               .bloc<LocationsBloc>()
                               .loadVehiclesInLocation,
-                          morePressed: () {}, //TODO:
+                          morePressed: () {
+                            _showLastSearchedPage(context);
+                          },
                         )
                     ],
                   )
@@ -440,6 +443,21 @@ class HomePage extends HookWidget {
             Scaffold.of(context).openDrawer();
           }
         },
+      ),
+    );
+  }
+
+  void _showLastSearchedPage(BuildContext context) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.bloc<MapBloc>()),
+            BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
+          ],
+          child: LastSearchedPage(filterMode: LastSearchedPageFilterMode.ALL),
+        ),
       ),
     );
   }
