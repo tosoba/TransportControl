@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stream_transform/stream_transform.dart';
-import 'package:transport_control/model/line.dart';
-import 'package:transport_control/model/location.dart';
 import 'package:transport_control/model/searched_item.dart';
 import 'package:transport_control/pages/last_searched/last_searched_event.dart';
 import 'package:transport_control/pages/map/map_vehicle_source.dart';
@@ -46,27 +44,25 @@ class LastSearchedBloc extends Bloc<LastSearchedEvent, List<SearchedItem>> {
     return combineLatest(
       loadedVehicleSourcesStream,
       (items, Set<MapVehicleSource> sources) {
-        final lineSources = <Line>{};
-        final locationSources = <Location>{};
+        final lineSymbols = <String>{};
+        final locationIds = <int>{};
         sources.forEach((source) {
           source.whenPartial(
             ofLine: (lineSource) {
-              lineSources.add(lineSource.line);
+              lineSymbols.add(lineSource.line.symbol);
             },
             nearbyLocation: (locationSource) {
-              locationSources.add(locationSource.location);
+              locationIds.add(locationSource.location.id);
             },
           );
         });
 
         final filteredItems = items.where(
           (item) => item.when(
-            lineItem: (lineItem) {
-              return !lineSources.contains(lineItem.line);
-            },
-            locationItem: (locationItem) {
-              return !locationSources.contains(locationItem.location);
-            },
+            lineItem: (lineItem) => !lineSymbols.contains(lineItem.line.symbol),
+            locationItem: (locationItem) => !locationIds.contains(
+              locationItem.location.id,
+            ),
           ),
         );
         return filteredItems.length > limit
