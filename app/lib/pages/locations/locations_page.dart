@@ -8,6 +8,7 @@ import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/model/searched_item.dart';
 import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
+import 'package:transport_control/pages/last_searched/last_searched_page.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
@@ -16,6 +17,7 @@ import 'package:transport_control/pages/map_location/map_location_page_mode.dart
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/util/model_util.dart';
+import 'package:transport_control/util/navigation_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/last_searched_items_list.dart';
 import 'package:transport_control/widgets/loading_button.dart';
@@ -128,7 +130,9 @@ class LocationsPage extends HookWidget {
                             locationItemPressed: context
                                 .bloc<LocationsBloc>()
                                 .loadVehiclesInLocation,
-                            morePressed: () {}, //TODO:
+                            morePressed: () => context.showLastSearchedPage(
+                              filterMode: LastSearchedPageFilterMode.LOCATIONS,
+                            ),
                           ),
                         ),
                   floating: true,

@@ -77,22 +77,14 @@ class MapLocationPage extends HookWidget {
       duration: kThemeAnimationDuration,
     );
     final appBarOffset = useMemoized(
-      () => Tween<Offset>(
-        begin: Offset.zero,
-        end: const Offset(0.0, -1.0),
-      ).animate(mapTapAnimController),
+      () => Tween(begin: Offset.zero, end: const Offset(0.0, -1.0))
+          .animate(mapTapAnimController),
     );
     final bottomNavSize = useMemoized(
-      () => Tween(
-        begin: 1.0,
-        end: 0.0,
-      ).animate(mapTapAnimController),
+      () => Tween(begin: 1.0, end: 0.0).animate(mapTapAnimController),
     );
     final controlsOpacity = useMemoized(
-      () => Tween<double>(
-        begin: 1.0,
-        end: 0.0,
-      ).animate(mapTapAnimController),
+      () => Tween(begin: 1.0, end: 0.0).animate(mapTapAnimController),
     );
 
     _preferences.useThemeBrightness(
@@ -108,9 +100,7 @@ class MapLocationPage extends HookWidget {
     final appBar = TextFieldAppBar(
       textFieldController: textFieldController,
       textFieldFocusNode: textFieldFocusNode,
-      leading: TextFieldAppBarBackButton(
-        textFieldFocusNode,
-      ),
+      leading: TextFieldAppBarBackButton(textFieldFocusNode),
       hint: 'Location name',
       trailing: _trailingResetNameButton(
         context,
@@ -130,10 +120,7 @@ class MapLocationPage extends HookWidget {
           offset: appBarOffset,
           child: PreferredSizeWrapped(
             size: appBar.size,
-            child: FadeTransition(
-              child: appBar,
-              opacity: controlsOpacity,
-            ),
+            child: FadeTransition(child: appBar, opacity: controlsOpacity),
           ),
         ),
         body: Stack(
