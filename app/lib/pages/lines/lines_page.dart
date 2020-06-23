@@ -15,7 +15,6 @@ import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
-import 'package:transport_control/pages/map/map_vehicle_source.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/circular_text_icon_button.dart';
 import 'package:transport_control/widgets/last_searched_items_list.dart';
@@ -110,7 +109,7 @@ class LinesPage extends HookWidget {
       ]);
     }
 
-    return StreamBuilder<SearchedItemsData>(
+    return StreamBuilder<SearchedItems>(
       stream: context
           .bloc<LastSearchedBloc>()
           .notLoadedLastSearchedItemsDataStream(
@@ -118,12 +117,7 @@ class LinesPage extends HookWidget {
                 context.bloc<MapBloc>().mapVehicleSourcesStream,
           )
           .map(
-            (data) => SearchedItemsData(
-              showMoreAvailable: data.showMoreAvailable,
-              mostRecentItems: data.mostRecentItems
-                  .where((item) => item is LineItem)
-                  .toList(),
-            ),
+            (searched) => searched.filterByType<LineItem>(),
           ),
       builder: (context, snapshot) => CustomScrollView(
         controller: _autoScrollController,
@@ -137,8 +131,8 @@ class LinesPage extends HookWidget {
                     context,
                     appBar: appBar,
                     lastSearchedItemsList: LastSearchedItemsList(
-                      itemsDataSnapshot: snapshot,
-                      lineItemPressed: (line) {}, //TODO:
+                      itemsSnapshot: snapshot,
+                      lineItemPressed: context.bloc<LinesBloc>().track,
                       morePressed: () {}, //TODO:
                     ),
                   ),

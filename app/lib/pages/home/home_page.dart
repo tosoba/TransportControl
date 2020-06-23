@@ -17,7 +17,6 @@ import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_markers.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/map/map_vehicle.dart';
-import 'package:transport_control/pages/map/map_vehicle_source.dart';
 import 'package:transport_control/pages/nearby/nearby_bloc.dart';
 import 'package:transport_control/pages/nearby/nearby_page.dart';
 import 'package:transport_control/pages/preferences/preferences_page.dart';
@@ -129,7 +128,7 @@ class HomePage extends HookWidget {
         placesPageAnimController: placesPageAnimController,
         bottomSheetControllers: bottomSheetControllers,
       ),
-      child: StreamBuilder<SearchedItemsData>(
+      child: StreamBuilder<SearchedItems>(
         stream: context
             .bloc<LastSearchedBloc>()
             .notLoadedLastSearchedItemsDataStream(
@@ -149,9 +148,9 @@ class HomePage extends HookWidget {
                       if (snapshot.data != null &&
                           snapshot.data.mostRecentItems.isNotEmpty)
                         LastSearchedItemsList(
-                          itemsDataSnapshot: snapshot,
+                          itemsSnapshot: snapshot,
                           opacity: controlsOpacity,
-                          lineItemPressed: (line) {}, //TODO:
+                          lineItemPressed: context.bloc<LinesBloc>().track,
                           locationItemPressed: (location) {}, //TODO:
                           morePressed: () {}, //TODO:
                         )

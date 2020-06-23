@@ -6,7 +6,7 @@ import 'package:transport_control/util/model_util.dart';
 
 class LastSearchedItemsList extends StatelessWidget
     implements PreferredSizeWidget {
-  final AsyncSnapshot<SearchedItemsData> itemsDataSnapshot;
+  final AsyncSnapshot<SearchedItems> itemsSnapshot;
   final Animation<double> opacity;
   final void Function(Line) lineItemPressed;
   final void Function(Location) locationItemPressed;
@@ -18,7 +18,7 @@ class LastSearchedItemsList extends StatelessWidget
 
   const LastSearchedItemsList({
     Key key,
-    @required this.itemsDataSnapshot,
+    @required this.itemsSnapshot,
     this.opacity,
     this.lineItemPressed,
     this.locationItemPressed,
@@ -31,8 +31,8 @@ class LastSearchedItemsList extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    final items = itemsDataSnapshot.data.mostRecentItems;
-    final showMoreAvailable = itemsDataSnapshot.data.showMoreAvailable;
+    final items = itemsSnapshot.data.mostRecentItems;
+    final showMoreAvailable = itemsSnapshot.data.moreAvailable;
 
     final list = ListView.builder(
       scrollDirection: Axis.horizontal,

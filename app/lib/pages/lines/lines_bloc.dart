@@ -198,13 +198,13 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     _linesRepo.updateIsFavourite([line]);
   }
 
-  void toggleTracked(MapEntry<Line, LineState> line) async {
+  void toggleTracked(MapEntry<Line, LineState> line) {
     if (line.value.tracked) {
-      _trackedLinesRemovedSink.add(Set<Line>()..add(line.key));
+      _trackedLinesRemovedSink.add({line.key});
     } else {
       _trackedLinesAddedSink.add(
         TrackedLinesAddedEvent(
-          lines: Set<Line>()..add(line.key),
+          lines: {line.key},
           beforeRetry: () => add(LinesEvent.toggleLineTracking(line: line.key)),
         ),
       );
@@ -213,6 +213,19 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     _linesRepo.updateLastSearched([line.key.symbol]);
 
     add(LinesEvent.toggleLineTracking(line: line.key));
+  }
+
+  void track(Line line) {
+    _trackedLinesAddedSink.add(
+      TrackedLinesAddedEvent(
+        lines: {line},
+        beforeRetry: () => add(LinesEvent.toggleLineTracking(line: line)),
+      ),
+    );
+
+    _linesRepo.updateLastSearched([line.symbol]);
+
+    add(LinesEvent.toggleLineTracking(line: line));
   }
 
   void resetSelection() => add(LinesEvent.resetSelection());

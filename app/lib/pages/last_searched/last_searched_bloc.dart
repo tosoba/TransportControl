@@ -39,7 +39,7 @@ class LastSearchedBloc extends Bloc<LastSearchedEvent, List<SearchedItem>> {
     yield event.when(updateItems: (updateEvt) => updateEvt.items);
   }
 
-  Stream<SearchedItemsData> notLoadedLastSearchedItemsDataStream({
+  Stream<SearchedItems> notLoadedLastSearchedItemsDataStream({
     @required Stream<Set<MapVehicleSource>> loadedVehicleSourcesStream,
     int limit = 10,
   }) {
@@ -70,25 +70,32 @@ class LastSearchedBloc extends Bloc<LastSearchedEvent, List<SearchedItem>> {
           ),
         );
         return filteredItems.length > limit
-            ? SearchedItemsData(
+            ? SearchedItems(
                 mostRecentItems: filteredItems.take(limit).toList(),
-                showMoreAvailable: true,
+                moreAvailable: true,
               )
-            : SearchedItemsData(
+            : SearchedItems(
                 mostRecentItems: filteredItems.toList(),
-                showMoreAvailable: false,
+                moreAvailable: false,
               );
       },
     );
   }
 }
 
-class SearchedItemsData {
+class SearchedItems {
   final List<SearchedItem> mostRecentItems;
-  final bool showMoreAvailable;
+  final bool moreAvailable;
 
-  SearchedItemsData({
+  SearchedItems({
     @required this.mostRecentItems,
-    @required this.showMoreAvailable,
+    @required this.moreAvailable,
   });
+
+  SearchedItems filterByType<T extends SearchedItem>() {
+    return SearchedItems(
+      mostRecentItems: mostRecentItems.where((item) => item is T).toList(),
+      moreAvailable: moreAvailable,
+    );
+  }
 }
