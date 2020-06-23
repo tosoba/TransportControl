@@ -476,6 +476,7 @@ class HomePage extends HookWidget {
               ),
             ),
             BlocProvider.value(value: context.bloc<MapBloc>()),
+            BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
           ],
           child: LocationsPage(),
         ),

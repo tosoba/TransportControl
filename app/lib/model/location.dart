@@ -26,16 +26,22 @@ class Location {
         id == other.id &&
         name == other.name &&
         bounds == other.bounds &&
-        isFavourite == other.isFavourite;
+        isFavourite == other.isFavourite &&
+        lastSearched == other.lastSearched &&
+        timesSearched == other.timesSearched &&
+        savedAt == other.savedAt;
   }
 
   int get hashCode {
-    return hash4(
+    return hashObjects([
       id.hashCode,
       name.hashCode,
       bounds.hashCode,
       isFavourite.hashCode,
-    );
+      lastSearched.hashCode,
+      timesSearched.hashCode,
+      savedAt.hashCode,
+    ]);
   }
 
   Location copyWith({

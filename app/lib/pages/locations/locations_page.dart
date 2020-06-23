@@ -6,14 +6,18 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:transport_control/hooks/use_map_signals.dart';
 import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
 import 'package:transport_control/model/location.dart';
+import 'package:transport_control/model/searched_item.dart';
+import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
+import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map_location/map_location_page.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
+import 'package:transport_control/widgets/last_searched_items_list.dart';
 import 'package:transport_control/widgets/loading_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
@@ -97,17 +101,39 @@ class LocationsPage extends HookWidget {
               ),
             ]);
           }
-          return CustomScrollView(
-            slivers: [
-              SliverPersistentHeader(
-                delegate: SliverTextFieldAppBarDelegate(
-                  context,
-                  appBar: appBar,
+
+          return StreamBuilder<SearchedItems>(
+            stream: context
+                .bloc<LastSearchedBloc>()
+                .notLoadedLastSearchedItemsDataStream(
+                  loadedVehicleSourcesStream:
+                      context.bloc<MapBloc>().mapVehicleSourcesStream,
+                )
+                .map(
+                  (searched) => searched.filterByType<LocationItem>(),
                 ),
-                floating: true,
-              ),
-              _locationsList(locations: result.locations),
-            ],
+            builder: (context, snapshot) => CustomScrollView(
+              slivers: [
+                SliverPersistentHeader(
+                  delegate: snapshot.data == null ||
+                          snapshot.data.mostRecentItems.isEmpty ||
+                          MediaQuery.of(context).orientation !=
+                              Orientation.portrait
+                      ? SliverTextFieldAppBarDelegate(context, appBar: appBar)
+                      : SliverTextFieldAppBarWithSearchedItemsListDelegate(
+                          context,
+                          appBar: appBar,
+                          lastSearchedItemsList: LastSearchedItemsList(
+                            itemsSnapshot: snapshot,
+                            locationItemPressed: (location) {}, //TODO:
+                            morePressed: () {}, //TODO:
+                          ),
+                        ),
+                  floating: true,
+                ),
+                _locationsList(locations: result.locations),
+              ],
+            ),
           );
         },
       ),
