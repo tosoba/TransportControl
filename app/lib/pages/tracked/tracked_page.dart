@@ -11,6 +11,7 @@ import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_vehicle_source.dart';
 import 'package:transport_control/util/model_util.dart';
+import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
@@ -25,22 +26,37 @@ class TrackedPage extends HookWidget {
       filterController.add(filter?.trim()?.toLowerCase() ?? filter);
     });
 
-    return StreamBuilder<List<MapEntry<MapVehicleSource, Set<Vehicle>>>>(
+    return StreamBuilder<_FilteredSources>(
       stream:
           context.bloc<MapBloc>().sourcesStreamFilteredUsing(filterController),
       builder: (context, snapshot) {
-        final sources = snapshot.data;
+        final filtered = snapshot.data;
         final appBar = TextFieldAppBar(
           textFieldFocusNode: searchFieldFocusNode,
           textFieldController: searchFieldController,
           hint: "Search...",
           leading: TextFieldAppBarBackButton(searchFieldFocusNode),
+          trailing: filtered == null ||
+                  filtered.filter == null ||
+                  filtered.filter.isEmpty
+              ? null
+              : CircularButton(
+                  child: Icon(
+                    Icons.close,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                  ),
+                  onPressed: () {
+                    searchFieldController.value = TextEditingValue();
+                  },
+                ),
         );
 
         return Scaffold(
           extendBodyBehindAppBar: true,
           extendBody: true,
-          body: sources == null || sources.isEmpty
+          body: filtered == null || filtered.sources.isEmpty
               ? Column(children: [
                   appBar,
                   Expanded(child: Center(child: Text('No tracked vehicles.'))),
@@ -53,11 +69,11 @@ class TrackedPage extends HookWidget {
                     ),
                     floating: true,
                   ),
-                  _sourcesList(context, sources: sources),
+                  _sourcesList(context, sources: filtered.sources),
                 ]),
           floatingActionButton: _floatingActionButton(
             context,
-            sources: sources,
+            sources: filtered?.sources,
           ),
         );
       },
@@ -124,14 +140,22 @@ class TrackedPage extends HookWidget {
     if (sources == null || sources.isEmpty) return null;
     return FloatingActionButton.extended(
       onPressed: () => context.bloc<MapBloc>().clearMap(),
-      label: Text('Clear all'),
+      label: const Text('Clear all'),
     );
   }
 }
 
+class _FilteredSources {
+  final List<MapEntry<MapVehicleSource, Set<Vehicle>>> sources;
+  final String filter;
+
+  _FilteredSources({@required this.sources, @required this.filter});
+}
+
 extension _MapBlocExt on MapBloc {
-  Stream<List<MapEntry<MapVehicleSource, Set<Vehicle>>>>
-      sourcesStreamFilteredUsing(StreamController<String> filterStream) {
+  Stream<_FilteredSources> sourcesStreamFilteredUsing(
+    StreamController<String> filterStream,
+  ) {
     return map((state) {
       final sourcesMap = Map<MapVehicleSource, Set<Vehicle>>();
       state.trackedVehicles.values.forEach((tracked) {
@@ -140,20 +164,23 @@ extension _MapBlocExt on MapBloc {
         });
       });
       return sourcesMap.entries.toList()
-        ..sort((entry1, entry2) {
-          return entry2.key.loadedAt.compareTo(entry1.key.loadedAt);
-        });
+        ..sort(
+          (entry1, entry2) => entry2.key.loadedAt.compareTo(
+            entry1.key.loadedAt,
+          ),
+        );
     }).combineLatest(
       filterStream.stream.startWith(null),
-      (sources, String filter) {
-        return filter == null || filter.isEmpty
+      (sources, String filter) => _FilteredSources(
+        sources: filter == null || filter.isEmpty
             ? sources
             : sources
                 .where(
                   (entry) => entry.key.title.toLowerCase().contains(filter),
                 )
-                .toList();
-      },
+                .toList(),
+        filter: filter,
+      ),
     );
   }
 }
