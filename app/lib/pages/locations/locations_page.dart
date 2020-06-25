@@ -17,7 +17,6 @@ import 'package:transport_control/pages/map_location/map_location_page_mode.dart
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/util/model_util.dart';
-import 'package:transport_control/util/navigation_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/last_searched_items_list.dart';
 import 'package:transport_control/widgets/loading_button.dart';
@@ -130,9 +129,7 @@ class LocationsPage extends HookWidget {
                             locationItemPressed: context
                                 .bloc<LocationsBloc>()
                                 .loadVehiclesInLocation,
-                            morePressed: () => context.showLastSearchedPage(
-                              filterMode: LastSearchedPageFilterMode.LOCATIONS,
-                            ),
+                            morePressed: () => _showLastSearchedPage(context),
                           ),
                         ),
                   floating: true,
@@ -149,6 +146,22 @@ class LocationsPage extends HookWidget {
         loadVehiclesNearbyUserLocation: () {
           context.bloc<LocationsBloc>().loadVehiclesNearbyUserLocation();
         },
+      ),
+    );
+  }
+
+  void _showLastSearchedPage(BuildContext context) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.bloc<MapBloc>()),
+            BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
+          ],
+          child: LastSearchedPage(
+              filterMode: LastSearchedPageFilterMode.LOCATIONS),
+        ),
       ),
     );
   }

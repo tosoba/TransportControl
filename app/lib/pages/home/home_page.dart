@@ -21,7 +21,6 @@ import 'package:transport_control/pages/nearby/nearby_page.dart';
 import 'package:transport_control/pages/preferences/preferences_page.dart';
 import 'package:transport_control/pages/tracked/tracked_page.dart';
 import 'package:transport_control/util/model_util.dart';
-import 'package:transport_control/util/navigation_util.dart';
 import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/last_searched_items_list.dart';
@@ -153,9 +152,9 @@ class HomePage extends HookWidget {
                           locationItemPressed: context
                               .bloc<LocationsBloc>()
                               .loadVehiclesInLocation,
-                          morePressed: () => context.showLastSearchedPage(
-                            filterMode: LastSearchedPageFilterMode.ALL,
-                          ),
+                          morePressed: () {
+                            _showLastSearchedPage(context);
+                          },
                         )
                     ],
                   )
@@ -448,27 +447,50 @@ class HomePage extends HookWidget {
     );
   }
 
+  void _showLastSearchedPage(BuildContext context) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.bloc<MapBloc>()),
+            BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
+          ],
+          child: LastSearchedPage(filterMode: LastSearchedPageFilterMode.ALL),
+        ),
+      ),
+    );
+  }
+
   void _showLinesPage(BuildContext context) async {
-    await context.pushRouteWithMultiProvider(
-      providers: [
-        BlocProvider.value(value: context.bloc<MapBloc>()),
-        BlocProvider.value(value: context.bloc<LinesBloc>()),
-        BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
-        BlocProvider.value(value: context.bloc<LocationsBloc>()),
-      ],
-      child: () => LinesPage(),
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.bloc<MapBloc>()),
+            BlocProvider.value(value: context.bloc<LinesBloc>()),
+            BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
+          ],
+          child: LinesPage(),
+        ),
+      ),
     );
   }
 
   void _showLocationsPage(BuildContext context) async {
-    await context.pushRouteWithMultiProvider(
-      providers: [
-        BlocProvider.value(value: context.bloc<LocationsBloc>()),
-        BlocProvider.value(value: context.bloc<LinesBloc>()),
-        BlocProvider.value(value: context.bloc<MapBloc>()),
-        BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
-      ],
-      child: () => LocationsPage(),
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.bloc<LocationsBloc>()),
+            BlocProvider.value(value: context.bloc<MapBloc>()),
+            BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
+          ],
+          child: LocationsPage(),
+        ),
+      ),
     );
   }
 

@@ -22,7 +22,6 @@ import 'package:transport_control/widgets/last_searched_items_list.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/util/collection_util.dart';
 import 'package:transport_control/util/model_util.dart';
-import 'package:transport_control/util/navigation_util.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
 class LinesPage extends HookWidget {
@@ -135,15 +134,28 @@ class LinesPage extends HookWidget {
                     lastSearchedItemsList: LastSearchedItemsList(
                       itemsSnapshot: snapshot,
                       lineItemPressed: context.bloc<LinesBloc>().track,
-                      morePressed: () => context.showLastSearchedPage(
-                        filterMode: LastSearchedPageFilterMode.LINES,
-                      ),
+                      morePressed: () => _showLastSearchedPage(context),
                     ),
                   ),
             floating: true,
           ),
           _linesList(context, lines: filteredLines),
         ],
+      ),
+    );
+  }
+
+  void _showLastSearchedPage(BuildContext context) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.bloc<MapBloc>()),
+            BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
+          ],
+          child: LastSearchedPage(filterMode: LastSearchedPageFilterMode.LINES),
+        ),
       ),
     );
   }

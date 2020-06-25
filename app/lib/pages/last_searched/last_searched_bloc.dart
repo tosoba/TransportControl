@@ -65,7 +65,7 @@ class LastSearchedBloc extends Bloc<LastSearchedEvent, List<SearchedItem>> {
             ),
           ),
         );
-        return filteredItems.length > limit
+        return limit != null && filteredItems.length > limit
             ? SearchedItems(
                 mostRecentItems: filteredItems.take(limit).toList(),
                 moreAvailable: true,
