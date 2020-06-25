@@ -34,7 +34,7 @@ class TrackedPage extends HookWidget {
         final appBar = TextFieldAppBar(
           textFieldFocusNode: searchFieldFocusNode,
           textFieldController: searchFieldController,
-          hint: "Search...",
+          hint: "Search tracked vehicles...",
           leading: TextFieldAppBarBackButton(searchFieldFocusNode),
           trailing: filtered == null ||
                   filtered.filter == null ||
@@ -59,7 +59,9 @@ class TrackedPage extends HookWidget {
           body: filtered == null || filtered.sources.isEmpty
               ? Column(children: [
                   appBar,
-                  Expanded(child: Center(child: Text('No tracked vehicles.'))),
+                  Expanded(
+                    child: Center(child: const Text('No tracked vehicles.')),
+                  ),
                 ])
               : CustomScrollView(slivers: [
                   SliverPersistentHeader(

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/model/searched_item.dart';
 import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
+import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
@@ -58,7 +60,7 @@ class LastSearchedPage extends HookWidget {
         final appBar = TextFieldAppBar(
           textFieldFocusNode: searchFieldFocusNode,
           textFieldController: searchFieldController,
-          hint: "Search...",
+          hint: "Search most recent items...",
           leading: TextFieldAppBarBackButton(searchFieldFocusNode),
           trailing: filtered == null ||
                   filtered.filter == null ||
@@ -80,10 +82,70 @@ class LastSearchedPage extends HookWidget {
         return Scaffold(
           extendBodyBehindAppBar: true,
           extendBody: true,
-          appBar: appBar,
-          body: Center(child: const Text('Last searched')),
+          body: filtered == null || filtered.searched.mostRecentItems.isEmpty
+              ? Column(children: [
+                  appBar,
+                  Expanded(
+                    child: Center(child: const Text('No searched items.')),
+                  ),
+                ])
+              : CustomScrollView(slivers: [
+                  SliverPersistentHeader(
+                    delegate: SliverTextFieldAppBarDelegate(
+                      context,
+                      appBar: appBar,
+                    ),
+                    floating: true,
+                  ),
+                  _itemsList(
+                    context,
+                    mostRecentItems: filtered.searched.mostRecentItems,
+                  ),
+                ]),
         );
       },
+    );
+  }
+
+  Widget _itemsList(
+    BuildContext context, {
+    @required List<SearchedItem> mostRecentItems,
+  }) {
+    return SliverList(
+      delegate: SliverChildListDelegate(
+        mostRecentItems
+            .asMap()
+            .map(
+              (index, source) => MapEntry(
+                index,
+                AnimationConfiguration.staggeredList(
+                  position: index,
+                  child: FadeInAnimation(
+                    child: _lastSearchedItem(
+                      source,
+                      context: context,
+                    ),
+                  ),
+                ),
+              ),
+            )
+            .values
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _lastSearchedItem(
+    SearchedItem item, {
+    @required BuildContext context,
+  }) {
+    return ListTile(
+      //TODO: load on click
+      title: item.titleWidget(context),
+      subtitle: Text(item.when(
+        lineItem: (lineItem) => lineItem.line.lastSearchedInfo,
+        locationItem: (locationItem) => locationItem.location.lastSearchedInfo,
+      )),
     );
   }
 }
@@ -98,8 +160,36 @@ class _FilteredSearchedItems {
 extension _SearchedItemExt on SearchedItem {
   String get title {
     return when(
-      lineItem: (item) => 'Line: ${item.line.symbol}',
-      locationItem: (item) => 'Location: ${item.location.name}',
+      lineItem: (item) => 'Vehicles of line: ${item.line.symbol}',
+      locationItem: (item) => 'Vehicles nearby location: ${item.location.name}',
+    );
+  }
+
+  Widget titleWidget(BuildContext context) {
+    final titleTextTheme = Theme.of(context).textTheme.subtitle1;
+    final normalTextStyle = titleTextTheme.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.normal,
+    );
+    final boldTextStyle = titleTextTheme.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.bold,
+    );
+    return when(
+      lineItem: (item) => RichText(
+        text: TextSpan(children: [
+          TextSpan(text: 'Vehicles of line: ', style: normalTextStyle),
+          TextSpan(text: item.line.symbol, style: boldTextStyle)
+        ]),
+        overflow: TextOverflow.ellipsis,
+      ),
+      locationItem: (item) => RichText(
+        text: TextSpan(children: [
+          TextSpan(text: 'Vehicles nearby location: ', style: normalTextStyle),
+          TextSpan(text: item.location.name, style: boldTextStyle)
+        ]),
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 }

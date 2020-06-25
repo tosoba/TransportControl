@@ -48,6 +48,15 @@ extension LineExt on Line {
       }
     }
   }
+
+  String get lastSearchedInfo {
+    if (lastSearched == null) return 'Never searched';
+    return dateTimeDiffInfo(
+      diffMillis: DateTime.now().millisecondsSinceEpoch -
+          lastSearched.millisecondsSinceEpoch,
+      prefix: 'Searched',
+    );
+  }
 }
 
 int _typeFrom(String symbol) {
