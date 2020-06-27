@@ -325,14 +325,17 @@ class LinesPage extends HookWidget {
         .entries;
     if (lineGroups.length < 2) return Container();
 
+    final navButtonTextGroup = AutoSizeGroup();
+
     return ScrollBottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       controller: _autoScrollController,
       items: List.generate(
         lineGroups.length,
         (index) => BottomNavigationBarItem(
-          icon: Text(
+          icon: AutoSizeText(
             lineGroups.elementAt(index).key,
+            group: navButtonTextGroup,
             style: Theme.of(context)
                 .textTheme
                 .button
