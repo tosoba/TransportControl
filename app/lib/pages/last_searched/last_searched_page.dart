@@ -4,8 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:stream_transform/stream_transform.dart';
+import 'package:transport_control/hooks/use_map_signals.dart';
+import 'package:transport_control/hooks/use_unfocus_on_keyboard_hidden.dart';
 import 'package:transport_control/model/searched_item.dart';
 import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
+import 'package:transport_control/pages/lines/lines_bloc.dart';
+import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
@@ -16,6 +20,7 @@ enum LastSearchedPageFilterMode { ALL, LINES, LOCATIONS }
 
 class LastSearchedPage extends HookWidget {
   final LastSearchedPageFilterMode filterMode;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   LastSearchedPage({Key key, @required this.filterMode}) : super(key: key);
 
@@ -28,6 +33,9 @@ class LastSearchedPage extends HookWidget {
       final filter = searchFieldController.value.text;
       filterController.add(filter?.trim()?.toLowerCase() ?? filter);
     });
+
+    useMapSignals(scaffoldKey: _scaffoldKey, context: context);
+    useUnfocusOnKeyboardHidden(focusNode: searchFieldFocusNode);
 
     return StreamBuilder<_FilteredSearchedItems>(
       stream: context
@@ -80,6 +88,7 @@ class LastSearchedPage extends HookWidget {
         );
 
         return Scaffold(
+          key: _scaffoldKey,
           extendBodyBehindAppBar: true,
           extendBody: true,
           body: filtered == null || filtered.searched.mostRecentItems.isEmpty
@@ -139,13 +148,29 @@ class LastSearchedPage extends HookWidget {
     SearchedItem item, {
     @required BuildContext context,
   }) {
-    return ListTile(
-      //TODO: load on click
-      title: item.titleWidget(context),
-      subtitle: Text(item.when(
-        lineItem: (lineItem) => lineItem.line.lastSearchedInfo,
-        locationItem: (locationItem) => locationItem.location.lastSearchedInfo,
-      )),
+    return Material(
+      child: InkWell(
+        onTap: () {
+          item.when(
+            lineItem: (lineItem) {
+              context.bloc<LinesBloc>().track(lineItem.line);
+            },
+            locationItem: (locationItem) {
+              context
+                  .bloc<LocationsBloc>()
+                  .loadVehiclesInLocation(locationItem.location);
+            },
+          );
+        },
+        child: ListTile(
+          title: item.titleWidget(context),
+          subtitle: Text(item.when(
+            lineItem: (lineItem) => lineItem.line.lastSearchedInfo,
+            locationItem: (locationItem) =>
+                locationItem.location.lastSearchedInfo,
+          )),
+        ),
+      ),
     );
   }
 }

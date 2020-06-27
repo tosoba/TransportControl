@@ -15,6 +15,7 @@ import 'package:transport_control/pages/last_searched/last_searched_bloc.dart';
 import 'package:transport_control/pages/last_searched/last_searched_page.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
+import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/circular_text_icon_button.dart';
@@ -116,6 +117,7 @@ class LinesPage extends HookWidget {
           .notLoadedLastSearchedItemsDataStream(
             loadedVehicleSourcesStream:
                 context.bloc<MapBloc>().mapVehicleSourcesStream,
+            limit: 10,
           )
           .map(
             (searched) => searched.filterByType<LineItem>(),
@@ -152,6 +154,8 @@ class LinesPage extends HookWidget {
         builder: (_) => MultiBlocProvider(
           providers: [
             BlocProvider.value(value: context.bloc<MapBloc>()),
+            BlocProvider.value(value: context.bloc<LinesBloc>()),
+            BlocProvider.value(value: context.bloc<LocationsBloc>()),
             BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
           ],
           child: LastSearchedPage(filterMode: LastSearchedPageFilterMode.LINES),

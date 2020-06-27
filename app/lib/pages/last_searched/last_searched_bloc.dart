@@ -7,6 +7,7 @@ import 'package:transport_control/model/searched_item.dart';
 import 'package:transport_control/pages/last_searched/last_searched_event.dart';
 import 'package:transport_control/pages/map/map_vehicle_source.dart';
 import 'package:transport_control/repo/last_searched_repo.dart';
+import 'package:transport_control/util/model_util.dart';
 
 class LastSearchedBloc extends Bloc<LastSearchedEvent, List<SearchedItem>> {
   final LastSearchedRepo _repo;
@@ -39,7 +40,7 @@ class LastSearchedBloc extends Bloc<LastSearchedEvent, List<SearchedItem>> {
 
   Stream<SearchedItems> notLoadedLastSearchedItemsDataStream({
     @required Stream<Set<MapVehicleSource>> loadedVehicleSourcesStream,
-    int limit = 10,
+    int limit,
   }) {
     return combineLatest(
       loadedVehicleSourcesStream,
@@ -57,14 +58,24 @@ class LastSearchedBloc extends Bloc<LastSearchedEvent, List<SearchedItem>> {
           );
         });
 
-        final filteredItems = items.where(
-          (item) => item.when(
-            lineItem: (lineItem) => !lineSymbols.contains(lineItem.line.symbol),
-            locationItem: (locationItem) => !locationIds.contains(
-              locationItem.location.id,
-            ),
-          ),
-        );
+        final filteredItems = items
+            .where(
+              (item) => item.when(
+                lineItem: (lineItem) => !lineSymbols.contains(
+                  lineItem.line.symbol,
+                ),
+                locationItem: (locationItem) => !locationIds.contains(
+                  locationItem.location.id,
+                ),
+              ),
+            )
+            .toList()
+              ..sort(
+                (item1, item2) => item2.lastSearched.compareTo(
+                  item1.lastSearched,
+                ),
+              );
+
         return limit != null && filteredItems.length > limit
             ? SearchedItems(
                 mostRecentItems: filteredItems.take(limit).toList(),

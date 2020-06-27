@@ -7,6 +7,7 @@ import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/model/place_suggestion.dart';
+import 'package:transport_control/model/searched_item.dart';
 import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_signal.dart';
@@ -150,6 +151,15 @@ extension PlaceSuggestionExt on PlaceSuggestion {
       diffMillis: DateTime.now().millisecondsSinceEpoch -
           lastSearched.millisecondsSinceEpoch,
       prefix: 'Searched',
+    );
+  }
+}
+
+extension SearchItemExt on SearchedItem {
+  DateTime get lastSearched {
+    return when(
+      lineItem: (lineItem) => lineItem.line.lastSearched,
+      locationItem: (locationItem) => locationItem.location.lastSearched,
     );
   }
 }
