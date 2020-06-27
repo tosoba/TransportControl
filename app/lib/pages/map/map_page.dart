@@ -158,11 +158,20 @@ class _MapPageState extends State<MapPage>
           : null);
     }));
 
-    return StreamBuilder<List<IconifiedMarker>>(
-      stream: context.bloc<MapBloc>().markers,
+    return StreamBuilder<_MapArguments>(
+      stream: context.bloc<MapBloc>().markers.combineLatest(
+            _preferences.mapPreferencesStream,
+            (List<IconifiedMarker> markers, MapPreferences preferences) =>
+                _MapArguments(
+              markers: markers,
+              preferences: preferences,
+            ),
+          ),
       builder: (context, snapshot) => Listener(
         onPointerDown: (event) => _cameraWasMovedByUser = true,
         child: GoogleMap(
+          trafficEnabled: snapshot.data?.preferences?.trafficEnabled ?? false,
+          buildingsEnabled: snapshot.data?.preferences?.buildingsEnabled ?? false,
           zoomControlsEnabled: false,
           rotateGesturesEnabled: false,
           mapType: MapType.normal,
@@ -172,9 +181,9 @@ class _MapPageState extends State<MapPage>
           ),
           onMapCreated: _mapController.complete,
           onCameraIdle: () => _cameraMoved(context),
-          markers: snapshot.data == null
+          markers: snapshot.data == null || snapshot.data.markers == null
               ? null
-              : snapshot.data
+              : snapshot.data.markers
                   .map(
                     (marker) => marker.toGoogleMapMarker(
                       onTap: marker.isCluster
@@ -221,4 +230,11 @@ class _MapPageState extends State<MapPage>
     );
     widget.animatedToBounds();
   }
+}
+
+class _MapArguments {
+  final List<IconifiedMarker> markers;
+  final MapPreferences preferences;
+
+  _MapArguments({@required this.markers, @required this.preferences});
 }

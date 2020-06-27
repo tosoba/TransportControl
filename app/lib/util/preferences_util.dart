@@ -1,10 +1,24 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:quiver/core.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 class Preferences {
   Preferences._();
+
+  static const Preference<bool> trafficEnabled = const Preference(
+    key: 'trafficEnabled',
+    defaultValue: false,
+    title: 'Traffic enabled',
+  );
+
+  static const Preference<bool> buildingsEnabled = const Preference(
+    key: 'buildingsEnabled',
+    defaultValue: false,
+    title: 'Buildings enabled',
+  );
 
   static const Preference<bool> zoomToLoadedMarkersBounds = const Preference(
     key: 'zoomToLoadedMarkersBounds',
@@ -12,7 +26,8 @@ class Preferences {
     title: "Zoom to loaded markers' bounds",
   );
 
-  static EnumeratedPreference<int> nearbySearchRadius = EnumeratedPreference(
+  static final EnumeratedPreference<int> nearbySearchRadius =
+      EnumeratedPreference(
     [100, 500, 1000, 2000, 5000],
     defaultValue: 1000,
     key: 'nearbySearchRadius',
@@ -31,6 +46,8 @@ class Preferences {
   );
 
   static List<Preference> list = [
+    trafficEnabled,
+    buildingsEnabled,
     zoomToLoadedMarkersBounds,
     nearbySearchRadius,
     theme,
@@ -169,4 +186,36 @@ extension RxSharedPreferencesExt on RxSharedPreferences {
       return subscription.cancel;
     });
   }
+
+  Stream<MapPreferences> get mapPreferencesStream {
+    return getBoolStream(Preferences.trafficEnabled.key)
+        .where((enabled) => enabled != null)
+        .combineLatest(
+          getBoolStream(Preferences.buildingsEnabled.key)
+              .where((enabled) => enabled != null),
+          (bool trafficEnabled, bool buildingsEnabled) => MapPreferences(
+            trafficEnabled: trafficEnabled,
+            buildingsEnabled: buildingsEnabled,
+          ),
+        )
+        .distinct();
+  }
+}
+
+class MapPreferences {
+  final bool trafficEnabled;
+  final bool buildingsEnabled;
+
+  MapPreferences({
+    @required this.trafficEnabled,
+    @required this.buildingsEnabled,
+  });
+
+  bool operator ==(other) {
+    return other is MapPreferences &&
+        trafficEnabled == other.trafficEnabled &&
+        buildingsEnabled == other.buildingsEnabled;
+  }
+
+  int get hashCode => hashObjects([trafficEnabled, buildingsEnabled]);
 }
