@@ -66,7 +66,8 @@ class _TransportControlAppState extends State<TransportControlApp> {
             (themeString) => ThemeMode.values.firstWhere(
               (themeMode) => describeEnum(themeMode) == themeString,
             ),
-          ),
+          )
+          .distinct(),
       builder: (context, snapshot) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Transport Control',

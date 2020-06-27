@@ -47,5 +47,8 @@
 	<string>Needed to load vehicles nearby your location</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Needed to load vehicles nearby your location</string>
+	<key>UIStatusBarHidden</key>
+	<true/>
+
 </dict>
 </plist>

@@ -65,6 +65,12 @@ dev_dependencies:
   json_serializable: ^3.2.5
   injectable_generator: ^0.2.3
   moor_generator: ^2.4.0
+  flutter_native_splash: ^0.1.9
+
+flutter_native_splash:
+  image: assets/img/splash.png
+  color: "2196f3"
+  fill: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
