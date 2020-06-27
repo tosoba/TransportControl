@@ -21,7 +21,6 @@ import 'package:transport_control/pages/nearby/nearby_page.dart';
 import 'package:transport_control/pages/preferences/preferences_page.dart';
 import 'package:transport_control/pages/tracked/tracked_page.dart';
 import 'package:transport_control/util/model_util.dart';
-import 'package:transport_control/util/string_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/last_searched_items_list.dart';
 import 'package:transport_control/widgets/preferred_size_column.dart';
@@ -264,7 +263,7 @@ class HomePage extends HookWidget {
             children: [
               _bottomNavBarButton(
                 context,
-                labelText: Strings.lines,
+                labelText: 'Lines',
                 onPressed: () {
                   bottomSheetControllers.closeBottomSheet();
                   _showLinesPage(context);
@@ -274,7 +273,7 @@ class HomePage extends HookWidget {
               ),
               _bottomNavBarButton(
                 context,
-                labelText: Strings.locations,
+                labelText: 'Locations',
                 onPressed: () {
                   bottomSheetControllers.closeBottomSheet();
                   _showLocationsPage(context);
@@ -370,7 +369,7 @@ class HomePage extends HookWidget {
           );
         },
       ),
-      hint: Strings.transportNearby,
+      hint: 'Search for a place...',
     );
   }
 
@@ -548,13 +547,13 @@ class HomePage extends HookWidget {
         children: [
           DrawerHeader(
             child: const Text(
-              Strings.transportControl,
+              'Transport Control',
               style: const TextStyle(fontSize: 22),
             ),
             decoration: BoxDecoration(color: Theme.of(context).primaryColor),
           ),
           _drawerListTile(
-            labelText: Strings.lines,
+            labelText: 'Lines',
             icon: Icons.grid_on,
             group: drawerItemTextGroup,
             onTap: () {
@@ -564,7 +563,7 @@ class HomePage extends HookWidget {
             },
           ),
           _drawerListTile(
-            labelText: Strings.locations,
+            labelText: 'Locations',
             icon: Icons.location_on,
             group: drawerItemTextGroup,
             onTap: () {
