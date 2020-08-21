@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -36,6 +37,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   final StreamController<MapSignal> _signals = StreamController.broadcast();
   Stream<MapSignal> get signals => _signals.stream;
 
+  Ticker _ticker;
+
   MapBloc(
     this._vehiclesRepo,
     this._preferences,
@@ -46,7 +49,17 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     Stream<PlaceSuggestion> loadVehiclesNearbyPlaceStream,
     Stream<TrackedLinesAddedEvent> trackedLinesAddedStream,
     Stream<Set<Line>> trackedLinesRemovedStream,
+    TickerProvider tickerProvider,
   ) {
+    _ticker = tickerProvider.createTicker(
+      (elapsed) {
+        if (state.trackedVehicles.values
+            .any((tracked) => tracked.animation.stage.isAnimating)) {
+          add(MapEvent.animateVehicles());
+        }
+      },
+    )..start();
+
     _subscriptions
       ..add(
         Stream.periodic(const Duration(seconds: 15))
@@ -64,14 +77,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
                 failure: (failure) => failure.logError(),
               ),
             ),
-      )
-      ..add(
-        Stream.periodic(const Duration(milliseconds: 16))
-            .where(
-              (_) => state.trackedVehicles.values
-                  .any((tracked) => tracked.animation.stage.isAnimating),
-            )
-            .listen((_) => add(MapEvent.animateVehicles())),
       )
       ..add(loadVehiclesInLocationStream.listen(_loadVehiclesInLocation))
       ..add(
@@ -199,6 +204,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   @override
   Future<void> close() async {
+    _ticker
+      ..stop()
+      ..dispose();
     await Future.wait([
       ..._subscriptions.map((subscription) => subscription.cancel()),
       _signals.close(),

@@ -30,7 +30,8 @@ class TransportControlApp extends StatefulWidget {
   _TransportControlAppState createState() => _TransportControlAppState();
 }
 
-class _TransportControlAppState extends State<TransportControlApp> {
+class _TransportControlAppState extends State<TransportControlApp>
+    with SingleTickerProviderStateMixin {
   @override
   void dispose() {
     final getIt = GetIt.instance;
@@ -87,6 +88,7 @@ class _TransportControlAppState extends State<TransportControlApp> {
                 loadVehiclesNearbyPlace.stream,
                 trackedLinesAdded.stream,
                 trackedLinesRemoved.stream,
+                this,
               ),
             ),
             BlocProvider<LinesBloc>(
