@@ -149,29 +149,34 @@ class _MapPageState extends State<MapPage>
       _subscriptions.last.cancel();
       _subscriptions.removeLast();
     }
-    _subscriptions.add(_preferences
-        .themeBrightnessStream(context: () => context)
-        .listen((brightness) async {
-      final controller = await _mapController.future;
-      controller.setMapStyle(brightness == Brightness.dark
-          ? await rootBundle.loadString(JsonAssets.darkMapStyle)
-          : null);
-    }));
+    _subscriptions.add(
+      _preferences.themeBrightnessStream(context: () => context).listen(
+        (brightness) async {
+          final controller = await _mapController.future;
+          controller.setMapStyle(
+            brightness == Brightness.dark
+                ? await rootBundle.loadString(JsonAssets.darkMapStyle)
+                : null,
+          );
+        },
+      ),
+    );
+
+    final bloc = context.bloc<MapBloc>();
 
     return StreamBuilder<_MapArguments>(
-      stream: context.bloc<MapBloc>().markers.combineLatest(
-            _preferences.mapPreferencesStream,
-            (List<IconifiedMarker> markers, MapPreferences preferences) =>
-                _MapArguments(
-              markers: markers,
-              preferences: preferences,
-            ),
-          ),
+      stream: bloc.markers.combineLatest(
+        _preferences.mapPreferencesStream,
+        (List<IconifiedMarker> markers, MapPreferences preferences) {
+          return _MapArguments(markers: markers, preferences: preferences);
+        },
+      ),
       builder: (context, snapshot) => Listener(
         onPointerDown: (event) => _cameraWasMovedByUser = true,
         child: GoogleMap(
           trafficEnabled: snapshot.data?.preferences?.trafficEnabled ?? false,
-          buildingsEnabled: snapshot.data?.preferences?.buildingsEnabled ?? false,
+          buildingsEnabled:
+              snapshot.data?.preferences?.buildingsEnabled ?? false,
           zoomControlsEnabled: false,
           rotateGesturesEnabled: false,
           mapType: MapType.normal,
@@ -179,7 +184,10 @@ class _MapPageState extends State<MapPage>
             target: MapConstants.initialTarget,
             zoom: MapConstants.initialZoom,
           ),
-          onMapCreated: _mapController.complete,
+          onMapCreated: (controller) {
+            _mapController.complete(controller);
+            bloc.mapId = controller.mapId;
+          },
           onCameraIdle: () => _cameraMoved(context),
           markers: snapshot.data == null || snapshot.data.markers == null
               ? null

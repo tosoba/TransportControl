@@ -38,6 +38,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   Stream<MapSignal> get signals => _signals.stream;
 
   Ticker _ticker;
+  int mapId = null;
 
   MapBloc(
     this._vehiclesRepo,
@@ -114,13 +115,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       clearMap: (_) => state.copyWith(trackedVehicles: {}),
       updateVehicles: (evt) {
         final updatedVehicles = Map.of(state.trackedVehicles);
-        evt.vehicles.forEach((vehicle) {
+        evt.vehicles.forEach((vehicle) async {
           final tracked = updatedVehicles[vehicle.number];
           if (tracked != null) {
-            updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
+            updatedVehicles[vehicle.number] = await tracked.withUpdatedVehicle(
               vehicle,
               bounds: state.bounds,
               zoom: state.zoom,
+              mapId: mapId,
             );
           }
         });
@@ -138,6 +140,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             line: lineSymbols[vehicle.symbol],
             loadedAt: loadedAt,
           ),
+          mapId: mapId,
         );
       },
       addVehiclesInLocation: (evt) {
@@ -148,6 +151,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             location: evt.location,
             loadedAt: loadedAt,
           ),
+          mapId: mapId,
         );
       },
       addVehiclesNearbyUserLocation: (evt) {
@@ -159,6 +163,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             radius: evt.radius,
             loadedAt: loadedAt,
           ),
+          mapId: mapId,
         );
       },
       addVehiclesNearbyPlace: (evt) {
@@ -171,6 +176,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             title: evt.title,
             loadedAt: loadedAt,
           ),
+          mapId: mapId,
         );
       },
       animateVehicles: (_) => state.copyWith(
@@ -470,15 +476,17 @@ extension _MapStateExt on MapState {
   MapState withNewVehicles(
     Iterable<Vehicle> vehicles, {
     @required MapVehicleSource Function(Vehicle) sourceForVehicle,
+    @required int mapId,
   }) {
     final updatedVehicles = Map.of(trackedVehicles);
-    vehicles.forEach((vehicle) {
+    vehicles.forEach((vehicle) async {
       final tracked = updatedVehicles[vehicle.number];
       if (tracked != null) {
-        updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
+        updatedVehicles[vehicle.number] = await tracked.withUpdatedVehicle(
           vehicle,
           bounds: bounds,
           zoom: zoom,
+          mapId: mapId,
           sources: tracked.sources..add(sourceForVehicle(vehicle)),
         );
       } else {

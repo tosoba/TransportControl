@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as Maps;
 import 'package:latlong/latlong.dart';
 import 'package:transport_control/util/lat_lng_util.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart'
+    as MapsPlatform;
 
 class MapPositionAnimation {
   final LatLng position;
@@ -15,14 +17,20 @@ class MapPositionAnimation {
       : position = position,
         stage = _AnimationStage.first(position);
 
-  MapPositionAnimation withUpdatedPosition(
+  Future<MapPositionAnimation> withUpdatedPosition(
     LatLng position, {
     @required Maps.LatLngBounds bounds,
     @required double zoom,
-  }) {
+    @required int mapId,
+  }) async {
     return MapPositionAnimation._(
       position,
-      stage.forUpdatedPosition(position, bounds: bounds, zoom: zoom),
+      await stage.forUpdatedPosition(
+        position,
+        bounds: bounds,
+        zoom: zoom,
+        mapId: mapId,
+      ),
     );
   }
 
@@ -45,8 +53,7 @@ class _AnimationStage {
   int _durationMillis;
   bool _isAnimating;
 
-  static final Distance _distance = const Distance();
-  static final double _animationThreshold = 12.5;
+  static final double _animationMinZoom = 12.5;
 
   bool get isAnimating => _isAnimating;
   LatLng get current => _current;
@@ -61,11 +68,12 @@ class _AnimationStage {
         _durationMillis = null,
         _isAnimating = false;
 
-  _AnimationStage forUpdatedPosition(
+  Future<_AnimationStage> forUpdatedPosition(
     LatLng updatedPosition, {
     @required Maps.LatLngBounds bounds,
     @required double zoom,
-  }) {
+    @required int mapId,
+  }) async {
     if (_shouldAnimate(
       bounds: bounds,
       zoom: zoom,
@@ -76,10 +84,11 @@ class _AnimationStage {
         .._current = _current
         .._dest = updatedPosition
         .._animationStartTime = DateTime.now().millisecondsSinceEpoch
-        .._durationMillis = _durationMillisFor(
+        .._durationMillis = await _durationMillisFor(
           zoom: zoom,
           start: _current,
           dest: updatedPosition,
+          mapId: mapId,
         )
         .._isAnimating = true;
     } else {
@@ -100,16 +109,21 @@ class _AnimationStage {
     if (_shouldAnimate(bounds: bounds, zoom: zoom, dest: _dest)) {
       final nextStage = _AnimationStage._().._start = _start;
       final elapsedMillis = _elapsed;
-      final multiplier = _interpolation(elapsedMillis);
-      final lng =
-          multiplier * _dest.longitude + (1 - multiplier) * _start.longitude;
-      final lat =
-          multiplier * _dest.latitude + (1 - multiplier) * _start.latitude;
-      nextStage._current = LatLng(lat, lng);
+      final isAnimating = elapsedMillis < _durationMillis;
+      if (isAnimating) {
+        final multiplier = _interpolation(elapsedMillis);
+        final lng =
+            multiplier * _dest.longitude + (1 - multiplier) * _start.longitude;
+        final lat =
+            multiplier * _dest.latitude + (1 - multiplier) * _start.latitude;
+        nextStage._current = LatLng(lat, lng);
+      } else {
+        nextStage._current = _dest;
+      }
       nextStage._dest = _dest;
       nextStage._animationStartTime = _animationStartTime;
       nextStage._durationMillis = _durationMillis;
-      nextStage._isAnimating = elapsedMillis < _durationMillis;
+      nextStage._isAnimating = isAnimating;
       return nextStage;
     } else {
       return _AnimationStage._()
@@ -127,7 +141,7 @@ class _AnimationStage {
     @required double zoom,
     @required LatLng dest,
   }) {
-    return zoom > _animationThreshold &&
+    return zoom > _animationMinZoom &&
         (bounds.containsLatLng(_current) || bounds.containsLatLng(dest));
   }
 
@@ -140,31 +154,29 @@ class _AnimationStage {
     return (cos(((elapsedMillis / _durationMillis) + 1) * pi) / 2.0) + 0.5;
   }
 
-  static int _durationMillisFor({
+  static Future<int> _durationMillisFor({
     @required double zoom,
     @required LatLng start,
     @required LatLng dest,
-  }) {
-    final startDestDistance = _distance(start, dest);
-    if (startDestDistance < 200)
-      return (250 * _durationMultiplierFor(zoom)).toInt();
-    else if (startDestDistance < 500)
-      return (500 * _durationMultiplierFor(zoom)).toInt();
-    else
-      return (1000 * _durationMultiplierFor(zoom)).toInt();
-  }
-
-  static double _durationMultiplierFor(double zoom) {
-    if (zoom < 13) {
-      return 0.8;
-    } else if (zoom < 15) {
-      return 1;
-    } else if (zoom < 17) {
-      return 1.1;
-    } else if (zoom < 19) {
-      return 1.3;
-    } else {
-      return 1.5;
-    }
+    @required int mapId,
+  }) async {
+    final platform = MapsPlatform.GoogleMapsFlutterPlatform.instance;
+    final coordinates = await Future.wait([
+      platform.getScreenCoordinate(
+        Maps.LatLng(start.latitude, start.longitude),
+        mapId: mapId,
+      ),
+      platform.getScreenCoordinate(
+        Maps.LatLng(dest.latitude, dest.longitude),
+        mapId: mapId,
+      ),
+    ]);
+    final startCoordinate = coordinates[0];
+    final destCoordinate = coordinates[1];
+    final coordinateDistance = sqrt(
+      pow(destCoordinate.x - startCoordinate.x, 2) +
+          pow(destCoordinate.y - startCoordinate.y, 2),
+    );
+    return (coordinateDistance * 16).toInt();
   }
 }

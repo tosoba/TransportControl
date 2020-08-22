@@ -19,18 +19,20 @@ class MapVehicle {
         animation = MapPositionAnimation.first(newlyLoadedVehicle.position),
         sources = Set()..add(source);
 
-  MapVehicle withUpdatedVehicle(
+  Future<MapVehicle> withUpdatedVehicle(
     Vehicle updatedVehicle, {
     @required Maps.LatLngBounds bounds,
     @required double zoom,
+    @required int mapId,
     Set<MapVehicleSource> sources,
-  }) {
+  }) async {
     return MapVehicle._(
       updatedVehicle,
-      animation.withUpdatedPosition(
+      await animation.withUpdatedPosition(
         updatedVehicle.position,
         bounds: bounds,
         zoom: zoom,
+        mapId: mapId,
       ),
       sources ?? this.sources,
     );
