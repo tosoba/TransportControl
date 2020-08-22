@@ -1,11 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart' as Maps;
-import 'package:latlong/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import 'package:transport_control/util/lat_lng_util.dart';
-import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart'
-    as MapsPlatform;
 
 class MapPositionAnimation {
   final LatLng position;
@@ -19,7 +17,7 @@ class MapPositionAnimation {
 
   Future<MapPositionAnimation> withUpdatedPosition(
     LatLng position, {
-    @required Maps.LatLngBounds bounds,
+    @required LatLngBounds bounds,
     @required double zoom,
     @required int mapId,
   }) async {
@@ -35,7 +33,7 @@ class MapPositionAnimation {
   }
 
   MapPositionAnimation toNextStage({
-    @required Maps.LatLngBounds bounds,
+    @required LatLngBounds bounds,
     @required double zoom,
   }) {
     return MapPositionAnimation._(
@@ -49,8 +47,8 @@ class _AnimationStage {
   LatLng _start;
   LatLng _current;
   LatLng _dest;
-  int _animationStartTime;
-  int _durationMillis;
+  int _animationFrame;
+  int _durationFrames;
   bool _isAnimating;
 
   static final double _animationMinZoom = 12.5;
@@ -64,13 +62,13 @@ class _AnimationStage {
       : _start = null,
         _current = position,
         _dest = null,
-        _animationStartTime = null,
-        _durationMillis = null,
+        _animationFrame = 0,
+        _durationFrames = null,
         _isAnimating = false;
 
   Future<_AnimationStage> forUpdatedPosition(
     LatLng updatedPosition, {
-    @required Maps.LatLngBounds bounds,
+    @required LatLngBounds bounds,
     @required double zoom,
     @required int mapId,
   }) async {
@@ -83,8 +81,8 @@ class _AnimationStage {
         .._start = _current
         .._current = _current
         .._dest = updatedPosition
-        .._animationStartTime = DateTime.now().millisecondsSinceEpoch
-        .._durationMillis = await _durationMillisFor(
+        .._animationFrame = 0
+        .._durationFrames = await _durationInFramesFor(
           zoom: zoom,
           start: _current,
           dest: updatedPosition,
@@ -96,33 +94,33 @@ class _AnimationStage {
         .._start = null
         .._current = updatedPosition
         .._dest = null
-        .._animationStartTime = null
-        .._durationMillis = null
+        .._animationFrame = 0
+        .._durationFrames = null
         .._isAnimating = false;
     }
   }
 
   _AnimationStage next({
-    @required Maps.LatLngBounds bounds,
+    @required LatLngBounds bounds,
     @required double zoom,
   }) {
     if (_shouldAnimate(bounds: bounds, zoom: zoom, dest: _dest)) {
       final nextStage = _AnimationStage._().._start = _start;
-      final elapsedMillis = _elapsed;
-      final isAnimating = elapsedMillis < _durationMillis;
+      final isAnimating = _animationFrame < _durationFrames;
       if (isAnimating) {
-        final multiplier = _interpolation(elapsedMillis);
-        final lng =
-            multiplier * _dest.longitude + (1 - multiplier) * _start.longitude;
+        final multiplier = _interpolation(_animationFrame);
         final lat =
             multiplier * _dest.latitude + (1 - multiplier) * _start.latitude;
+        final lng =
+            multiplier * _dest.longitude + (1 - multiplier) * _start.longitude;
         nextStage._current = LatLng(lat, lng);
+        nextStage._animationFrame = _animationFrame + 1;
       } else {
         nextStage._current = _dest;
+        nextStage._animationFrame = 0;
       }
       nextStage._dest = _dest;
-      nextStage._animationStartTime = _animationStartTime;
-      nextStage._durationMillis = _durationMillis;
+      nextStage._durationFrames = _durationFrames;
       nextStage._isAnimating = isAnimating;
       return nextStage;
     } else {
@@ -130,46 +128,37 @@ class _AnimationStage {
         .._start = null
         .._current = _dest
         .._dest = null
-        .._animationStartTime = null
-        .._durationMillis = null
+        .._animationFrame = 0
+        .._durationFrames = null
         .._isAnimating = false;
     }
   }
 
   bool _shouldAnimate({
-    @required Maps.LatLngBounds bounds,
+    @required LatLngBounds bounds,
     @required double zoom,
     @required LatLng dest,
   }) {
     return zoom > _animationMinZoom &&
-        (bounds.containsLatLng(_current) || bounds.containsLatLng(dest));
+        (bounds.containsLatLng(_current.latitude, _current.longitude) ||
+            bounds.containsLatLng(dest.latitude, dest.longitude));
   }
 
-  int get _elapsed {
-    return DateTime.now().millisecondsSinceEpoch - _animationStartTime;
-  }
-
-  double _interpolation(int elapsedMillis) {
+  double _interpolation(int elapsedFrames) {
     if (!_isAnimating) throw ArgumentError();
-    return (cos(((elapsedMillis / _durationMillis) + 1) * pi) / 2.0) + 0.5;
+    return (cos(((elapsedFrames / _durationFrames) + 1) * pi) / 2.0) + 0.5;
   }
 
-  static Future<int> _durationMillisFor({
+  static Future<int> _durationInFramesFor({
     @required double zoom,
     @required LatLng start,
     @required LatLng dest,
     @required int mapId,
   }) async {
-    final platform = MapsPlatform.GoogleMapsFlutterPlatform.instance;
+    final platform = GoogleMapsFlutterPlatform.instance;
     final coordinates = await Future.wait([
-      platform.getScreenCoordinate(
-        Maps.LatLng(start.latitude, start.longitude),
-        mapId: mapId,
-      ),
-      platform.getScreenCoordinate(
-        Maps.LatLng(dest.latitude, dest.longitude),
-        mapId: mapId,
-      ),
+      platform.getScreenCoordinate(start, mapId: mapId),
+      platform.getScreenCoordinate(dest, mapId: mapId),
     ]);
     final startCoordinate = coordinates[0];
     final destCoordinate = coordinates[1];
@@ -177,6 +166,6 @@ class _AnimationStage {
       pow(destCoordinate.x - startCoordinate.x, 2) +
           pow(destCoordinate.y - startCoordinate.y, 2),
     );
-    return (coordinateDistance * 16).toInt();
+    return coordinateDistance.toInt();
   }
 }

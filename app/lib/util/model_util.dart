@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:latlong/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:moor_flutter/moor_flutter.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/model/line.dart';

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +55,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   ) {
     _ticker = tickerProvider.createTicker(
       (elapsed) {
+        log(elapsed.inMilliseconds.toString());
         if (state.trackedVehicles.values
             .any((tracked) => tracked.animation.stage.isAnimating)) {
           add(MapEvent.animateVehicles());
@@ -452,7 +454,13 @@ extension _MapStateExt on MapState {
   Map<String, ClusterableMarker> get _markersToCluster {
     final markers = Map.fromEntries(
       trackedVehicles.entries.where(
-        (entry) => bounds.containsLatLng(entry.value.animation.stage.current),
+        (entry) {
+          final currentLatLng = entry.value.animation.stage.current;
+          return bounds.containsLatLng(
+            currentLatLng.latitude,
+            currentLatLng.longitude,
+          );
+        },
       ),
     ).map(
       (number, tracked) {
