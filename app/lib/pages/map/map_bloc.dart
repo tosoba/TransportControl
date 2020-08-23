@@ -8,6 +8,7 @@ import 'package:flutter_animarker/lat_lng_interpolation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/model/line.dart';
@@ -393,9 +394,8 @@ extension _IconifiedMarkersExt on IconifiedMarkers {
   }
 
   Stream<List<Marker>> animatedMarkersStream({IconifiedMarker selectedMarker}) {
-    final markersToAnimate = _markersToAnimate(selectedMarker: selectedMarker);
-    return Stream<Marker>.empty().combineLatestAll(
-      markersToAnimate.map(
+    return CombineLatestStream.list(
+      _markersToAnimate(selectedMarker: selectedMarker).map(
         (marker) {
           if (marker.previousPosition == null) {
             return Stream.value(marker.toGoogleMapMarker())
