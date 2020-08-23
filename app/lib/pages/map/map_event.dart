@@ -42,9 +42,6 @@ enum _MapEvent {
   ])
   AddVehiclesNearbyPlace,
 
-  @object
-  AnimateVehicles,
-
   @Data(fields: [
     DataField<LatLngBounds>('bounds'),
     DataField<double>('zoom'),

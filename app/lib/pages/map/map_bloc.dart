@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -38,9 +36,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   final StreamController<MapSignal> _signals = StreamController.broadcast();
   Stream<MapSignal> get signals => _signals.stream;
 
-  Ticker _ticker;
-  int mapId = null;
-
   MapBloc(
     this._vehiclesRepo,
     this._preferences,
@@ -51,18 +46,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     Stream<PlaceSuggestion> loadVehiclesNearbyPlaceStream,
     Stream<TrackedLinesAddedEvent> trackedLinesAddedStream,
     Stream<Set<Line>> trackedLinesRemovedStream,
-    TickerProvider tickerProvider,
   ) {
-    _ticker = tickerProvider.createTicker(
-      (elapsed) {
-        log(elapsed.inMilliseconds.toString());
-        if (state.trackedVehicles.values
-            .any((tracked) => tracked.animation.stage.isAnimating)) {
-          add(MapEvent.animateVehicles());
-        }
-      },
-    )..start();
-
     _subscriptions
       ..add(
         Stream.periodic(const Duration(seconds: 15))
@@ -117,14 +101,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       clearMap: (_) => state.copyWith(trackedVehicles: {}),
       updateVehicles: (evt) {
         final updatedVehicles = Map.of(state.trackedVehicles);
-        evt.vehicles.forEach((vehicle) async {
+        evt.vehicles.forEach((vehicle) {
           final tracked = updatedVehicles[vehicle.number];
           if (tracked != null) {
-            updatedVehicles[vehicle.number] = await tracked.withUpdatedVehicle(
+            updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
               vehicle,
               bounds: state.bounds,
-              zoom: state.zoom,
-              mapId: mapId,
             );
           }
         });
@@ -142,7 +124,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             line: lineSymbols[vehicle.symbol],
             loadedAt: loadedAt,
           ),
-          mapId: mapId,
         );
       },
       addVehiclesInLocation: (evt) {
@@ -153,7 +134,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             location: evt.location,
             loadedAt: loadedAt,
           ),
-          mapId: mapId,
         );
       },
       addVehiclesNearbyUserLocation: (evt) {
@@ -165,7 +145,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             radius: evt.radius,
             loadedAt: loadedAt,
           ),
-          mapId: mapId,
         );
       },
       addVehiclesNearbyPlace: (evt) {
@@ -178,19 +157,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             title: evt.title,
             loadedAt: loadedAt,
           ),
-          mapId: mapId,
         );
       },
-      animateVehicles: (_) => state.copyWith(
-        trackedVehicles: state.trackedVehicles.map(
-          (number, tracked) => tracked.animation.stage.isAnimating
-              ? MapEntry(
-                  number,
-                  tracked.toNextStage(bounds: state.bounds, zoom: state.zoom),
-                )
-              : MapEntry(number, tracked),
-        ),
-      ),
       cameraMoved: (evt) => evt.byUser
           ? state.withNoSelectedVehicleBoundsAndZoom(
               bounds: evt.bounds,
@@ -212,9 +180,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   @override
   Future<void> close() async {
-    _ticker
-      ..stop()
-      ..dispose();
     await Future.wait([
       ..._subscriptions.map((subscription) => subscription.cancel()),
       _signals.close(),
@@ -428,15 +393,14 @@ extension _MapStateExt on MapState {
       return markers;
     } else {
       final selected = trackedVehicles[selectedVehicleNumber];
-      final position = selected.animation.stage.current;
       return List.of(markers)
         ..add(
           IconifiedMarker(
             ClusterableMarker(
               symbol: selected.vehicle.symbol,
               id: selectedVehicleNumber,
-              lat: position.latitude,
-              lng: position.longitude,
+              lat: selected.vehicle.lat,
+              lng: selected.vehicle.lon,
             ),
             icon: await markerBitmap(
               symbol: selected.vehicle.symbol,
@@ -455,22 +419,19 @@ extension _MapStateExt on MapState {
     final markers = Map.fromEntries(
       trackedVehicles.entries.where(
         (entry) {
-          final currentLatLng = entry.value.animation.stage.current;
-          return bounds.containsLatLng(
-            currentLatLng.latitude,
-            currentLatLng.longitude,
-          );
+          final vehicle = entry.value.vehicle;
+          return bounds.containsLatLng(vehicle.lat, vehicle.lon);
         },
       ),
     ).map(
       (number, tracked) {
-        final position = tracked.animation.stage.current;
+        final vehicle = tracked.vehicle;
         return MapEntry(
           number,
           ClusterableMarker(
             id: number,
-            lat: position.latitude,
-            lng: position.longitude,
+            lat: vehicle.lat,
+            lng: vehicle.lon,
             number: number,
             symbol: tracked.vehicle.symbol,
           ),
@@ -484,17 +445,14 @@ extension _MapStateExt on MapState {
   MapState withNewVehicles(
     Iterable<Vehicle> vehicles, {
     @required MapVehicleSource Function(Vehicle) sourceForVehicle,
-    @required int mapId,
   }) {
     final updatedVehicles = Map.of(trackedVehicles);
-    vehicles.forEach((vehicle) async {
+    vehicles.forEach((vehicle) {
       final tracked = updatedVehicles[vehicle.number];
       if (tracked != null) {
-        updatedVehicles[vehicle.number] = await tracked.withUpdatedVehicle(
+        updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
           vehicle,
           bounds: bounds,
-          zoom: zoom,
-          mapId: mapId,
           sources: tracked.sources..add(sourceForVehicle(vehicle)),
         );
       } else {

@@ -184,10 +184,7 @@ class _MapPageState extends State<MapPage>
             target: MapConstants.initialTarget,
             zoom: MapConstants.initialZoom,
           ),
-          onMapCreated: (controller) {
-            _mapController.complete(controller);
-            bloc.mapId = controller.mapId;
-          },
+          onMapCreated: _mapController.complete,
           onCameraIdle: () => _cameraMoved(context),
           markers: snapshot.data == null || snapshot.data.markers == null
               ? null
