@@ -429,9 +429,7 @@ extension _MapStateExt on MapState {
         .toList();
     yield* iconifiedMarkers
         .animatedMarkersStream(selectedMarker: await _selectedMarker)
-        .tap((markers) => log('Animated markers size: ${markers.length}'))
-        .map((animatedMarkers) => clusteredMarkers..addAll(animatedMarkers))
-        .tap((markers) => log('All markers size: ${markers.length}'));
+        .map((animatedMarkers) => [...clusteredMarkers, ...animatedMarkers]);
   }
 
   Future<IconifiedMarker> get _selectedMarker async {
