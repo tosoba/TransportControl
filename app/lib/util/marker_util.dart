@@ -17,46 +17,6 @@ class IconifiedMarkers {
 }
 
 extension FlusterMapMarkerExt on Fluster<ClusterableMarker> {
-  Future<List<IconifiedMarker>> getMarkers({
-    @required double currentZoom,
-    @required Color clusterColor,
-    @required Color clusterTextColor,
-  }) async {
-    final markerImage = await rootBundle.loadUiImage(ImageAssets.marker);
-    return Future.wait(
-      clusters(
-        const [-180, -85, 180, 85],
-        currentZoom.toInt(),
-      ).map(
-        (marker) async {
-          if (marker.isCluster) {
-            return IconifiedMarker(
-              marker,
-              childrenPositions: points(marker.clusterId)
-                  .map((marker) => LatLng(marker.latitude, marker.longitude))
-                  .toList(),
-              icon: await _clusterMarkerBitmap(
-                clusterSize: marker.pointsSize,
-                clusterColor: clusterColor,
-                textColor: clusterTextColor,
-              ),
-            );
-          } else {
-            return IconifiedMarker(
-              marker,
-              icon: await markerBitmap(
-                symbol: marker.symbol,
-                width: MapConstants.markerWidth,
-                height: MapConstants.markerHeight,
-                imageAsset: markerImage,
-              ),
-            );
-          }
-        },
-      ).toList(),
-    );
-  }
-
   Future<IconifiedMarkers> iconifiedMarkers({
     @required double currentZoom,
     @required Color clusterColor,

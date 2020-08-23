@@ -9,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
@@ -398,8 +397,10 @@ extension _IconifiedMarkersExt on IconifiedMarkers {
       _markersToAnimate(selectedMarker: selectedMarker).map(
         (marker) {
           if (marker.previousPosition == null) {
+            log('No prev pos.');
             return Stream.value(marker.toGoogleMapMarker());
           } else {
+            log('Has prev pos.');
             final interpolationStream = LatLngInterpolationStream()
               ..addLatLng(marker.previousPosition)
               ..addLatLng(marker.position);
@@ -473,7 +474,9 @@ extension _MapStateExt on MapState {
             lng: vehicle.lon,
             number: number,
             symbol: vehicle.symbol,
-            previousPosition: tracked.previousPosition,
+            previousPosition: tracked.previousPositions.isNotEmpty
+                ? tracked.previousPositions.removeLast()
+                : null,
           ),
         );
       },
