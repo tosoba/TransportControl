@@ -24,7 +24,9 @@ class MapVehicle {
   }) {
     return MapVehicle._(
       updatedVehicle,
-      LatLng(vehicle.lat, vehicle.lon),
+      (updatedVehicle.lat == vehicle.lat && updatedVehicle.lon == vehicle.lon)
+          ? null
+          : LatLng(vehicle.lat, vehicle.lon),
       sources ?? this.sources,
     );
   }

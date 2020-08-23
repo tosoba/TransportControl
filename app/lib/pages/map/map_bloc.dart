@@ -398,18 +398,14 @@ extension _IconifiedMarkersExt on IconifiedMarkers {
       _markersToAnimate(selectedMarker: selectedMarker).map(
         (marker) {
           if (marker.previousPosition == null) {
-            return Stream.value(marker.toGoogleMapMarker())
-                .tap((marker) => log('Animated marker: ${marker.markerId}'));
+            return Stream.value(marker.toGoogleMapMarker());
           } else {
             final interpolationStream = LatLngInterpolationStream()
               ..addLatLng(marker.previousPosition)
               ..addLatLng(marker.position);
             return interpolationStream
                 .getLatLngInterpolation()
-                .map((delta) => marker.googleMapMarker(position: delta.from))
-                .tap(
-                  (marker) => log('Animated delta marker: ${marker.markerId}'),
-                );
+                .map((delta) => marker.googleMapMarker(position: delta.from));
           }
         },
       ),
