@@ -52,4 +52,15 @@ class IconifiedMarker {
       onTap: onTap,
     );
   }
+
+  Marker googleMapMarker({LatLng position, void Function() onTap}) {
+    return Marker(
+      markerId: MarkerId(
+        _marker.isCluster ? 'cl_${_marker.markerId}' : _marker.markerId,
+      ),
+      position: position ?? LatLng(_marker.latitude, _marker.longitude),
+      icon: icon,
+      onTap: onTap,
+    );
+  }
 }

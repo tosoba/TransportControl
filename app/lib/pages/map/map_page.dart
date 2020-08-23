@@ -162,15 +162,14 @@ class _MapPageState extends State<MapPage>
       ),
     );
 
-    final bloc = context.bloc<MapBloc>();
-
     return StreamBuilder<_MapArguments>(
-      stream: bloc.markers.combineLatest(
-        _preferences.mapPreferencesStream,
-        (List<IconifiedMarker> markers, MapPreferences preferences) {
-          return _MapArguments(markers: markers, preferences: preferences);
-        },
-      ),
+      stream: context.bloc<MapBloc>().markers.combineLatest(
+            _preferences.mapPreferencesStream,
+            (List<Marker> markers, MapPreferences preferences) => _MapArguments(
+              markers: markers,
+              preferences: preferences,
+            ),
+          ),
       builder: (context, snapshot) => Listener(
         onPointerDown: (event) => _cameraWasMovedByUser = true,
         child: GoogleMap(
@@ -184,24 +183,14 @@ class _MapPageState extends State<MapPage>
             target: MapConstants.initialTarget,
             zoom: MapConstants.initialZoom,
           ),
-          onMapCreated: _mapController.complete,
+          onMapCreated: (controller) {
+            _mapController.complete(controller);
+            _cameraMoved(context);
+          },
           onCameraIdle: () => _cameraMoved(context),
           markers: snapshot.data == null || snapshot.data.markers == null
               ? null
-              : snapshot.data.markers
-                  .map(
-                    (marker) => marker.toGoogleMapMarker(
-                      onTap: marker.isCluster
-                          ? () => _animateToClusterChildrenBounds(
-                                marker.childrenPositions,
-                              )
-                          : () {
-                              widget.markerTapped(marker);
-                              _cameraWasMovedByUser = false;
-                            },
-                    ),
-                  )
-                  .toSet(),
+              : snapshot.data.markers.toSet(),
           onTap: (position) {
             context.bloc<MapBloc>().deselectVehicle();
             widget.mapTapped();
@@ -238,7 +227,7 @@ class _MapPageState extends State<MapPage>
 }
 
 class _MapArguments {
-  final List<IconifiedMarker> markers;
+  final List<Marker> markers;
   final MapPreferences preferences;
 
   _MapArguments({@required this.markers, @required this.preferences});

@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_animarker/lat_lng_interpolation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
@@ -70,8 +73,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         loadVehiclesNearbyUserLocationStream.listen(
           (position) async => _loadVehiclesNearbyUserLocation(
             position,
-            radiusInMeters:
-                await _preferences.getInt(Preferences.nearbySearchRadius.key),
+            radiusInMeters: await _preferences.getInt(
+              Preferences.nearbySearchRadius.key,
+            ),
           ),
         ),
       )
@@ -80,8 +84,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           (place) async => _loadVehiclesNearbyPlace(
             LatLng(place.position.lat, place.position.lng),
             title: place.title,
-            radiusInMeters:
-                await _preferences.getInt(Preferences.nearbySearchRadius.key),
+            radiusInMeters: await _preferences.getInt(
+              Preferences.nearbySearchRadius.key,
+            ),
           ),
         ),
       )
@@ -187,8 +192,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     return super.close();
   }
 
-  Stream<List<IconifiedMarker>> get markers {
-    return asyncMap((state) => state.markers);
+  Stream<List<Marker>> get markers {
+    return asyncExpand((state) => state.mapMarkers);
   }
 
   void _loadVehiclesOfLines(TrackedLinesAddedEvent event) {
@@ -376,43 +381,76 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 }
 
+extension _IconifiedMarkersExt on IconifiedMarkers {
+  List<IconifiedMarker> _markersToAnimate({IconifiedMarker selectedMarker}) {
+    if (selectedMarker != null) {
+      return List.of(nonClustered)..add(selectedMarker);
+    } else {
+      return nonClustered;
+    }
+  }
+
+  Stream<List<Marker>> animatedMarkersStream({IconifiedMarker selectedMarker}) {
+    final markersToAnimate = _markersToAnimate(selectedMarker: selectedMarker);
+    return Stream<Marker>.empty().combineLatestAll(
+      markersToAnimate.map(
+        (marker) {
+          final interpolationStream = LatLngInterpolationStream();
+          interpolationStream.addLatLng(marker.position);
+          return interpolationStream
+              .getLatLngInterpolation()
+              .map((delta) => marker.googleMapMarker(position: delta.from));
+        },
+      ),
+    );
+  }
+}
+
 extension _MapStateExt on MapState {
-  Future<List<IconifiedMarker>> get markers async {
-    if (trackedVehicles.isEmpty) return null;
+  Stream<List<Marker>> get mapMarkers async* {
+    if (trackedVehicles.isEmpty) yield null;
     final fluster = await _markersToCluster.fluster(
       minZoom: MapConstants.minClusterZoom,
       maxZoom: MapConstants.maxClusterZoom,
     );
-    final markers = await fluster.getMarkers(
+    final iconifiedMarkers = await fluster.iconifiedMarkers(
       currentZoom: zoom,
       clusterColor: Colors.blue,
       clusterTextColor: Colors.white,
     );
-    if (selectedVehicleNumber == null ||
-        !trackedVehicles.containsKey(selectedVehicleNumber)) {
-      return markers;
-    } else {
-      final selected = trackedVehicles[selectedVehicleNumber];
-      return List.of(markers)
-        ..add(
-          IconifiedMarker(
-            ClusterableMarker(
-              symbol: selected.vehicle.symbol,
-              id: selectedVehicleNumber,
-              lat: selected.vehicle.lat,
-              lng: selected.vehicle.lon,
-            ),
-            icon: await markerBitmap(
-              symbol: selected.vehicle.symbol,
-              width: MapConstants.markerWidth,
-              height: MapConstants.markerHeight,
-              imageAsset: await rootBundle.loadUiImage(
-                ImageAssets.selectedMarker,
-              ),
-            ),
-          ),
+    final clusteredMarkers = iconifiedMarkers.clustered
+        .map((marker) => marker.googleMapMarker())
+        .toList();
+    final animatedMarkersStream = iconifiedMarkers
+        .animatedMarkersStream(selectedMarker: await _selectedMarker)
+        .tap(
+          (animated) => log('Animated count: ${animated.length.toString()}'),
         );
+    await for (final animatedMarkers in animatedMarkersStream) {
+      yield clusteredMarkers..addAll(animatedMarkers);
     }
+  }
+
+  Future<IconifiedMarker> get _selectedMarker async {
+    if (selectedVehicleNumber == null) return null;
+    final selected = trackedVehicles[selectedVehicleNumber];
+    if (selected == null) return null;
+    return IconifiedMarker(
+      ClusterableMarker(
+        symbol: selected.vehicle.symbol,
+        id: selectedVehicleNumber,
+        lat: selected.vehicle.lat,
+        lng: selected.vehicle.lon,
+      ),
+      icon: await markerBitmap(
+        symbol: selected.vehicle.symbol,
+        width: MapConstants.markerWidth,
+        height: MapConstants.markerHeight,
+        imageAsset: await rootBundle.loadUiImage(
+          ImageAssets.selectedMarker,
+        ),
+      ),
+    );
   }
 
   Map<String, ClusterableMarker> get _markersToCluster {

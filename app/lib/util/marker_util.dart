@@ -9,6 +9,13 @@ import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_markers.dart';
 import 'package:transport_control/util/asset_util.dart';
 
+class IconifiedMarkers {
+  final List<IconifiedMarker> clustered;
+  final List<IconifiedMarker> nonClustered;
+
+  IconifiedMarkers({@required this.clustered, @required this.nonClustered});
+}
+
 extension FlusterMapMarkerExt on Fluster<ClusterableMarker> {
   Future<List<IconifiedMarker>> getMarkers({
     @required double currentZoom,
@@ -48,6 +55,50 @@ extension FlusterMapMarkerExt on Fluster<ClusterableMarker> {
         },
       ).toList(),
     );
+  }
+
+  Future<IconifiedMarkers> iconifiedMarkers({
+    @required double currentZoom,
+    @required Color clusterColor,
+    @required Color clusterTextColor,
+  }) async {
+    final markerImage = await rootBundle.loadUiImage(ImageAssets.marker);
+    final clusterableMarkers = clusters(
+      const [-180, -85, 180, 85],
+      currentZoom.toInt(),
+    );
+    final clustered = <IconifiedMarker>[];
+    final nonClustered = <IconifiedMarker>[];
+    for (final clusterable in clusterableMarkers) {
+      if (clusterable.isCluster) {
+        clustered.add(
+          IconifiedMarker(
+            clusterable,
+            childrenPositions: points(clusterable.clusterId)
+                .map((marker) => LatLng(marker.latitude, marker.longitude))
+                .toList(),
+            icon: await _clusterMarkerBitmap(
+              clusterSize: clusterable.pointsSize,
+              clusterColor: clusterColor,
+              textColor: clusterTextColor,
+            ),
+          ),
+        );
+      } else {
+        nonClustered.add(
+          IconifiedMarker(
+            clusterable,
+            icon: await markerBitmap(
+              symbol: clusterable.symbol,
+              width: MapConstants.markerWidth,
+              height: MapConstants.markerHeight,
+              imageAsset: markerImage,
+            ),
+          ),
+        );
+      }
+    }
+    return IconifiedMarkers(clustered: clustered, nonClustered: nonClustered);
   }
 }
 
