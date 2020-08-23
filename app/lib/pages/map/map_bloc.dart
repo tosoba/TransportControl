@@ -193,7 +193,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   Stream<List<Marker>> get markers {
-    return asyncExpand((state) => state.mapMarkers);
+    return state.trackedVehicles.isEmpty
+        ? map((state) => null)
+        : asyncExpand((state) => state.mapMarkers);
   }
 
   void _loadVehiclesOfLines(TrackedLinesAddedEvent event) {
@@ -384,7 +386,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 extension _IconifiedMarkersExt on IconifiedMarkers {
   List<IconifiedMarker> _markersToAnimate({IconifiedMarker selectedMarker}) {
     if (selectedMarker != null) {
-      return List.of(nonClustered)..add(selectedMarker);
+      return nonClustered..add(selectedMarker);
     } else {
       return nonClustered;
     }
@@ -395,11 +397,20 @@ extension _IconifiedMarkersExt on IconifiedMarkers {
     return Stream<Marker>.empty().combineLatestAll(
       markersToAnimate.map(
         (marker) {
-          final interpolationStream = LatLngInterpolationStream();
-          interpolationStream.addLatLng(marker.position);
-          return interpolationStream
-              .getLatLngInterpolation()
-              .map((delta) => marker.googleMapMarker(position: delta.from));
+          if (marker.previousPosition == null) {
+            return Stream.value(marker.toGoogleMapMarker())
+                .tap((marker) => log('Animated marker: ${marker.markerId}'));
+          } else {
+            final interpolationStream = LatLngInterpolationStream()
+              ..addLatLng(marker.previousPosition)
+              ..addLatLng(marker.position);
+            return interpolationStream
+                .getLatLngInterpolation()
+                .map((delta) => marker.googleMapMarker(position: delta.from))
+                .tap(
+                  (marker) => log('Animated delta marker: ${marker.markerId}'),
+                );
+          }
         },
       ),
     );
@@ -408,7 +419,6 @@ extension _IconifiedMarkersExt on IconifiedMarkers {
 
 extension _MapStateExt on MapState {
   Stream<List<Marker>> get mapMarkers async* {
-    if (trackedVehicles.isEmpty) yield null;
     final fluster = await _markersToCluster.fluster(
       minZoom: MapConstants.minClusterZoom,
       maxZoom: MapConstants.maxClusterZoom,
@@ -421,14 +431,11 @@ extension _MapStateExt on MapState {
     final clusteredMarkers = iconifiedMarkers.clustered
         .map((marker) => marker.googleMapMarker())
         .toList();
-    final animatedMarkersStream = iconifiedMarkers
+    yield* iconifiedMarkers
         .animatedMarkersStream(selectedMarker: await _selectedMarker)
-        .tap(
-          (animated) => log('Animated count: ${animated.length.toString()}'),
-        );
-    await for (final animatedMarkers in animatedMarkersStream) {
-      yield clusteredMarkers..addAll(animatedMarkers);
-    }
+        .tap((markers) => log('Animated markers size: ${markers.length}'))
+        .map((animatedMarkers) => clusteredMarkers..addAll(animatedMarkers))
+        .tap((markers) => log('All markers size: ${markers.length}'));
   }
 
   Future<IconifiedMarker> get _selectedMarker async {
@@ -471,7 +478,8 @@ extension _MapStateExt on MapState {
             lat: vehicle.lat,
             lng: vehicle.lon,
             number: number,
-            symbol: tracked.vehicle.symbol,
+            symbol: vehicle.symbol,
+            previousPosition: tracked.previousPosition,
           ),
         );
       },

@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 class ClusterableMarker extends Clusterable {
   final String number;
   final String symbol;
+  final LatLng previousPosition;
 
   ClusterableMarker({
     @required String id,
@@ -12,6 +13,7 @@ class ClusterableMarker extends Clusterable {
     @required double lng,
     this.symbol,
     this.number,
+    this.previousPosition,
     bool isCluster = false,
     int clusterId,
     int pointsSize,
@@ -41,6 +43,7 @@ class IconifiedMarker {
   String get number => _marker.number;
   LatLng get position => LatLng(_marker.latitude, _marker.longitude);
   bool get isCluster => _marker.isCluster;
+  LatLng get previousPosition => _marker.previousPosition;
 
   Marker toGoogleMapMarker({void Function() onTap}) {
     return Marker(
