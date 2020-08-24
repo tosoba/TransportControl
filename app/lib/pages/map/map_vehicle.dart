@@ -14,8 +14,8 @@ class MapVehicle {
     Vehicle newlyLoadedVehicle, {
     @required MapVehicleSource source,
   })  : vehicle = newlyLoadedVehicle,
-        previousPositions = List.empty(),
-        sources = Set()..add(source);
+        previousPositions = [],
+        sources = {source};
 
   MapVehicle withUpdatedVehicle(
     Vehicle updatedVehicle, {
@@ -25,7 +25,7 @@ class MapVehicle {
     return MapVehicle._(
       updatedVehicle,
       (updatedVehicle.lat == vehicle.lat && updatedVehicle.lon == vehicle.lon)
-          ? List.empty()
+          ? []
           : [LatLng(vehicle.lat, vehicle.lon)],
       sources ?? this.sources,
     );

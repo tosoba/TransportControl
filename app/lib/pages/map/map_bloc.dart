@@ -367,7 +367,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   void removeSource(MapVehicleSource source) {
     if (source is OfLine) {
-      _untrackLinesSink.add(Set()..add(source.line));
+      _untrackLinesSink.add({source.line});
     }
     add(MapEvent.removeSource(source: source));
   }
