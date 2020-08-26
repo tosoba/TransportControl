@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
@@ -181,6 +182,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           : state.copyWith(selectedVehicleNumber: evt.number),
       deselectVehicle: (_) => state.withNoSelectedVehicle,
     );
+  }
+
+  @override
+  void onTransition(Transition<MapEvent, MapState> transition) {
+    super.onTransition(transition);
+    log(transition.toString());
   }
 
   @override
@@ -396,17 +403,19 @@ extension _IconifiedMarkersExt on IconifiedMarkers {
     return CombineLatestStream.list(
       _markersToAnimate(selectedMarker: selectedMarker).map(
         (marker) {
-          if (marker.previousPosition == null) {
-            log('No prev pos.');
-            return Stream.value(marker.toGoogleMapMarker());
-          } else {
-            log('Has prev pos.');
+          if (marker.previousPosition != null) {
             final interpolationStream = LatLngInterpolationStream()
               ..addLatLng(marker.previousPosition)
               ..addLatLng(marker.position);
             return interpolationStream
                 .getLatLngInterpolation()
-                .map((delta) => marker.googleMapMarker(position: delta.from));
+                .map((delta) => marker.googleMapMarker(position: delta.from))
+                .tap(
+                  (marker) => log('${marker.markerId.value}: has prev pos.'),
+                );
+          } else {
+            return Stream.value(marker.toGoogleMapMarker())
+                .tap((marker) => log('${marker.markerId.value}: no prev pos.'));
           }
         },
       ),
