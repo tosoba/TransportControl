@@ -34,9 +34,7 @@ extension FlusterMapMarkerExt on Fluster<ClusterableMarker> {
         clustered.add(
           IconifiedMarker(
             clusterable,
-            childrenPositions: points(clusterable.clusterId)
-                .map((marker) => LatLng(marker.latitude, marker.longitude))
-                .toList(),
+            children: points(clusterable.clusterId),
             icon: await _clusterMarkerBitmap(
               clusterSize: clusterable.pointsSize,
               clusterColor: clusterColor,

@@ -32,12 +32,12 @@ class ClusterableMarker extends Clusterable {
 class IconifiedMarker {
   final BitmapDescriptor icon;
   final ClusterableMarker _marker;
-  final List<LatLng> childrenPositions;
+  final List<ClusterableMarker> children;
 
   IconifiedMarker(
     this._marker, {
     @required this.icon,
-    this.childrenPositions,
+    this.children,
   });
 
   String get number => _marker.number;
@@ -66,4 +66,11 @@ class IconifiedMarker {
       onTap: onTap,
     );
   }
+}
+
+class MapVehicleMarker {
+  final Marker marker;
+  final String number;
+
+  MapVehicleMarker({@required this.marker, @required this.number});
 }

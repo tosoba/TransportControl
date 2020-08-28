@@ -13,8 +13,18 @@ class MapVehicle {
   MapVehicle.withoutMarker(
     Vehicle vehicle, {
     Set<MapVehicleSource> sources,
-  })  : vehicle = vehicle,
+  })  : assert(vehicle != null),
+        vehicle = vehicle,
         marker = null,
+        sources = sources ?? {};
+
+  MapVehicle.withMarker(
+    Vehicle vehicle, {
+    @required Marker marker,
+    Set<MapVehicleSource> sources,
+  })  : assert(vehicle != null),
+        vehicle = vehicle,
+        marker = marker,
         sources = sources ?? {};
 
   MapVehicle.fromNewlyLoadedVehicle(
