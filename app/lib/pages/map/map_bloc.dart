@@ -103,101 +103,108 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   static final double _minAnimationZoom = 12;
 
-  @override
-  Stream<MapState> mapEventToState(MapEvent event) async* {
-    if (event is UpdateVehicles) {
-      final bounds = state.bounds;
-      final trackedVehicles = state.trackedVehicles;
-      // 1) empty trackedVehicles Map
-      // 2) put vehicles that are outside of current bounds into the map with null Marker
-      // 3) create markers for those that are in bounds and assign each Marker to Vehicle inside the map in place
-      // depending on current zoom
-      // (if zoom > _minAnimationZoom) give all unclustered markers their initial position = previous position (or destination in case it's the first load)
-      // and position = destination for clustered ones
-      // else make them all equal to destination
-      // keep the part of the map holding clustered markers as a variable
-      // animate unclustered markers
-      final eventVehiclesMap = Map<String, Vehicle>.fromIterable(
-        event.vehicles,
-        key: (vehicle) => vehicle.number,
-        value: (vehicle) => vehicle,
-      );
+  Stream<MapState> _trackedVehiclesUpdates({
+    @required Map<String, Vehicle> toProcess,
+    @required Map<String, MapVehicle> processed,
+  }) async* {
+    // 1) empty processed Map
+    // 2) put vehicles that are outside of current bounds into the map with null Marker
+    // 3) create markers for those that are in bounds and assign each Marker to Vehicle inside the map in place
+    // depending on current zoom
+    // (if zoom > _minAnimationZoom) give all unclustered markers their initial position = previous position (or destination in case it's the first load)
+    // and position = destination for clustered ones
+    // else make them all equal to destination
+    // keep the part of the map holding clustered markers as a variable
+    // animate unclustered markers
 
-      final updatedVehicles = <String, MapVehicle>{};
-      final clusterables = <String, ClusterableMarker>{};
-      event.vehicles.forEach((updatedVehicle) {
-        if (!bounds.containsLatLng(updatedVehicle.lat, updatedVehicle.lon)) {
-          final current = trackedVehicles[updatedVehicle.number];
-          if (current?.marker == null) {
-            updatedVehicles[updatedVehicle.number] = MapVehicle.withoutMarker(
+    // handle cameraMoved
+    final bounds = state.bounds;
+    final trackedVehicles = state.trackedVehicles;
+    final clusterables = <String, ClusterableMarker>{};
+    toProcess.forEach((number, updatedVehicle) {
+      if (!bounds.containsLatLng(updatedVehicle.lat, updatedVehicle.lon)) {
+        final current = trackedVehicles[number];
+        if (current?.marker == null) {
+          processed[number] = MapVehicle.withoutMarker(
+            updatedVehicle,
+            sources: current?.sources,
+          );
+        } else {
+          final currentPosition = current.marker.position;
+          if (!bounds.containsLatLng(
+            currentPosition.latitude,
+            currentPosition.longitude,
+          )) {
+            processed[number] = MapVehicle.withoutMarker(
               updatedVehicle,
               sources: current?.sources,
             );
           } else {
-            final currentPosition = current.marker.position;
-            if (!bounds.containsLatLng(
-              currentPosition.latitude,
-              currentPosition.longitude,
-            )) {
-              updatedVehicles[updatedVehicle.number] = MapVehicle.withoutMarker(
-                updatedVehicle,
-                sources: current?.sources,
-              );
-            } else {
-              clusterables[updatedVehicle.number] =
-                  ClusterableMarker.fromVehicle(
-                updatedVehicle,
-                initialPosition: currentPosition,
-              );
-            }
+            clusterables[number] = ClusterableMarker.fromVehicle(
+              updatedVehicle,
+              initialPosition: currentPosition,
+            );
           }
-        } else {
-          clusterables[updatedVehicle.number] = ClusterableMarker.fromVehicle(
-            updatedVehicle,
-            initialPosition:
-                trackedVehicles[updatedVehicle.number]?.marker?.position,
-          );
         }
-      });
+      } else {
+        clusterables[number] = ClusterableMarker.fromVehicle(
+          updatedVehicle,
+          initialPosition: trackedVehicles[number]?.marker?.position,
+        );
+      }
+    });
 
-      final fluster = await clusterables.fluster(
-        minZoom: MapConstants.minClusterZoom,
-        maxZoom: MapConstants.maxClusterZoom,
+    final fluster = await clusterables.fluster(
+      minZoom: MapConstants.minClusterZoom,
+      maxZoom: MapConstants.maxClusterZoom,
+    );
+
+    final iconifiedMarkers = await fluster.iconifiedMarkers(
+      currentZoom: state.zoom,
+      clusterColor: Colors.blue,
+      clusterTextColor: Colors.white,
+    );
+
+    iconifiedMarkers.clustered.forEach((clustered) {
+      final marker = clustered.googleMapMarker();
+      clustered.children.forEach((clusterable) {
+        processed[clusterable.number] = MapVehicle.withMarker(
+          toProcess[clusterable.number],
+          marker: marker,
+          sources: trackedVehicles[clusterable.number]?.sources,
+        );
+      });
+    });
+
+    final selectedMarker = await state._selectedMarker;
+
+    // if (state.zoom > _minAnimationZoom) {
+    // } else {}
+    iconifiedMarkers.nonClustered.forEach((nonClustered) {
+      final marker = nonClustered.googleMapMarker();
+      nonClustered.children.forEach((clusterable) {
+        processed[clusterable.number] = MapVehicle.withMarker(
+          toProcess[clusterable.number],
+          marker: marker,
+          sources: trackedVehicles[clusterable.number]?.sources,
+        );
+      });
+    });
+
+    yield state.copyWith(trackedVehicles: processed);
+  }
+
+  @override
+  Stream<MapState> mapEventToState(MapEvent event) async* {
+    if (event is UpdateVehicles) {
+      yield* _trackedVehiclesUpdates(
+        toProcess: Map<String, Vehicle>.fromIterable(
+          event.vehicles,
+          key: (vehicle) => vehicle.number,
+          value: (vehicle) => vehicle,
+        ),
+        processed: {},
       );
-
-      final iconifiedMarkers = await fluster.iconifiedMarkers(
-        currentZoom: state.zoom,
-        clusterColor: Colors.blue,
-        clusterTextColor: Colors.white,
-      );
-
-      iconifiedMarkers.clustered.forEach((clustered) {
-        final marker = clustered.googleMapMarker();
-        clustered.children.forEach((clusterable) {
-          updatedVehicles[clusterable.number] = MapVehicle.withMarker(
-            eventVehiclesMap[clusterable.number],
-            marker: marker,
-            sources: trackedVehicles[clusterable.number]?.sources,
-          );
-        });
-      });
-
-      final selectedMarker = await state._selectedMarker;
-
-      // if (state.zoom > _minAnimationZoom) {
-      // } else {}
-      iconifiedMarkers.nonClustered.forEach((nonClustered) {
-        final marker = nonClustered.googleMapMarker();
-        nonClustered.children.forEach((clusterable) {
-          updatedVehicles[clusterable.number] = MapVehicle.withMarker(
-            eventVehiclesMap[clusterable.number],
-            marker: marker,
-            sources: trackedVehicles[clusterable.number]?.sources,
-          );
-        });
-      });
-
-      yield state.copyWith(trackedVehicles: updatedVehicles);
     } else {
       yield event.whenOrElse(
         orElse: (_) => state,
