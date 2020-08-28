@@ -101,87 +101,178 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   @override
   MapState get initialState => MapState.initial();
 
+  static final double _minAnimationZoom = 12;
+
   @override
   Stream<MapState> mapEventToState(MapEvent event) async* {
-    yield event.when(
-      clearMap: (_) => state.copyWith(trackedVehicles: {}),
-      updateVehicles: (evt) {
-        final updatedVehicles = Map.of(state.trackedVehicles);
-        evt.vehicles.forEach((vehicle) {
-          final tracked = updatedVehicles[vehicle.number];
-          if (tracked != null) {
-            updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
-              vehicle,
-              bounds: state.bounds,
+    if (event is UpdateVehicles) {
+      final bounds = state.bounds;
+      final trackedVehicles = state.trackedVehicles;
+      // 1) empty trackedVehicles Map
+      // 2) put vehicles that are outside of current bounds into the map with null Marker
+      // 3) create markers for those that are in bounds and assign each Marker to Vehicle inside the map in place
+      // depending on current zoom
+      // (if zoom > _minAnimationZoom) give all unclustered markers their initial position = previous position (or destination in case it's the first load)
+      // and position = destination for clustered ones
+      // else make them all equal to destination
+      // keep the part of the map holding clustered markers as a variable
+      // animate unclustered markers
+      final eventVehiclesMap = Map.fromIterable(
+        event.vehicles,
+        key: (vehicle) => vehicle.number,
+        value: (vehicle) => vehicle,
+      );
+
+      final vehiclesOutOfBounds = <String, MapVehicle>{};
+      final clusterables = <String, ClusterableMarker>{};
+      event.vehicles.forEach((updatedVehicle) {
+        if (!bounds.containsLatLng(updatedVehicle.lat, updatedVehicle.lon)) {
+          final current = trackedVehicles[updatedVehicle.number];
+          if (current?.marker == null) {
+            vehiclesOutOfBounds[updatedVehicle.number] =
+                MapVehicle.withoutMarker(
+              updatedVehicle,
+              sources: current?.sources,
             );
+          } else {
+            final currentPosition = current.marker.position;
+            if (!bounds.containsLatLng(
+              currentPosition.latitude,
+              currentPosition.longitude,
+            )) {
+              vehiclesOutOfBounds[updatedVehicle.number] =
+                  MapVehicle.withoutMarker(
+                updatedVehicle,
+                sources: current?.sources,
+              );
+            } else {
+              clusterables[updatedVehicle.number] = ClusterableMarker(
+                id: updatedVehicle.number,
+                lat: updatedVehicle.lat,
+                lng: updatedVehicle.lon,
+                number: updatedVehicle.number,
+                symbol: updatedVehicle.symbol,
+                initialPosition: currentPosition,
+              );
+            }
           }
-        });
-        return state.copyWith(trackedVehicles: updatedVehicles);
-      },
-      addVehiclesOfLines: (evt) {
-        final lineSymbols = Map.fromIterables(
-          evt.lines.map((line) => line.symbol),
-          evt.lines,
-        );
-        final loadedAt = DateTime.now();
-        return state.withNewVehicles(
-          evt.vehicles,
-          sourceForVehicle: (vehicle) => MapVehicleSource.ofLine(
-            line: lineSymbols[vehicle.symbol],
-            loadedAt: loadedAt,
-          ),
-        );
-      },
-      addVehiclesInLocation: (evt) {
-        final loadedAt = DateTime.now();
-        return state.withNewVehicles(
-          evt.vehicles,
-          sourceForVehicle: (_) => MapVehicleSource.nearbyLocation(
-            location: evt.location,
-            loadedAt: loadedAt,
-          ),
-        );
-      },
-      addVehiclesNearbyUserLocation: (evt) {
-        final loadedAt = DateTime.now();
-        return state.withNewVehicles(
-          evt.vehicles,
-          sourceForVehicle: (_) => MapVehicleSource.nearbyUserLocation(
-            position: evt.position,
-            radius: evt.radius,
-            loadedAt: loadedAt,
-          ),
-        );
-      },
-      addVehiclesNearbyPlace: (evt) {
-        final loadedAt = DateTime.now();
-        return state.withNewVehicles(
-          evt.vehicles,
-          sourceForVehicle: (_) => MapVehicleSource.nearbyPlace(
-            position: evt.position,
-            radius: evt.radius,
-            title: evt.title,
-            loadedAt: loadedAt,
-          ),
-        );
-      },
-      cameraMoved: (evt) => evt.byUser
-          ? state.withNoSelectedVehicleBoundsAndZoom(
-              bounds: evt.bounds,
-              zoom: evt.zoom,
-            )
-          : state.copyWith(zoom: evt.zoom, bounds: evt.bounds),
-      trackedLinesRemoved: (evt) => state.withRemovedSource(
-        (source) => source is OfLine && evt.lines.contains(source.line),
-      ),
-      removeSource: (evt) => state.withRemovedSource(
-        (source) => source == evt.source,
-      ),
-      selectVehicle: (evt) => evt.number == state.selectedVehicleNumber
-          ? state
-          : state.copyWith(selectedVehicleNumber: evt.number),
-      deselectVehicle: (_) => state.withNoSelectedVehicle,
-    );
+        } else {
+          clusterables[updatedVehicle.number] = ClusterableMarker(
+            id: updatedVehicle.number,
+            lat: updatedVehicle.lat,
+            lng: updatedVehicle.lon,
+            number: updatedVehicle.number,
+            symbol: updatedVehicle.symbol,
+            initialPosition:
+                trackedVehicles[updatedVehicle.number]?.marker?.position,
+          );
+        }
+      });
+
+      final fluster = await clusterables.fluster(
+        minZoom: MapConstants.minClusterZoom,
+        maxZoom: MapConstants.maxClusterZoom,
+      );
+
+      final iconifiedMarkers = await fluster.iconifiedMarkers(
+        currentZoom: state.zoom,
+        clusterColor: Colors.blue,
+        clusterTextColor: Colors.white,
+      );
+
+      final clusteredMarkers = iconifiedMarkers.clustered
+          .map((marker) => marker.googleMapMarker())
+          .toList();
+
+      final selectedMarker = await state._selectedMarker;
+
+      if (state.zoom > _minAnimationZoom) {
+
+      } else {
+        
+      }
+    } else {
+      yield event.whenOrElse(
+        orElse: (_) => state,
+        clearMap: (_) => state.copyWith(trackedVehicles: {}),
+        updateVehicles: (evt) {
+          final updatedVehicles = Map.of(state.trackedVehicles);
+          evt.vehicles.forEach((vehicle) {
+            final tracked = updatedVehicles[vehicle.number];
+            if (tracked != null) {
+              updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
+                vehicle,
+                bounds: state.bounds,
+              );
+            }
+          });
+          return state.copyWith(trackedVehicles: updatedVehicles);
+        },
+        addVehiclesOfLines: (evt) {
+          final lineSymbols = Map.fromIterables(
+            evt.lines.map((line) => line.symbol),
+            evt.lines,
+          );
+          final loadedAt = DateTime.now();
+          return state.withNewVehicles(
+            evt.vehicles,
+            sourceForVehicle: (vehicle) => MapVehicleSource.ofLine(
+              line: lineSymbols[vehicle.symbol],
+              loadedAt: loadedAt,
+            ),
+          );
+        },
+        addVehiclesInLocation: (evt) {
+          final loadedAt = DateTime.now();
+          return state.withNewVehicles(
+            evt.vehicles,
+            sourceForVehicle: (_) => MapVehicleSource.nearbyLocation(
+              location: evt.location,
+              loadedAt: loadedAt,
+            ),
+          );
+        },
+        addVehiclesNearbyUserLocation: (evt) {
+          final loadedAt = DateTime.now();
+          return state.withNewVehicles(
+            evt.vehicles,
+            sourceForVehicle: (_) => MapVehicleSource.nearbyUserLocation(
+              position: evt.position,
+              radius: evt.radius,
+              loadedAt: loadedAt,
+            ),
+          );
+        },
+        addVehiclesNearbyPlace: (evt) {
+          final loadedAt = DateTime.now();
+          return state.withNewVehicles(
+            evt.vehicles,
+            sourceForVehicle: (_) => MapVehicleSource.nearbyPlace(
+              position: evt.position,
+              radius: evt.radius,
+              title: evt.title,
+              loadedAt: loadedAt,
+            ),
+          );
+        },
+        cameraMoved: (evt) => evt.byUser
+            ? state.withNoSelectedVehicleBoundsAndZoom(
+                bounds: evt.bounds,
+                zoom: evt.zoom,
+              )
+            : state.copyWith(zoom: evt.zoom, bounds: evt.bounds),
+        trackedLinesRemoved: (evt) => state.withRemovedSource(
+          (source) => source is OfLine && evt.lines.contains(source.line),
+        ),
+        removeSource: (evt) => state.withRemovedSource(
+          (source) => source == evt.source,
+        ),
+        selectVehicle: (evt) => evt.number == state.selectedVehicleNumber
+            ? state
+            : state.copyWith(selectedVehicleNumber: evt.number),
+        deselectVehicle: (_) => state.withNoSelectedVehicle,
+      );
+    }
   }
 
   @override
@@ -403,9 +494,9 @@ extension _IconifiedMarkersExt on IconifiedMarkers {
     return CombineLatestStream.list(
       _markersToAnimate(selectedMarker: selectedMarker).map(
         (marker) {
-          if (marker.previousPosition != null) {
+          if (marker.initialPosition != null) {
             final interpolationStream = LatLngInterpolationStream()
-              ..addLatLng(marker.previousPosition)
+              ..addLatLng(marker.initialPosition)
               ..addLatLng(marker.position);
             return interpolationStream
                 .getLatLngInterpolation()
@@ -483,7 +574,7 @@ extension _MapStateExt on MapState {
             lng: vehicle.lon,
             number: number,
             symbol: vehicle.symbol,
-            previousPosition: tracked.previousPositions.isNotEmpty
+            initialPosition: tracked.previousPositions.isNotEmpty
                 ? tracked.previousPositions.removeLast()
                 : null,
           ),
