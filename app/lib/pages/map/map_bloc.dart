@@ -144,23 +144,16 @@ class MapBloc extends Bloc<MapEvent, MapState> {
                 sources: current?.sources,
               );
             } else {
-              clusterables[updatedVehicle.number] = ClusterableMarker(
-                id: updatedVehicle.number,
-                lat: updatedVehicle.lat,
-                lng: updatedVehicle.lon,
-                number: updatedVehicle.number,
-                symbol: updatedVehicle.symbol,
+              clusterables[updatedVehicle.number] =
+                  ClusterableMarker.fromVehicle(
+                updatedVehicle,
                 initialPosition: currentPosition,
               );
             }
           }
         } else {
-          clusterables[updatedVehicle.number] = ClusterableMarker(
-            id: updatedVehicle.number,
-            lat: updatedVehicle.lat,
-            lng: updatedVehicle.lon,
-            number: updatedVehicle.number,
-            symbol: updatedVehicle.symbol,
+          clusterables[updatedVehicle.number] = ClusterableMarker.fromVehicle(
+            updatedVehicle,
             initialPosition:
                 trackedVehicles[updatedVehicle.number]?.marker?.position,
           );

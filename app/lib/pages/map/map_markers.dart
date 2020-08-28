@@ -1,6 +1,7 @@
 import 'package:fluster/fluster.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:meta/meta.dart';
+import 'package:transport_control/model/vehicle.dart';
 
 class ClusterableMarker extends Clusterable {
   final String number;
@@ -27,6 +28,20 @@ class ClusterableMarker extends Clusterable {
           pointsSize: pointsSize,
           childMarkerId: childMarkerId,
         );
+
+  static ClusterableMarker fromVehicle(
+    Vehicle vehicle, {
+    @required LatLng initialPosition,
+  }) {
+    return ClusterableMarker(
+      id: vehicle.number,
+      lat: vehicle.lat,
+      lng: vehicle.lon,
+      number: vehicle.number,
+      symbol: vehicle.symbol,
+      initialPosition: initialPosition,
+    );
+  }
 }
 
 class IconifiedMarker {
