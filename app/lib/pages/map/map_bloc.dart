@@ -117,7 +117,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       // else make them all equal to destination
       // keep the part of the map holding clustered markers as a variable
       // animate unclustered markers
-      final eventVehiclesMap = Map.fromIterable(
+      final eventVehiclesMap = Map<String, Vehicle>.fromIterable(
         event.vehicles,
         key: (vehicle) => vehicle.number,
         value: (vehicle) => vehicle,
@@ -187,10 +187,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       final selectedMarker = await state._selectedMarker;
 
       if (state.zoom > _minAnimationZoom) {
-
-      } else {
-        
-      }
+      } else {}
     } else {
       yield event.whenOrElse(
         orElse: (_) => state,

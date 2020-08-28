@@ -67,27 +67,29 @@ extension MapMarkerListExt on Map<String, ClusterableMarker> {
     @required int minZoom,
     @required int maxZoom,
   }) {
-    return Future.value(Fluster<ClusterableMarker>(
-      minZoom: minZoom,
-      maxZoom: maxZoom,
-      radius: 150,
-      extent: 2048,
-      nodeSize: 64,
-      points: values.toList(),
-      createCluster: (BaseCluster cluster, double lng, double lat) {
-        return ClusterableMarker(
-          id: cluster.id.toString(),
-          lat: lat,
-          lng: lng,
-          isCluster: cluster.isCluster,
-          clusterId: cluster.id,
-          pointsSize: cluster.pointsSize,
-          childMarkerId: cluster.childMarkerId,
-          number: cluster.markerId,
-          symbol: cluster.isCluster ? null : this[cluster.markerId].symbol,
-        );
-      },
-    ));
+    return Future.value(
+      Fluster<ClusterableMarker>(
+        minZoom: minZoom,
+        maxZoom: maxZoom,
+        radius: 150,
+        extent: 2048,
+        nodeSize: 64,
+        points: values.toList(),
+        createCluster: (BaseCluster cluster, double lng, double lat) {
+          return ClusterableMarker(
+            id: cluster.id.toString(),
+            lat: lat,
+            lng: lng,
+            isCluster: cluster.isCluster,
+            clusterId: cluster.id,
+            pointsSize: cluster.pointsSize,
+            childMarkerId: cluster.childMarkerId,
+            number: cluster.markerId,
+            symbol: cluster.isCluster ? null : this[cluster.markerId].symbol,
+          );
+        },
+      ),
+    );
   }
 }
 
