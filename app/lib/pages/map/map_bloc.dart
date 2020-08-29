@@ -108,6 +108,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     @required Map<String, MapVehicle> processed,
     @required LatLngBounds bounds,
     @required double zoom,
+    MapVehicleSource Function(Vehicle) sourceForVehicle,
   }) async* {
     // 1) empty processed Map
     // 2) put vehicles that are outside of current bounds into the map with null Marker
@@ -122,13 +123,16 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     // handle cameraMoved
     final trackedVehicles = state.trackedVehicles;
     final clusterables = <String, ClusterableMarker>{};
-    toProcess.forEach((number, updatedVehicle) {
-      if (!bounds.containsLatLng(updatedVehicle.lat, updatedVehicle.lon)) {
+    toProcess.forEach((number, vehicleToProcess) {
+      if (!bounds.containsLatLng(vehicleToProcess.lat, vehicleToProcess.lon)) {
         final current = trackedVehicles[number];
+        final sources = sourceForVehicle != null
+            ? {sourceForVehicle(vehicleToProcess)}
+            : current?.sources;
         if (current?.marker == null) {
           processed[number] = MapVehicle.withoutMarker(
-            updatedVehicle,
-            sources: current?.sources,
+            vehicleToProcess,
+            sources: sources,
           );
         } else {
           final currentPosition = current.marker.position;
@@ -137,19 +141,19 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             currentPosition.longitude,
           )) {
             processed[number] = MapVehicle.withoutMarker(
-              updatedVehicle,
-              sources: current?.sources,
+              vehicleToProcess,
+              sources: sources,
             );
           } else {
             clusterables[number] = ClusterableMarker.fromVehicle(
-              updatedVehicle,
+              vehicleToProcess,
               initialPosition: currentPosition,
             );
           }
         }
       } else {
         clusterables[number] = ClusterableMarker.fromVehicle(
-          updatedVehicle,
+          vehicleToProcess,
           initialPosition: trackedVehicles[number]?.marker?.position,
         );
       }
@@ -169,10 +173,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     iconifiedMarkers.clustered.forEach((clustered) {
       final marker = clustered.googleMapMarker();
       clustered.children.forEach((clusterable) {
+        final vehicle = toProcess[clusterable.number];
+        final sources = sourceForVehicle != null
+            ? {sourceForVehicle(vehicle)}
+            : trackedVehicles[clusterable.number]?.sources;
         processed[clusterable.number] = MapVehicle.withMarker(
-          toProcess[clusterable.number],
+          vehicle,
           marker: marker,
-          sources: trackedVehicles[clusterable.number]?.sources,
+          sources: sources,
         );
       });
     });
@@ -184,10 +192,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
     iconifiedMarkers.nonClustered.forEach((nonClustered) {
       final marker = nonClustered.googleMapMarker();
+      final vehicle = toProcess[nonClustered.number];
+      final sources = sourceForVehicle != null
+          ? {sourceForVehicle(vehicle)}
+          : trackedVehicles[nonClustered.number]?.sources;
       processed[nonClustered.number] = MapVehicle.withMarker(
-        toProcess[nonClustered.number],
+        vehicle,
         marker: marker,
-        sources: trackedVehicles[nonClustered.number]?.sources,
+        sources: sources,
       );
     });
 
@@ -220,6 +232,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       processed: updatedVehicles,
       bounds: state.bounds,
       zoom: state.zoom,
+      sourceForVehicle: sourceForVehicle,
     );
   }
 
