@@ -185,9 +185,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     });
 
     if (zoom > _minAnimationZoom) {
-      await for (final animated in iconifiedMarkers.animatedMarkersStream(
-        selectedMarker: await state._selectedMarker,
-      )) {
+      final sc = StreamController<MapState>();
+      Future.delayed(Duration(milliseconds: 1100), () => sc.close());
+      iconifiedMarkers
+          .animatedMarkersStream(selectedMarker: await state._selectedMarker)
+          .map((animated) {
         animated.forEach((mapVehicleMarker) {
           final vehicle = vehiclesToProcess[mapVehicleMarker.number];
           final sources = sourceForVehicle != null
@@ -199,12 +201,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             sources: sources,
           );
         });
-        yield state.copyWith(
+        return state.copyWith(
           trackedVehicles: processedMapVehicles,
           bounds: bounds,
           zoom: zoom,
         );
-      }
+      }).listen(sc.add);
+      yield* sc.stream;
     } else {
       iconifiedMarkers.nonClustered.forEach((nonClustered) {
         final marker = nonClustered.googleMapMarker();
