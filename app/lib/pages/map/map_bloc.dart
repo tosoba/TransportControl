@@ -9,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
@@ -177,25 +176,38 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       });
     });
 
-    final selectedMarker = await state._selectedMarker;
-
     if (zoom > _minAnimationZoom) {
-    } else {}
-
-    iconifiedMarkers.nonClustered.forEach((nonClustered) {
-      final marker = nonClustered.googleMapMarker();
-      processed[nonClustered.number] = MapVehicle.withMarker(
-        toProcess[nonClustered.number],
-        marker: marker,
-        sources: trackedVehicles[nonClustered.number]?.sources,
+      await for (final animated in iconifiedMarkers.animatedMarkersStream(
+        selectedMarker: await state._selectedMarker,
+      )) {
+        animated.forEach((mapVehicleMarker) {
+          processed[mapVehicleMarker.number] = MapVehicle.withMarker(
+            toProcess[mapVehicleMarker.number],
+            marker: mapVehicleMarker.marker,
+            sources: trackedVehicles[mapVehicleMarker.number]?.sources,
+          );
+        });
+        yield state.copyWith(
+          trackedVehicles: processed,
+          bounds: bounds,
+          zoom: zoom,
+        );
+      }
+    } else {
+      iconifiedMarkers.nonClustered.forEach((nonClustered) {
+        final marker = nonClustered.googleMapMarker();
+        processed[nonClustered.number] = MapVehicle.withMarker(
+          toProcess[nonClustered.number],
+          marker: marker,
+          sources: trackedVehicles[nonClustered.number]?.sources,
+        );
+      });
+      yield state.copyWith(
+        trackedVehicles: processed,
+        bounds: bounds,
+        zoom: zoom,
       );
-    });
-
-    yield state.copyWith(
-      trackedVehicles: processed,
-      bounds: bounds,
-      zoom: zoom,
-    );
+    }
   }
 
   Stream<MapState> _newVehiclesStates(
@@ -524,7 +536,9 @@ extension _IconifiedMarkersExt on IconifiedMarkers {
     }
   }
 
-  Stream<List<Marker>> animatedMarkersStream({IconifiedMarker selectedMarker}) {
+  Stream<List<MapVehicleMarker>> animatedMarkersStream({
+    IconifiedMarker selectedMarker,
+  }) {
     return CombineLatestStream.list(
       _markersToAnimate(selectedMarker: selectedMarker).map(
         (marker) {
@@ -532,15 +546,19 @@ extension _IconifiedMarkersExt on IconifiedMarkers {
             final interpolationStream = LatLngInterpolationStream()
               ..addLatLng(marker.initialPosition)
               ..addLatLng(marker.position);
-            return interpolationStream
-                .getLatLngInterpolation()
-                .map((delta) => marker.googleMapMarker(position: delta.from))
-                .tap(
-                  (marker) => log('${marker.markerId.value}: has prev pos.'),
+            return interpolationStream.getLatLngInterpolation().map(
+                  (delta) => MapVehicleMarker(
+                    marker: marker.googleMapMarker(position: delta.from),
+                    number: marker.number,
+                  ),
                 );
           } else {
-            return Stream.value(marker.toGoogleMapMarker())
-                .tap((marker) => log('${marker.markerId.value}: no prev pos.'));
+            return Stream.value(
+              MapVehicleMarker(
+                marker: marker.googleMapMarker(),
+                number: marker.number,
+              ),
+            );
           }
         },
       ),
@@ -549,24 +567,6 @@ extension _IconifiedMarkersExt on IconifiedMarkers {
 }
 
 extension _MapStateExt on MapState {
-  Stream<List<Marker>> get mapMarkers async* {
-    final fluster = await _markersToCluster.fluster(
-      minZoom: MapConstants.minClusterZoom,
-      maxZoom: MapConstants.maxClusterZoom,
-    );
-    final iconifiedMarkers = await fluster.iconifiedMarkers(
-      currentZoom: zoom,
-      clusterColor: Colors.blue,
-      clusterTextColor: Colors.white,
-    );
-    final clusteredMarkers = iconifiedMarkers.clustered
-        .map((marker) => marker.googleMapMarker())
-        .toList();
-    yield* iconifiedMarkers
-        .animatedMarkersStream(selectedMarker: await _selectedMarker)
-        .map((animatedMarkers) => [...clusteredMarkers, ...animatedMarkers]);
-  }
-
   Future<IconifiedMarker> get _selectedMarker async {
     if (selectedVehicleNumber == null) return null;
     final selected = trackedVehicles[selectedVehicleNumber];
@@ -587,34 +587,6 @@ extension _MapStateExt on MapState {
         ),
       ),
     );
-  }
-
-  Map<String, ClusterableMarker> get _markersToCluster {
-    final markers = Map.fromEntries(
-      trackedVehicles.entries.where(
-        (entry) {
-          final vehicle = entry.value.vehicle;
-          return bounds.containsLatLng(vehicle.lat, vehicle.lon);
-        },
-      ),
-    ).map(
-      (number, tracked) {
-        final vehicle = tracked.vehicle;
-        return MapEntry(
-          number,
-          ClusterableMarker(
-            id: number,
-            lat: vehicle.lat,
-            lng: vehicle.lon,
-            number: number,
-            symbol: vehicle.symbol,
-            initialPosition: null,
-          ),
-        );
-      },
-    );
-    if (selectedVehicleNumber != null) markers.remove(selectedVehicleNumber);
-    return markers;
   }
 
   MapState withRemovedSource(bool Function(MapVehicleSource) sourceMatcher) {
