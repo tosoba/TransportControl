@@ -165,7 +165,7 @@ class _MapPageState extends State<MapPage>
     return StreamBuilder<_MapArguments>(
       stream: context.bloc<MapBloc>().markers.combineLatest(
             _preferences.mapPreferencesStream,
-            (List<Marker> markers, MapPreferences preferences) => _MapArguments(
+            (Set<Marker> markers, MapPreferences preferences) => _MapArguments(
               markers: markers,
               preferences: preferences,
             ),
@@ -183,14 +183,9 @@ class _MapPageState extends State<MapPage>
             target: MapConstants.initialTarget,
             zoom: MapConstants.initialZoom,
           ),
-          onMapCreated: (controller) {
-            _mapController.complete(controller);
-            _cameraMoved(context);
-          },
+          onMapCreated: _mapController.complete,
           onCameraIdle: () => _cameraMoved(context),
-          markers: snapshot.data == null || snapshot.data.markers == null
-              ? null
-              : snapshot.data.markers.toSet(),
+          markers: snapshot?.data?.markers,
           onTap: (position) {
             context.bloc<MapBloc>().deselectVehicle();
             widget.mapTapped();
@@ -227,7 +222,7 @@ class _MapPageState extends State<MapPage>
 }
 
 class _MapArguments {
-  final List<Marker> markers;
+  final Set<Marker> markers;
   final MapPreferences preferences;
 
   _MapArguments({@required this.markers, @required this.preferences});

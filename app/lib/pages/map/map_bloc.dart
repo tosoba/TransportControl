@@ -35,9 +35,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   final Sink<Set<Line>> _untrackLinesSink;
   final Sink<Object> _untrackAllLinesSink;
 
-  final List<StreamSubscription> _subscriptions = [];
+  final _subscriptions = <StreamSubscription>[];
 
-  final StreamController<MapSignal> _signals = StreamController.broadcast();
+  final _signals = StreamController<MapSignal>.broadcast();
   Stream<MapSignal> get signals => _signals.stream;
 
   MapBloc(
@@ -103,9 +103,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   static final double _minAnimationZoom = 12;
 
-  Stream<MapState> _trackedVehiclesUpdates({
+  Stream<MapState> _updateVehiclesStates({
     @required Map<String, Vehicle> toProcess,
     @required Map<String, MapVehicle> processed,
+    @required LatLngBounds bounds,
+    @required double zoom,
   }) async* {
     // 1) empty processed Map
     // 2) put vehicles that are outside of current bounds into the map with null Marker
@@ -118,7 +120,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     // animate unclustered markers
 
     // handle cameraMoved
-    final bounds = state.bounds;
     final trackedVehicles = state.trackedVehicles;
     final clusterables = <String, ClusterableMarker>{};
     toProcess.forEach((number, updatedVehicle) {
@@ -178,100 +179,129 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
     final selectedMarker = await state._selectedMarker;
 
-    // if (state.zoom > _minAnimationZoom) {
-    // } else {}
+    if (zoom > _minAnimationZoom) {
+    } else {}
+
     iconifiedMarkers.nonClustered.forEach((nonClustered) {
       final marker = nonClustered.googleMapMarker();
-      nonClustered.children.forEach((clusterable) {
-        processed[clusterable.number] = MapVehicle.withMarker(
-          toProcess[clusterable.number],
-          marker: marker,
-          sources: trackedVehicles[clusterable.number]?.sources,
-        );
-      });
+      processed[nonClustered.number] = MapVehicle.withMarker(
+        toProcess[nonClustered.number],
+        marker: marker,
+        sources: trackedVehicles[nonClustered.number]?.sources,
+      );
     });
 
-    yield state.copyWith(trackedVehicles: processed);
+    yield state.copyWith(
+      trackedVehicles: processed,
+      bounds: bounds,
+      zoom: zoom,
+    );
+  }
+
+  Stream<MapState> _newVehiclesStates(
+    Iterable<Vehicle> vehicles, {
+    @required MapVehicleSource Function(Vehicle) sourceForVehicle,
+  }) async* {
+    final toProcess = <String, Vehicle>{};
+    final updatedVehicles = Map.of(state.trackedVehicles);
+    vehicles.forEach((vehicle) {
+      final tracked = updatedVehicles[vehicle.number];
+      if (tracked != null) {
+        updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
+          vehicle,
+          sources: tracked.sources..add(sourceForVehicle(vehicle)),
+        );
+      } else {
+        toProcess[vehicle.number] = vehicle;
+      }
+    });
+    yield* _updateVehiclesStates(
+      toProcess: toProcess,
+      processed: updatedVehicles,
+      bounds: state.bounds,
+      zoom: state.zoom,
+    );
   }
 
   @override
   Stream<MapState> mapEventToState(MapEvent event) async* {
     if (event is UpdateVehicles) {
-      yield* _trackedVehiclesUpdates(
+      yield* _updateVehiclesStates(
         toProcess: Map<String, Vehicle>.fromIterable(
           event.vehicles,
           key: (vehicle) => vehicle.number,
           value: (vehicle) => vehicle,
         ),
         processed: {},
+        bounds: state.bounds,
+        zoom: state.zoom,
+      );
+    } else if (event is AddVehiclesOfLines) {
+      final lineSymbols = Map.fromIterables(
+        event.lines.map((line) => line.symbol),
+        event.lines,
+      );
+      final loadedAt = DateTime.now();
+      yield* _newVehiclesStates(
+        event.vehicles,
+        sourceForVehicle: (vehicle) => MapVehicleSource.ofLine(
+          line: lineSymbols[vehicle.symbol],
+          loadedAt: loadedAt,
+        ),
+      );
+    } else if (event is AddVehiclesInLocation) {
+      final loadedAt = DateTime.now();
+      yield* _newVehiclesStates(
+        event.vehicles,
+        sourceForVehicle: (_) => MapVehicleSource.nearbyLocation(
+          location: event.location,
+          loadedAt: loadedAt,
+        ),
+      );
+    } else if (event is AddVehiclesNearbyUserLocation) {
+      final loadedAt = DateTime.now();
+      yield* _newVehiclesStates(
+        event.vehicles,
+        sourceForVehicle: (_) => MapVehicleSource.nearbyUserLocation(
+          position: event.position,
+          radius: event.radius,
+          loadedAt: loadedAt,
+        ),
+      );
+    } else if (event is AddVehiclesNearbyPlace) {
+      final loadedAt = DateTime.now();
+      yield* _newVehiclesStates(
+        event.vehicles,
+        sourceForVehicle: (_) => MapVehicleSource.nearbyPlace(
+          position: event.position,
+          radius: event.radius,
+          title: event.title,
+          loadedAt: loadedAt,
+        ),
+      );
+    } else if (event is CameraMoved) {
+      //withNoSelectedVehicleBoundsAndZoom
+      yield* _updateVehiclesStates(
+        toProcess: state.trackedVehicles
+            .map((number, mapVehicle) => MapEntry(number, mapVehicle.vehicle)),
+        processed: {},
+        bounds: event.bounds,
+        zoom: event.zoom,
       );
     } else {
       yield event.whenOrElse(
         orElse: (_) => state,
         clearMap: (_) => state.copyWith(trackedVehicles: {}),
-        addVehiclesOfLines: (evt) {
-          final lineSymbols = Map.fromIterables(
-            evt.lines.map((line) => line.symbol),
-            evt.lines,
-          );
-          final loadedAt = DateTime.now();
-          return state.withNewVehicles(
-            evt.vehicles,
-            sourceForVehicle: (vehicle) => MapVehicleSource.ofLine(
-              line: lineSymbols[vehicle.symbol],
-              loadedAt: loadedAt,
-            ),
-          );
-        },
-        addVehiclesInLocation: (evt) {
-          final loadedAt = DateTime.now();
-          return state.withNewVehicles(
-            evt.vehicles,
-            sourceForVehicle: (_) => MapVehicleSource.nearbyLocation(
-              location: evt.location,
-              loadedAt: loadedAt,
-            ),
-          );
-        },
-        addVehiclesNearbyUserLocation: (evt) {
-          final loadedAt = DateTime.now();
-          return state.withNewVehicles(
-            evt.vehicles,
-            sourceForVehicle: (_) => MapVehicleSource.nearbyUserLocation(
-              position: evt.position,
-              radius: evt.radius,
-              loadedAt: loadedAt,
-            ),
-          );
-        },
-        addVehiclesNearbyPlace: (evt) {
-          final loadedAt = DateTime.now();
-          return state.withNewVehicles(
-            evt.vehicles,
-            sourceForVehicle: (_) => MapVehicleSource.nearbyPlace(
-              position: evt.position,
-              radius: evt.radius,
-              title: evt.title,
-              loadedAt: loadedAt,
-            ),
-          );
-        },
-        cameraMoved: (evt) => evt.byUser
-            ? state.withNoSelectedVehicleBoundsAndZoom(
-                bounds: evt.bounds,
-                zoom: evt.zoom,
-              )
-            : state.copyWith(zoom: evt.zoom, bounds: evt.bounds),
         trackedLinesRemoved: (evt) => state.withRemovedSource(
           (source) => source is OfLine && evt.lines.contains(source.line),
         ),
         removeSource: (evt) => state.withRemovedSource(
           (source) => source == evt.source,
         ),
-        selectVehicle: (evt) => evt.number == state.selectedVehicleNumber
-            ? state
-            : state.copyWith(selectedVehicleNumber: evt.number),
-        deselectVehicle: (_) => state.withNoSelectedVehicle,
+        // selectVehicle: (evt) => evt.number == state.selectedVehicleNumber
+        //     ? state
+        //     : state.copyWith(selectedVehicleNumber: evt.number),
+        // deselectVehicle: (_) => state.withNoSelectedVehicle,
       );
     }
   }
@@ -291,10 +321,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     return super.close();
   }
 
-  Stream<List<Marker>> get markers {
-    return state.trackedVehicles.isEmpty
-        ? map((state) => null)
-        : asyncExpand((state) => state.mapMarkers);
+  Stream<Set<Marker>> get markers {
+    return map(
+      (state) => state.trackedVehicles.values
+          .map((vehicle) => vehicle.marker)
+          .where((marker) => marker != null)
+          .toSet(),
+    );
   }
 
   void _loadVehiclesOfLines(TrackedLinesAddedEvent event) {
@@ -575,38 +608,13 @@ extension _MapStateExt on MapState {
             lng: vehicle.lon,
             number: number,
             symbol: vehicle.symbol,
-            initialPosition: tracked.previousPositions.isNotEmpty
-                ? tracked.previousPositions.removeLast()
-                : null,
+            initialPosition: null,
           ),
         );
       },
     );
     if (selectedVehicleNumber != null) markers.remove(selectedVehicleNumber);
     return markers;
-  }
-
-  MapState withNewVehicles(
-    Iterable<Vehicle> vehicles, {
-    @required MapVehicleSource Function(Vehicle) sourceForVehicle,
-  }) {
-    final updatedVehicles = Map.of(trackedVehicles);
-    vehicles.forEach((vehicle) {
-      final tracked = updatedVehicles[vehicle.number];
-      if (tracked != null) {
-        updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
-          vehicle,
-          bounds: bounds,
-          sources: tracked.sources..add(sourceForVehicle(vehicle)),
-        );
-      } else {
-        updatedVehicles[vehicle.number] = MapVehicle.fromNewlyLoadedVehicle(
-          vehicle,
-          source: sourceForVehicle(vehicle),
-        );
-      }
-    });
-    return copyWith(trackedVehicles: updatedVehicles);
   }
 
   MapState withRemovedSource(bool Function(MapVehicleSource) sourceMatcher) {

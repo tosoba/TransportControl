@@ -36,12 +36,11 @@ class MapVehicle {
 
   MapVehicle withUpdatedVehicle(
     Vehicle updatedVehicle, {
-    @required LatLngBounds bounds,
     Set<MapVehicleSource> sources,
   }) {
     return MapVehicle._(
       updatedVehicle,
-      null,
+      marker,
       sources ?? this.sources,
     );
   }
