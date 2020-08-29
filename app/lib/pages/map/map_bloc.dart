@@ -103,8 +103,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   static final double _minAnimationZoom = 12;
 
   Stream<MapState> _updateVehiclesStates({
-    @required Map<String, Vehicle> toProcess,
-    @required Map<String, MapVehicle> processed,
+    @required Map<String, Vehicle> vehiclesToProcess,
+    @required Map<String, MapVehicle> processedMapVehicles,
     @required LatLngBounds bounds,
     @required double zoom,
     MapVehicleSource Function(Vehicle) sourceForVehicle,
@@ -122,14 +122,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     // handle cameraMoved
     final trackedVehicles = state.trackedVehicles;
     final clusterables = <String, ClusterableMarker>{};
-    toProcess.forEach((number, vehicleToProcess) {
+    vehiclesToProcess.forEach((number, vehicleToProcess) {
+      final current = trackedVehicles[number];
       if (!bounds.containsLatLng(vehicleToProcess.lat, vehicleToProcess.lon)) {
-        final current = trackedVehicles[number];
         final sources = sourceForVehicle != null
             ? {sourceForVehicle(vehicleToProcess)}
             : current?.sources;
         if (current?.marker == null) {
-          processed[number] = MapVehicle.withoutMarker(
+          processedMapVehicles[number] = MapVehicle.withoutMarker(
             vehicleToProcess,
             sources: sources,
           );
@@ -139,7 +139,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             currentPosition.latitude,
             currentPosition.longitude,
           )) {
-            processed[number] = MapVehicle.withoutMarker(
+            processedMapVehicles[number] = MapVehicle.withoutMarker(
               vehicleToProcess,
               sources: sources,
             );
@@ -153,7 +153,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       } else {
         clusterables[number] = ClusterableMarker.fromVehicle(
           vehicleToProcess,
-          initialPosition: trackedVehicles[number]?.marker?.position,
+          initialPosition: current?.marker?.position,
         );
       }
     });
@@ -172,11 +172,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     iconifiedMarkers.clustered.forEach((clustered) {
       final marker = clustered.googleMapMarker();
       clustered.children.forEach((clusterable) {
-        final vehicle = toProcess[clusterable.number];
+        final vehicle = vehiclesToProcess[clusterable.number];
         final sources = sourceForVehicle != null
             ? {sourceForVehicle(vehicle)}
             : trackedVehicles[clusterable.number]?.sources;
-        processed[clusterable.number] = MapVehicle.withMarker(
+        processedMapVehicles[clusterable.number] = MapVehicle.withMarker(
           vehicle,
           marker: marker,
           sources: sources,
@@ -189,18 +189,18 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         selectedMarker: await state._selectedMarker,
       )) {
         animated.forEach((mapVehicleMarker) {
-          final vehicle = toProcess[mapVehicleMarker.number];
+          final vehicle = vehiclesToProcess[mapVehicleMarker.number];
           final sources = sourceForVehicle != null
               ? {sourceForVehicle(vehicle)}
               : trackedVehicles[mapVehicleMarker.number]?.sources;
-          processed[mapVehicleMarker.number] = MapVehicle.withMarker(
+          processedMapVehicles[mapVehicleMarker.number] = MapVehicle.withMarker(
             vehicle,
             marker: mapVehicleMarker.marker,
             sources: sources,
           );
         });
         yield state.copyWith(
-          trackedVehicles: processed,
+          trackedVehicles: processedMapVehicles,
           bounds: bounds,
           zoom: zoom,
         );
@@ -208,18 +208,18 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     } else {
       iconifiedMarkers.nonClustered.forEach((nonClustered) {
         final marker = nonClustered.googleMapMarker();
-        final vehicle = toProcess[nonClustered.number];
+        final vehicle = vehiclesToProcess[nonClustered.number];
         final sources = sourceForVehicle != null
             ? {sourceForVehicle(vehicle)}
             : trackedVehicles[nonClustered.number]?.sources;
-        processed[nonClustered.number] = MapVehicle.withMarker(
+        processedMapVehicles[nonClustered.number] = MapVehicle.withMarker(
           vehicle,
           marker: marker,
           sources: sources,
         );
       });
       yield state.copyWith(
-        trackedVehicles: processed,
+        trackedVehicles: processedMapVehicles,
         bounds: bounds,
         zoom: zoom,
       );
@@ -244,8 +244,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       }
     });
     yield* _updateVehiclesStates(
-      toProcess: toProcess,
-      processed: updatedVehicles,
+      vehiclesToProcess: toProcess,
+      processedMapVehicles: updatedVehicles,
       bounds: state.bounds,
       zoom: state.zoom,
       sourceForVehicle: sourceForVehicle,
@@ -256,12 +256,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   Stream<MapState> mapEventToState(MapEvent event) async* {
     if (event is UpdateVehicles) {
       yield* _updateVehiclesStates(
-        toProcess: Map<String, Vehicle>.fromIterable(
+        vehiclesToProcess: Map<String, Vehicle>.fromIterable(
           event.vehicles,
           key: (vehicle) => vehicle.number,
           value: (vehicle) => vehicle,
         ),
-        processed: {},
+        processedMapVehicles: {},
         bounds: state.bounds,
         zoom: state.zoom,
       );
@@ -311,9 +311,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     } else if (event is CameraMoved) {
       //withNoSelectedVehicleBoundsAndZoom
       yield* _updateVehiclesStates(
-        toProcess: state.trackedVehicles
-            .map((number, mapVehicle) => MapEntry(number, mapVehicle.vehicle)),
-        processed: {},
+        vehiclesToProcess: state.trackedVehicles
+            .map((number, tracked) => MapEntry(number, tracked.vehicle)),
+        processedMapVehicles: {},
         bounds: event.bounds,
         zoom: event.zoom,
       );
@@ -559,16 +559,17 @@ extension _IconifiedMarkersExt on IconifiedMarkers {
     return CombineLatestStream.list(
       _markersToAnimate(selectedMarker: selectedMarker).map(
         (marker) {
-          if (marker.initialPosition != null) {
+          if (marker.initialPosition != null &&
+              marker.initialPosition != marker.position) {
             final interpolationStream = LatLngInterpolationStream()
               ..addLatLng(marker.initialPosition)
               ..addLatLng(marker.position);
-            return interpolationStream.getLatLngInterpolation().map(
-                  (delta) => MapVehicleMarker(
-                    marker: marker.googleMapMarker(position: delta.from),
-                    number: marker.number,
-                  ),
-                );
+            return interpolationStream
+                .getLatLngInterpolation()
+                .map((delta) => MapVehicleMarker(
+                      marker: marker.googleMapMarker(position: delta.from),
+                      number: marker.number,
+                    ));
           } else {
             return Stream.value(
               MapVehicleMarker(
