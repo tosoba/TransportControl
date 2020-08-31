@@ -4,7 +4,6 @@ import 'dart:developer';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter_animarker/lat_lng_interpolation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
@@ -178,12 +177,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     });
 
     if (animatePositions && zoom > MapConstants.minAnimationZoom) {
-      final animationStatesController = StreamController<MapState>();
-      Future.delayed(
-        Duration(milliseconds: 1100),
-        () => animationStatesController.close(),
-      );
-      iconifiedMarkers
+      yield* iconifiedMarkers
           .animatedMarkersStream(selectedMarker: await state._selectedMarker)
           .map((animated) {
         animated.forEach((mapVehicleMarker) {
@@ -205,8 +199,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           bounds: bounds,
           zoom: zoom,
         );
-      }).listen(animationStatesController.add);
-      yield* animationStatesController.stream;
+      });
     } else {
       iconifiedMarkers.nonClustered.forEach((nonClustered) {
         final marker = nonClustered.googleMapMarker();
