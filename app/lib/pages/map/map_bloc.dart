@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:async/async.dart' show RestartableTimer;
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -177,29 +178,40 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     });
 
     if (animatePositions && zoom > MapConstants.minAnimationZoom) {
-      yield* iconifiedMarkers
+      final animationStatesController = StreamController<MapState>();
+      final animationStatesTimer = RestartableTimer(
+        const Duration(milliseconds: 100),
+        () {
+          animationStatesController.close();
+        },
+      );
+      iconifiedMarkers
           .animatedMarkersStream(selectedMarker: await state._selectedMarker)
           .map((animated) {
-        animated.forEach((mapVehicleMarker) {
-          final vehicle = vehiclesToProcess[mapVehicleMarker.number];
-          final sources = sourceForVehicle != null
-              ? {
-                  sourceForVehicle(vehicle),
-                  ...?trackedVehicles[mapVehicleMarker.number]?.sources
-                }
-              : trackedVehicles[mapVehicleMarker.number]?.sources;
-          processed[mapVehicleMarker.number] = MapVehicle.withMarker(
-            vehicle,
-            marker: mapVehicleMarker.marker,
-            sources: sources,
-          );
-        });
-        return state.copyWith(
-          trackedVehicles: processed,
-          bounds: bounds,
-          zoom: zoom,
-        );
-      });
+            animated.forEach((mapVehicleMarker) {
+              final vehicle = vehiclesToProcess[mapVehicleMarker.number];
+              final sources = sourceForVehicle != null
+                  ? {
+                      sourceForVehicle(vehicle),
+                      ...?trackedVehicles[mapVehicleMarker.number]?.sources
+                    }
+                  : trackedVehicles[mapVehicleMarker.number]?.sources;
+              processed[mapVehicleMarker.number] = MapVehicle.withMarker(
+                vehicle,
+                marker: mapVehicleMarker.marker,
+                sources: sources,
+              );
+            });
+            return state.copyWith(
+              trackedVehicles: processed,
+              bounds: bounds,
+              zoom: zoom,
+            );
+          })
+          .doOnData((_) => animationStatesTimer.reset())
+          .takeWhile((_) => !animationStatesController.isClosed)
+          .listen(animationStatesController.add);
+      yield* animationStatesController.stream;
     } else {
       iconifiedMarkers.nonClustered.forEach((nonClustered) {
         final marker = nonClustered.googleMapMarker();
