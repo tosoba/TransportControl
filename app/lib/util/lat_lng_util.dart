@@ -23,16 +23,12 @@ class LatLngInterpolationStream {
   StreamSubscription _subscription;
   final Curve curve;
 
-  final int latLngLimit;
-  int _latLngCount = 0;
-
   LatLngInterpolationStream({
     this.curve = Curves.linear,
     this.rotationDuration = const Duration(milliseconds: 600),
     this.movementDuration = const Duration(milliseconds: 1000),
     this.movementInterval = const Duration(milliseconds: 20),
     this.rotationInterval = const Duration(milliseconds: 12),
-    this.latLngLimit,
   }) {
     _latLngStream = LatLngStream();
     _latLngRotationStream = LatLngDeltaStream();
@@ -44,9 +40,6 @@ class LatLngInterpolationStream {
       _subscription = _latLngMovementInterpolation().listen(_rotateLatLng);
     }
     _latLngStream.addLatLng(latLng);
-    if (latLngLimit != null && latLngLimit == ++_latLngCount) {
-      _latLngRotationStream.dispose();
-    }
   }
 
   ///Rotate markers between two given position

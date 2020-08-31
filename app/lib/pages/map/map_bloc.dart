@@ -543,10 +543,9 @@ extension _IconifiedMarkersExt on IconifiedMarkers {
         (marker) {
           if (marker.initialPosition != null &&
               marker.initialPosition != marker.position) {
-            final interpolationStream =
-                LatLngInterpolationStream(latLngLimit: 2)
-                  ..addLatLng(marker.initialPosition)
-                  ..addLatLng(marker.position);
+            final interpolationStream = LatLngInterpolationStream()
+              ..addLatLng(marker.initialPosition)
+              ..addLatLng(marker.position);
             return interpolationStream
                 .getLatLngInterpolation()
                 .map((delta) => MapVehicleMarker(
