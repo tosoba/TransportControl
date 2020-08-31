@@ -107,6 +107,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     @required Map<String, MapVehicle> processedMapVehicles,
     @required LatLngBounds bounds,
     @required double zoom,
+    @required bool updateExisting,
     MapVehicleSource Function(Vehicle) sourceForVehicle,
   }) async* {
     // 1) empty processed Map
@@ -122,38 +123,38 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     // handle cameraMoved
     final trackedVehicles = state.trackedVehicles;
     final clusterables = <String, ClusterableMarker>{};
-    vehiclesToProcess.forEach((number, vehicleToProcess) {
-      final current = trackedVehicles[number];
-      if (!bounds.containsLatLng(vehicleToProcess.lat, vehicleToProcess.lon)) {
+    vehiclesToProcess.forEach((number, vehicle) {
+      final previous = trackedVehicles[number];
+      if (!bounds.containsLatLng(vehicle.lat, vehicle.lon)) {
         final sources = sourceForVehicle != null
-            ? {sourceForVehicle(vehicleToProcess)}
-            : current?.sources;
-        if (current?.marker == null) {
+            ? {sourceForVehicle(vehicle)}
+            : previous?.sources;
+        if (previous?.marker == null) {
           processedMapVehicles[number] = MapVehicle.withoutMarker(
-            vehicleToProcess,
+            vehicle,
             sources: sources,
           );
         } else {
-          final currentPosition = current.marker.position;
+          final currentPosition = previous.marker.position;
           if (!bounds.containsLatLng(
             currentPosition.latitude,
             currentPosition.longitude,
           )) {
             processedMapVehicles[number] = MapVehicle.withoutMarker(
-              vehicleToProcess,
+              vehicle,
               sources: sources,
             );
           } else {
             clusterables[number] = ClusterableMarker.fromVehicle(
-              vehicleToProcess,
+              vehicle,
               initialPosition: currentPosition,
             );
           }
         }
       } else {
         clusterables[number] = ClusterableMarker.fromVehicle(
-          vehicleToProcess,
-          initialPosition: current?.marker?.position,
+          vehicle,
+          initialPosition: previous?.marker?.position,
         );
       }
     });
@@ -184,7 +185,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       });
     });
 
-    if (zoom > _minAnimationZoom) {
+    if (updateExisting && zoom > _minAnimationZoom) {
       final sc = StreamController<MapState>();
       Future.delayed(Duration(milliseconds: 1100), () => sc.close());
       iconifiedMarkers
@@ -251,6 +252,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       processedMapVehicles: updatedVehicles,
       bounds: state.bounds,
       zoom: state.zoom,
+      updateExisting: false,
       sourceForVehicle: sourceForVehicle,
     );
   }
@@ -267,6 +269,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         processedMapVehicles: {},
         bounds: state.bounds,
         zoom: state.zoom,
+        updateExisting: true,
       );
     } else if (event is AddVehiclesOfLines) {
       final lineSymbols = Map.fromIterables(
@@ -319,6 +322,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         processedMapVehicles: {},
         bounds: event.bounds,
         zoom: event.zoom,
+        updateExisting: false,
       );
     } else {
       yield event.whenOrElse(
