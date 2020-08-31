@@ -100,8 +100,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   @override
   MapState get initialState => MapState.initial();
 
-  static final double _minAnimationZoom = 12;
-
   Stream<MapState> _updateVehiclesStates({
     @required Map<String, Vehicle> vehiclesToProcess,
     bool animatePositions = false,
@@ -179,7 +177,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       });
     });
 
-    if (animatePositions && zoom > _minAnimationZoom) {
+    if (animatePositions && zoom > MapConstants.minAnimationZoom) {
       final animationStatesController = StreamController<MapState>();
       Future.delayed(
         Duration(milliseconds: 1100),
