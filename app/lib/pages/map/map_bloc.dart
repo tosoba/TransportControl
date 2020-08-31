@@ -5,6 +5,7 @@ import 'package:async/async.dart' show RestartableTimer;
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_animarker/lat_lng_interpolation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
