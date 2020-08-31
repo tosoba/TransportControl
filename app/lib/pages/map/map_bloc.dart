@@ -104,43 +104,34 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   Stream<MapState> _updateVehiclesStates({
     @required Map<String, Vehicle> vehiclesToProcess,
-    @required LatLngBounds bounds,
-    @required double zoom,
-    @required bool updateExisting,
+    bool animatePositions = false,
+    LatLngBounds updatedBounds,
+    double updatedZoom,
     MapVehicleSource Function(Vehicle) sourceForVehicle,
   }) async* {
-    // 1) empty processed Map
-    // 2) put vehicles that are outside of current bounds into the map with null Marker
-    // 3) create markers for those that are in bounds and assign each Marker to Vehicle inside the map in place
-    // depending on current zoom
-    // (if zoom > _minAnimationZoom) give all unclustered markers their initial position = previous position (or destination in case it's the first load)
-    // and position = destination for clustered ones
-    // else make them all equal to destination
-    // keep the part of the map holding clustered markers as a variable
-    // animate unclustered markers
-
-    // handle cameraMoved
+    final bounds = updatedBounds ?? state.bounds;
+    final zoom = updatedZoom ?? state.zoom;
     final trackedVehicles = state.trackedVehicles;
-    final processedMapVehicles = Map.of(state.trackedVehicles);
+    final processed = Map.of(trackedVehicles);
     final clusterables = <String, ClusterableMarker>{};
     vehiclesToProcess.forEach((number, vehicle) {
-      final previous = trackedVehicles[number];
+      final current = trackedVehicles[number];
       if (!bounds.containsLatLng(vehicle.lat, vehicle.lon)) {
         final sources = sourceForVehicle != null
-            ? {sourceForVehicle(vehicle), ...?previous?.sources}
-            : previous?.sources;
-        if (previous?.marker == null) {
-          processedMapVehicles[number] = MapVehicle.withoutMarker(
+            ? {sourceForVehicle(vehicle), ...?current?.sources}
+            : current?.sources;
+        if (current?.marker == null) {
+          processed[number] = MapVehicle.withoutMarker(
             vehicle,
             sources: sources,
           );
         } else {
-          final currentPosition = previous.marker.position;
+          final currentPosition = current.marker.position;
           if (!bounds.containsLatLng(
             currentPosition.latitude,
             currentPosition.longitude,
           )) {
-            processedMapVehicles[number] = MapVehicle.withoutMarker(
+            processed[number] = MapVehicle.withoutMarker(
               vehicle,
               sources: sources,
             );
@@ -154,7 +145,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       } else {
         clusterables[number] = ClusterableMarker.fromVehicle(
           vehicle,
-          initialPosition: previous?.marker?.position,
+          initialPosition: current?.marker?.position,
         );
       }
     });
@@ -180,7 +171,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
                 ...?trackedVehicles[clusterable.number]?.sources
               }
             : trackedVehicles[clusterable.number]?.sources;
-        processedMapVehicles[clusterable.number] = MapVehicle.withMarker(
+        processed[clusterable.number] = MapVehicle.withMarker(
           vehicle,
           marker: marker,
           sources: sources,
@@ -188,7 +179,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       });
     });
 
-    if (updateExisting && zoom > _minAnimationZoom) {
+    if (animatePositions && zoom > _minAnimationZoom) {
       final animationStatesController = StreamController<MapState>();
       Future.delayed(
         Duration(milliseconds: 1100),
@@ -205,14 +196,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
                   ...?trackedVehicles[mapVehicleMarker.number]?.sources
                 }
               : trackedVehicles[mapVehicleMarker.number]?.sources;
-          processedMapVehicles[mapVehicleMarker.number] = MapVehicle.withMarker(
+          processed[mapVehicleMarker.number] = MapVehicle.withMarker(
             vehicle,
             marker: mapVehicleMarker.marker,
             sources: sources,
           );
         });
         return state.copyWith(
-          trackedVehicles: processedMapVehicles,
+          trackedVehicles: processed,
           bounds: bounds,
           zoom: zoom,
         );
@@ -228,14 +219,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
                 ...?trackedVehicles[nonClustered.number]?.sources
               }
             : trackedVehicles[nonClustered.number]?.sources;
-        processedMapVehicles[nonClustered.number] = MapVehicle.withMarker(
+        processed[nonClustered.number] = MapVehicle.withMarker(
           vehicle,
           marker: marker,
           sources: sources,
         );
       });
       yield state.copyWith(
-        trackedVehicles: processedMapVehicles,
+        trackedVehicles: processed,
         bounds: bounds,
         zoom: zoom,
       );
@@ -251,9 +242,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     vehicles.forEach((vehicle) => toProcess[vehicle.number] = vehicle);
     yield* _updateVehiclesStates(
       vehiclesToProcess: toProcess,
-      bounds: state.bounds,
-      zoom: state.zoom,
-      updateExisting: false,
       sourceForVehicle: sourceForVehicle,
     );
   }
@@ -267,9 +255,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           key: (vehicle) => vehicle.number,
           value: (vehicle) => vehicle,
         ),
-        bounds: state.bounds,
-        zoom: state.zoom,
-        updateExisting: true,
+        animatePositions: true,
       );
     } else if (event is AddVehiclesOfLines) {
       final lineSymbols = Map.fromIterables(
@@ -319,9 +305,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       yield* _updateVehiclesStates(
         vehiclesToProcess: state.trackedVehicles
             .map((number, tracked) => MapEntry(number, tracked.vehicle)),
-        bounds: event.bounds,
-        zoom: event.zoom,
-        updateExisting: false,
+        updatedBounds: event.bounds,
+        updatedZoom: event.zoom,
       );
     } else {
       yield event.whenOrElse(
