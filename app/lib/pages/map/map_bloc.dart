@@ -104,7 +104,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   Stream<MapState> _updateVehiclesStates({
     @required Map<String, Vehicle> vehiclesToProcess,
-    @required Map<String, MapVehicle> processedMapVehicles,
     @required LatLngBounds bounds,
     @required double zoom,
     @required bool updateExisting,
@@ -122,12 +121,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
     // handle cameraMoved
     final trackedVehicles = state.trackedVehicles;
+    final processedMapVehicles = Map.of(state.trackedVehicles);
     final clusterables = <String, ClusterableMarker>{};
     vehiclesToProcess.forEach((number, vehicle) {
       final previous = trackedVehicles[number];
       if (!bounds.containsLatLng(vehicle.lat, vehicle.lon)) {
         final sources = sourceForVehicle != null
-            ? {sourceForVehicle(vehicle)}
+            ? {sourceForVehicle(vehicle), ...?previous?.sources}
             : previous?.sources;
         if (previous?.marker == null) {
           processedMapVehicles[number] = MapVehicle.withoutMarker(
@@ -175,7 +175,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       clustered.children.forEach((clusterable) {
         final vehicle = vehiclesToProcess[clusterable.number];
         final sources = sourceForVehicle != null
-            ? {sourceForVehicle(vehicle)}
+            ? {
+                sourceForVehicle(vehicle),
+                ...?trackedVehicles[clusterable.number]?.sources
+              }
             : trackedVehicles[clusterable.number]?.sources;
         processedMapVehicles[clusterable.number] = MapVehicle.withMarker(
           vehicle,
@@ -186,15 +189,21 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     });
 
     if (updateExisting && zoom > _minAnimationZoom) {
-      final sc = StreamController<MapState>();
-      Future.delayed(Duration(milliseconds: 1100), () => sc.close());
+      final animationStatesController = StreamController<MapState>();
+      Future.delayed(
+        Duration(milliseconds: 1100),
+        () => animationStatesController.close(),
+      );
       iconifiedMarkers
           .animatedMarkersStream(selectedMarker: await state._selectedMarker)
           .map((animated) {
         animated.forEach((mapVehicleMarker) {
           final vehicle = vehiclesToProcess[mapVehicleMarker.number];
           final sources = sourceForVehicle != null
-              ? {sourceForVehicle(vehicle)}
+              ? {
+                  sourceForVehicle(vehicle),
+                  ...?trackedVehicles[mapVehicleMarker.number]?.sources
+                }
               : trackedVehicles[mapVehicleMarker.number]?.sources;
           processedMapVehicles[mapVehicleMarker.number] = MapVehicle.withMarker(
             vehicle,
@@ -207,14 +216,17 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           bounds: bounds,
           zoom: zoom,
         );
-      }).listen(sc.add);
-      yield* sc.stream;
+      }).listen(animationStatesController.add);
+      yield* animationStatesController.stream;
     } else {
       iconifiedMarkers.nonClustered.forEach((nonClustered) {
         final marker = nonClustered.googleMapMarker();
         final vehicle = vehiclesToProcess[nonClustered.number];
         final sources = sourceForVehicle != null
-            ? {sourceForVehicle(vehicle)}
+            ? {
+                sourceForVehicle(vehicle),
+                ...?trackedVehicles[nonClustered.number]?.sources
+              }
             : trackedVehicles[nonClustered.number]?.sources;
         processedMapVehicles[nonClustered.number] = MapVehicle.withMarker(
           vehicle,
@@ -234,22 +246,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     Iterable<Vehicle> vehicles, {
     @required MapVehicleSource Function(Vehicle) sourceForVehicle,
   }) async* {
-    final toProcess = <String, Vehicle>{};
-    final updatedVehicles = Map.of(state.trackedVehicles);
-    vehicles.forEach((vehicle) {
-      final tracked = updatedVehicles[vehicle.number];
-      if (tracked != null) {
-        updatedVehicles[vehicle.number] = tracked.withUpdatedVehicle(
-          vehicle,
-          sources: tracked.sources..add(sourceForVehicle(vehicle)),
-        );
-      } else {
-        toProcess[vehicle.number] = vehicle;
-      }
-    });
+    final toProcess = state.trackedVehicles
+        .map((number, tracked) => MapEntry(number, tracked.vehicle));
+    vehicles.forEach((vehicle) => toProcess[vehicle.number] = vehicle);
     yield* _updateVehiclesStates(
       vehiclesToProcess: toProcess,
-      processedMapVehicles: updatedVehicles,
       bounds: state.bounds,
       zoom: state.zoom,
       updateExisting: false,
@@ -266,7 +267,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           key: (vehicle) => vehicle.number,
           value: (vehicle) => vehicle,
         ),
-        processedMapVehicles: {},
         bounds: state.bounds,
         zoom: state.zoom,
         updateExisting: true,
@@ -319,7 +319,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       yield* _updateVehiclesStates(
         vehiclesToProcess: state.trackedVehicles
             .map((number, tracked) => MapEntry(number, tracked.vehicle)),
-        processedMapVehicles: {},
         bounds: event.bounds,
         zoom: event.zoom,
         updateExisting: false,
