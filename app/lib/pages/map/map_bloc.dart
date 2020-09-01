@@ -215,12 +215,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     final bounds = updatedBounds ?? state.bounds;
     final zoom = updatedZoom ?? state.zoom;
 
-    final selectedVehicleNumber = selectedVehicleUpdate.when(
+    final selectedUpdate = selectedVehicleUpdate ?? NoChange();
+    final selectedVehicleNumber = selectedUpdate.when(
       noChange: (_) => state.selectedVehicleNumber,
       deselect: (_) => null,
       select: (update) => update.number,
     );
-    final selectedUpdate = selectedVehicleUpdate ?? NoChange();
     Vehicle updatedSelectedVehicle;
 
     final currentTrackedVehicles = state.trackedVehicles;
@@ -660,21 +660,25 @@ extension _MapStateExt on MapState {
 
   MapState withRemovedSource(bool Function(MapVehicleSource) sourceMatcher) {
     final updatedVehicles = <String, MapVehicle>{};
+    bool deselectVehicle = false;
     trackedVehicles.forEach((number, tracked) {
       final sources = tracked.sources;
       final sourceToRemove = sources.firstWhere(
         sourceMatcher,
         orElse: () => null,
       );
-
       if (sourceToRemove == null) {
         updatedVehicles[number] = tracked;
       } else if (sources.length == 1) {
+        if (number == selectedVehicleNumber) deselectVehicle = true;
         return;
       } else {
         updatedVehicles[number] = tracked.withRemovedSource(sourceToRemove);
       }
     });
-    return copyWith(trackedVehicles: updatedVehicles);
+    return copyWith(
+      trackedVehicles: updatedVehicles,
+      selectedVehicleUpdate: deselectVehicle ? Deselect() : NoChange(),
+    );
   }
 }
