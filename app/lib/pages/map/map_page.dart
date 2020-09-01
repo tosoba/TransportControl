@@ -10,7 +10,6 @@ import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
-import 'package:transport_control/pages/map/map_markers.dart';
 import 'package:transport_control/util/asset_util.dart';
 import 'package:transport_control/util/lat_lng_util.dart';
 import 'package:transport_control/util/model_util.dart';
@@ -21,7 +20,7 @@ class MapPage extends StatefulWidget {
   final void Function() mapTapped;
   final void Function() animatedToBounds;
   final void Function() cameraMovedByUser;
-  final void Function(IconifiedMarker) markerTapped;
+  final void Function(String) markerTapped;
   final ValueNotifier<LatLng> moveToPositionNotifier;
 
   const MapPage({
@@ -51,7 +50,12 @@ class _MapPageState extends State<MapPage>
     super.initState();
 
     final bloc = context.bloc<MapBloc>()
-      ..clusteredMarkerTapped = _animateToClusterChildrenBounds;
+      ..clusteredMarkerTapped = _animateToClusterChildrenBounds
+      ..nonClusteredMarkerTapped = (number) {
+        widget.markerTapped(number);
+        _cameraWasMovedByUser = false;
+      };
+
     _subscriptions
       ..add(
         bloc

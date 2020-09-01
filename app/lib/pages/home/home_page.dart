@@ -13,7 +13,6 @@ import 'package:transport_control/pages/lines/lines_page.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_page.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
-import 'package:transport_control/pages/map/map_markers.dart';
 import 'package:transport_control/pages/map/map_page.dart';
 import 'package:transport_control/pages/map/map_vehicle.dart';
 import 'package:transport_control/pages/nearby/nearby_bloc.dart';
@@ -171,10 +170,10 @@ class HomePage extends HookWidget {
                 cameraMovedByUser: () {
                   bottomSheetControllers.closeBottomSheet();
                 },
-                markerTapped: (marker) {
+                markerTapped: (number) {
                   bottomSheetControllers.showOrUpdateBottomSheet(
                     context,
-                    marker: marker,
+                    number: number,
                     moveToPositionNotifier: moveToPositionNotifier,
                   );
                 },
@@ -617,11 +616,11 @@ extension _VehiclesBottomSheetCarouselControllersExt
 
   void showOrUpdateBottomSheet(
     BuildContext context, {
-    @required IconifiedMarker marker,
+    @required number,
     @required ValueNotifier<LatLng> moveToPositionNotifier,
   }) {
     final bloc = context.bloc<MapBloc>();
-    bloc.selectVehicle(marker.number);
+    bloc.selectVehicle(number);
 
     if (value == null) {
       final carouselController = CarouselControllerImpl();
@@ -645,8 +644,7 @@ extension _VehiclesBottomSheetCarouselControllersExt
                 aspectRatio: 3.0,
                 enlargeCenterPage: true,
                 enableInfiniteScroll: entries.length > 2,
-                initialPage:
-                    entries.indexWhere((entry) => entry.key == marker.number),
+                initialPage: entries.indexWhere((entry) => entry.key == number),
                 onPageChanged: (index, reason) {
                   final entry = entries.elementAt(index);
                   if (entry != null) {
@@ -682,7 +680,7 @@ extension _VehiclesBottomSheetCarouselControllersExt
     } else {
       final selectedVehicleIndex = bloc.state.trackedVehicles.entries
           .toList()
-          .indexWhere((entry) => entry.key == marker.number);
+          .indexWhere((entry) => entry.key == number);
       if (selectedVehicleIndex != -1) {
         value.carouselController.animateToPage(selectedVehicleIndex);
       }

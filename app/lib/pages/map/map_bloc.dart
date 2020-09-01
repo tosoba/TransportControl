@@ -28,6 +28,7 @@ import 'package:transport_control/repo/vehicles_repo.dart';
 import 'package:transport_control/util/asset_util.dart';
 import 'package:transport_control/util/lat_lng_util.dart';
 import 'package:transport_control/util/marker_util.dart';
+import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/util/preferences_util.dart';
 
 class MapBloc extends Bloc<MapEvent, MapState> {
@@ -42,6 +43,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   Stream<MapSignal> get signals => _signals.stream;
 
   void Function(List<LatLng>) clusteredMarkerTapped;
+  void Function(String) nonClusteredMarkerTapped;
 
   MapBloc(
     this._vehiclesRepo,
@@ -313,7 +315,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       );
       iconifiedMarkers
           .animatedMarkersStream(
-            markerTapped: selectVehicle,
+            markerTapped: nonClusteredMarkerTapped,
             selectedMarker: await state.selectedMarker(
               selectedVehicleUpdate: selectedUpdate,
               updatedSelectedVehicle: updatedSelectedVehicle,
@@ -348,7 +350,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     } else {
       iconifiedMarkers.nonClustered.forEach((nonClustered) {
         final marker = nonClustered.googleMapMarker(
-          onTap: () => selectVehicle(nonClustered.number),
+          onTap: () => nonClusteredMarkerTapped(nonClustered.number),
         );
         final vehicle = toProcess[nonClustered.number];
         final sources = sourceForVehicle != null
@@ -379,7 +381,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         processed[selectedVehicleNumber] = MapVehicle.withMarker(
           vehicle,
           marker: selectedMarker.googleMapMarker(
-            onTap: () => selectVehicle(selectedVehicleNumber),
+            onTap: () => nonClusteredMarkerTapped(selectedVehicleNumber),
           ),
           sources: sources,
         );
@@ -521,9 +523,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           _signals.add(
             zoomToLoadedMarkersBounds
                 ? MapSignal.zoomToBoundsAfterLoadedSuccessfully(
-                    bounds: vehicles
-                        .map((vehicle) => LatLng(vehicle.lat, vehicle.lon))
-                        .bounds,
+                    bounds: vehicles.map((vehicle) => vehicle.position).bounds,
                   )
                 : MapSignal.loadedSuccessfully(),
           );
