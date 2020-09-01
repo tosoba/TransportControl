@@ -27,24 +27,6 @@ class MapVehicle {
         marker = marker,
         sources = sources ?? {};
 
-  MapVehicle.fromNewlyLoadedVehicle(
-    Vehicle newlyLoadedVehicle, {
-    @required MapVehicleSource source,
-  })  : vehicle = newlyLoadedVehicle,
-        marker = null,
-        sources = {source};
-
-  MapVehicle withUpdatedVehicle(
-    Vehicle updatedVehicle, {
-    Set<MapVehicleSource> sources,
-  }) {
-    return MapVehicle._(
-      updatedVehicle,
-      marker,
-      sources ?? this.sources,
-    );
-  }
-
   MapVehicle withRemovedSource(MapVehicleSource source) {
     return MapVehicle._(vehicle, marker, sources..remove(source));
   }

@@ -49,27 +49,11 @@ class IconifiedMarker {
   final ClusterableMarker _marker;
   final List<ClusterableMarker> children;
 
-  IconifiedMarker(
-    this._marker, {
-    @required this.icon,
-    this.children,
-  });
+  IconifiedMarker(this._marker, {@required this.icon, this.children});
 
   String get number => _marker.number;
   LatLng get position => LatLng(_marker.latitude, _marker.longitude);
-  bool get isCluster => _marker.isCluster;
   LatLng get initialPosition => _marker.initialPosition;
-
-  Marker toGoogleMapMarker({void Function() onTap}) {
-    return Marker(
-      markerId: MarkerId(
-        _marker.isCluster ? 'cl_${_marker.markerId}' : _marker.markerId,
-      ),
-      position: LatLng(_marker.latitude, _marker.longitude),
-      icon: icon,
-      onTap: onTap,
-    );
-  }
 
   Marker googleMapMarker({LatLng position, void Function() onTap}) {
     return Marker(
