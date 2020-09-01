@@ -363,6 +363,28 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           sources: sources,
         );
       });
+
+      if (selectedVehicleNumber != null) {
+        final selectedMarker = await state.selectedMarker(
+          selectedVehicleUpdate: selectedUpdate,
+          updatedSelectedVehicle: updatedSelectedVehicle,
+        );
+        final vehicle = toProcess[selectedVehicleNumber];
+        final sources = sourceForVehicle != null
+            ? {
+                sourceForVehicle(vehicle),
+                ...?currentTrackedVehicles[selectedVehicleNumber]?.sources
+              }
+            : currentTrackedVehicles[selectedVehicleNumber]?.sources;
+        processed[selectedVehicleNumber] = MapVehicle.withMarker(
+          vehicle,
+          marker: selectedMarker.googleMapMarker(
+            onTap: () => selectVehicle(selectedVehicleNumber),
+          ),
+          sources: sources,
+        );
+      }
+
       yield state.copyWith(
         trackedVehicles: processed,
         bounds: bounds,

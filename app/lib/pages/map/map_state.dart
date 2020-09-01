@@ -33,12 +33,13 @@ class MapState {
       trackedVehicles: trackedVehicles ?? this.trackedVehicles,
       zoom: zoom ?? this.zoom,
       bounds: bounds ?? this.bounds,
-      selectedVehicleNumber: selectedVehicleUpdate?.when(
-            noChange: (_) => this.selectedVehicleNumber,
-            deselect: (_) => null,
-            select: (update) => update.number,
-          ) ??
-          this.selectedVehicleNumber,
+      selectedVehicleNumber: selectedVehicleUpdate == null
+          ? this.selectedVehicleNumber
+          : selectedVehicleUpdate.when(
+              noChange: (_) => this.selectedVehicleNumber,
+              deselect: (_) => null,
+              select: (update) => update.number,
+            ),
     );
   }
 
