@@ -41,6 +41,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   final _signals = StreamController<MapSignal>.broadcast();
   Stream<MapSignal> get signals => _signals.stream;
 
+  void Function(List<LatLng>) clusteredMarkerTapped;
+
   MapBloc(
     this._vehiclesRepo,
     this._preferences,
@@ -278,7 +280,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
 
     iconifiedMarkers.clustered.forEach((clustered) {
-      final marker = clustered.googleMapMarker();
+      final marker = clustered.googleMapMarker(
+        onTap: () => clusteredMarkerTapped(
+          clustered.children.map(
+            (child) => LatLng(child.latitude, child.longitude),
+          ),
+        ),
+      );
       clustered.children.forEach((clusterable) {
         final vehicle = toProcess[clusterable.number];
         final sources = sourceForVehicle != null
@@ -305,6 +313,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       );
       iconifiedMarkers
           .animatedMarkersStream(
+            markerTapped: selectVehicle,
             selectedMarker: await state.selectedMarker(
               selectedVehicleUpdate: selectedUpdate,
               updatedSelectedVehicle: updatedSelectedVehicle,
@@ -338,7 +347,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       yield* animationStatesController.stream;
     } else {
       iconifiedMarkers.nonClustered.forEach((nonClustered) {
-        final marker = nonClustered.googleMapMarker();
+        final marker = nonClustered.googleMapMarker(
+          onTap: () => selectVehicle(nonClustered.number),
+        );
         final vehicle = toProcess[nonClustered.number];
         final sources = sourceForVehicle != null
             ? {
@@ -569,6 +580,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
 extension _IconifiedMarkersExt on IconifiedMarkers {
   Stream<List<MapVehicleMarker>> animatedMarkersStream({
+    @required void Function(String) markerTapped,
     IconifiedMarker selectedMarker,
   }) {
     return CombineLatestStream.list(
@@ -579,16 +591,21 @@ extension _IconifiedMarkersExt on IconifiedMarkers {
             final interpolationStream = LatLngInterpolationStream()
               ..addLatLng(marker.initialPosition)
               ..addLatLng(marker.position);
-            return interpolationStream
-                .getLatLngInterpolation()
-                .map((delta) => MapVehicleMarker(
-                      marker: marker.googleMapMarker(position: delta.from),
-                      number: marker.number,
-                    ));
+            return interpolationStream.getLatLngInterpolation().map(
+                  (delta) => MapVehicleMarker(
+                    marker: marker.googleMapMarker(
+                      position: delta.from,
+                      onTap: () => markerTapped(marker.number),
+                    ),
+                    number: marker.number,
+                  ),
+                );
           } else {
             return Stream.value(
               MapVehicleMarker(
-                marker: marker.googleMapMarker(),
+                marker: marker.googleMapMarker(
+                  onTap: () => markerTapped(marker.number),
+                ),
                 number: marker.number,
               ),
             );

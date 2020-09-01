@@ -50,7 +50,8 @@ class _MapPageState extends State<MapPage>
   void initState() {
     super.initState();
 
-    final bloc = context.bloc<MapBloc>();
+    final bloc = context.bloc<MapBloc>()
+      ..clusteredMarkerTapped = _animateToClusterChildrenBounds;
     _subscriptions
       ..add(
         bloc
@@ -164,12 +165,11 @@ class _MapPageState extends State<MapPage>
 
     return StreamBuilder<_MapArguments>(
       stream: context.bloc<MapBloc>().markers.combineLatest(
-            _preferences.mapPreferencesStream,
-            (Set<Marker> markers, MapPreferences preferences) => _MapArguments(
-              markers: markers,
-              preferences: preferences,
-            ),
-          ),
+        _preferences.mapPreferencesStream,
+        (Set<Marker> markers, MapPreferences preferences) {
+          return _MapArguments(markers: markers, preferences: preferences);
+        },
+      ),
       builder: (context, snapshot) => Listener(
         onPointerDown: (event) => _cameraWasMovedByUser = true,
         child: GoogleMap(
@@ -212,7 +212,9 @@ class _MapPageState extends State<MapPage>
     }
   }
 
-  void _animateToClusterChildrenBounds(List<LatLng> childrenPositions) async {
+  void _animateToClusterChildrenBounds(
+    Iterable<LatLng> childrenPositions,
+  ) async {
     final controller = await _mapController.future;
     await controller.animateCamera(
       CameraUpdate.newLatLngBounds(childrenPositions.bounds, 50),
