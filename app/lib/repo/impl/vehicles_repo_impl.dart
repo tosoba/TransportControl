@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animarker/helpers/spherical_util.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:injectable/injectable.dart';
-import 'package:latlong/latlong.dart' as LL;
 import 'package:transport_control/api/vehicles_api.dart';
 import 'package:transport_control/di/injection.dart';
 import 'package:transport_control/model/line.dart';
@@ -102,7 +102,6 @@ class VehiclesRepoImpl extends VehiclesRepo {
     int type,
   }) async {
     try {
-      const distance = LL.Distance();
       final responses = await _loadVehiclesOfTypesUsing<int>(
         type != null ? [type] : _vehicleTypes,
         (type) => type,
@@ -110,9 +109,9 @@ class VehiclesRepoImpl extends VehiclesRepo {
       return Result.success(
         data: responses.filterVehicles(
           (vehicle) {
-            final distanceFromPosition = distance.distance(
-              LL.LatLng(position.latitude, position.longitude),
-              LL.LatLng(vehicle.lat, vehicle.lon),
+            final distanceFromPosition = SphericalUtil.computeDistanceBetween(
+              position,
+              vehicle.position,
             );
             return vehicle.isValid && distanceFromPosition <= radiusInMeters;
           },

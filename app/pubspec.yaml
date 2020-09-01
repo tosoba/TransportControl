@@ -32,7 +32,6 @@ dependencies:
   get_it: ^4.0.0
   flutter_staggered_animations: ^0.1.2
   super_enum_generator: ^0.5.0
-  latlong: ^0.6.1
   fluster: ^1.1.2
   flutter_cache_manager: ^1.1.1
   moor_flutter: ^2.1.1
