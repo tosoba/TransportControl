@@ -167,9 +167,7 @@ class HomePage extends HookWidget {
                   bottomSheetControllers: bottomSheetControllers,
                 ),
                 animatedToBounds: () => _hideControls(mapTapAnimController),
-                cameraMovedByUser: () {
-                  bottomSheetControllers.closeBottomSheet();
-                },
+                cameraMovedByUser: bottomSheetControllers.closeBottomSheet,
                 markerTapped: (number) {
                   bottomSheetControllers.showOrUpdateBottomSheet(
                     context,

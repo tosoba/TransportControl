@@ -164,7 +164,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       yield* _updateVehiclesStates(
         updatedBounds: event.bounds,
         updatedZoom: event.zoom,
-        selectedVehicleUpdate: Deselect(),
+        selectedVehicleUpdate: event.byUser ? Deselect() : NoChange(),
       );
     } else if (event is DeselectVehicle) {
       yield* _updateVehiclesStates(selectedVehicleUpdate: Deselect());
