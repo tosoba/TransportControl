@@ -325,11 +325,6 @@ class MapLocationPage extends HookWidget {
       zoomControlsEnabled: false,
       rotateGesturesEnabled: false,
       mapType: MapType.normal,
-      //TODO:
-      // minMaxZoomPreference: MinMaxZoomPreference(
-      //   MapConstants.minLocationPageMapZoom,
-      //   MapConstants.maxLocationPageMapZoom,
-      // ),
       initialCameraPosition: CameraPosition(
         target: _initialMapTarget,
         zoom: MapConstants.initialZoom,

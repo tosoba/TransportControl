@@ -9,45 +9,54 @@ import 'package:transport_control/pages/map/map_constants.dart';
 import 'package:transport_control/pages/map/map_markers.dart';
 import 'package:transport_control/util/asset_util.dart';
 
+class IconifiedMarkers {
+  final List<IconifiedMarker> clustered;
+  final List<IconifiedMarker> nonClustered;
+
+  IconifiedMarkers({@required this.clustered, @required this.nonClustered});
+}
+
 extension FlusterMapMarkerExt on Fluster<ClusterableMarker> {
-  Future<List<IconifiedMarker>> getMarkers({
+  Future<IconifiedMarkers> iconifiedMarkers({
     @required double currentZoom,
     @required Color clusterColor,
     @required Color clusterTextColor,
   }) async {
     final markerImage = await rootBundle.loadUiImage(ImageAssets.marker);
-    return Future.wait(
-      clusters(
-        const [-180, -85, 180, 85],
-        currentZoom.toInt(),
-      ).map(
-        (marker) async {
-          if (marker.isCluster) {
-            return IconifiedMarker(
-              marker,
-              childrenPositions: points(marker.clusterId)
-                  .map((marker) => LatLng(marker.latitude, marker.longitude))
-                  .toList(),
-              icon: await _clusterMarkerBitmap(
-                clusterSize: marker.pointsSize,
-                clusterColor: clusterColor,
-                textColor: clusterTextColor,
-              ),
-            );
-          } else {
-            return IconifiedMarker(
-              marker,
-              icon: await markerBitmap(
-                symbol: marker.symbol,
-                width: MapConstants.markerWidth,
-                height: MapConstants.markerHeight,
-                imageAsset: markerImage,
-              ),
-            );
-          }
-        },
-      ).toList(),
+    final clusterableMarkers = clusters(
+      const [-180, -85, 180, 85],
+      currentZoom.toInt(),
     );
+    final clustered = <IconifiedMarker>[];
+    final nonClustered = <IconifiedMarker>[];
+    for (final clusterable in clusterableMarkers) {
+      if (clusterable.isCluster) {
+        clustered.add(
+          IconifiedMarker(
+            clusterable,
+            children: points(clusterable.clusterId),
+            icon: await _clusterMarkerBitmap(
+              clusterSize: clusterable.pointsSize,
+              clusterColor: clusterColor,
+              textColor: clusterTextColor,
+            ),
+          ),
+        );
+      } else {
+        nonClustered.add(
+          IconifiedMarker(
+            clusterable,
+            icon: await markerBitmap(
+              symbol: clusterable.symbol,
+              width: MapConstants.markerWidth,
+              height: MapConstants.markerHeight,
+              imageAsset: markerImage,
+            ),
+          ),
+        );
+      }
+    }
+    return IconifiedMarkers(clustered: clustered, nonClustered: nonClustered);
   }
 }
 
@@ -56,27 +65,29 @@ extension MapMarkerListExt on Map<String, ClusterableMarker> {
     @required int minZoom,
     @required int maxZoom,
   }) {
-    return Future.value(Fluster<ClusterableMarker>(
-      minZoom: minZoom,
-      maxZoom: maxZoom,
-      radius: 150,
-      extent: 2048,
-      nodeSize: 64,
-      points: values.toList(),
-      createCluster: (BaseCluster cluster, double lng, double lat) {
-        return ClusterableMarker(
-          id: cluster.id.toString(),
-          lat: lat,
-          lng: lng,
-          isCluster: cluster.isCluster,
-          clusterId: cluster.id,
-          pointsSize: cluster.pointsSize,
-          childMarkerId: cluster.childMarkerId,
-          number: cluster.markerId,
-          symbol: cluster.isCluster ? null : this[cluster.markerId].symbol,
-        );
-      },
-    ));
+    return Future.value(
+      Fluster<ClusterableMarker>(
+        minZoom: minZoom,
+        maxZoom: maxZoom,
+        radius: 150,
+        extent: 2048,
+        nodeSize: 64,
+        points: values.toList(),
+        createCluster: (BaseCluster cluster, double lng, double lat) {
+          return ClusterableMarker(
+            id: cluster.id.toString(),
+            lat: lat,
+            lng: lng,
+            isCluster: cluster.isCluster,
+            clusterId: cluster.id,
+            pointsSize: cluster.pointsSize,
+            childMarkerId: cluster.childMarkerId,
+            number: cluster.markerId,
+            symbol: cluster.isCluster ? null : this[cluster.markerId].symbol,
+          );
+        },
+      ),
+    );
   }
 }
 

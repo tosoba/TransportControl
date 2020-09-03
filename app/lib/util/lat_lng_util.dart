@@ -1,42 +1,32 @@
 import 'dart:math';
 
-import 'package:google_maps_flutter/google_maps_flutter.dart' as Maps;
-import 'package:latlong/latlong.dart';
+import 'package:flutter_animarker/helpers/spherical_util.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-extension LatLngExt on Maps.LatLngBounds {
-  bool containsLatLng(LatLng latLng) {
-    final containsLat = (southwest.latitude <= latLng.latitude) &&
-        (latLng.latitude <= northeast.latitude);
+extension LatLngExt on LatLngBounds {
+  bool containsLatLng(double latitude, double longitude) {
+    final containsLat =
+        (southwest.latitude <= latitude) && (latitude <= northeast.latitude);
     final containsLng = southwest.longitude <= northeast.longitude
-        ? southwest.longitude <= latLng.longitude &&
-            latLng.longitude <= northeast.longitude
-        : southwest.longitude <= latLng.longitude ||
-            latLng.longitude <= northeast.longitude;
+        ? southwest.longitude <= longitude && longitude <= northeast.longitude
+        : southwest.longitude <= longitude || longitude <= northeast.longitude;
     return containsLat && containsLng;
   }
 
-  static final Distance _distance = const Distance();
-
-  Maps.CameraPosition get cameraPosition {
+  CameraPosition get cameraPosition {
     final center = LatLng(
       (northeast.latitude + southwest.latitude) / 2,
       (northeast.longitude + southwest.longitude) / 2,
     );
-    final distance = _distance(
-      center,
-      LatLng(northeast.latitude, northeast.longitude),
-    );
+    final distance = SphericalUtil.computeDistanceBetween(center, northeast);
     final scale = distance / 1000;
     final zoom = 16 - log(scale) / log(2);
-    return Maps.CameraPosition(
-      target: Maps.LatLng(center.latitude, center.longitude),
-      zoom: zoom,
-    );
+    return CameraPosition(target: center, zoom: zoom);
   }
 }
 
-extension LatLngListExt on Iterable<Maps.LatLng> {
-  Maps.LatLngBounds get bounds {
+extension LatLngListExt on Iterable<LatLng> {
+  LatLngBounds get bounds {
     assert(isNotEmpty);
     double x0, x1, y0, y1;
     for (final latLng in this) {
@@ -50,9 +40,6 @@ extension LatLngListExt on Iterable<Maps.LatLng> {
         if (latLng.longitude < y0) y0 = latLng.longitude;
       }
     }
-    return Maps.LatLngBounds(
-      northeast: Maps.LatLng(x1, y1),
-      southwest: Maps.LatLng(x0, y0),
-    );
+    return LatLngBounds(northeast: LatLng(x1, y1), southwest: LatLng(x0, y0));
   }
 }

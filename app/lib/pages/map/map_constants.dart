@@ -7,6 +7,8 @@ class MapConstants {
   static const int minClusterZoom = 0;
   static const int maxClusterZoom = 19;
 
+  static const double minAnimationZoom = 12;
+
   static const double minLocationPageMapZoom = 0;
   static const double maxLocationPageMapZoom = 17;
 

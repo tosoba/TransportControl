@@ -10,7 +10,6 @@ import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
-import 'package:transport_control/pages/map/map_markers.dart';
 import 'package:transport_control/util/asset_util.dart';
 import 'package:transport_control/util/lat_lng_util.dart';
 import 'package:transport_control/util/model_util.dart';
@@ -21,7 +20,7 @@ class MapPage extends StatefulWidget {
   final void Function() mapTapped;
   final void Function() animatedToBounds;
   final void Function() cameraMovedByUser;
-  final void Function(IconifiedMarker) markerTapped;
+  final void Function(String) markerTapped;
   final ValueNotifier<LatLng> moveToPositionNotifier;
 
   const MapPage({
@@ -50,7 +49,13 @@ class _MapPageState extends State<MapPage>
   void initState() {
     super.initState();
 
-    final bloc = context.bloc<MapBloc>();
+    final bloc = context.bloc<MapBloc>()
+      ..clusteredMarkerTapped = _animateToClusterChildrenBounds
+      ..nonClusteredMarkerTapped = (number) {
+        widget.markerTapped(number);
+        _cameraWasMovedByUser = false;
+      };
+
     _subscriptions
       ..add(
         bloc
@@ -149,29 +154,32 @@ class _MapPageState extends State<MapPage>
       _subscriptions.last.cancel();
       _subscriptions.removeLast();
     }
-    _subscriptions.add(_preferences
-        .themeBrightnessStream(context: () => context)
-        .listen((brightness) async {
-      final controller = await _mapController.future;
-      controller.setMapStyle(brightness == Brightness.dark
-          ? await rootBundle.loadString(JsonAssets.darkMapStyle)
-          : null);
-    }));
+    _subscriptions.add(
+      _preferences.themeBrightnessStream(context: () => context).listen(
+        (brightness) async {
+          final controller = await _mapController.future;
+          controller.setMapStyle(
+            brightness == Brightness.dark
+                ? await rootBundle.loadString(JsonAssets.darkMapStyle)
+                : null,
+          );
+        },
+      ),
+    );
 
     return StreamBuilder<_MapArguments>(
       stream: context.bloc<MapBloc>().markers.combineLatest(
-            _preferences.mapPreferencesStream,
-            (List<IconifiedMarker> markers, MapPreferences preferences) =>
-                _MapArguments(
-              markers: markers,
-              preferences: preferences,
-            ),
-          ),
+        _preferences.mapPreferencesStream,
+        (Set<Marker> markers, MapPreferences preferences) {
+          return _MapArguments(markers: markers, preferences: preferences);
+        },
+      ),
       builder: (context, snapshot) => Listener(
         onPointerDown: (event) => _cameraWasMovedByUser = true,
         child: GoogleMap(
           trafficEnabled: snapshot.data?.preferences?.trafficEnabled ?? false,
-          buildingsEnabled: snapshot.data?.preferences?.buildingsEnabled ?? false,
+          buildingsEnabled:
+              snapshot.data?.preferences?.buildingsEnabled ?? false,
           zoomControlsEnabled: false,
           rotateGesturesEnabled: false,
           mapType: MapType.normal,
@@ -181,22 +189,7 @@ class _MapPageState extends State<MapPage>
           ),
           onMapCreated: _mapController.complete,
           onCameraIdle: () => _cameraMoved(context),
-          markers: snapshot.data == null || snapshot.data.markers == null
-              ? null
-              : snapshot.data.markers
-                  .map(
-                    (marker) => marker.toGoogleMapMarker(
-                      onTap: marker.isCluster
-                          ? () => _animateToClusterChildrenBounds(
-                                marker.childrenPositions,
-                              )
-                          : () {
-                              widget.markerTapped(marker);
-                              _cameraWasMovedByUser = false;
-                            },
-                    ),
-                  )
-                  .toSet(),
+          markers: snapshot?.data?.markers,
           onTap: (position) {
             context.bloc<MapBloc>().deselectVehicle();
             widget.mapTapped();
@@ -223,7 +216,9 @@ class _MapPageState extends State<MapPage>
     }
   }
 
-  void _animateToClusterChildrenBounds(List<LatLng> childrenPositions) async {
+  void _animateToClusterChildrenBounds(
+    Iterable<LatLng> childrenPositions,
+  ) async {
     final controller = await _mapController.future;
     await controller.animateCamera(
       CameraUpdate.newLatLngBounds(childrenPositions.bounds, 50),
@@ -233,7 +228,7 @@ class _MapPageState extends State<MapPage>
 }
 
 class _MapArguments {
-  final List<IconifiedMarker> markers;
+  final Set<Marker> markers;
   final MapPreferences preferences;
 
   _MapArguments({@required this.markers, @required this.preferences});
