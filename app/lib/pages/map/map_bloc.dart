@@ -42,7 +42,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   final _signals = StreamController<MapSignal>.broadcast();
   Stream<MapSignal> get signals => _signals.stream;
 
-  void Function(List<LatLng>) clusteredMarkerTapped;
+  void Function(Iterable<LatLng>) clusteredMarkerTapped;
   void Function(String) nonClusteredMarkerTapped;
 
   MapBloc(
