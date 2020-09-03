@@ -20,8 +20,8 @@ extension LocationExt on Location {
     }
 
     return getLocation()
-        .then((data) => LocationResult.success(data: data))
         .timeout(timeLimit)
+        .then((data) => LocationResult.success(data: data))
         .catchError((error) => LocationResult.failure(error: error));
   }
 }
