@@ -51,7 +51,9 @@ dependencies:
   location: ^3.0.0
   async: ^2.4.1
   stream_transform: ^1.2.0
-  carousel_slider: ^2.1.0
+  carousel_slider:
+    git:
+      url: https://github.com/thearthurdev/flutter_carousel_slider
   rounded_loading_button: ^1.0.6
   keyboard_visibility: ^0.5.6
   flutter_animarker: ^0.1.1+1

@@ -635,12 +635,14 @@ extension _VehiclesBottomSheetCarouselControllersExt
           builder: (context, snapshot) {
             final entries = snapshot.data;
             if (entries == null) return Container();
+            final isPortrait =
+                MediaQuery.of(context).orientation == Orientation.portrait;
             return CarouselSlider.builder(
               carouselController: carouselController,
               options: CarouselOptions(
-                viewportFraction: .5,
-                aspectRatio: 3.0,
-                enlargeCenterPage: true,
+                viewportFraction: isPortrait ? .5 : .2,
+                aspectRatio: isPortrait ? 3.0 : 7.0,
+                enlargeCenterPage: isPortrait,
                 enableInfiniteScroll: entries.length > 2,
                 initialPage: entries.indexWhere((entry) => entry.key == number),
                 onPageChanged: (index, reason) {

@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as UserLocation;
 import 'package:transport_control/model/location.dart';
-import 'package:transport_control/model/location_result.dart';
 import 'package:transport_control/pages/locations/locations_event.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
 import 'package:transport_control/pages/locations/locations_signal.dart';
