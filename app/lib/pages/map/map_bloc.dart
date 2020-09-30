@@ -211,7 +211,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     bool animatePositions = false,
     LatLngBounds updatedBounds,
     double updatedZoom,
-    MapVehicleSource Function(Vehicle) sourceForVehicle,
+    _NewVehiclesData newVehiclesData,
   }) async* {
     final toProcess = vehiclesToProcess ?? state.allVehicles;
     final bounds = updatedBounds ?? state.bounds;
@@ -237,8 +237,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
       final current = currentTrackedVehicles[number];
       if (!bounds.containsLatLng(vehicle.lat, vehicle.lon)) {
-        final sources = sourceForVehicle != null
-            ? {sourceForVehicle(vehicle), ...?current?.sources}
+        final sources = newVehiclesData != null &&
+                newVehiclesData.vehicleNumbers.contains(number)
+            ? {newVehiclesData.sourceForVehicle(vehicle), ...?current?.sources}
             : current?.sources;
         if (current?.marker == null) {
           processed[number] = MapVehicle.withoutMarker(
@@ -291,9 +292,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       );
       clustered.children.forEach((clusterable) {
         final vehicle = toProcess[clusterable.number];
-        final sources = sourceForVehicle != null
+        final sources = newVehiclesData.sourceForVehicle != null &&
+                newVehiclesData.vehicleNumbers.contains(clusterable.number)
             ? {
-                sourceForVehicle(vehicle),
+                newVehiclesData.sourceForVehicle(vehicle),
                 ...?currentTrackedVehicles[clusterable.number]?.sources
               }
             : currentTrackedVehicles[clusterable.number]?.sources;
@@ -324,9 +326,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           .map((animated) {
             animated.forEach((vehicleMarker) {
               final vehicle = toProcess[vehicleMarker.number];
-              final sources = sourceForVehicle != null
+              final sources = newVehiclesData.sourceForVehicle != null
                   ? {
-                      sourceForVehicle(vehicle),
+                      newVehiclesData.sourceForVehicle(vehicle),
                       ...?currentTrackedVehicles[vehicleMarker.number]?.sources
                     }
                   : currentTrackedVehicles[vehicleMarker.number]?.sources;
@@ -353,9 +355,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           onTap: () => nonClusteredMarkerTapped(nonClustered.number),
         );
         final vehicle = toProcess[nonClustered.number];
-        final sources = sourceForVehicle != null
+        final sources = newVehiclesData.sourceForVehicle != null &&
+                newVehiclesData.vehicleNumbers.contains(nonClustered.number)
             ? {
-                sourceForVehicle(vehicle),
+                newVehiclesData.sourceForVehicle(vehicle),
                 ...?currentTrackedVehicles[nonClustered.number]?.sources
               }
             : currentTrackedVehicles[nonClustered.number]?.sources;
@@ -372,9 +375,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           updatedSelectedVehicle: updatedSelectedVehicle,
         );
         final vehicle = toProcess[selectedVehicleNumber];
-        final sources = sourceForVehicle != null
+        final sources = newVehiclesData.sourceForVehicle != null &&
+                newVehiclesData.vehicleNumbers.contains(selectedVehicleNumber)
             ? {
-                sourceForVehicle(vehicle),
+                newVehiclesData.sourceForVehicle(vehicle),
                 ...?currentTrackedVehicles[selectedVehicleNumber]?.sources
               }
             : currentTrackedVehicles[selectedVehicleNumber]?.sources;
@@ -401,10 +405,14 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     @required MapVehicleSource Function(Vehicle) sourceForVehicle,
   }) async* {
     final toProcess = state.allVehicles;
-    vehicles.forEach((vehicle) => toProcess[vehicle.number] = vehicle);
+    final newVehiclesNumbers = <String>{};
+    vehicles.forEach((vehicle) {
+      toProcess[vehicle.number] = vehicle;
+      newVehiclesNumbers.add(vehicle.number);
+    });
     yield* _updateVehiclesStates(
       vehiclesToProcess: toProcess,
-      sourceForVehicle: sourceForVehicle,
+      newVehiclesData: _NewVehiclesData(newVehiclesNumbers, sourceForVehicle),
     );
   }
 
@@ -703,4 +711,11 @@ extension _MapStateExt on MapState {
       selectedVehicleUpdate: deselectVehicle ? Deselect() : NoChange(),
     );
   }
+}
+
+class _NewVehiclesData {
+  final Set<String> vehicleNumbers;
+  final MapVehicleSource Function(Vehicle) sourceForVehicle;
+
+  _NewVehiclesData(this.vehicleNumbers, this.sourceForVehicle);
 }
