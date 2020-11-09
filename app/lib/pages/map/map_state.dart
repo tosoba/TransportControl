@@ -5,20 +5,20 @@ import 'package:transport_control/pages/map/map_selected_vehicle_update.dart';
 import 'package:transport_control/pages/map/map_vehicle.dart';
 
 class MapState {
-  final Map<String, MapVehicle> trackedVehicles;
+  final Map<String, MapVehicle> mapVehicles;
   final double zoom;
   final LatLngBounds bounds;
   final String selectedVehicleNumber;
 
   MapState._({
-    @required this.trackedVehicles,
+    @required this.mapVehicles,
     @required this.zoom,
     @required this.bounds,
     @required this.selectedVehicleNumber,
   });
 
   MapState.initial()
-      : trackedVehicles = {},
+      : mapVehicles = {},
         zoom = MapConstants.initialZoom,
         bounds = null,
         selectedVehicleNumber = null;
@@ -30,7 +30,7 @@ class MapState {
     MapSelectedVehicleUpdate selectedVehicleUpdate,
   }) {
     return MapState._(
-      trackedVehicles: trackedVehicles ?? this.trackedVehicles,
+      mapVehicles: trackedVehicles ?? this.mapVehicles,
       zoom: zoom ?? this.zoom,
       bounds: bounds ?? this.bounds,
       selectedVehicleNumber: selectedVehicleUpdate == null
@@ -45,7 +45,7 @@ class MapState {
 
   MapState get withNoSelectedVehicle {
     return MapState._(
-      trackedVehicles: trackedVehicles,
+      mapVehicles: mapVehicles,
       zoom: zoom,
       bounds: bounds,
       selectedVehicleNumber: null,
@@ -57,7 +57,7 @@ class MapState {
     @required double zoom,
   }) {
     return MapState._(
-      trackedVehicles: trackedVehicles,
+      mapVehicles: mapVehicles,
       zoom: zoom,
       bounds: bounds,
       selectedVehicleNumber: null,

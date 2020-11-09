@@ -247,9 +247,8 @@ class HomePage extends HookWidget {
             bottomSheetControllers,
   }) {
     return StreamBuilder<bool>(
-      stream: context
-          .bloc<MapBloc>()
-          .map((state) => state.trackedVehicles.isNotEmpty),
+      stream:
+          context.bloc<MapBloc>().map((state) => state.mapVehicles.isNotEmpty),
       builder: (context, snapshot) => Container(
         height: kBottomNavigationBarHeight,
         child: Align(
@@ -626,7 +625,7 @@ extension _VehiclesBottomSheetCarouselControllersExt
         context: context,
         builder: (context) => StreamBuilder<List<MapEntry<String, MapVehicle>>>(
           stream: bloc.map(
-            (state) => state.trackedVehicles.entries.toList()
+            (state) => state.mapVehicles.entries.toList()
               ..sort(
                 (entry1, entry2) => entry1.value.vehicle.lon
                     .compareTo(entry2.value.vehicle.lon),
@@ -678,7 +677,7 @@ extension _VehiclesBottomSheetCarouselControllersExt
         value = null;
       });
     } else {
-      final selectedVehicleIndex = bloc.state.trackedVehicles.entries
+      final selectedVehicleIndex = bloc.state.mapVehicles.entries
           .toList()
           .indexWhere((entry) => entry.key == number);
       if (selectedVehicleIndex != -1) {

@@ -160,7 +160,7 @@ extension _MapBlocExt on MapBloc {
   ) {
     return map((state) {
       final sourcesMap = Map<MapVehicleSource, Set<Vehicle>>();
-      state.trackedVehicles.values.forEach((tracked) {
+      state.mapVehicles.values.forEach((tracked) {
         tracked.sources.forEach((source) {
           sourcesMap.putIfAbsent(source, () => {}).add(tracked.vehicle);
         });

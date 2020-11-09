@@ -61,8 +61,8 @@ class _MapPageState extends State<MapPage>
         bloc
             .where((state) => state.selectedVehicleNumber != null)
             .map(
-              (state) => state.trackedVehicles[state.selectedVehicleNumber]
-                  .vehicle.position,
+              (state) => state
+                  .mapVehicles[state.selectedVehicleNumber].vehicle.position,
             )
             .distinct()
             .debounce(const Duration(milliseconds: 250))
