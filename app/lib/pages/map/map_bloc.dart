@@ -292,7 +292,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       );
       clustered.children.forEach((clusterable) {
         final vehicle = toProcess[clusterable.number];
-        final sources = newVehiclesData.sourceForVehicle != null &&
+        final sources = newVehiclesData != null &&
+                newVehiclesData.sourceForVehicle != null &&
                 newVehiclesData.vehicleNumbers.contains(clusterable.number)
             ? {
                 newVehiclesData.sourceForVehicle(vehicle),
@@ -326,7 +327,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           .map((animated) {
             animated.forEach((vehicleMarker) {
               final vehicle = toProcess[vehicleMarker.number];
-              final sources = newVehiclesData.sourceForVehicle != null
+              final sources = newVehiclesData != null &&
+                      newVehiclesData.sourceForVehicle != null
                   ? {
                       newVehiclesData.sourceForVehicle(vehicle),
                       ...?currentTrackedVehicles[vehicleMarker.number]?.sources
@@ -355,7 +357,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           onTap: () => nonClusteredMarkerTapped(nonClustered.number),
         );
         final vehicle = toProcess[nonClustered.number];
-        final sources = newVehiclesData.sourceForVehicle != null &&
+        final sources = newVehiclesData != null &&
+                newVehiclesData.sourceForVehicle != null &&
                 newVehiclesData.vehicleNumbers.contains(nonClustered.number)
             ? {
                 newVehiclesData.sourceForVehicle(vehicle),
@@ -375,7 +378,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
           updatedSelectedVehicle: updatedSelectedVehicle,
         );
         final vehicle = toProcess[selectedVehicleNumber];
-        final sources = newVehiclesData.sourceForVehicle != null &&
+        final sources = newVehiclesData != null &&
+                newVehiclesData.sourceForVehicle != null &&
                 newVehiclesData.vehicleNumbers.contains(selectedVehicleNumber)
             ? {
                 newVehiclesData.sourceForVehicle(vehicle),
