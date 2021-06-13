@@ -115,7 +115,7 @@ class MapLocationPage extends HookWidget {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         extendBody: true,
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         appBar: SlideTransitionPreferredSizeWidget(
           offset: appBarOffset,
           child: PreferredSizeWrapped(

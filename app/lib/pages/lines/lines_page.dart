@@ -62,7 +62,7 @@ class LinesPage extends HookWidget {
         key: _scaffoldKey,
         extendBodyBehindAppBar: true,
         extendBody: true,
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         body: _scaffoldBody(
           context,
           stateSnapshot: snapshot,
