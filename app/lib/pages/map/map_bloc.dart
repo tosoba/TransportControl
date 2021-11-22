@@ -38,8 +38,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   final Sink<Object> _untrackAllLinesSink;
 
   final _subscriptions = <StreamSubscription>[];
-
   final _signals = StreamController<MapSignal>.broadcast();
+
   Stream<MapSignal> get signals => _signals.stream;
 
   void Function(Iterable<LatLng>) clusteredMarkerTapped;
@@ -55,7 +55,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     Stream<PlaceSuggestion> loadVehiclesNearbyPlaceStream,
     Stream<TrackedLinesAddedEvent> trackedLinesAddedStream,
     Stream<Set<Line>> trackedLinesRemovedStream,
-  ) {
+  ) : super(MapState.initial()) {
     _subscriptions
       ..add(
         Stream.periodic(const Duration(seconds: 15))
@@ -102,9 +102,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             .listen((lines) => add(MapEvent.trackedLinesRemoved(lines: lines))),
       );
   }
-
-  @override
-  MapState get initialState => MapState.initial();
 
   @override
   Stream<MapState> mapEventToState(MapEvent event) async* {
@@ -593,7 +590,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   Stream<Set<MapVehicleSource>> get mapVehicleSourcesStream {
-    return map((state) {
+    return stream.map((state) {
       final sources = <MapVehicleSource>{};
       state.mapVehicles.values.forEach((tracked) {
         sources.addAll(tracked.sources);
@@ -603,7 +600,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   Stream<Set<Marker>> get markers {
-    return map(
+    return stream.map(
       (state) => state.mapVehicles.values
           .map((vehicle) => vehicle.marker)
           .where((marker) => marker != null)

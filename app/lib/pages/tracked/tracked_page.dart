@@ -28,7 +28,7 @@ class TrackedPage extends HookWidget {
 
     return StreamBuilder<_FilteredSources>(
       stream:
-          context.bloc<MapBloc>().sourcesStreamFilteredUsing(filterController),
+          context.watch<MapBloc>().sourcesStreamFilteredUsing(filterController),
       builder: (context, snapshot) {
         final filtered = snapshot.data;
         final appBar = TextFieldAppBar(
@@ -99,7 +99,7 @@ class TrackedPage extends HookWidget {
                     child: _sourceListItem(
                       source,
                       context: context,
-                      removeSource: context.bloc<MapBloc>().removeSource,
+                      removeSource: context.watch<MapBloc>().removeSource,
                     ),
                   ),
                 ),
@@ -144,7 +144,7 @@ class TrackedPage extends HookWidget {
   }) {
     if (sources == null || sources.isEmpty) return null;
     return FloatingActionButton.extended(
-      onPressed: () => context.bloc<MapBloc>().clearMap(),
+      onPressed: () => context.watch<MapBloc>().clearMap(),
       label: const Text('Clear all'),
     );
   }
@@ -161,7 +161,7 @@ extension _MapBlocExt on MapBloc {
   Stream<_FilteredSources> sourcesStreamFilteredUsing(
     StreamController<String> filterStream,
   ) {
-    return map((state) {
+    return stream.map((state) {
       final sourcesMap = Map<MapVehicleSource, Set<Vehicle>>();
       state.mapVehicles.values.forEach((tracked) {
         tracked.sources.forEach((source) {

@@ -11,7 +11,7 @@ void useMapSignals({
   @required BuildContext context,
 }) {
   useEffect(() {
-    final subscription = context.bloc<MapBloc>().listenToLoadingSignalTrackers(
+    final subscription = context.watch<MapBloc>().listenToLoadingSignalTrackers(
       (tracker) {
         return tracker.signal.whenPartial(
           loading: (loading) {

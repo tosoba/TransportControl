@@ -24,8 +24,8 @@ import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/last_searched_items_list.dart';
 import 'package:transport_control/widgets/preferred_size_column.dart';
 import 'package:transport_control/widgets/preferred_size_wrapped.dart';
-import 'package:transport_control/widgets/text_field_app_bar.dart';
 import 'package:transport_control/widgets/slide_transition_preferred_size_widget.dart';
+import 'package:transport_control/widgets/text_field_app_bar.dart';
 
 enum _HomeSubPage { map, places }
 
@@ -91,7 +91,7 @@ class HomePage extends HookWidget {
     final searchFieldController = useTextEditingController();
     searchFieldController.addListener(
       () => context
-          .bloc<NearbyBloc>()
+          .watch<NearbyBloc>()
           .queryUpdated(searchFieldController.value.text, submitted: false),
     );
 
@@ -126,10 +126,10 @@ class HomePage extends HookWidget {
       ),
       child: StreamBuilder<SearchedItems>(
         stream: context
-            .bloc<LastSearchedBloc>()
+            .watch<LastSearchedBloc>()
             .notLoadedLastSearchedItemsDataStream(
               loadedVehicleSourcesStream:
-                  context.bloc<MapBloc>().mapVehicleSourcesStream,
+                  context.watch<MapBloc>().mapVehicleSourcesStream,
               limit: 10,
             ),
         builder: (context, snapshot) => Scaffold(
@@ -147,9 +147,9 @@ class HomePage extends HookWidget {
                         LastSearchedItemsList(
                           itemsSnapshot: snapshot,
                           opacity: controlsOpacity,
-                          lineItemPressed: context.bloc<LinesBloc>().track,
+                          lineItemPressed: context.watch<LinesBloc>().track,
                           locationItemPressed: context
-                              .bloc<LocationsBloc>()
+                              .watch<LocationsBloc>()
                               .loadVehiclesInLocation,
                           morePressed: () {
                             _showLastSearchedPage(context);
@@ -247,8 +247,10 @@ class HomePage extends HookWidget {
             bottomSheetControllers,
   }) {
     return StreamBuilder<bool>(
-      stream:
-          context.bloc<MapBloc>().map((state) => state.mapVehicles.isNotEmpty),
+      stream: context
+          .watch<MapBloc>()
+          .stream
+          .map((state) => state.mapVehicles.isNotEmpty),
       builder: (context, snapshot) => Container(
         height: kBottomNavigationBarHeight,
         child: Align(
@@ -335,7 +337,7 @@ class HomePage extends HookWidget {
         ValueNotifier<_VehiclesBottomSheetCarouselControllers>
             bottomSheetControllers,
   }) {
-    final nearbyBloc = context.bloc<NearbyBloc>();
+    final nearbyBloc = context.watch<NearbyBloc>();
     return TextFieldAppBar(
       textFieldFocusNode: searchFieldFocusNode,
       textFieldController: searchFieldController,
@@ -348,7 +350,7 @@ class HomePage extends HookWidget {
         bottomSheetControllers: bottomSheetControllers,
       ),
       trailing: StreamBuilder<String>(
-        stream: nearbyBloc.map((state) => state.query),
+        stream: nearbyBloc.stream.map((state) => state.query),
         builder: (context, snapshot) {
           if (snapshot.data == null || snapshot.data.isEmpty)
             return Container(width: 0.0, height: 0.0);
@@ -449,10 +451,10 @@ class HomePage extends HookWidget {
       MaterialPageRoute(
         builder: (_) => MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: context.bloc<MapBloc>()),
-            BlocProvider.value(value: context.bloc<LinesBloc>()),
-            BlocProvider.value(value: context.bloc<LocationsBloc>()),
-            BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
+            BlocProvider.value(value: context.watch<MapBloc>()),
+            BlocProvider.value(value: context.watch<LinesBloc>()),
+            BlocProvider.value(value: context.watch<LocationsBloc>()),
+            BlocProvider.value(value: context.watch<LastSearchedBloc>()),
           ],
           child: LastSearchedPage(filterMode: LastSearchedPageFilterMode.ALL),
         ),
@@ -466,9 +468,9 @@ class HomePage extends HookWidget {
       MaterialPageRoute(
         builder: (_) => MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: context.bloc<MapBloc>()),
-            BlocProvider.value(value: context.bloc<LinesBloc>()),
-            BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
+            BlocProvider.value(value: context.watch<MapBloc>()),
+            BlocProvider.value(value: context.watch<LinesBloc>()),
+            BlocProvider.value(value: context.watch<LastSearchedBloc>()),
           ],
           child: LinesPage(),
         ),
@@ -482,9 +484,9 @@ class HomePage extends HookWidget {
       MaterialPageRoute(
         builder: (_) => MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: context.bloc<LocationsBloc>()),
-            BlocProvider.value(value: context.bloc<MapBloc>()),
-            BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
+            BlocProvider.value(value: context.watch<LocationsBloc>()),
+            BlocProvider.value(value: context.watch<MapBloc>()),
+            BlocProvider.value(value: context.watch<LastSearchedBloc>()),
           ],
           child: LocationsPage(),
         ),
@@ -497,7 +499,7 @@ class HomePage extends HookWidget {
       context,
       MaterialPageRoute(
         builder: (_) => BlocProvider.value(
-          value: context.bloc<MapBloc>(),
+          value: context.watch<MapBloc>(),
           child: TrackedPage(),
         ),
       ),
@@ -616,7 +618,7 @@ extension _VehiclesBottomSheetCarouselControllersExt
     @required number,
     @required ValueNotifier<LatLng> moveToPositionNotifier,
   }) {
-    final bloc = context.bloc<MapBloc>();
+    final bloc = context.watch<MapBloc>();
     bloc.selectVehicle(number);
 
     if (value == null) {
@@ -624,7 +626,7 @@ extension _VehiclesBottomSheetCarouselControllersExt
       final sheetController = showBottomSheet(
         context: context,
         builder: (context) => StreamBuilder<List<MapEntry<String, MapVehicle>>>(
-          stream: bloc.map(
+          stream: bloc.stream.map(
             (state) => state.mapVehicles.entries.toList()
               ..sort(
                 (entry1, entry2) => entry1.value.vehicle.lon

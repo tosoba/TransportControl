@@ -17,12 +17,12 @@ import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
+import 'package:transport_control/util/collection_util.dart';
+import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/circular_text_icon_button.dart';
 import 'package:transport_control/widgets/last_searched_items_list.dart';
 import 'package:transport_control/widgets/text_field_app_bar.dart';
-import 'package:transport_control/util/collection_util.dart';
-import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 
 class LinesPage extends HookWidget {
@@ -37,10 +37,10 @@ class LinesPage extends HookWidget {
     final searchFieldController = useTextEditingController();
     searchFieldController.addListener(
       () => context
-          .bloc<LinesBloc>()
+          .watch<LinesBloc>()
           .symbolFilterChanged(searchFieldController.text),
     );
-    final filter = context.bloc<LinesBloc>().state.symbolFilter;
+    final filter = context.watch<LinesBloc>().state.symbolFilter;
     if (filter != null) {
       searchFieldController.value = TextEditingValue(text: filter);
     }
@@ -57,7 +57,7 @@ class LinesPage extends HookWidget {
     useUnfocusOnKeyboardHidden(focusNode: searchFieldFocusNode);
 
     return StreamBuilder<LinesState>(
-      stream: context.bloc<LinesBloc>(),
+      stream: context.watch<LinesBloc>().stream,
       builder: (context, snapshot) => Scaffold(
         key: _scaffoldKey,
         extendBodyBehindAppBar: true,
@@ -113,10 +113,10 @@ class LinesPage extends HookWidget {
 
     return StreamBuilder<SearchedItems>(
       stream: context
-          .bloc<LastSearchedBloc>()
+          .watch<LastSearchedBloc>()
           .notLoadedLastSearchedItemsDataStream(
             loadedVehicleSourcesStream:
-                context.bloc<MapBloc>().mapVehicleSourcesStream,
+                context.watch<MapBloc>().mapVehicleSourcesStream,
             limit: 10,
           )
           .map(
@@ -135,7 +135,7 @@ class LinesPage extends HookWidget {
                     appBar: appBar,
                     lastSearchedItemsList: LastSearchedItemsList(
                       itemsSnapshot: snapshot,
-                      lineItemPressed: context.bloc<LinesBloc>().track,
+                      lineItemPressed: context.watch<LinesBloc>().track,
                       morePressed: () => _showLastSearchedPage(context),
                     ),
                   ),
@@ -153,10 +153,10 @@ class LinesPage extends HookWidget {
       MaterialPageRoute(
         builder: (_) => MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: context.bloc<MapBloc>()),
-            BlocProvider.value(value: context.bloc<LinesBloc>()),
-            BlocProvider.value(value: context.bloc<LocationsBloc>()),
-            BlocProvider.value(value: context.bloc<LastSearchedBloc>()),
+            BlocProvider.value(value: context.watch<MapBloc>()),
+            BlocProvider.value(value: context.watch<LinesBloc>()),
+            BlocProvider.value(value: context.watch<LocationsBloc>()),
+            BlocProvider.value(value: context.watch<LastSearchedBloc>()),
           ],
           child: LastSearchedPage(filterMode: LastSearchedPageFilterMode.LINES),
         ),
@@ -175,7 +175,7 @@ class LinesPage extends HookWidget {
       hint: "Search lines...",
       leading: TextFieldAppBarBackButton(searchFieldFocusNode),
       trailing: StreamBuilder<String>(
-        stream: context.bloc<LinesBloc>().symbolFiltersStream,
+        stream: context.watch<LinesBloc>().symbolFiltersStream,
         builder: (context, snapshot) => Container(
           child: Row(
             children: [
@@ -201,13 +201,13 @@ class LinesPage extends HookWidget {
 
   Widget _listFiltersMenu(BuildContext context) {
     return StreamBuilder<List<LineListFilter>>(
-      stream: context.bloc<LinesBloc>().listFiltersStream,
+      stream: context.watch<LinesBloc>().listFiltersStream,
       builder: (context, snapshot) {
         if (snapshot.data == null || snapshot.data.isEmpty)
           return Container(width: 0.0, height: 0.0);
         return PopupMenuButton<LineListFilter>(
           icon: const Icon(Icons.filter_list),
-          onSelected: context.bloc<LinesBloc>().listFilterChanged,
+          onSelected: context.watch<LinesBloc>().listFilterChanged,
           itemBuilder: (context) => snapshot.data.map(
             (filter) {
               final filterString = filter.toString();
@@ -253,7 +253,7 @@ class LinesPage extends HookWidget {
         ++numberOfNonFav;
     });
 
-    final bloc = context.bloc<LinesBloc>();
+    final bloc = context.watch<LinesBloc>();
     final buttons = [
       if (numberOfUntracked > 0)
         _LinesFloatingActionButton(
@@ -420,7 +420,7 @@ class LinesPage extends HookWidget {
   }) {
     return Card(
       child: InkWell(
-        onLongPress: () => context.bloc<LinesBloc>().toggleSelected(line.key),
+        onLongPress: () => context.watch<LinesBloc>().toggleSelected(line.key),
         onTap: () async => _handleLineActionsDialogResult(
           context,
           result: await showDialog<_LineActionsDialogResult>(
@@ -477,7 +477,7 @@ class LinesPage extends HookWidget {
     @required MapEntry<Line, LineState> line,
   }) async {
     if (result == null) return;
-    final bloc = context.bloc<LinesBloc>();
+    final bloc = context.watch<LinesBloc>();
     switch (result) {
       case _LineActionsDialogResult.TOGGLE_SELECTED:
         bloc.toggleSelected(line.key);

@@ -14,7 +14,9 @@ class LastSearchedBloc extends Bloc<LastSearchedEvent, List<SearchedItem>> {
 
   final List<StreamSubscription> _subscriptions = [];
 
-  LastSearchedBloc(this._repo) {
+  LastSearchedBloc(this._repo) : super([]) {
+    on<UpdateItems>((event, emit) => emit(event.items));
+
     _subscriptions.add(
       _repo.getLastSearchedItemsStream().listen((items) {
         add(LastSearchedEvent.updateItems(items: items));
@@ -30,19 +32,11 @@ class LastSearchedBloc extends Bloc<LastSearchedEvent, List<SearchedItem>> {
     return super.close();
   }
 
-  @override
-  List<SearchedItem> get initialState => [];
-
-  @override
-  Stream<List<SearchedItem>> mapEventToState(LastSearchedEvent event) async* {
-    yield event.when(updateItems: (updateEvt) => updateEvt.items);
-  }
-
   Stream<SearchedItems> notLoadedLastSearchedItemsDataStream({
     @required Stream<Set<MapVehicleSource>> loadedVehicleSourcesStream,
     int limit,
   }) {
-    return combineLatest(
+    return stream.combineLatest(
       loadedVehicleSourcesStream,
       (items, Set<MapVehicleSource> sources) {
         final lineSymbols = <String>{};
@@ -70,11 +64,11 @@ class LastSearchedBloc extends Bloc<LastSearchedEvent, List<SearchedItem>> {
               ),
             )
             .toList()
-              ..sort(
-                (item1, item2) => item2.lastSearched.compareTo(
-                  item1.lastSearched,
-                ),
-              );
+          ..sort(
+            (item1, item2) => item2.lastSearched.compareTo(
+              item1.lastSearched,
+            ),
+          );
 
         return limit != null && filteredItems.length > limit
             ? SearchedItems(

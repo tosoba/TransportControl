@@ -1,14 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/di/module/controllers_module.dart';
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_event.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
 import 'package:transport_control/repo/lines_repo.dart';
 import 'package:transport_control/util/asset_util.dart';
-import 'package:stream_transform/stream_transform.dart';
 
 class LinesBloc extends Bloc<LinesEvent, LinesState> {
   final LinesRepo _linesRepo;
@@ -23,7 +24,107 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     this._trackedLinesRemovedSink,
     Stream<Set<Line>> untrackLinesStream,
     Stream<Object> untrackAllLinesStream,
-  ) {
+  ) : super(LinesState.initial()) {
+    on<UpdateLines>((event, emit) => emit(state.copyWith(lines: event.lines)));
+    on<SymbolFilterChanged>(
+      (event, emit) => emit(state.copyWith(symbolFilter: event.filter)),
+    );
+    on<ListFilterChanged>(
+      (event, emit) => emit(state.copyWith(listFilter: event.filter)),
+    );
+    on<ToggleLineSelection>(
+      (event, emit) {
+        final oldLineState = state.lines[event.line];
+        final updatedLines = Map.of(state.lines);
+        updatedLines[event.line] = oldLineState.toggleSelection;
+        emit(state.copyWith(lines: updatedLines));
+      },
+    );
+    on<ResetSelection>(
+      (event, emit) => emit(state.copyWith(
+        lines: state.lines.map(
+          (line, lineState) => lineState.selected
+              ? MapEntry(line, lineState.toggleSelection)
+              : MapEntry(line, lineState),
+        ),
+      )),
+    );
+    on<TrackSelectedLines>(
+      (event, emit) {
+        final updatedLines = Map.of(state.lines);
+        final newlyTrackedLines = Set<Line>();
+        final toggle = event.resetSelection
+            ? (LineState state) => state.toggleTrackedAndSelection
+            : (LineState state) => state.toggleTracked;
+        updatedLines.forEach((line, lineState) {
+          if (!lineState.tracked && lineState.selected) {
+            newlyTrackedLines.add(line);
+            updatedLines[line] = toggle(lineState);
+          }
+        });
+
+        _linesRepo
+            .updateLastSearched(newlyTrackedLines.map((line) => line.symbol));
+
+        _trackedLinesAddedSink.add(
+          TrackedLinesAddedEvent(
+            lines: newlyTrackedLines,
+            beforeRetry: () {
+              add(LinesEvent.toggleLinesTracking(lines: newlyTrackedLines));
+            },
+          ),
+        );
+
+        emit(state.copyWith(lines: updatedLines));
+      },
+    );
+    on<UntrackSelectedLines>((event, emit) {
+      final updatedLines = Map.of(state.lines);
+      final linesRemovedFromTracking = Set<Line>();
+      final toggle = event.resetSelection
+          ? (LineState state) => state.toggleTrackedAndSelection
+          : (LineState state) => state.toggleTracked;
+      updatedLines.forEach((line, lineState) {
+        if (lineState.tracked && lineState.selected) {
+          linesRemovedFromTracking.add(line);
+          updatedLines[line] = toggle(lineState);
+        }
+      });
+
+      _trackedLinesRemovedSink.add(linesRemovedFromTracking);
+
+      emit(state.copyWith(lines: updatedLines));
+    });
+    on<UntrackAllLines>(
+      (event, emit) => emit(state.copyWith(
+        lines: state.lines.map(
+          (line, lineState) => MapEntry(line, lineState.untracked),
+        ),
+      )),
+    );
+    on<ToggleLinesTracking>(
+      (event, emit) => emit(
+        state.copyWith(
+          lines: state.lines.map(
+            (line, lineState) => event.lines.contains(line)
+                ? MapEntry(line, lineState.toggleTracked)
+                : MapEntry(line, lineState),
+          ),
+        ),
+      ),
+    );
+    on<ToggleLineTracking>(
+      (event, emit) => emit(
+        state.copyWith(
+          lines: state.lines.map(
+            (line, lineState) => event.line == line
+                ? MapEntry(line, lineState.toggleTracked)
+                : MapEntry(line, lineState),
+          ),
+        ),
+      ),
+    );
+
     _subscriptions
       ..add(
         _linesRepo.linesStream
@@ -65,96 +166,8 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     return super.close();
   }
 
-  @override
-  LinesState get initialState => LinesState.initial();
-
-  @override
-  Stream<LinesState> mapEventToState(LinesEvent event) async* {
-    yield event.when(
-      updateLines: (evt) => state.copyWith(lines: evt.lines),
-      symbolFilterChanged: (evt) => state.copyWith(symbolFilter: evt.filter),
-      listFilterChanged: (evt) => state.copyWith(listFilter: evt.filter),
-      toggleLineSelection: (evt) {
-        final oldLineState = state.lines[evt.line];
-        final updatedLines = Map.of(state.lines);
-        updatedLines[evt.line] = oldLineState.toggleSelection;
-        return state.copyWith(lines: updatedLines);
-      },
-      resetSelection: (_) => state.copyWith(
-        lines: state.lines.map(
-          (line, lineState) => lineState.selected
-              ? MapEntry(line, lineState.toggleSelection)
-              : MapEntry(line, lineState),
-        ),
-      ),
-      trackSelectedLines: (evt) {
-        final updatedLines = Map.of(state.lines);
-        final newlyTrackedLines = Set<Line>();
-        final toggle = evt.resetSelection
-            ? (LineState state) => state.toggleTrackedAndSelection
-            : (LineState state) => state.toggleTracked;
-        updatedLines.forEach((line, lineState) {
-          if (!lineState.tracked && lineState.selected) {
-            newlyTrackedLines.add(line);
-            updatedLines[line] = toggle(lineState);
-          }
-        });
-
-        _linesRepo
-            .updateLastSearched(newlyTrackedLines.map((line) => line.symbol));
-
-        _trackedLinesAddedSink.add(
-          TrackedLinesAddedEvent(
-            lines: newlyTrackedLines,
-            beforeRetry: () {
-              add(LinesEvent.toggleLinesTracking(lines: newlyTrackedLines));
-            },
-          ),
-        );
-
-        return state.copyWith(lines: updatedLines);
-      },
-      untrackSelectedLines: (evt) {
-        final updatedLines = Map.of(state.lines);
-        final linesRemovedFromTracking = Set<Line>();
-        final toggle = evt.resetSelection
-            ? (LineState state) => state.toggleTrackedAndSelection
-            : (LineState state) => state.toggleTracked;
-        updatedLines.forEach((line, lineState) {
-          if (lineState.tracked && lineState.selected) {
-            linesRemovedFromTracking.add(line);
-            updatedLines[line] = toggle(lineState);
-          }
-        });
-
-        _trackedLinesRemovedSink.add(linesRemovedFromTracking);
-
-        return state.copyWith(lines: updatedLines);
-      },
-      untrackAllLines: (_) => state.copyWith(
-        lines: state.lines.map(
-          (line, lineState) => MapEntry(line, lineState.untracked),
-        ),
-      ),
-      toggleLinesTracking: (evt) => state.copyWith(
-        lines: state.lines.map(
-          (line, lineState) => evt.lines.contains(line)
-              ? MapEntry(line, lineState.toggleTracked)
-              : MapEntry(line, lineState),
-        ),
-      ),
-      toggleLineTracking: (evt) => state.copyWith(
-        lines: state.lines.map(
-          (line, lineState) => evt.line == line
-              ? MapEntry(line, lineState.toggleTracked)
-              : MapEntry(line, lineState),
-        ),
-      ),
-    );
-  }
-
   Stream<List<MapEntry<Line, LineState>>> get filteredLinesStream {
-    return map(
+    return stream.map(
       (state) {
         final symbolFilterPred = state.symbolFilterPredicate;
         final listFilterPred = state.listFilterPredicate;
@@ -166,11 +179,11 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
   }
 
   Stream<Iterable<MapEntry<Line, LineState>>> get selectedLinesStream {
-    return map((state) => state.selectedLines);
+    return stream.map((state) => state.selectedLines);
   }
 
   Stream<List<LineListFilter>> get listFiltersStream {
-    return map(
+    return stream.map(
       (state) {
         final availableFilters = List.of(LineListFilter.values)
           ..remove(state.listFilter);
@@ -188,7 +201,8 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     );
   }
 
-  Stream<String> get symbolFiltersStream => map((state) => state.symbolFilter);
+  Stream<String> get symbolFiltersStream =>
+      stream.map((state) => state.symbolFilter);
 
   void toggleSelected(Line line) {
     add(LinesEvent.toggleLineSelection(line: line));

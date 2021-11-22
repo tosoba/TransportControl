@@ -16,7 +16,7 @@ class NearbyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<NearbyState>(
-      stream: context.bloc<NearbyBloc>(),
+      stream: context.watch<NearbyBloc>().stream,
       builder: (context, snapshot) => Container(
         child: _nearbyWidget(state: snapshot.data),
         color: Theme.of(context).primaryColor,
@@ -79,7 +79,7 @@ class NearbyPage extends StatelessWidget {
               child: InkWell(
                 onTap: () {
                   final suggestion = suggestions[index - 1];
-                  context.bloc<NearbyBloc>().suggestionSelected(suggestion);
+                  context.watch<NearbyBloc>().suggestionSelected(suggestion);
                   suggestionSelected();
                 },
                 child: ListTile(

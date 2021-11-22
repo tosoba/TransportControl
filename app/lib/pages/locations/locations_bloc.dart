@@ -20,13 +20,24 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
 
   final StreamController<LocationsSignal> _signals =
       StreamController.broadcast();
+
   Stream<LocationsSignal> get signals => _signals.stream;
 
   LocationsBloc(
     this._repo,
     this._loadVehiclesInLocationSink,
     this._loadVehiclesNearbyUserLocationSink,
-  ) {
+  ) : super(LocationsState.initial()) {
+    on<ChangeListOrder>(
+      (event, emit) => emit(state.copyWith(listOrder: event.order)),
+    );
+    on<UpdateLocations>(
+      (event, emit) => emit(state.copyWith(locations: event.locations)),
+    );
+    on<NameFilterChanged>(
+      (event, emit) => emit(state.copyWith(nameFilter: event.filter)),
+    );
+
     _subscriptions
       ..add(
         _repo.favouriteLocationsStream.listen(
@@ -45,20 +56,8 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     return super.close();
   }
 
-  @override
-  LocationsState get initialState => LocationsState.initial();
-
-  @override
-  Stream<LocationsState> mapEventToState(LocationsEvent event) async* {
-    yield event.when(
-      changeListOrder: (evt) => state.copyWith(listOrder: evt.order),
-      updateLocations: (evt) => state.copyWith(locations: evt.locations),
-      nameFilterChanged: (evt) => state.copyWith(nameFilter: evt.filter),
-    );
-  }
-
   Stream<FilteredLocationsResult> get filteredLocationsStream {
-    return map((state) {
+    return stream.map((state) {
       final filter = state.nameFilter == null
           ? (Location location) => true
           : (Location location) => location.name
@@ -74,11 +73,11 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   }
 
   Stream<LocationsListOrder> get listOrderStream {
-    return map((state) => state.listOrder);
+    return stream.map((state) => state.listOrder);
   }
 
   Stream<List<LocationsListOrder>> get listOrdersStream {
-    return map(
+    return stream.map(
       (state) => const [
         const BySavedTimestampWrapper(const BySavedTimestamp()),
         const ByLastSearchedWrapper(const ByLastSearched()),

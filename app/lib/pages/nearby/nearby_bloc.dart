@@ -3,12 +3,12 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/model/loadable.dart';
 import 'package:transport_control/model/place_suggestion.dart';
 import 'package:transport_control/pages/nearby/nearby_event.dart';
 import 'package:transport_control/pages/nearby/nearby_state.dart';
 import 'package:transport_control/repo/place_suggestions_repo.dart';
-import 'package:stream_transform/stream_transform.dart';
 
 class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
   final PlaceSuggestionsRepo _repo;
@@ -18,7 +18,20 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
 
   final List<StreamSubscription> subscriptions = [];
 
-  NearbyBloc(this._repo, this._loadVehiclesNearbyPlaceSink) {
+  NearbyBloc(this._repo, this._loadVehiclesNearbyPlaceSink)
+      : super(NearbyState.initial()) {
+    on<UpdateQuery>((event, emit) => emit(state.copyWith(query: event.query)));
+    on<UpdateSuggestions>(
+      (event, emit) => emit(state.copyWith(suggestions: event.suggestions)),
+    );
+    on<UpdateRecentlySearchedSuggestions>(
+      (event, emit) => emit(
+        state.copyWith(
+          recentlySearchedSuggestions: event.suggestions,
+        ),
+      ),
+    );
+
     subscriptions
       ..add(
         _submittedQueries.stream
@@ -70,26 +83,12 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
   }
 
   @override
-  NearbyState get initialState => NearbyState.initial();
-
-  @override
   Future<void> close() async {
     await Future.wait(
       subscriptions.map((subscription) => subscription.cancel()),
     );
     await Future.wait([_queries.close(), _submittedQueries.close()]);
     return super.close();
-  }
-
-  @override
-  Stream<NearbyState> mapEventToState(NearbyEvent event) async* {
-    yield event.when(
-      updateQuery: (evt) => state.copyWith(query: evt.query),
-      updateSuggestions: (evt) => state.copyWith(suggestions: evt.suggestions),
-      updateRecentlySearchedSuggestions: (evt) => state.copyWith(
-        recentlySearchedSuggestions: evt.suggestions,
-      ),
-    );
   }
 
   void queryUpdated(String query, {@required bool submitted}) {

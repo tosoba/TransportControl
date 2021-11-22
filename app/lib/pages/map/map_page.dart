@@ -49,7 +49,7 @@ class _MapPageState extends State<MapPage>
   void initState() {
     super.initState();
 
-    final bloc = context.bloc<MapBloc>()
+    final bloc = context.watch<MapBloc>()
       ..clusteredMarkerTapped = _animateToClusterChildrenBounds
       ..nonClusteredMarkerTapped = (number) {
         widget.markerTapped(number);
@@ -58,7 +58,7 @@ class _MapPageState extends State<MapPage>
 
     _subscriptions
       ..add(
-        bloc
+        bloc.stream
             .where((state) => state.selectedVehicleNumber != null)
             .map(
               (state) => state
@@ -168,7 +168,7 @@ class _MapPageState extends State<MapPage>
     );
 
     return StreamBuilder<_MapArguments>(
-      stream: context.bloc<MapBloc>().markers.combineLatest(
+      stream: context.watch<MapBloc>().markers.combineLatest(
         _preferences.mapPreferencesStream,
         (Set<Marker> markers, MapPreferences preferences) {
           return _MapArguments(markers: markers, preferences: preferences);
@@ -191,7 +191,7 @@ class _MapPageState extends State<MapPage>
           onCameraIdle: () => _cameraMoved(context),
           markers: snapshot?.data?.markers,
           onTap: (position) {
-            context.bloc<MapBloc>().deselectVehicle();
+            context.watch<MapBloc>().deselectVehicle();
             widget.mapTapped();
           },
         ),
@@ -205,7 +205,7 @@ class _MapPageState extends State<MapPage>
       controller.getVisibleRegion(),
       controller.getZoomLevel(),
     ]);
-    context.bloc<MapBloc>().cameraMoved(
+    context.watch<MapBloc>().cameraMoved(
           bounds: results[0] as LatLngBounds,
           zoom: results[1] as double,
           byUser: _cameraWasMovedByUser,
