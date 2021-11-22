@@ -86,7 +86,6 @@ class TrackedPage extends HookWidget {
     BuildContext context, {
     @required List<MapEntry<MapVehicleSource, Set<Vehicle>>> sources,
   }) {
-    final removeSource = context.bloc<MapBloc>().removeSource;
     return SliverList(
       delegate: SliverChildListDelegate(
         sources
@@ -100,7 +99,7 @@ class TrackedPage extends HookWidget {
                     child: _sourceListItem(
                       source,
                       context: context,
-                      removeSource: removeSource,
+                      removeSource: context.bloc<MapBloc>().removeSource,
                     ),
                   ),
                 ),
@@ -118,20 +117,24 @@ class TrackedPage extends HookWidget {
     @required void Function(MapVehicleSource) removeSource,
   }) {
     return Slidable(
-      actionPane: SlidableDrawerActionPane(),
-      actionExtentRatio: 0.25,
+      endActionPane: ActionPane(
+        motion: const DrawerMotion(),
+        extentRatio: 0.25,
+        children: [
+          SlidableAction(
+            label: 'Delete',
+            backgroundColor: Colors.red,
+            icon: Icons.delete,
+            onPressed: (context) {
+              removeSource(source.key);
+            },
+          ),
+        ],
+      ),
       child: ListTile(
         title: source.key.titleWidget(context),
         subtitle: Text('${source.value.length.toString()} in total'),
       ),
-      secondaryActions: [
-        IconSlideAction(
-          caption: 'Delete',
-          color: Colors.red,
-          icon: Icons.delete,
-          onTap: () => removeSource(source.key),
-        ),
-      ],
     );
   }
 

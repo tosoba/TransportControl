@@ -12,11 +12,11 @@ import 'package:transport_control/pages/last_searched/last_searched_page.dart';
 import 'package:transport_control/pages/lines/lines_bloc.dart';
 import 'package:transport_control/pages/locations/locations_bloc.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
+import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
 import 'package:transport_control/pages/map_location/map_location_page.dart';
 import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
-import 'package:transport_control/pages/locations/locations_state.dart';
 import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
 import 'package:transport_control/widgets/last_searched_items_list.dart';
@@ -255,8 +255,37 @@ class LocationsPage extends HookWidget {
         builder: (context, snapshot) {
           if (snapshot.data == null) return Container();
           return Slidable(
-            actionPane: SlidableDrawerActionPane(),
-            actionExtentRatio: 0.25,
+            startActionPane: ActionPane(
+              motion: const DrawerMotion(),
+              extentRatio: 0.25,
+              children: [
+                SlidableAction(
+                  label: 'Edit',
+                  backgroundColor: Colors.indigo,
+                  icon: Icons.edit,
+                  onPressed: (context) {
+                    _showMapLocationPageWithTransition(
+                      context,
+                      mode: MapLocationPageMode.existing(location: location),
+                    );
+                  },
+                ),
+              ],
+            ),
+            endActionPane: ActionPane(
+              motion: const DrawerMotion(),
+              extentRatio: 0.25,
+              children: [
+                SlidableAction(
+                  label: 'Delete',
+                  backgroundColor: Colors.red,
+                  icon: Icons.delete,
+                  onPressed: (context) {
+                    context.bloc<LocationsBloc>().deleteLocation(location);
+                  },
+                ),
+              ],
+            ),
             child: Material(
               child: InkWell(
                 onTap: () => context
@@ -274,29 +303,6 @@ class LocationsPage extends HookWidget {
                 ),
               ),
             ),
-            actions: [
-              IconSlideAction(
-                caption: 'Edit',
-                color: Colors.indigo,
-                icon: Icons.edit,
-                onTap: () {
-                  _showMapLocationPageWithTransition(
-                    context,
-                    mode: MapLocationPageMode.existing(location: location),
-                  );
-                },
-              ),
-            ],
-            secondaryActions: [
-              IconSlideAction(
-                caption: 'Delete',
-                color: Colors.red,
-                icon: Icons.delete,
-                onTap: () {
-                  context.bloc<LocationsBloc>().deleteLocation(location);
-                },
-              ),
-            ],
           );
         },
       ),
