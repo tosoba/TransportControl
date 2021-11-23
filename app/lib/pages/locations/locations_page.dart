@@ -53,7 +53,7 @@ class LocationsPage extends HookWidget {
       extendBodyBehindAppBar: true,
       extendBody: true,
       body: StreamBuilder<FilteredLocationsResult>(
-        stream: context.watch<LocationsBloc>().filteredLocationsStream,
+        stream: context.read<LocationsBloc>().filteredLocationsStream,
         builder: (context, snapshot) {
           final result = snapshot.data;
 
@@ -109,7 +109,7 @@ class LocationsPage extends HookWidget {
                 .watch<LastSearchedBloc>()
                 .notLoadedLastSearchedItemsDataStream(
                   loadedVehicleSourcesStream:
-                      context.watch<MapBloc>().mapVehicleSourcesStream,
+                      context.read<MapBloc>().mapVehicleSourcesStream,
                   limit: 10,
                 )
                 .map(
@@ -146,7 +146,7 @@ class LocationsPage extends HookWidget {
         context,
         nearbyButtonEnabled: nearbyButtonEnabled,
         loadVehiclesNearbyUserLocation: () {
-          context.watch<LocationsBloc>().loadVehiclesNearbyUserLocation();
+          context.read<LocationsBloc>().loadVehiclesNearbyUserLocation();
         },
       ),
     );
@@ -158,10 +158,10 @@ class LocationsPage extends HookWidget {
       MaterialPageRoute(
         builder: (_) => MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: context.watch<MapBloc>()),
-            BlocProvider.value(value: context.watch<LinesBloc>()),
-            BlocProvider.value(value: context.watch<LocationsBloc>()),
-            BlocProvider.value(value: context.watch<LastSearchedBloc>()),
+            BlocProvider.value(value: context.read<MapBloc>()),
+            BlocProvider.value(value: context.read<LinesBloc>()),
+            BlocProvider.value(value: context.read<LocationsBloc>()),
+            BlocProvider.value(value: context.read<LastSearchedBloc>()),
           ],
           child: LastSearchedPage(
             filterMode: LastSearchedPageFilterMode.LOCATIONS,
@@ -207,14 +207,14 @@ class LocationsPage extends HookWidget {
 
   Widget _listOrderMenu(BuildContext context) {
     return StreamBuilder<List<LocationsListOrder>>(
-      stream: context.watch<LocationsBloc>().listOrdersStream,
+      stream: context.read<LocationsBloc>().listOrdersStream,
       builder: (context, snapshot) {
         if (snapshot.data == null || snapshot.data.isEmpty) {
           return Container(width: 0.0, height: 0.0);
         }
         return PopupMenuButton<LocationsListOrder>(
           icon: const Icon(Icons.sort),
-          onSelected: context.watch<LocationsBloc>().listOrderChanged,
+          onSelected: context.read<LocationsBloc>().listOrderChanged,
           itemBuilder: (context) => snapshot.data
               .map(
                 (order) => PopupMenuItem<LocationsListOrder>(
@@ -251,7 +251,7 @@ class LocationsPage extends HookWidget {
   Widget _locationListItem(Location location) {
     return Builder(
       builder: (context) => StreamBuilder<LocationsListOrder>(
-        stream: context.watch<LocationsBloc>().listOrderStream,
+        stream: context.read<LocationsBloc>().listOrderStream,
         builder: (context, snapshot) {
           if (snapshot.data == null) return Container();
           return Slidable(
@@ -281,7 +281,7 @@ class LocationsPage extends HookWidget {
                   backgroundColor: Colors.red,
                   icon: Icons.delete,
                   onPressed: (context) {
-                    context.watch<LocationsBloc>().deleteLocation(location);
+                    context.read<LocationsBloc>().deleteLocation(location);
                   },
                 ),
               ],
@@ -355,7 +355,7 @@ class LocationsPage extends HookWidget {
       save: (_) => _saveOrUpdateLocation(context, result),
       orElse: (_) {
         _saveOrUpdateLocation(context, result);
-        context.watch<LocationsBloc>().loadVehiclesInLocation(result.location);
+        context.read<LocationsBloc>().loadVehiclesInLocation(result.location);
       },
     );
   }
@@ -366,10 +366,10 @@ class LocationsPage extends HookWidget {
   ) {
     result.mode.when(
       add: (_) {
-        context.watch<LocationsBloc>().saveLocation(result.location);
+        context.read<LocationsBloc>().saveLocation(result.location);
       },
       existing: (_) {
-        context.watch<LocationsBloc>().updateLocation(result.location);
+        context.read<LocationsBloc>().updateLocation(result.location);
       },
     );
   }
@@ -385,7 +385,7 @@ class LocationsPage extends HookWidget {
       });
     };
     useEffect(() {
-      final subscription = context.watch<LocationsBloc>().signals.listen(
+      final subscription = context.read<LocationsBloc>().signals.listen(
         (signal) {
           signal.when(
             loading: (loading) {

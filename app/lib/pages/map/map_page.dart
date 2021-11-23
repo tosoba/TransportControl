@@ -6,6 +6,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
@@ -49,7 +50,7 @@ class _MapPageState extends State<MapPage>
   void initState() {
     super.initState();
 
-    final bloc = context.watch<MapBloc>()
+    final bloc = context.read<MapBloc>()
       ..clusteredMarkerTapped = _animateToClusterChildrenBounds
       ..nonClusteredMarkerTapped = (number) {
         widget.markerTapped(number);
@@ -168,7 +169,7 @@ class _MapPageState extends State<MapPage>
     );
 
     return StreamBuilder<_MapArguments>(
-      stream: context.watch<MapBloc>().markers.combineLatest(
+      stream: context.read<MapBloc>().markers.combineLatest(
         _preferences.mapPreferencesStream,
         (Set<Marker> markers, MapPreferences preferences) {
           return _MapArguments(markers: markers, preferences: preferences);
@@ -191,7 +192,7 @@ class _MapPageState extends State<MapPage>
           onCameraIdle: () => _cameraMoved(context),
           markers: snapshot?.data?.markers,
           onTap: (position) {
-            context.watch<MapBloc>().deselectVehicle();
+            context.read<MapBloc>().deselectVehicle();
             widget.mapTapped();
           },
         ),
@@ -205,7 +206,7 @@ class _MapPageState extends State<MapPage>
       controller.getVisibleRegion(),
       controller.getZoomLevel(),
     ]);
-    context.watch<MapBloc>().cameraMoved(
+    context.read<MapBloc>().cameraMoved(
           bounds: results[0] as LatLngBounds,
           zoom: results[1] as double,
           byUser: _cameraWasMovedByUser,

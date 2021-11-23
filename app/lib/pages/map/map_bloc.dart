@@ -10,7 +10,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:transport_control/di/module/controllers_module.dart';
+import 'package:transport_control/di/module/controllers_module.dart'
+    as Controllers;
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/model/place_suggestion.dart';
@@ -26,6 +27,7 @@ import 'package:transport_control/pages/map/map_vehicle.dart';
 import 'package:transport_control/pages/map/map_vehicle_source.dart';
 import 'package:transport_control/repo/vehicles_repo.dart';
 import 'package:transport_control/util/asset_util.dart';
+import 'package:transport_control/util/bloc_util.dart';
 import 'package:transport_control/util/lat_lng_util.dart';
 import 'package:transport_control/util/marker_util.dart';
 import 'package:transport_control/util/model_util.dart';
@@ -53,9 +55,107 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     Stream<Location> loadVehiclesInLocationStream,
     Stream<LatLng> loadVehiclesNearbyUserLocationStream,
     Stream<PlaceSuggestion> loadVehiclesNearbyPlaceStream,
-    Stream<TrackedLinesAddedEvent> trackedLinesAddedStream,
+    Stream<Controllers.TrackedLinesAddedEvent> trackedLinesAddedStream,
     Stream<Set<Line>> trackedLinesRemovedStream,
   ) : super(MapState.initial()) {
+    emitAllOn<UpdateVehicles>(
+      nextStates: (event) => _mapVehiclesStates(
+        vehiclesToProcess: Map<String, Vehicle>.fromIterable(
+          event.vehicles,
+          key: (vehicle) => vehicle.number,
+          value: (vehicle) => vehicle,
+        ),
+        animatePositions: true,
+      ),
+    );
+
+    emitAllOn<AddVehiclesOfLines>(nextStates: (event) {
+      final lineSymbols = Map.fromIterables(
+        event.lines.map((line) => line.symbol),
+        event.lines,
+      );
+      final loadedAt = DateTime.now();
+      return _newVehiclesStates(
+        event.vehicles,
+        sourceForVehicle: (vehicle) => MapVehicleSource.ofLine(
+          line: lineSymbols[vehicle.symbol],
+          loadedAt: loadedAt,
+        ),
+      );
+    });
+
+    emitAllOn<AddVehiclesInLocation>(nextStates: (event) {
+      final loadedAt = DateTime.now();
+      return _newVehiclesStates(
+        event.vehicles,
+        sourceForVehicle: (_) => MapVehicleSource.nearbyLocation(
+          location: event.location,
+          loadedAt: loadedAt,
+        ),
+      );
+    });
+
+    emitAllOn<AddVehiclesNearbyUserLocation>(nextStates: (event) {
+      final loadedAt = DateTime.now();
+      return _newVehiclesStates(
+        event.vehicles,
+        sourceForVehicle: (_) => MapVehicleSource.nearbyUserLocation(
+          position: event.position,
+          radius: event.radius,
+          loadedAt: loadedAt,
+        ),
+      );
+    });
+
+    emitAllOn<AddVehiclesNearbyPlace>(nextStates: (event) {
+      final loadedAt = DateTime.now();
+      return _newVehiclesStates(
+        event.vehicles,
+        sourceForVehicle: (_) => MapVehicleSource.nearbyPlace(
+          position: event.position,
+          radius: event.radius,
+          title: event.title,
+          loadedAt: loadedAt,
+        ),
+      );
+    });
+
+    emitAllOn<CameraMoved>(
+      nextStates: (event) => _mapVehiclesStates(
+        updatedBounds: event.bounds,
+        updatedZoom: event.zoom,
+        selectedVehicleUpdate: event.byUser ? Deselect() : NoChange(),
+      ),
+    );
+
+    emitAllOn<DeselectVehicle>(
+      nextStates: (event) => _mapVehiclesStates(
+        selectedVehicleUpdate: Deselect(),
+      ),
+    );
+
+    emitAllOn<SelectVehicle>(
+      nextStates: (event) => event.number == state.selectedVehicleNumber
+          ? Stream.value(state)
+          : _mapVehiclesStates(
+              selectedVehicleUpdate: Select(number: event.number),
+            ),
+    );
+
+    on<ClearMap>((event, emit) => state.copyWith(trackedVehicles: {}));
+
+    on<TrackedLinesRemoved>(
+      (event, emit) => state.withRemovedSource(
+        (source) => source is OfLine && event.lines.contains(source.line),
+      ),
+    );
+
+    on<RemoveSource>(
+      (event, emit) => state.withRemovedSource(
+        (source) => source == event.source,
+      ),
+    );
+
     _subscriptions
       ..add(
         Stream.periodic(const Duration(seconds: 15))
@@ -101,90 +201,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         trackedLinesRemovedStream
             .listen((lines) => add(MapEvent.trackedLinesRemoved(lines: lines))),
       );
-  }
-
-  @override
-  Stream<MapState> mapEventToState(MapEvent event) async* {
-    if (event is UpdateVehicles) {
-      yield* _mapVehiclesStates(
-        vehiclesToProcess: Map<String, Vehicle>.fromIterable(
-          event.vehicles,
-          key: (vehicle) => vehicle.number,
-          value: (vehicle) => vehicle,
-        ),
-        animatePositions: true,
-      );
-    } else if (event is AddVehiclesOfLines) {
-      final lineSymbols = Map.fromIterables(
-        event.lines.map((line) => line.symbol),
-        event.lines,
-      );
-      final loadedAt = DateTime.now();
-      yield* _newVehiclesStates(
-        event.vehicles,
-        sourceForVehicle: (vehicle) => MapVehicleSource.ofLine(
-          line: lineSymbols[vehicle.symbol],
-          loadedAt: loadedAt,
-        ),
-      );
-    } else if (event is AddVehiclesInLocation) {
-      final loadedAt = DateTime.now();
-      yield* _newVehiclesStates(
-        event.vehicles,
-        sourceForVehicle: (_) => MapVehicleSource.nearbyLocation(
-          location: event.location,
-          loadedAt: loadedAt,
-        ),
-      );
-    } else if (event is AddVehiclesNearbyUserLocation) {
-      final loadedAt = DateTime.now();
-      yield* _newVehiclesStates(
-        event.vehicles,
-        sourceForVehicle: (_) => MapVehicleSource.nearbyUserLocation(
-          position: event.position,
-          radius: event.radius,
-          loadedAt: loadedAt,
-        ),
-      );
-    } else if (event is AddVehiclesNearbyPlace) {
-      final loadedAt = DateTime.now();
-      yield* _newVehiclesStates(
-        event.vehicles,
-        sourceForVehicle: (_) => MapVehicleSource.nearbyPlace(
-          position: event.position,
-          radius: event.radius,
-          title: event.title,
-          loadedAt: loadedAt,
-        ),
-      );
-    } else if (event is CameraMoved) {
-      yield* _mapVehiclesStates(
-        updatedBounds: event.bounds,
-        updatedZoom: event.zoom,
-        selectedVehicleUpdate: event.byUser ? Deselect() : NoChange(),
-      );
-    } else if (event is DeselectVehicle) {
-      yield* _mapVehiclesStates(selectedVehicleUpdate: Deselect());
-    } else if (event is SelectVehicle) {
-      if (event.number == state.selectedVehicleNumber) {
-        yield state;
-      } else {
-        yield* _mapVehiclesStates(
-          selectedVehicleUpdate: Select(number: event.number),
-        );
-      }
-    } else {
-      yield event.whenOrElse(
-        clearMap: (_) => state.copyWith(trackedVehicles: {}),
-        trackedLinesRemoved: (evt) => state.withRemovedSource(
-          (source) => source is OfLine && evt.lines.contains(source.line),
-        ),
-        removeSource: (evt) => state.withRemovedSource(
-          (source) => source == evt.source,
-        ),
-        orElse: (_) => state,
-      );
-    }
   }
 
   @override
@@ -417,7 +433,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         : currentSources;
   }
 
-  void _loadVehiclesOfLines(TrackedLinesAddedEvent event) {
+  void _loadVehiclesOfLines(Controllers.TrackedLinesAddedEvent event) {
     final lines = event.lines;
     _loadVehicles(
       loadingMsg:

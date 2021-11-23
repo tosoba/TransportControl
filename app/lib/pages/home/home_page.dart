@@ -126,10 +126,10 @@ class HomePage extends HookWidget {
       ),
       child: StreamBuilder<SearchedItems>(
         stream: context
-            .watch<LastSearchedBloc>()
+            .read<LastSearchedBloc>()
             .notLoadedLastSearchedItemsDataStream(
               loadedVehicleSourcesStream:
-                  context.watch<MapBloc>().mapVehicleSourcesStream,
+                  context.read<MapBloc>().mapVehicleSourcesStream,
               limit: 10,
             ),
         builder: (context, snapshot) => Scaffold(
@@ -147,9 +147,9 @@ class HomePage extends HookWidget {
                         LastSearchedItemsList(
                           itemsSnapshot: snapshot,
                           opacity: controlsOpacity,
-                          lineItemPressed: context.watch<LinesBloc>().track,
+                          lineItemPressed: context.read<LinesBloc>().track,
                           locationItemPressed: context
-                              .watch<LocationsBloc>()
+                              .read<LocationsBloc>()
                               .loadVehiclesInLocation,
                           morePressed: () {
                             _showLastSearchedPage(context);
@@ -337,7 +337,7 @@ class HomePage extends HookWidget {
         ValueNotifier<_VehiclesBottomSheetCarouselControllers>
             bottomSheetControllers,
   }) {
-    final nearbyBloc = context.watch<NearbyBloc>();
+    final nearbyBloc = context.read<NearbyBloc>();
     return TextFieldAppBar(
       textFieldFocusNode: searchFieldFocusNode,
       textFieldController: searchFieldController,
@@ -352,8 +352,9 @@ class HomePage extends HookWidget {
       trailing: StreamBuilder<String>(
         stream: nearbyBloc.stream.map((state) => state.query),
         builder: (context, snapshot) {
-          if (snapshot.data == null || snapshot.data.isEmpty)
+          if (snapshot.data == null || snapshot.data.isEmpty) {
             return Container(width: 0.0, height: 0.0);
+          }
           return CircularButton(
             child: Icon(
               Icons.close,
@@ -451,10 +452,10 @@ class HomePage extends HookWidget {
       MaterialPageRoute(
         builder: (_) => MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: context.watch<MapBloc>()),
-            BlocProvider.value(value: context.watch<LinesBloc>()),
-            BlocProvider.value(value: context.watch<LocationsBloc>()),
-            BlocProvider.value(value: context.watch<LastSearchedBloc>()),
+            BlocProvider.value(value: context.read<MapBloc>()),
+            BlocProvider.value(value: context.read<LinesBloc>()),
+            BlocProvider.value(value: context.read<LocationsBloc>()),
+            BlocProvider.value(value: context.read<LastSearchedBloc>()),
           ],
           child: LastSearchedPage(filterMode: LastSearchedPageFilterMode.ALL),
         ),
@@ -468,9 +469,9 @@ class HomePage extends HookWidget {
       MaterialPageRoute(
         builder: (_) => MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: context.watch<MapBloc>()),
-            BlocProvider.value(value: context.watch<LinesBloc>()),
-            BlocProvider.value(value: context.watch<LastSearchedBloc>()),
+            BlocProvider.value(value: context.read<MapBloc>()),
+            BlocProvider.value(value: context.read<LinesBloc>()),
+            BlocProvider.value(value: context.read<LastSearchedBloc>()),
           ],
           child: LinesPage(),
         ),
@@ -484,9 +485,9 @@ class HomePage extends HookWidget {
       MaterialPageRoute(
         builder: (_) => MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: context.watch<LocationsBloc>()),
-            BlocProvider.value(value: context.watch<MapBloc>()),
-            BlocProvider.value(value: context.watch<LastSearchedBloc>()),
+            BlocProvider.value(value: context.read<LocationsBloc>()),
+            BlocProvider.value(value: context.read<MapBloc>()),
+            BlocProvider.value(value: context.read<LastSearchedBloc>()),
           ],
           child: LocationsPage(),
         ),
@@ -499,7 +500,7 @@ class HomePage extends HookWidget {
       context,
       MaterialPageRoute(
         builder: (_) => BlocProvider.value(
-          value: context.watch<MapBloc>(),
+          value: context.read<MapBloc>(),
           child: TrackedPage(),
         ),
       ),
@@ -618,7 +619,7 @@ extension _VehiclesBottomSheetCarouselControllersExt
     @required number,
     @required ValueNotifier<LatLng> moveToPositionNotifier,
   }) {
-    final bloc = context.watch<MapBloc>();
+    final bloc = context.read<MapBloc>();
     bloc.selectVehicle(number);
 
     if (value == null) {

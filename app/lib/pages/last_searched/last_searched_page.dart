@@ -42,7 +42,7 @@ class LastSearchedPage extends HookWidget {
           .watch<LastSearchedBloc>()
           .notLoadedLastSearchedItemsDataStream(
             loadedVehicleSourcesStream:
-                context.watch<MapBloc>().mapVehicleSourcesStream,
+                context.read<MapBloc>().mapVehicleSourcesStream,
             limit: null,
           )
           .combineLatest(
@@ -153,7 +153,7 @@ class LastSearchedPage extends HookWidget {
         onTap: () {
           item.when(
             lineItem: (lineItem) {
-              context.watch<LinesBloc>().track(lineItem.line);
+              context.read<LinesBloc>().track(lineItem.line);
             },
             locationItem: (locationItem) {
               context

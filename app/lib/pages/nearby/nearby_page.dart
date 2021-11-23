@@ -1,5 +1,5 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transport_control/model/place_suggestion.dart';
 import 'package:transport_control/pages/nearby/nearby_bloc.dart';
 import 'package:transport_control/pages/nearby/nearby_state.dart';
@@ -15,10 +15,9 @@ class NearbyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<NearbyState>(
-      stream: context.watch<NearbyBloc>().stream,
-      builder: (context, snapshot) => Container(
-        child: _nearbyWidget(state: snapshot.data),
+    return BlocBuilder<NearbyBloc, NearbyState>(
+      builder: (context, state) => Container(
+        child: _nearbyWidget(state: state),
         color: Theme.of(context).primaryColor,
       ),
     );
@@ -79,7 +78,7 @@ class NearbyPage extends StatelessWidget {
               child: InkWell(
                 onTap: () {
                   final suggestion = suggestions[index - 1];
-                  context.watch<NearbyBloc>().suggestionSelected(suggestion);
+                  context.read<NearbyBloc>().suggestionSelected(suggestion);
                   suggestionSelected();
                 },
                 child: ListTile(

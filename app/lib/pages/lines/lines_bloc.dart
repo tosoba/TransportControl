@@ -4,7 +4,8 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stream_transform/stream_transform.dart';
-import 'package:transport_control/di/module/controllers_module.dart';
+import 'package:transport_control/di/module/controllers_module.dart'
+    as Controllers;
 import 'package:transport_control/model/line.dart';
 import 'package:transport_control/pages/lines/lines_event.dart';
 import 'package:transport_control/pages/lines/lines_state.dart';
@@ -13,7 +14,7 @@ import 'package:transport_control/util/asset_util.dart';
 
 class LinesBloc extends Bloc<LinesEvent, LinesState> {
   final LinesRepo _linesRepo;
-  final Sink<TrackedLinesAddedEvent> _trackedLinesAddedSink;
+  final Sink<Controllers.TrackedLinesAddedEvent> _trackedLinesAddedSink;
   final Sink<Set<Line>> _trackedLinesRemovedSink;
 
   final List<StreamSubscription> _subscriptions = [];
@@ -67,7 +68,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
             .updateLastSearched(newlyTrackedLines.map((line) => line.symbol));
 
         _trackedLinesAddedSink.add(
-          TrackedLinesAddedEvent(
+          Controllers.TrackedLinesAddedEvent(
             lines: newlyTrackedLines,
             beforeRetry: () {
               add(LinesEvent.toggleLinesTracking(lines: newlyTrackedLines));
@@ -217,7 +218,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
       _trackedLinesRemovedSink.add({line.key});
     } else {
       _trackedLinesAddedSink.add(
-        TrackedLinesAddedEvent(
+        Controllers.TrackedLinesAddedEvent(
           lines: {line.key},
           beforeRetry: () => add(LinesEvent.toggleLineTracking(line: line.key)),
         ),
@@ -231,7 +232,7 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
 
   void track(Line line) {
     _trackedLinesAddedSink.add(
-      TrackedLinesAddedEvent(
+      Controllers.TrackedLinesAddedEvent(
         lines: {line},
         beforeRetry: () => add(LinesEvent.toggleLineTracking(line: line)),
       ),

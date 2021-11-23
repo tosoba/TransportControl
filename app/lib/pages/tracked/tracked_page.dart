@@ -99,7 +99,7 @@ class TrackedPage extends HookWidget {
                     child: _sourceListItem(
                       source,
                       context: context,
-                      removeSource: context.watch<MapBloc>().removeSource,
+                      removeSource: context.read<MapBloc>().removeSource,
                     ),
                   ),
                 ),
@@ -144,7 +144,7 @@ class TrackedPage extends HookWidget {
   }) {
     if (sources == null || sources.isEmpty) return null;
     return FloatingActionButton.extended(
-      onPressed: () => context.watch<MapBloc>().clearMap(),
+      onPressed: () => context.read<MapBloc>().clearMap(),
       label: const Text('Clear all'),
     );
   }
