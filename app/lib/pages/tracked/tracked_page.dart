@@ -9,6 +9,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:transport_control/model/vehicle.dart';
 import 'package:transport_control/pages/map/map_bloc.dart';
+import 'package:transport_control/pages/map/map_vehicle.dart';
 import 'package:transport_control/pages/map/map_vehicle_source.dart';
 import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/widgets/circular_icon_button.dart';
@@ -28,7 +29,7 @@ class TrackedPage extends HookWidget {
 
     return StreamBuilder<_FilteredSources>(
       stream:
-          context.watch<MapBloc>().sourcesStreamFilteredUsing(filterController),
+          context.read<MapBloc>().sourcesStreamFilteredUsing(filterController),
       builder: (context, snapshot) {
         final filtered = snapshot.data;
         final appBar = TextFieldAppBar(
@@ -161,32 +162,41 @@ extension _MapBlocExt on MapBloc {
   Stream<_FilteredSources> sourcesStreamFilteredUsing(
     StreamController<String> filterStream,
   ) {
-    return stream.map((state) {
-      final sourcesMap = Map<MapVehicleSource, Set<Vehicle>>();
-      state.mapVehicles.values.forEach((tracked) {
-        tracked.sources.forEach((source) {
-          sourcesMap.putIfAbsent(source, () => {}).add(tracked.vehicle);
-        });
-      });
-      return sourcesMap.entries.toList()
-        ..sort(
-          (entry1, entry2) => entry2.key.loadedAt.compareTo(
-            entry1.key.loadedAt,
+    return stream
+        .map((state) => state.mapVehicles)
+        .distinct()
+        .startWith(state.mapVehicles)
+        .map(_toEntriesList)
+        .combineLatest(
+          filterStream.stream.startWith(null),
+          (sources, String filter) => _FilteredSources(
+            sources: filter == null || filter.isEmpty
+                ? sources
+                : sources
+                    .where(
+                      (entry) => entry.key.title.toLowerCase().contains(filter),
+                    )
+                    .toList(),
+            filter: filter,
           ),
         );
-    }).combineLatest(
-      filterStream.stream.startWith(null),
-      (sources, String filter) => _FilteredSources(
-        sources: filter == null || filter.isEmpty
-            ? sources
-            : sources
-                .where(
-                  (entry) => entry.key.title.toLowerCase().contains(filter),
-                )
-                .toList(),
-        filter: filter,
-      ),
-    );
+  }
+
+  List<MapEntry<MapVehicleSource, Set<Vehicle>>> _toEntriesList(
+    Map<String, MapVehicle> mapVehicles,
+  ) {
+    final sourcesMap = Map<MapVehicleSource, Set<Vehicle>>();
+    mapVehicles.values.forEach((tracked) {
+      tracked.sources.forEach((source) {
+        sourcesMap.putIfAbsent(source, () => {}).add(tracked.vehicle);
+      });
+    });
+    return sourcesMap.entries.toList()
+      ..sort(
+        (entry1, entry2) => entry2.key.loadedAt.compareTo(
+          entry1.key.loadedAt,
+        ),
+      );
   }
 }
 

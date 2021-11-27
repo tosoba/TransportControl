@@ -111,9 +111,7 @@ class LinesPage extends HookWidget {
                 context.read<MapBloc>().mapVehicleSourcesStream,
             limit: 10,
           )
-          .map(
-            (searched) => searched.filterByType<LineItem>(),
-          ),
+          .map((searched) => searched.filterByType<LineItem>()),
       builder: (context, snapshot) => CustomScrollView(
         controller: _autoScrollController,
         slivers: [

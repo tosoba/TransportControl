@@ -110,10 +110,7 @@ class HomePage extends HookWidget {
     );
     final wrappedAppBar = PreferredSizeWrapped(
       size: appBar.size,
-      child: FadeTransition(
-        child: appBar,
-        opacity: controlsOpacity,
-      ),
+      child: FadeTransition(child: appBar, opacity: controlsOpacity),
     );
 
     return WillPopScope(

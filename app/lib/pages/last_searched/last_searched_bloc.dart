@@ -36,9 +36,9 @@ class LastSearchedBloc extends Bloc<LastSearchedEvent, List<SearchedItem>> {
     @required Stream<Set<MapVehicleSource>> loadedVehicleSourcesStream,
     int limit,
   }) {
-    return stream.combineLatest(
+    return stream.startWith(state).combineLatest(
       loadedVehicleSourcesStream,
-      (items, Set<MapVehicleSource> sources) {
+      (List<SearchedItem> items, Set<MapVehicleSource> sources) {
         final lineSymbols = <String>{};
         final locationIds = <int>{};
         sources.forEach((source) {
@@ -65,9 +65,7 @@ class LastSearchedBloc extends Bloc<LastSearchedEvent, List<SearchedItem>> {
             )
             .toList()
           ..sort(
-            (item1, item2) => item2.lastSearched.compareTo(
-              item1.lastSearched,
-            ),
+            (item1, item2) => item2.lastSearched.compareTo(item1.lastSearched),
           );
 
         return limit != null && filteredItems.length > limit

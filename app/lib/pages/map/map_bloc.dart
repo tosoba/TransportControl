@@ -142,18 +142,18 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             ),
     );
 
-    on<ClearMap>((event, emit) => state.copyWith(trackedVehicles: {}));
+    on<ClearMap>((event, emit) => emit(state.copyWith(trackedVehicles: {})));
 
     on<TrackedLinesRemoved>(
-      (event, emit) => state.withRemovedSource(
+      (event, emit) => emit(state.withRemovedSource(
         (source) => source is OfLine && event.lines.contains(source.line),
-      ),
+      )),
     );
 
     on<RemoveSource>(
-      (event, emit) => state.withRemovedSource(
+      (event, emit) => emit(state.withRemovedSource(
         (source) => source == event.source,
-      ),
+      )),
     );
 
     _subscriptions
@@ -599,16 +599,18 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   void removeSource(MapVehicleSource source) {
-    if (source is OfLine) {
-      _untrackLinesSink.add({source.line});
-    }
+    if (source is OfLine) _untrackLinesSink.add({source.line});
     add(MapEvent.removeSource(source: source));
   }
 
   Stream<Set<MapVehicleSource>> get mapVehicleSourcesStream {
-    return stream.map((state) {
+    return stream
+        .map((state) => state.mapVehicles)
+        .startWith(state.mapVehicles)
+        .distinct()
+        .map((mapVehicles) {
       final sources = <MapVehicleSource>{};
-      state.mapVehicles.values.forEach((tracked) {
+      mapVehicles.values.forEach((tracked) {
         sources.addAll(tracked.sources);
       });
       return sources;
