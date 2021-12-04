@@ -42,7 +42,7 @@ class LastSearchedPage extends HookWidget {
 
     return StreamBuilder<_FilteredSearchedItems>(
       stream: context
-          .watch<LastSearchedBloc>()
+          .read<LastSearchedBloc>()
           .notLoadedLastSearchedItemsDataStream(
             loadedVehicleSourcesStream:
                 context.read<MapBloc>().mapVehicleSourcesStream,
@@ -162,7 +162,7 @@ class LastSearchedPage extends HookWidget {
             },
             locationItem: (locationItem) {
               context
-                  .watch<LocationsBloc>()
+                  .read<LocationsBloc>()
                   .loadVehiclesInLocation(locationItem.location);
             },
           );

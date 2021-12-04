@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
@@ -31,7 +32,7 @@ class LocationsState {
   }
 }
 
-class FilteredLocationsResult {
+class FilteredLocationsResult extends Equatable {
   final List<Location> locations;
   final bool anyLocationsSaved;
   final String nameFilter;
@@ -41,4 +42,7 @@ class FilteredLocationsResult {
     @required this.anyLocationsSaved,
     @required this.nameFilter,
   });
+
+  @override
+  List<Object> get props => [locations, anyLocationsSaved, nameFilter];
 }

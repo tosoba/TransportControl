@@ -36,7 +36,7 @@ class LocationsPage extends HookWidget {
     final searchFieldController = useTextEditingController();
     searchFieldController.addListener(
       () => context
-          .watch<LocationsBloc>()
+          .read<LocationsBloc>()
           .nameFilterChanged(searchFieldController.value.text),
     );
 
@@ -111,15 +111,13 @@ class LocationsPage extends HookWidget {
 
             return StreamBuilder<SearchedItems>(
               stream: context
-                  .watch<LastSearchedBloc>()
+                  .read<LastSearchedBloc>()
                   .notLoadedLastSearchedItemsDataStream(
                     loadedVehicleSourcesStream:
                         context.read<MapBloc>().mapVehicleSourcesStream,
                     limit: 10,
                   )
-                  .map(
-                    (searched) => searched.filterByType<LocationItem>(),
-                  ),
+                  .map((searched) => searched.filterByType<LocationItem>()),
               builder: (context, snapshot) => CustomScrollView(
                 slivers: [
                   SliverPersistentHeader(
@@ -134,7 +132,7 @@ class LocationsPage extends HookWidget {
                             lastSearchedItemsList: LastSearchedItemsList(
                               itemsSnapshot: snapshot,
                               locationItemPressed: context
-                                  .watch<LocationsBloc>()
+                                  .read<LocationsBloc>()
                                   .loadVehiclesInLocation,
                               morePressed: () => _showLastSearchedPage(context),
                             ),
@@ -295,7 +293,7 @@ class LocationsPage extends HookWidget {
             child: Material(
               child: InkWell(
                 onTap: () => context
-                    .watch<LocationsBloc>()
+                    .read<LocationsBloc>()
                     .loadVehiclesInLocation(location),
                 child: ListTile(
                   title: Text(location.name),

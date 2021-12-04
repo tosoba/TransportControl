@@ -245,7 +245,7 @@ class HomePage extends HookWidget {
   }) {
     return StreamBuilder<bool>(
       stream: context
-          .watch<MapBloc>()
+          .read<MapBloc>()
           .stream
           .map((state) => state.mapVehicles.isNotEmpty),
       builder: (context, snapshot) => Container(

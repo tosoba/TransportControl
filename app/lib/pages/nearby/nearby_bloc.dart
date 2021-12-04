@@ -84,10 +84,11 @@ class NearbyBloc extends Bloc<NearbyEvent, NearbyState> {
 
   @override
   Future<void> close() async {
-    await Future.wait(
-      subscriptions.map((subscription) => subscription.cancel()),
-    );
-    await Future.wait([_queries.close(), _submittedQueries.close()]);
+    await Future.wait([
+      ...subscriptions.map((subscription) => subscription.cancel()),
+      _queries.close(),
+      _submittedQueries.close()
+    ]);
     return super.close();
   }
 

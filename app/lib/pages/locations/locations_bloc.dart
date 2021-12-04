@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as UserLocation;
+import 'package:rxdart/src/transformers/start_with.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_event.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
@@ -57,7 +58,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   }
 
   Stream<FilteredLocationsResult> get filteredLocationsStream {
-    return stream.map((state) {
+    return stream.startWith(state).map((state) {
       final filter = state.nameFilter == null
           ? (Location location) => true
           : (Location location) => location.name
@@ -69,21 +70,28 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
         anyLocationsSaved: state.locations.isNotEmpty,
         nameFilter: state.nameFilter,
       );
-    });
+    }).distinct();
   }
 
   Stream<LocationsListOrder> get listOrderStream {
-    return stream.map((state) => state.listOrder);
+    return stream
+        .map((state) => state.listOrder)
+        .startWith(state.listOrder)
+        .distinct();
   }
 
   Stream<List<LocationsListOrder>> get listOrdersStream {
-    return stream.map(
-      (state) => const [
-        const BySavedTimestampWrapper(const BySavedTimestamp()),
-        const ByLastSearchedWrapper(const ByLastSearched()),
-        const ByTimesSearchedWrapper(const ByTimesSearched())
-      ].where((value) => value != state.listOrder).toList(),
-    );
+    return stream
+        .map((state) => state.listOrder)
+        .startWith(state.listOrder)
+        .map(
+          (listOrder) => const [
+            const BySavedTimestampWrapper(const BySavedTimestamp()),
+            const ByLastSearchedWrapper(const ByLastSearched()),
+            const ByTimesSearchedWrapper(const ByTimesSearched())
+          ].where((value) => value != listOrder).toList(),
+        )
+        .distinct();
   }
 
   void nameFilterChanged(String filter) {

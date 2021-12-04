@@ -37,7 +37,7 @@ class LinesPage extends HookWidget {
     final searchFieldController = useTextEditingController();
     searchFieldController.addListener(
       () => context
-          .watch<LinesBloc>()
+          .read<LinesBloc>()
           .symbolFilterChanged(searchFieldController.text),
     );
     final filter = context.read<LinesBloc>().state.symbolFilter;
