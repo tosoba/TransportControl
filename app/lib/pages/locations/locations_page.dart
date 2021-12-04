@@ -56,11 +56,9 @@ class LocationsPage extends HookWidget {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         extendBody: true,
-        body: StreamBuilder<FilteredLocationsResult>(
-          stream: context.read<LocationsBloc>().filteredLocationsStream,
-          builder: (context, snapshot) {
-            final result = snapshot.data;
-
+        body: BlocBuilder<LocationsBloc, LocationsState>(
+          builder: (context, state) {
+            final result = state._filteredLocationsResult;
             final appBar = TextFieldAppBar(
               textFieldFocusNode: searchFieldFocusNode,
               textFieldController: searchFieldController,
@@ -87,7 +85,7 @@ class LocationsPage extends HookWidget {
                               },
                             ),
                           if (result.locations.isNotEmpty)
-                            _listOrderMenu(context),
+                            _listOrderMenu(state._locationListOrders),
                         ],
                       ),
                     ),
@@ -139,7 +137,10 @@ class LocationsPage extends HookWidget {
                           ),
                     floating: true,
                   ),
-                  _locationsList(locations: result.locations),
+                  _locationsList(
+                    locations: result.locations,
+                    listOrder: state.listOrder,
+                  ),
                 ],
               ),
             );
@@ -209,30 +210,30 @@ class LocationsPage extends HookWidget {
     );
   }
 
-  Widget _listOrderMenu(BuildContext context) {
-    return StreamBuilder<List<LocationsListOrder>>(
-      stream: context.read<LocationsBloc>().listOrdersStream,
-      builder: (context, snapshot) {
-        if (snapshot.data == null || snapshot.data.isEmpty) {
-          return Container(width: 0.0, height: 0.0);
-        }
-        return PopupMenuButton<LocationsListOrder>(
-          icon: const Icon(Icons.sort),
-          onSelected: context.read<LocationsBloc>().listOrderChanged,
-          itemBuilder: (context) => snapshot.data
-              .map(
-                (order) => PopupMenuItem<LocationsListOrder>(
-                  value: order,
-                  child: Text(order.props.first.toString()),
-                ),
-              )
-              .toList(),
-        );
-      },
+  Widget _listOrderMenu(List<LocationsListOrder> listOrders) {
+    if (listOrders == null || listOrders.isEmpty) {
+      return Container(width: 0.0, height: 0.0);
+    }
+    return Builder(
+      builder: (context) => PopupMenuButton<LocationsListOrder>(
+        icon: const Icon(Icons.sort),
+        onSelected: context.read<LocationsBloc>().listOrderChanged,
+        itemBuilder: (context) => listOrders
+            .map(
+              (order) => PopupMenuItem<LocationsListOrder>(
+                value: order,
+                child: Text(order.props.first.toString()),
+              ),
+            )
+            .toList(),
+      ),
     );
   }
 
-  Widget _locationsList({@required List<Location> locations}) {
+  Widget _locationsList({
+    @required List<Location> locations,
+    @required LocationsListOrder listOrder,
+  }) {
     return SliverList(
       delegate: SliverChildListDelegate(
         locations
@@ -242,7 +243,12 @@ class LocationsPage extends HookWidget {
                 index,
                 AnimationConfiguration.staggeredList(
                   position: index,
-                  child: FadeInAnimation(child: _locationListItem(location)),
+                  child: FadeInAnimation(
+                    child: _locationListItem(
+                      location: location,
+                      listOrder: listOrder,
+                    ),
+                  ),
                 ),
               ),
             )
@@ -252,65 +258,61 @@ class LocationsPage extends HookWidget {
     );
   }
 
-  Widget _locationListItem(Location location) {
-    return Builder(
-      builder: (context) => StreamBuilder<LocationsListOrder>(
-        stream: context.read<LocationsBloc>().listOrderStream,
-        builder: (context, snapshot) {
-          if (snapshot.data == null) return Container();
-          return Slidable(
-            startActionPane: ActionPane(
-              motion: const DrawerMotion(),
-              extentRatio: 0.25,
-              children: [
-                SlidableAction(
-                  label: 'Edit',
-                  backgroundColor: Colors.indigo,
-                  icon: Icons.edit,
-                  onPressed: (context) {
-                    _showMapLocationPageWithTransition(
-                      context,
-                      mode: MapLocationPageMode.existing(location: location),
-                    );
-                  },
-                ),
-              ],
+  Widget _locationListItem({
+    @required Location location,
+    @required LocationsListOrder listOrder,
+  }) {
+    return Builder(builder: (context) {
+      return Slidable(
+        startActionPane: ActionPane(
+          motion: const DrawerMotion(),
+          extentRatio: 0.25,
+          children: [
+            SlidableAction(
+              label: 'Edit',
+              backgroundColor: Colors.indigo,
+              icon: Icons.edit,
+              onPressed: (context) {
+                _showMapLocationPageWithTransition(
+                  context,
+                  mode: MapLocationPageMode.existing(location: location),
+                );
+              },
             ),
-            endActionPane: ActionPane(
-              motion: const DrawerMotion(),
-              extentRatio: 0.25,
-              children: [
-                SlidableAction(
-                  label: 'Delete',
-                  backgroundColor: Colors.red,
-                  icon: Icons.delete,
-                  onPressed: (context) {
-                    context.read<LocationsBloc>().deleteLocation(location);
-                  },
-                ),
-              ],
+          ],
+        ),
+        endActionPane: ActionPane(
+          motion: const DrawerMotion(),
+          extentRatio: 0.25,
+          children: [
+            SlidableAction(
+              label: 'Delete',
+              backgroundColor: Colors.red,
+              icon: Icons.delete,
+              onPressed: (context) {
+                context.read<LocationsBloc>().deleteLocation(location);
+              },
             ),
-            child: Material(
-              child: InkWell(
-                onTap: () => context
-                    .read<LocationsBloc>()
-                    .loadVehiclesInLocation(location),
-                child: ListTile(
-                  title: Text(location.name),
-                  subtitle: Text(
-                    snapshot.data.when(
-                      savedTimestamp: (_) => location.savedAtInfo,
-                      lastSearched: (_) => location.lastSearchedInfo,
-                      timesSearched: (_) => location.timesSearchedInfo,
-                    ),
-                  ),
+          ],
+        ),
+        child: Material(
+          child: InkWell(
+            onTap: () =>
+                context.read<LocationsBloc>().loadVehiclesInLocation(location),
+            child: ListTile(
+              title: Text(location.name),
+              subtitle: Text(
+                listOrder.when(
+                  savedTimestamp: (_) => location.savedAtInfo,
+                  lastSearched: (_) => location.lastSearchedInfo,
+                  timesSearched: (_) => location.timesSearchedInfo,
                 ),
               ),
             ),
-          );
-        },
-      ),
-    );
+          ),
+        ),
+      );
+    });
   }
 
   void _showMapLocationPageWithTransition(
@@ -411,5 +413,28 @@ class LocationsPage extends HookWidget {
       );
       return subscription.cancel;
     });
+  }
+}
+
+extension _LocationStateExt on LocationsState {
+  FilteredLocationsResult get _filteredLocationsResult {
+    final filter = nameFilter == null
+        ? (Location location) => true
+        : (Location location) => location.name
+            .toLowerCase()
+            .contains(nameFilter.trim().toLowerCase());
+    return FilteredLocationsResult(
+      locations: locations.where(filter).toList()..orderBy(listOrder),
+      anyLocationsSaved: locations.isNotEmpty,
+      nameFilter: nameFilter,
+    );
+  }
+
+  List<LocationsListOrder> get _locationListOrders {
+    return const [
+      const BySavedTimestampWrapper(const BySavedTimestamp()),
+      const ByLastSearchedWrapper(const ByLastSearched()),
+      const ByTimesSearchedWrapper(const ByTimesSearched())
+    ].where((value) => value != listOrder).toList();
   }
 }

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as UserLocation;
-import 'package:rxdart/src/transformers/start_with.dart';
 import 'package:transport_control/model/location.dart';
 import 'package:transport_control/pages/locations/locations_event.dart';
 import 'package:transport_control/pages/locations/locations_list_order.dart';
@@ -55,43 +54,6 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
       _signals.close(),
     ]);
     return super.close();
-  }
-
-  Stream<FilteredLocationsResult> get filteredLocationsStream {
-    return stream.startWith(state).map((state) {
-      final filter = state.nameFilter == null
-          ? (Location location) => true
-          : (Location location) => location.name
-              .toLowerCase()
-              .contains(state.nameFilter.trim().toLowerCase());
-      return FilteredLocationsResult(
-        locations: state.locations.where(filter).toList()
-          ..orderBy(state.listOrder),
-        anyLocationsSaved: state.locations.isNotEmpty,
-        nameFilter: state.nameFilter,
-      );
-    }).distinct();
-  }
-
-  Stream<LocationsListOrder> get listOrderStream {
-    return stream
-        .map((state) => state.listOrder)
-        .startWith(state.listOrder)
-        .distinct();
-  }
-
-  Stream<List<LocationsListOrder>> get listOrdersStream {
-    return stream
-        .map((state) => state.listOrder)
-        .startWith(state.listOrder)
-        .map(
-          (listOrder) => const [
-            const BySavedTimestampWrapper(const BySavedTimestamp()),
-            const ByLastSearchedWrapper(const ByLastSearched()),
-            const ByTimesSearchedWrapper(const ByTimesSearched())
-          ].where((value) => value != listOrder).toList(),
-        )
-        .distinct();
   }
 
   void nameFilterChanged(String filter) {
@@ -147,7 +109,7 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
   }
 }
 
-extension _LocationsListExt on List<Location> {
+extension LocationsListExt on List<Location> {
   void orderBy(LocationsListOrder order) {
     order.when(
       savedTimestamp: (_) {
