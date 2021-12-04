@@ -15,7 +15,7 @@ SnackBar _signalSnackBar({
   );
 }
 
-extension ScaffoldStateExt on ScaffoldState {
+extension ScaffoldStateExt on ScaffoldMessengerState {
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason>
       _hideCurrentAndShowSnackBar(SnackBar snackBar) {
     hideCurrentSnackBar();
@@ -48,7 +48,7 @@ extension ScaffoldStateExt on ScaffoldState {
 
   void showNewLoadedSuccessfullySnackBar<Signal, Loading extends Signal>({
     @required LoadingSignalTracker<Signal, Loading> tracker,
-    @required ScaffoldState Function() getScaffoldState,
+    @required ScaffoldMessengerState Function() getScaffoldMessengerState,
     SnackBarAction action,
   }) {
     _hideCurrentAndShowSnackBar(
@@ -61,13 +61,13 @@ extension ScaffoldStateExt on ScaffoldState {
       text:
           'Processing remaining ${tracker.currentlyLoading} loading request${tracker.currentlyLoading > 1 ? 's' : ''}.',
       currentlyLoading: tracker.currentlyLoading,
-      getScaffoldState: getScaffoldState,
+      getScaffoldMessengerState: getScaffoldMessengerState,
     );
   }
 
   void showNewLoadingErrorSnackBar<Signal, Loading extends Signal>({
     @required LoadingSignalTracker<Signal, Loading> tracker,
-    @required ScaffoldState Function() getScaffoldState,
+    @required ScaffoldMessengerState Function() getScaffoldMessengerState,
     @required String errorMessage,
     void Function() retry,
     bool autoHide = false,
@@ -95,7 +95,7 @@ extension ScaffoldStateExt on ScaffoldState {
     if (tracker.currentlyLoading == 0) {
       if (!retryPressed && autoHide) {
         Future.delayed(duration, () {
-          getScaffoldState().removeCurrentSnackBar();
+          getScaffoldMessengerState()?.removeCurrentSnackBar();
         });
       }
       return;
@@ -105,7 +105,7 @@ extension ScaffoldStateExt on ScaffoldState {
       text:
           'Processing remaining ${tracker.currentlyLoading} loading request${tracker.currentlyLoading > 1 ? 's' : ''}.',
       currentlyLoading: tracker.currentlyLoading,
-      getScaffoldState: getScaffoldState,
+      getScaffoldMessengerState: getScaffoldMessengerState,
     );
   }
 }
@@ -115,13 +115,13 @@ extension _ScaffoldFeatureControllerExt
   void _showLoadingSnackBarOnClose({
     @required String text,
     @required int currentlyLoading,
-    @required ScaffoldState Function() getScaffoldState,
+    @required ScaffoldMessengerState Function() getScaffoldMessengerState,
   }) {
     closed.then((reason) {
       if (reason == SnackBarClosedReason.action ||
           reason == SnackBarClosedReason.hide ||
           reason == SnackBarClosedReason.remove) return;
-      getScaffoldState()._showLoadingSnackBar(
+      getScaffoldMessengerState()?._showLoadingSnackBar(
         text: text,
         currentlyLoading: currentlyLoading,
       );

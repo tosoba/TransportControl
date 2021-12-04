@@ -8,8 +8,8 @@ import 'package:get_it/get_it.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:transport_control/model/location.dart';
-import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map/map_constants.dart';
+import 'package:transport_control/pages/map_location/map_location_page_mode.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result.dart';
 import 'package:transport_control/pages/map_location/map_location_page_result_action.dart';
 import 'package:transport_control/util/asset_util.dart';
@@ -23,6 +23,7 @@ import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 class MapLocationPage extends HookWidget {
   final MapLocationPageMode mode;
   final void Function({@required MapLocationPageResult result}) finishWith;
+
   final _mapController = Completer<GoogleMapController>();
   final _preferences = GetIt.instance<RxSharedPreferences>();
 
@@ -301,7 +302,7 @@ class MapLocationPage extends HookWidget {
   }) {
     final locationValue = location.value;
     if (locationValue.name == null || locationValue.name.trim().isEmpty) {
-      Scaffold.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Enter a name for location to save')),
       );
     } else {
@@ -485,11 +486,11 @@ class MapLocationPage extends HookWidget {
         builder: (_) => AlertDialog(
           content: Text("Discard changes?"),
           actions: [
-            FlatButton(
+            TextButton(
               child: const Text('Yes'),
               onPressed: () => Navigator.pop(context, true),
             ),
-            FlatButton(
+            TextButton(
               child: const Text('No'),
               onPressed: () => Navigator.pop(context, false),
             ),

@@ -27,7 +27,7 @@ import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 class LocationsPage extends HookWidget {
   LocationsPage({Key key}) : super(key: key);
 
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final _locationBtnController = LoadingButtonController();
 
   @override
@@ -45,109 +45,115 @@ class LocationsPage extends HookWidget {
       context: context,
       nearbyButtonEnabled: nearbyButtonEnabled,
     );
-    useMapSignals(scaffoldKey: _scaffoldKey, context: context);
+    useMapSignals(
+      scaffoldMessengerKey: _scaffoldMessengerKey,
+      context: context,
+    );
     useUnfocusOnKeyboardHidden(focusNode: searchFieldFocusNode);
 
-    return Scaffold(
-      key: _scaffoldKey,
-      extendBodyBehindAppBar: true,
-      extendBody: true,
-      body: StreamBuilder<FilteredLocationsResult>(
-        stream: context.read<LocationsBloc>().filteredLocationsStream,
-        builder: (context, snapshot) {
-          final result = snapshot.data;
+    return ScaffoldMessenger(
+      key: _scaffoldMessengerKey,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        extendBody: true,
+        body: StreamBuilder<FilteredLocationsResult>(
+          stream: context.read<LocationsBloc>().filteredLocationsStream,
+          builder: (context, snapshot) {
+            final result = snapshot.data;
 
-          final appBar = TextFieldAppBar(
-            textFieldFocusNode: searchFieldFocusNode,
-            textFieldController: searchFieldController,
-            hint: "Search locations...",
-            leading: TextFieldAppBarBackButton(searchFieldFocusNode),
-            trailing: result == null
-                ? null
-                : Container(
-                    child: Row(
-                      children: [
-                        if (result.nameFilter != null &&
-                            result.nameFilter.isNotEmpty)
-                          CircularButton(
-                            child: Icon(
-                              Icons.close,
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black,
+            final appBar = TextFieldAppBar(
+              textFieldFocusNode: searchFieldFocusNode,
+              textFieldController: searchFieldController,
+              hint: "Search locations...",
+              leading: TextFieldAppBarBackButton(searchFieldFocusNode),
+              trailing: result == null
+                  ? null
+                  : Container(
+                      child: Row(
+                        children: [
+                          if (result.nameFilter != null &&
+                              result.nameFilter.isNotEmpty)
+                            CircularButton(
+                              child: Icon(
+                                Icons.close,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
+                              onPressed: () {
+                                searchFieldController.value =
+                                    TextEditingValue();
+                              },
                             ),
-                            onPressed: () {
-                              searchFieldController.value = TextEditingValue();
-                            },
-                          ),
-                        if (result.locations.isNotEmpty)
-                          _listOrderMenu(context),
-                      ],
+                          if (result.locations.isNotEmpty)
+                            _listOrderMenu(context),
+                        ],
+                      ),
                     ),
+            );
+
+            if (result == null || !result.anyLocationsSaved) {
+              return Column(children: [
+                appBar,
+                Expanded(child: Center(child: Text('No saved locations.'))),
+              ]);
+            } else if (result.locations.isEmpty && result.anyLocationsSaved) {
+              return Column(children: [
+                appBar,
+                Expanded(
+                  child: Center(
+                    child: Text('No saved locations match entered name.'),
                   ),
-          );
-
-          if (result == null || !result.anyLocationsSaved) {
-            return Column(children: [
-              appBar,
-              Expanded(child: Center(child: Text('No saved locations.'))),
-            ]);
-          } else if (result.locations.isEmpty && result.anyLocationsSaved) {
-            return Column(children: [
-              appBar,
-              Expanded(
-                child: Center(
-                  child: Text('No saved locations match entered name.'),
                 ),
-              ),
-            ]);
-          }
+              ]);
+            }
 
-          return StreamBuilder<SearchedItems>(
-            stream: context
-                .watch<LastSearchedBloc>()
-                .notLoadedLastSearchedItemsDataStream(
-                  loadedVehicleSourcesStream:
-                      context.read<MapBloc>().mapVehicleSourcesStream,
-                  limit: 10,
-                )
-                .map(
-                  (searched) => searched.filterByType<LocationItem>(),
-                ),
-            builder: (context, snapshot) => CustomScrollView(
-              slivers: [
-                SliverPersistentHeader(
-                  delegate: snapshot.data == null ||
-                          snapshot.data.mostRecentItems.isEmpty ||
-                          MediaQuery.of(context).orientation !=
-                              Orientation.portrait
-                      ? SliverTextFieldAppBarDelegate(context, appBar: appBar)
-                      : SliverTextFieldAppBarWithSearchedItemsListDelegate(
-                          context,
-                          appBar: appBar,
-                          lastSearchedItemsList: LastSearchedItemsList(
-                            itemsSnapshot: snapshot,
-                            locationItemPressed: context
-                                .watch<LocationsBloc>()
-                                .loadVehiclesInLocation,
-                            morePressed: () => _showLastSearchedPage(context),
+            return StreamBuilder<SearchedItems>(
+              stream: context
+                  .watch<LastSearchedBloc>()
+                  .notLoadedLastSearchedItemsDataStream(
+                    loadedVehicleSourcesStream:
+                        context.read<MapBloc>().mapVehicleSourcesStream,
+                    limit: 10,
+                  )
+                  .map(
+                    (searched) => searched.filterByType<LocationItem>(),
+                  ),
+              builder: (context, snapshot) => CustomScrollView(
+                slivers: [
+                  SliverPersistentHeader(
+                    delegate: snapshot.data == null ||
+                            snapshot.data.mostRecentItems.isEmpty ||
+                            MediaQuery.of(context).orientation !=
+                                Orientation.portrait
+                        ? SliverTextFieldAppBarDelegate(context, appBar: appBar)
+                        : SliverTextFieldAppBarWithSearchedItemsListDelegate(
+                            context,
+                            appBar: appBar,
+                            lastSearchedItemsList: LastSearchedItemsList(
+                              itemsSnapshot: snapshot,
+                              locationItemPressed: context
+                                  .watch<LocationsBloc>()
+                                  .loadVehiclesInLocation,
+                              morePressed: () => _showLastSearchedPage(context),
+                            ),
                           ),
-                        ),
-                  floating: true,
-                ),
-                _locationsList(locations: result.locations),
-              ],
-            ),
-          );
-        },
-      ),
-      floatingActionButton: _floatingActionButtons(
-        context,
-        nearbyButtonEnabled: nearbyButtonEnabled,
-        loadVehiclesNearbyUserLocation: () {
-          context.read<LocationsBloc>().loadVehiclesNearbyUserLocation();
-        },
+                    floating: true,
+                  ),
+                  _locationsList(locations: result.locations),
+                ],
+              ),
+            );
+          },
+        ),
+        floatingActionButton: _floatingActionButtons(
+          context,
+          nearbyButtonEnabled: nearbyButtonEnabled,
+          loadVehiclesNearbyUserLocation: () {
+            context.read<LocationsBloc>().loadVehiclesNearbyUserLocation();
+          },
+        ),
       ),
     );
   }
@@ -354,7 +360,10 @@ class LocationsPage extends HookWidget {
     result.action.asyncWhenOrElse(
       save: (_) => _saveOrUpdateLocation(context, result),
       orElse: (_) {
-        _saveOrUpdateLocation(context, result);
+        final locationName = result.location.name;
+        if (locationName != null && locationName.trim().isNotEmpty) {
+          _saveOrUpdateLocation(context, result);
+        }
         context.read<LocationsBloc>().loadVehiclesInLocation(result.location);
       },
     );

@@ -7,7 +7,7 @@ import 'package:transport_control/util/model_util.dart';
 import 'package:transport_control/util/snack_bar_util.dart';
 
 void useMapSignals({
-  @required GlobalKey<ScaffoldState> scaffoldKey,
+  @required GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey,
   @required BuildContext context,
 }) {
   useEffect(() {
@@ -15,7 +15,7 @@ void useMapSignals({
       (tracker) {
         return tracker.signal.whenPartial(
           loading: (loading) {
-            scaffoldKey.currentState.showNewLoadingSnackBar(
+            scaffoldMessengerKey.currentState.showNewLoadingSnackBar(
               text: loading.message,
               currentlyLoading: tracker.currentlyLoading,
             );
@@ -24,9 +24,9 @@ void useMapSignals({
             if (tracker.currentlyLoading == 0) {
               Navigator.pop(context);
             } else {
-              scaffoldKey.currentState.showNewLoadedSuccessfullySnackBar(
+              scaffoldMessengerKey.currentState.showNewLoadedSuccessfullySnackBar(
                 tracker: tracker,
-                getScaffoldState: () => scaffoldKey.currentState,
+                getScaffoldMessengerState: () => scaffoldMessengerKey.currentState,
                 action: SnackBarAction(
                   label: 'Map',
                   onPressed: () => Navigator.pop(context),
@@ -35,9 +35,9 @@ void useMapSignals({
             }
           },
           loadingError: (loadingError) {
-            scaffoldKey.currentState.showNewLoadingErrorSnackBar(
+            scaffoldMessengerKey.currentState.showNewLoadingErrorSnackBar(
               tracker: tracker,
-              getScaffoldState: () => scaffoldKey.currentState,
+              getScaffoldMessengerState: () => scaffoldMessengerKey.currentState,
               errorMessage: loadingError.message,
               retry: loadingError.retry,
             );

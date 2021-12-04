@@ -83,25 +83,28 @@ class _MapPageState extends State<MapPage>
           (tracker) {
             tracker.signal.when(
               loading: (loading) {
-                Scaffold.of(context).showNewLoadingSnackBar(
+                ScaffoldMessenger.of(context).showNewLoadingSnackBar(
                   text: loading.message,
                   currentlyLoading: tracker.currentlyLoading,
                 );
               },
               loadedSuccessfully: (_) {
                 if (tracker.currentlyLoading == 0) {
-                  Scaffold.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 } else {
-                  Scaffold.of(context).showNewLoadedSuccessfullySnackBar(
+                  ScaffoldMessenger.of(context)
+                      .showNewLoadedSuccessfullySnackBar(
                     tracker: tracker,
-                    getScaffoldState: () => Scaffold.of(context),
+                    getScaffoldMessengerState: () =>
+                        ScaffoldMessenger.of(context),
                   );
                 }
               },
               loadingError: (loadingError) {
-                Scaffold.of(context).showNewLoadingErrorSnackBar(
+                ScaffoldMessenger.of(context).showNewLoadingErrorSnackBar(
                   tracker: tracker,
-                  getScaffoldState: () => Scaffold.of(context),
+                  getScaffoldMessengerState: () =>
+                      ScaffoldMessenger.of(context),
                   errorMessage: loadingError.message,
                   retry: loadingError.retry,
                   autoHide: true,
@@ -109,11 +112,13 @@ class _MapPageState extends State<MapPage>
               },
               zoomToBoundsAfterLoadedSuccessfully: (signal) {
                 if (tracker.currentlyLoading == 0) {
-                  Scaffold.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 } else {
-                  Scaffold.of(context).showNewLoadedSuccessfullySnackBar(
+                  ScaffoldMessenger.of(context)
+                      .showNewLoadedSuccessfullySnackBar(
                     tracker: tracker,
-                    getScaffoldState: () => Scaffold.of(context),
+                    getScaffoldMessengerState: () =>
+                        ScaffoldMessenger.of(context),
                   );
                 }
 

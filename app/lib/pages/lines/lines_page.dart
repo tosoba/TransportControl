@@ -28,7 +28,7 @@ import 'package:transport_control/widgets/text_field_app_bar_back_button.dart';
 class LinesPage extends HookWidget {
   LinesPage({Key key}) : super(key: key);
 
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final _autoScrollController = AutoScrollController();
 
   @override
@@ -52,25 +52,30 @@ class LinesPage extends HookWidget {
       );
     });
 
-    useMapSignals(scaffoldKey: _scaffoldKey, context: context);
+    useMapSignals(
+        scaffoldMessengerKey: _scaffoldMessengerKey, context: context);
 
     useUnfocusOnKeyboardHidden(focusNode: searchFieldFocusNode);
 
     return BlocBuilder<LinesBloc, LinesState>(
-      builder: (context, state) => Scaffold(
-        key: _scaffoldKey,
-        extendBodyBehindAppBar: true,
-        extendBody: true,
-        resizeToAvoidBottomInset: false,
-        body: _scaffoldBody(
-          context,
-          state: state,
-          searchFieldFocusNode: searchFieldFocusNode,
-          searchFieldController: searchFieldController,
+      builder: (context, state) => ScaffoldMessenger(
+        key: _scaffoldMessengerKey,
+        child: Scaffold(
+          extendBodyBehindAppBar: true,
+          extendBody: true,
+          resizeToAvoidBottomInset: false,
+          body: _scaffoldBody(
+            context,
+            state: state,
+            searchFieldFocusNode: searchFieldFocusNode,
+            searchFieldController: searchFieldController,
+          ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
+          floatingActionButton: _floatingActionButtons(context, state: state),
+          bottomNavigationBar:
+              _listGroupNavigationButtons(context, state: state),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: _floatingActionButtons(context, state: state),
-        bottomNavigationBar: _listGroupNavigationButtons(context, state: state),
       ),
     );
   }

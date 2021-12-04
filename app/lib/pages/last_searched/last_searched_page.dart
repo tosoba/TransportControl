@@ -20,7 +20,7 @@ enum LastSearchedPageFilterMode { ALL, LINES, LOCATIONS }
 
 class LastSearchedPage extends HookWidget {
   final LastSearchedPageFilterMode filterMode;
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   LastSearchedPage({Key key, @required this.filterMode}) : super(key: key);
 
@@ -34,7 +34,10 @@ class LastSearchedPage extends HookWidget {
       filterController.add(filter?.trim()?.toLowerCase() ?? filter);
     });
 
-    useMapSignals(scaffoldKey: _scaffoldKey, context: context);
+    useMapSignals(
+      scaffoldMessengerKey: _scaffoldMessengerKey,
+      context: context,
+    );
     useUnfocusOnKeyboardHidden(focusNode: searchFieldFocusNode);
 
     return StreamBuilder<_FilteredSearchedItems>(
@@ -87,30 +90,32 @@ class LastSearchedPage extends HookWidget {
                 ),
         );
 
-        return Scaffold(
-          key: _scaffoldKey,
-          extendBodyBehindAppBar: true,
-          extendBody: true,
-          body: filtered == null || filtered.searched.mostRecentItems.isEmpty
-              ? Column(children: [
-                  appBar,
-                  Expanded(
-                    child: Center(child: const Text('No searched items.')),
-                  ),
-                ])
-              : CustomScrollView(slivers: [
-                  SliverPersistentHeader(
-                    delegate: SliverTextFieldAppBarDelegate(
-                      context,
-                      appBar: appBar,
+        return ScaffoldMessenger(
+          key: _scaffoldMessengerKey,
+          child: Scaffold(
+            extendBodyBehindAppBar: true,
+            extendBody: true,
+            body: filtered == null || filtered.searched.mostRecentItems.isEmpty
+                ? Column(children: [
+                    appBar,
+                    Expanded(
+                      child: Center(child: const Text('No searched items.')),
                     ),
-                    floating: true,
-                  ),
-                  _itemsList(
-                    context,
-                    mostRecentItems: filtered.searched.mostRecentItems,
-                  ),
-                ]),
+                  ])
+                : CustomScrollView(slivers: [
+                    SliverPersistentHeader(
+                      delegate: SliverTextFieldAppBarDelegate(
+                        context,
+                        appBar: appBar,
+                      ),
+                      floating: true,
+                    ),
+                    _itemsList(
+                      context,
+                      mostRecentItems: filtered.searched.mostRecentItems,
+                    ),
+                  ]),
+          ),
         );
       },
     );
