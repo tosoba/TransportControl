@@ -87,7 +87,7 @@ class LinesPage extends HookWidget {
     @required TextEditingController searchFieldController,
   }) {
     final appBar = _appBar(
-      context,
+      state: state,
       searchFieldFocusNode: searchFieldFocusNode,
       searchFieldController: searchFieldController,
     );
@@ -159,8 +159,8 @@ class LinesPage extends HookWidget {
     );
   }
 
-  Widget _appBar(
-    BuildContext context, {
+  Widget _appBar({
+    @required LinesState state,
     @required FocusNode searchFieldFocusNode,
     @required TextEditingController searchFieldController,
   }) {
@@ -169,56 +169,52 @@ class LinesPage extends HookWidget {
       textFieldController: searchFieldController,
       hint: "Search lines...",
       leading: TextFieldAppBarBackButton(searchFieldFocusNode),
-      trailing: StreamBuilder<String>(
-        stream: context.read<LinesBloc>().symbolFiltersStream,
-        builder: (context, snapshot) => Container(
-          child: Row(
-            children: [
-              if (snapshot.data != null && snapshot.data.isNotEmpty)
-                CircularButton(
-                  child: Icon(
-                    Icons.close,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black,
-                  ),
-                  onPressed: () {
-                    searchFieldController.value = TextEditingValue();
-                  },
+      trailing: Container(
+        child: Row(
+          children: [
+            CircularButton(
+              child: Builder(
+                builder: (context) => Icon(
+                  Icons.close,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
                 ),
-              _listFiltersMenu(context),
-            ],
-          ),
+              ),
+              onPressed: () {
+                searchFieldController.value = TextEditingValue();
+              },
+            ),
+            _listFiltersMenu(state.listFilters),
+          ],
         ),
       ),
     );
   }
 
-  Widget _listFiltersMenu(BuildContext context) {
-    return StreamBuilder<List<LineListFilter>>(
-      stream: context.read<LinesBloc>().listFiltersStream,
-      builder: (context, snapshot) {
-        if (snapshot.data == null || snapshot.data.isEmpty)
-          return Container(width: 0.0, height: 0.0);
-        return PopupMenuButton<LineListFilter>(
-          icon: const Icon(Icons.filter_list),
-          onSelected: context.read<LinesBloc>().listFilterChanged,
-          itemBuilder: (context) => snapshot.data.map(
-            (filter) {
-              final filterString = filter.toString();
-              final filterName = filterString
-                  .substring(filterString.indexOf('.') + 1)
-                  .toLowerCase();
-              return PopupMenuItem<LineListFilter>(
-                value: filter,
-                child: Text(
-                  '${filterName[0].toUpperCase()}${filterName.substring(1)}',
-                ),
-              );
-            },
-          ).toList(),
-        );
-      },
+  Widget _listFiltersMenu(List<LineListFilter> listFilters) {
+    if (listFilters == null || listFilters.isEmpty) {
+      return Container(width: 0.0, height: 0.0);
+    }
+    return Builder(
+      builder: (context) => PopupMenuButton<LineListFilter>(
+        icon: const Icon(Icons.filter_list),
+        onSelected: context.read<LinesBloc>().listFilterChanged,
+        itemBuilder: (context) => listFilters.map(
+          (filter) {
+            final filterString = filter.toString();
+            final filterName = filterString
+                .substring(filterString.indexOf('.') + 1)
+                .toLowerCase();
+            return PopupMenuItem<LineListFilter>(
+              value: filter,
+              child: Text(
+                '${filterName[0].toUpperCase()}${filterName.substring(1)}',
+              ),
+            );
+          },
+        ).toList(),
+      ),
     );
   }
 
@@ -438,7 +434,7 @@ class LinesPage extends HookWidget {
                       ? TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).accentColor,
+                          color: Theme.of(context).colorScheme.secondary,
                         )
                       : const TextStyle(
                           fontSize: 30,
@@ -597,8 +593,7 @@ class _LineActionsDialog extends HookWidget {
   }) {
     return Builder(
       builder: (context) => Expanded(
-        child: FlatButton(
-          padding: EdgeInsets.zero,
+        child: TextButton(
           child: AutoSizeText(
             text,
             maxLines: 1,
@@ -628,4 +623,20 @@ enum _LineActionsDialogResult {
   TOGGLE_SELECTED,
   TOGGLE_FAVOURITE,
   TOGGLE_TRACKED,
+}
+
+extension _LinesStateExt on LinesState {
+  List<LineListFilter> get listFilters {
+    final availableFilters = List.of(LineListFilter.values)..remove(listFilter);
+    if (selectedLines.isEmpty) {
+      availableFilters.remove(LineListFilter.selected);
+    }
+    if (trackedLines.isEmpty) {
+      availableFilters.remove(LineListFilter.tracked);
+    }
+    if (favouriteLines.isEmpty) {
+      availableFilters.remove(LineListFilter.favourite);
+    }
+    return availableFilters;
+  }
 }

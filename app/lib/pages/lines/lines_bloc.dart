@@ -167,44 +167,6 @@ class LinesBloc extends Bloc<LinesEvent, LinesState> {
     return super.close();
   }
 
-  Stream<List<MapEntry<Line, LineState>>> get filteredLinesStream {
-    return stream.map(
-      (state) {
-        final symbolFilterPred = state.symbolFilterPredicate;
-        final listFilterPred = state.listFilterPredicate;
-        return state.lines.entries
-            .where((entry) => symbolFilterPred(entry) && listFilterPred(entry))
-            .toList();
-      },
-    );
-  }
-
-  Stream<Iterable<MapEntry<Line, LineState>>> get selectedLinesStream {
-    return stream.map((state) => state.selectedLines);
-  }
-
-  Stream<List<LineListFilter>> get listFiltersStream {
-    return stream.map(
-      (state) {
-        final availableFilters = List.of(LineListFilter.values)
-          ..remove(state.listFilter);
-        if (state.selectedLines.isEmpty) {
-          availableFilters.remove(LineListFilter.selected);
-        }
-        if (state.trackedLines.isEmpty) {
-          availableFilters.remove(LineListFilter.tracked);
-        }
-        if (state.favouriteLines.isEmpty) {
-          availableFilters.remove(LineListFilter.favourite);
-        }
-        return availableFilters;
-      },
-    );
-  }
-
-  Stream<String> get symbolFiltersStream =>
-      stream.map((state) => state.symbolFilter);
-
   void toggleSelected(Line line) {
     add(LinesEvent.toggleLineSelection(line: line));
   }
