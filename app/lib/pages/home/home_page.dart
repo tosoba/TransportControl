@@ -91,7 +91,7 @@ class HomePage extends HookWidget {
     final searchFieldController = useTextEditingController();
     searchFieldController.addListener(
       () => context
-          .watch<NearbyBloc>()
+          .read<NearbyBloc>()
           .queryUpdated(searchFieldController.value.text, submitted: false),
     );
 
