@@ -24,5 +24,5 @@ abstract class VehiclesApi {
 }
 
 class _VehiclesApiData {
-  static const key = '9a96f3a2-a68d-4533-ba91-0775ac9f937d';
+  static const key = '<UM_WARSZAWA_API_KEY>';
 }
